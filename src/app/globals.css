@@ -1,0 +1,346 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/*
+  ─────────────────────────────────────────────────────────────────────────
+  DAVIJARA.UZ DESIGN SYSTEM
+  ─────────────────────────────────────────────────────────────────────────
+
+  This site is NOT light/dark themed. It is one fixed brand palette with two
+  surface TONES that alternate down the page:
+
+    tone="deep"   navy  #07102b   (the default — set on <body>)
+    tone="light"  bone  #f4f2ee   (interleaved sections)
+
+  Tone is switched with a `data-tone` attribute on a section wrapper. Every
+  semantic token below is re-bound under [data-tone="light"], so shadcn/ui
+  components placed inside a light section adapt automatically — no props,
+  no variants, no prop drilling.
+
+  RULE: components consume SEMANTIC tokens (bg-background, text-foreground,
+  border-border, text-muted-foreground…). They must never reach for the raw
+  brand scale (--color-navy, --color-gold) except for deliberate brand
+  ornament that should look identical in both tones.
+  ─────────────────────────────────────────────────────────────────────────
+*/
+
+/* ── Raw brand scale ─────────────────────────────────────────────────────
+   Static values. Ported verbatim from legacy/styles.css :root.           */
+@theme {
+  --color-navy: #07102b;
+  --color-navy-mid: #0d1e45;
+  --color-cobalt: #1a3a7c;
+  --color-gold: #c8a96e;
+  --color-gold-light: #e8d5a8;
+  --color-bone: #f4f2ee;
+  --color-bone-edge: #e8e4dc;
+  --color-slate: #3d4a6b;
+
+  /* Gold is unusable as TEXT on light surfaces — #c8a96e on #f4f2ee is
+     2.01:1, a hard WCAG AA failure. This darkened bronze is the text-safe
+     substitute at 5.14:1. Use --color-gold for ornament on deep surfaces,
+     --color-gold-ink for any gold-toned text on light surfaces. */
+  --color-gold-ink: #7d6229;
+
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-outfit);
+
+  /* Legacy radius scale, preserved exactly (8 / 14 / 20 / 28). */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+
+  --animate-rotate-words: rotateWords 9s infinite;
+}
+
+/* ── Semantic contract ───────────────────────────────────────────────────
+   `inline` matters: it makes utilities resolve var() at USE time, which is
+   what lets [data-tone="light"] re-bind them further down.               */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+}
+
+/* ── DEEP tone (default) ─────────────────────────────────────────────── */
+:root {
+  --radius: 20px;
+
+  --background: #07102b;
+  --foreground: rgba(255, 255, 255, 0.85);
+
+  --card: rgba(255, 255, 255, 0.04);
+  --card-foreground: rgba(255, 255, 255, 0.85);
+
+  --popover: #0d1e45;
+  --popover-foreground: rgba(255, 255, 255, 0.92);
+
+  --primary: #c8a96e;
+  --primary-foreground: #07102b;
+
+  --secondary: rgba(255, 255, 255, 0.06);
+  --secondary-foreground: rgba(255, 255, 255, 0.85);
+
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: rgba(255, 255, 255, 0.55);
+
+  --accent: rgba(200, 169, 110, 0.15);
+  --accent-foreground: #e8d5a8;
+
+  --destructive: #e5484d;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #c8a96e;
+
+  --chart-1: #c8a96e;
+  --chart-2: #1a3a7c;
+  --chart-3: #e8d5a8;
+  --chart-4: #4c6bb3;
+  --chart-5: #8a7440;
+}
+
+/* ── LIGHT tone ──────────────────────────────────────────────────────── */
+[data-tone="light"] {
+  --background: #f4f2ee;
+  --foreground: #07102b;
+
+  --card: #ffffff;
+  --card-foreground: #07102b;
+
+  --popover: #ffffff;
+  --popover-foreground: #07102b;
+
+  /* On bone, navy carries actions — gold cannot meet contrast here. */
+  --primary: #0d1e45;
+  --primary-foreground: #ffffff;
+
+  --secondary: #e8e4dc;
+  --secondary-foreground: #07102b;
+
+  --muted: #e8e4dc;
+  --muted-foreground: #3d4a6b;
+
+  --accent: rgba(200, 169, 110, 0.18);
+  --accent-foreground: #7d6229;
+
+  --destructive: #c02730;
+
+  --border: #e8e4dc;
+  --input: #d8d3c8;
+  --ring: #7d6229;
+
+  --chart-1: #7d6229;
+  --chart-2: #1a3a7c;
+  --chart-3: #3d4a6b;
+  --chart-4: #a08544;
+  --chart-5: #4c6bb3;
+
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+/*
+  ── Maxsus imkoniyatlar — accessibility mode ──────────────────────────────
+
+  Uzbek government portals conventionally offer a mode for visually impaired
+  users. In the legacy site the link existed but pointed at "#".
+
+  Two independent switches, both set on <html> and persisted to localStorage:
+
+    data-contrast="high"    maximum-contrast palette (21:1 body text)
+    data-text-size="large"  scales the root font size; every size in the app
+                            is in rem, so the whole layout scales with it
+
+  The contrast palette deliberately overrides BOTH tones — in this mode the
+  deep/light alternation is abandoned, because the point is uniform maximum
+  legibility, not brand expression.
+*/
+:root[data-contrast="high"],
+:root[data-contrast="high"] [data-tone="deep"],
+:root[data-contrast="high"] [data-tone="light"] {
+  --background: #000000;
+  --foreground: #ffffff;
+
+  --card: #000000;
+  --card-foreground: #ffffff;
+
+  --popover: #000000;
+  --popover-foreground: #ffffff;
+
+  /* Yellow on black is the conventional high-contrast accent: 19.6:1. */
+  --primary: #ffff00;
+  --primary-foreground: #000000;
+
+  --secondary: #1a1a1a;
+  --secondary-foreground: #ffffff;
+
+  --muted: #1a1a1a;
+  /* Not dimmed — "muted" text must stay fully legible in this mode. */
+  --muted-foreground: #ffffff;
+
+  --accent: #1a1a1a;
+  --accent-foreground: #ffff00;
+
+  --destructive: #ff6b6b;
+
+  /* Borders become visible structure rather than subtle hairlines. */
+  --border: #ffffff;
+  --input: #ffffff;
+  --ring: #ffff00;
+
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+:root[data-contrast="high"] img,
+:root[data-contrast="high"] svg {
+  /* Decorative gradients and blurs become noise at this contrast level. */
+  filter: none;
+}
+
+:root[data-contrast="high"] [aria-hidden="true"][class*="blur"] {
+  display: none;
+}
+
+:root[data-text-size="large"] {
+  font-size: 125%;
+}
+
+:root[data-text-size="xlarge"] {
+  font-size: 150%;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    @apply font-heading;
+  }
+
+  /* Focus is invisible in the legacy site. Make it unmissable — this is a
+     public-sector portal and keyboard users are not optional. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+  Hero word rotator — three words cycling inside the <h1>.
+
+  Kept as pure CSS (zero JS, zero bundle cost). The legacy version shifted
+  layout on every swap because the words differ in width, so each cycle
+  nudged CLS. Here the <em>s are absolutely positioned inside a relative
+  inline-grid whose width is reserved by the longest word, which is present
+  in the flow but invisible. Result: the box never resizes.
+*/
+.word-rotator {
+  position: relative;
+  display: inline-grid;
+  vertical-align: bottom;
+}
+
+.word-rotator > .word-rotator-sizer {
+  visibility: hidden;
+  grid-area: 1 / 1;
+  pointer-events: none;
+}
+
+.word-rotator > em {
+  grid-area: 1 / 1;
+  font-style: normal;
+  color: var(--color-gold);
+  opacity: 0;
+  animation: var(--animate-rotate-words);
+}
+
+.word-rotator > em:nth-of-type(1) {
+  animation-delay: 0s;
+}
+.word-rotator > em:nth-of-type(2) {
+  animation-delay: 3s;
+}
+.word-rotator > em:nth-of-type(3) {
+  animation-delay: 6s;
+}
+
+@keyframes rotateWords {
+  0%,
+  2% {
+    opacity: 0;
+    transform: translateY(0.25em);
+  }
+  6%,
+  30% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  36%,
+  100% {
+    opacity: 0;
+    transform: translateY(-0.25em);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No cycling for reduced-motion users: pin the first word visible. */
+  .word-rotator > em {
+    animation: none;
+  }
+  .word-rotator > em:nth-of-type(1) {
+    opacity: 1;
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "title": "Davijara.uz — Davlat mulkini ijaraga berish yagona portali",
+    "description": "Davlat mulki obyektlarini ijaraga olish bo'yicha yagona portal: bo'sh obyektlarni qidirish, E-auksion savdolari, ijara imtiyozlari va onlayn shartnoma rasmiylashtirish."
+  },
+  "common": {
+    "skipToContent": "Asosiy mazmunga o'tish",
+    "menu": "Menyu",
+    "close": "Yopish",
+    "readMore": "Batafsil",
+    "all": "Barchasi",
+    "loading": "Yuklanmoqda…",
+    "backToTop": "Yuqoriga"
+  },
+  "topbar": {
+    "accessibility": "Maxsus imkoniyatlar",
+    "languageLabel": "Saytning tilini tanlang"
+  },
+  "nav": {
+    "home": "Bosh sahifa",
+    "objects": "Ijara obyektlari",
+    "auction": "E-auksion",
+    "privileges": "Imtiyozlar",
+    "services": "Interaktiv xizmatlar",
+    "documents": "Normativ hujjatlar",
+    "news": "Yangiliklar",
+    "about": "Markaz haqida",
+    "login": "Kirish",
+    "cabinet": "Kabinet"
+  },
+  "hero": {
+    "eyebrow": "Raqamli O'zbekiston — 2030",
+    "titleLead": "Davlat mulkini ijaraga olish —",
+    "rotator": {
+      "first": "oson",
+      "second": "shaffof",
+      "third": "onlayn"
+    }
+  },
+  "search": {
+    "label": "Ijara obyektini qidirish",
+    "region": "Hudud",
+    "type": "Obyekt turi",
+    "area": "Maydon, m²",
+    "price": "Narx (yillik)",
+    "submit": "Qidirish",
+    "anyRegion": "Barcha hududlar",
+    "anyType": "Barcha turlar",
+    "anyArea": "Har qanday maydon",
+    "anyPrice": "Barchasi",
+    "types": {
+      "noturar": "Noturar joy binosi",
+      "turar": "Turar joy binosi",
+      "ishlab-chiqarish": "Ishlab chiqarish",
+      "mamuriy": "Ma'muriy bino"
+    }
+  },
+  "map": {
+    "eyebrow": "Xarita",
+    "title": "Ijara obyektlari xaritada",
+    "description": "Hududni tanlang — o'sha hududdagi bo'sh obyektlar ro'yxati ochiladi.",
+    "objectsCount": "{count} ta obyekt"
+  },
+  "steps": {
+    "eyebrow": "Jarayon",
+    "title": "Qanday ijaraga olinadi?",
+    "description": "To'rt oddiy qadam orqali davlat mulkini rasman ijaraga oling.",
+    "action": "Batafsil yo'riqnoma"
+  },
+  "listings": {
+    "eyebrow": "Dolzarb takliflar",
+    "title": "Yangi qo'yilgan obyektlar",
+    "action": "Barcha obyektlar",
+    "perYear": "so'm / yil boshiga",
+    "badgeAuction": "Auksionda",
+    "badgeNew": "Yangi lot",
+    "empty": "Tanlangan shartlarga mos obyekt topilmadi."
+  },
+  "services": {
+    "eyebrow": "Onlayn xizmatlar",
+    "title": "Interaktiv xizmatlar",
+    "description": "Hamma narsani onlayn — uydan chiqmasdan hal qiling.",
+    "action": "Barcha xizmatlar"
+  },
+  "privileges": {
+    "eyebrow": "Davlat yordami",
+    "title": "Ijara imtiyozlari",
+    "description": "Tadbirkorlik subyektlari uchun davlat mulkini ijaraga olishda amaldagi asosiy yengilliklar.",
+    "action": "Barcha imtiyozlar",
+    "count": "{count} ta imtiyoz",
+    "pageTitle": "Davlat mulkini ijaraga berishda imtiyozlar",
+    "pageDescription": "Amaldagi qonunchilikka muvofiq davlat mulkini ijaraga olishda beriladigan imtiyozlar ro'yxati.",
+    "filterLabel": "Toifa bo'yicha saralash",
+    "subject": "Foydalanuvchi subyekt",
+    "duration": "Davriylik",
+    "basis": "Asos",
+    "empty": "Bu toifada imtiyoz topilmadi."
+  },
+  "news": {
+    "eyebrow": "Matbuot markazi",
+    "title": "Yangiliklar",
+    "action": "Barchasi"
+  },
+  "documents": {
+    "eyebrow": "Qonunchilik",
+    "title": "Normativ hujjatlar",
+    "action": "Barchasi"
+  },
+  "footer": {
+    "operator": "Davlat mulki obyektlaridan foydalanish markazi.",
+    "hotline": "Ishonch telefoni",
+    "contact": "Bog'lanish",
+    "rights": "Barcha huquqlar himoyalangan",
+    "corporate": "Korporativ haqida batafsil"
+  },
+  "notFound": {
+    "title": "Sahifa topilmadi",
+    "description": "Siz qidirgan sahifa mavjud emas yoki ko'chirilgan.",
+    "action": "Bosh sahifaga qaytish"
+  },
+  "placeholder": {
+    "title": "Bo'lim tayyorlanmoqda",
+    "description": "Bu bo'lim ustida ish olib borilmoqda va tez orada ishga tushiriladi.",
+    "action": "Bosh sahifaga qaytish"
+  }
+}

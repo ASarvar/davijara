@@ -1,0 +1,46 @@
+{
+  "_note": "PARTIAL. Only unambiguous UI chrome (navigation, buttons, labels) is translated. Every omitted key falls back to messages/uz.json via the deep-merge in src/i18n/request.ts. Content prose and ALL statutory text remain Uzbek pending human translation — do not machine-translate legal material into this file.",
+  "common": {
+    "skipToContent": "Перейти к основному содержанию",
+    "menu": "Меню",
+    "close": "Закрыть",
+    "readMore": "Подробнее",
+    "all": "Все",
+    "loading": "Загрузка…",
+    "backToTop": "Наверх"
+  },
+  "topbar": {
+    "accessibility": "Версия для слабовидящих",
+    "languageLabel": "Выберите язык сайта"
+  },
+  "nav": {
+    "home": "Главная",
+    "objects": "Объекты аренды",
+    "auction": "Э-аукцион",
+    "privileges": "Льготы",
+    "services": "Интерактивные услуги",
+    "documents": "Нормативные документы",
+    "news": "Новости",
+    "about": "О центре",
+    "login": "Вход",
+    "cabinet": "Кабинет"
+  },
+  "search": {
+    "label": "Поиск объекта аренды",
+    "region": "Регион",
+    "type": "Тип объекта",
+    "area": "Площадь, м²",
+    "price": "Цена (годовая)",
+    "submit": "Поиск"
+  },
+  "footer": {
+    "hotline": "Телефон доверия",
+    "contact": "Контакты",
+    "rights": "Все права защищены"
+  },
+  "notFound": {
+    "title": "Страница не найдена",
+    "description": "Запрашиваемая страница не существует или была перемещена.",
+    "action": "Вернуться на главную"
+  }
+}

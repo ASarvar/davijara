@@ -1,0 +1,46 @@
+{
+  "_note": "PARTIAL. Only unambiguous UI chrome (navigation, buttons, labels) is translated. Every omitted key falls back to messages/uz.json via the deep-merge in src/i18n/request.ts. Content prose and ALL statutory text remain Uzbek pending human translation — do not machine-translate legal material into this file.",
+  "common": {
+    "skipToContent": "Skip to main content",
+    "menu": "Menu",
+    "close": "Close",
+    "readMore": "Learn more",
+    "all": "All",
+    "loading": "Loading…",
+    "backToTop": "Back to top"
+  },
+  "topbar": {
+    "accessibility": "Accessibility options",
+    "languageLabel": "Choose site language"
+  },
+  "nav": {
+    "home": "Home",
+    "objects": "Rental objects",
+    "auction": "E-auction",
+    "privileges": "Privileges",
+    "services": "Interactive services",
+    "documents": "Legal documents",
+    "news": "News",
+    "about": "About the Centre",
+    "login": "Sign in",
+    "cabinet": "Account"
+  },
+  "search": {
+    "label": "Search for a rental object",
+    "region": "Region",
+    "type": "Object type",
+    "area": "Area, m²",
+    "price": "Price (annual)",
+    "submit": "Search"
+  },
+  "footer": {
+    "hotline": "Hotline",
+    "contact": "Contact",
+    "rights": "All rights reserved"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "action": "Return to homepage"
+  }
+}

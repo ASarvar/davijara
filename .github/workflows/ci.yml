@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # 22.13+ — parts of the toolchain declare ^22.13.0 and warn on 22.12.
+          node-version: "22.13"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify statutory content is intact
+        # The 24 privilege records are the highest-value data in the repo and
+        # every field is legally binding. Fail the build if any record goes
+        # missing or a citation is emptied.
+        run: |
+          node -e "
+            const src = require('fs').readFileSync('src/content/privileges.ts','utf8');
+            const ids = [...src.matchAll(/^\s{4}id: (\d+),/gm)].length;
+            const cites = [...src.matchAll(/legalBasis: \"(.+?)\",/g)].map(m => m[1]);
+            if (ids !== 24) { console.error('Expected 24 privileges, found ' + ids); process.exit(1); }
+            if (cites.length !== 24) { console.error('Expected 24 citations, found ' + cites.length); process.exit(1); }
+            if (cites.some(c => !c.trim())) { console.error('Empty legalBasis found'); process.exit(1); }
+            console.log('OK: 24 privileges, 24 non-empty citations');
+          "
