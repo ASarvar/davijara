@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Imtiyozlar — Davijara.uz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="topbar-left">
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.2 2 2 0 012.22 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0120.01 15h.91z" />
+            </svg>
+            (71) 256-22-98
+          </span>
+          <span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            info@davijara.uz
+          </span>
+        </div>
+        <div class="topbar-right">
+          <a href="#">Maxsus imkoniyatlar</a>
+          <div class="lang-switcher">
+            <button class="lang-btn active">O'z</button>
+            <button class="lang-btn">Ru</button>
+            <button class="lang-btn">En</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+      <div class="nav-inner">
+        <a href="index.html" class="logo">
+          <div><img src="logo-dm-light.svg" alt="Davijara.uz Logo" /></div>
+        </a>
+        <ul class="nav-links">
+          <li><a href="index.html">Bosh sahifa</a></li>
+          <li><a href="#">Ijara obyektlari</a></li>
+          <li><a href="#">E-auksion</a></li>
+          <li><a href="imtiyozlar.html" class="active">Imtiyozlar</a></li>
+          <li><a href="#">Interaktiv xizmatlar</a></li>
+          <li><a href="#">Normativ hujjatlar</a></li>
+          <li><a href="#">Yangiliklar</a></li>
+          <li><a href="#">Markaz haqida</a></li>
+        </ul>
+        <div class="nav-actions">
+          <button class="btn-ghost">Kirish</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+      <div class="section-inner">
+        <div class="breadcrumb">
+          <a href="davijara-redesign.html">Bosh sahifa</a>
+          <span>/</span>
+          <span class="current">Imtiyozlar</span>
+        </div>
+        <div class="eyebrow">Davlat yordami</div>
+        <h1>Davlat mulkini ijaraga berishda imtiyozlar</h1>
+        <p class="section-desc">
+          Tadbirkorlik subyektlariga davlat mulkini ijaraga berishda amaldagi 24 ta imtiyoz — tegishli
+          me'yoriy-huquqiy hujjatlar, foydalanuvchi subyektlar va amal qilish muddati bilan.
+        </p>
+      </div>
+    </section>
+
+    <!-- PRIVILEGES LIST -->
+    <section class="section" style="padding-top: 8px">
+      <div class="section-inner">
+        <div class="filter-bar" id="filterBar">
+          <button class="filter-chip active" data-filter="barchasi">Barchasi (24)</button>
+          <button class="filter-chip" data-filter="ijtimoiy">Ijtimoiy himoya (8)</button>
+          <button class="filter-chip" data-filter="talim">Ta'lim muassasalari (4)</button>
+          <button class="filter-chip" data-filter="it">IT va innovatsiya (3)</button>
+          <button class="filter-chip" data-filter="boshqa">Sport, hunarmandchilik va hudud (9)</button>
+        </div>
+
+        <div class="privileges-list" id="privilegesList">
+          <!-- 1 -->
+          <div class="privilege-card" data-category="talim">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">01</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ta'lim muassasalari</span>
+                <h4>Xususiy o'quv markazlariga sinf xonalaridan bepul foydalanish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">2024-yilda kamida 1000 ta umumta'lim muassasasining bo'sh sinf xonalari xususiy o'quv markazlariga kasb-hunar va xorijiy tillarni o'qitish faoliyatini yo'lga qo'yish uchun bepul foydalanishga beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Xususiy o'quv markazlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-239, 27.06.2024-y. (4-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2 -->
+          <div class="privilege-card" data-category="it">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">02</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">IT va innovatsiya</span>
+                <h4>IT-park va raqamli texnologiyalar tashkilotlariga bepul bino</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">IT-parkning tavsiyanomasiga asosan bo'sh turgan davlat ko'chmas mulk obyektlari, Raqamli texnologiyalar vazirligi tizimidagi tashkilotlar hamda IT-park filiallarining bo'sh binolari va maydonlari bir yilgacha muddatga bepul foydalanish huquqi asosida beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>IT-xizmatlar eksportini kengaytirish dasturi ishtirokchilari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>1 yilgacha muddatga</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-87, 26.02.2024-y. (2-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 -->
+          <div class="privilege-card" data-category="it">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">03</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">IT va innovatsiya</span>
+                <h4>Dastur muddati tugagach to'g'ridan-to'g'ri ijara shartnomasi</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Dasturda ishtirok etuvchi korxonalarga bir yillik bepul foydalanish shartnomasi muddati tugagach, ular egallab turgan bino va maydonlar bo'yicha «E-auksion» elektron savdo platformasida shakllangan hududiy o'rtacha ijara haqi miqdorida to'g'ridan-to'g'ri shartnoma tuziladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Dastur ishtirokchisi korxonalar</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>Tegishli hukumat qarorlari asosida</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 -->
+          <div class="privilege-card" data-category="it">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">04</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">IT va innovatsiya</span>
+                <h4>Malaka oshirish uchun eng kam stavkada ijara</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Hududlarda bo'sh turgan va bir yildan buyon auksion savdolarida sotilmagan davlat mulki bino-inshootlari, shuningdek kasb-hunar kollejlarining bo'sh binolari dastur ishtirokchilariga xodimlarni o'qitish, malakasini oshirish va «amaliy monomarkaz» tashkil etish uchun tanlov (yagona talabgor bo'lganda — to'g'ridan-to'g'ri shartnoma) asosida eng kam ijara stavkasida beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>«20 ming tadbirkor — 500 ming malakali mutaxassis» dasturi ishtirokchilari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PF-93, 12.06.2023-y. (7-band, 12-xatboshi)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">05</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Hunarmandchilik va meros</span>
+                <h4>Hunarmandlarga madaniy meros obyektlari 50% chegirma bilan</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Madaniy meros obyektlarini hunarmandlarga ijaraga berishda auksionga chiqariladigan boshlang'ich narx amaldagi stavkaga nisbatan 50 foiz miqdorida belgilanadi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Hunarmandlar</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PF-91, 12.06.2023-y. (10-band, 4-xatboshi)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">06</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Sport</span>
+                <h4>Xususiy shaxmat klublariga bepul joy</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Xususiy shaxmat klublariga shaxmat to'garaklarini tashkil etish va aholiga xizmat ko'rsatish uchun davlat mulki obyektlari va hududlardagi «Yoshlar markazlari»dan ijara to'lovisiz (kommunal to'lovlar bundan mustasno) joy ajratiladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Xususiy shaxmat klublari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>2024-yil 1-yanvardan boshlab</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-150, 08.05.2023-y. (10-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">07</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Hududiy dasturlar</span>
+                <h4>Kasanachilarni jalb qilganlar uchun 50% chegirma</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Kasanachilarni jalb qilgan tadbirkorlik subyektlariga davlat mulki obyektlari ijara to'lovlarini 50 foizga kamaytirgan holda ijaraga beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Kasanachilarni jalb qilgan tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-70, 23.02.2023-y. (2-ilova)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">08</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Hududiy dasturlar</span>
+                <h4>Hudud toifasiga qarab boshlang'ich narxni 50% pasaytirish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Tadbirkorlik faoliyatini tuman va shaharlarning toifalaridan kelib chiqib qo'llab-quvvatlash choralariga muvofiq, tadbirkorlik subyektlariga davlat mulki obyektlarini ijaraga berishda auksionga chiqariladigan boshlang'ich narx amaldagi stavkaga nisbatan 50 foizga tushiriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Barcha tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-287, 30.12.2022-y. (4-band, 2-xatboshi)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">09</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>«Ayollar daftari»dagi xotin-qizlarni ishga qabul qilganda chegirma</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">«Ayollar daftari»ga kiritilgan ishsiz xotin-qizlarni ishga qabul qilganda, umumiy ijara maydoniga nisbatan ijara to'lovlaridan 50 foiz miqdorida imtiyoz beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Barcha tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>Tegishli hukumat qarorlari asosida</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 10 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">10</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>Xotin-qizlar ustunlik qiladigan korxonalar uchun 5 yillik ozodlik</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Ishlab chiqarish sohasida faoliyat yurituvchi va xodimlar umumiy sonining kamida 70 foizi «Ayollar daftari»ga kiritilgan xotin-qizlar bo'lgan tadbirkorlik subyektlari davlat mulki obyektlari uchun ijara haqi to'lovidan 5 yilga ozod etiladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Ishlab chiqarish bilan shug'ullanuvchi tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>5 yilgacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>Tegishli hukumat qarorlari asosida</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 11 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">11</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Sport</span>
+                <h4>Olimpiya g'oliblari tashkil etgan sport muassasalariga chegirma</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Yozgi Olimpiya va Paralimpiya o'yinlarida g'olib hamda sovrindor bo'lgan sportchilar tashkil etgan nodavlat sport-ta'lim muassasalari uchun zarur bino va inshootlarning ijara to'lovi 2024-yil 1-yanvardan 2026-yil 1-yanvargacha 50 foizga kamaytiriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Nodavlat sport-ta'lim muassasalari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>2024–2026-yil 1-yanvargacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-302, 01.07.2022-y. (1.2, 1.3-bandlar)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 12 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">12</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>Qishloqlarda ayollar bandligi uchun 90% imtiyoz</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Mehnat resurslari zich bo'lgan qishloq hududlari reyestriga kiritilgan joylarda xotin-qizlar bandligini ta'minlagan tadbirkorlik subyektlari davlat mulki obyektlarini ijaraga olishda ijara to'lovlaridan 90 foiz miqdorida imtiyozdan foydalanadi (elektron savdolarsiz, alohida shartlar asosida).</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Kamida 10 xodimli, ularning kamida 50%i xotin-qizlar bo'lgan kichik tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>2022-yil sentabrdan 2025-yil yanvargacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PF-87, 07.03.2022-y. (9-band, 3-ilova)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 13 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">13</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Sport</span>
+                <h4>Mahallada sport to'garaklari uchun 50% eng kam stavka</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Sport to'garaklarini tashkil etish uchun mahallada bo'sh turgan davlat mulki bino va inshootlari elektron savdolarsiz, belgilangan eng kam ijara to'lovi stavkasining 50 foizi miqdorida ijaraga beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Barcha tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-92, 19.01.2022-y. (1-ilova, 9-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 14 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">14</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Sport</span>
+                <h4>Sportchi-murabbiylarga to'garak tashkil etish uchun imtiyoz</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Olimpiya va Paralimpiya hamda Osiyo va Paraosiyo o'yinlari, jahon, Osiyo va respublika chempionatlarida so'nggi 5 yilda g'olib va sovrindor (1–3 o'rin) bo'lgan sportchi-murabbiylarga, shuningdek olis va chekka hududlarda faoliyat yurituvchi sportchi-murabbiylarga to'garak tashkil etish uchun tuman va shaharlarda bo'sh turgan davlat mulki bino va inshootlari elektron savdolarsiz, eng kam stavkaning 50 foizi miqdorida ijaraga beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Ko'rsatilgan yutuqlarga ega sportchi-murabbiylar</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PF-6260, 13.07.2021-y. (13-band); PQ-376, 21.09.2022-y. (1-ilova)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 15 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">15</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>«Yoshlar daftari»dagi yoshlarni ishga qabul qilganda chegirma</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">«Yoshlar daftari»ga kiritilgan ishsiz yoshlarni ishga qabul qilganda, umumiy ijara maydoniga nisbatan ijara to'lovlaridan 50 foiz miqdorda imtiyoz beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Barcha tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>Tegishli hukumat qarorlari asosida</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 16 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">16</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>Yoshlar ustunlik qiladigan korxonalar uchun 5 yillik ozodlik</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Ishlab chiqarish sohasida faoliyat yurituvchi va xodimlar umumiy sonining kamida 70 foizi «Yoshlar daftari»ga kiritilgan yoshlar bo'lgan tadbirkorlik subyektlari davlat mulki obyektlari uchun ijara haqi to'lovidan 5 yilga ozod etiladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Ishlab chiqarish bilan shug'ullanuvchi tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>5 yilgacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>Tegishli hukumat qarorlari asosida</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 17 -->
+          <div class="privilege-card" data-category="talim">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">17</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ta'lim muassasalari</span>
+                <h4>Bog'cha oshxonasidan bepul foydalanish (autsorsing)</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Davlat maktabgacha ta'lim tashkilotida ovqatlantirish autsorsing usulida tashkil etilganda, ijara shartnomasi doirasida autsorserga vaqtincha foydalanishga beriladigan oshxonaning ishlab chiqarish xonalari, asbob-uskunalari, idish-tovoqlari va mebelidan foydalanganlik uchun bepul foydalanish huquqi belgilanadi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Autsorsing usulida tashkil etilgan tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>VM-626, 25.07.2019-y. (5-band, 3-xatboshi)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 18 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">18</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>Nogironligi bo'lgan shaxslar uchun 50% chegirma</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Davlat mulkini ijaraga olgan alohida toifadagi (nogironligi mavjud yoki xodimlarining ko'proq qismi nogironlarni tashkil etuvchi) tadbirkorlik subyektlariga ijara to'lovi ushbu obyektga nisbatan auksion savdolari natijalari bo'yicha belgilangan ijara to'lovining 50 foizi miqdorida belgilanadi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Nogironligi bo'lgan yoki nogironlarni ishga qabul qilgan tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-3782, 11.06.2018-y. (1-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 19 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">19</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>Yosh tadbirkorlarga ishlab chiqarish maydonlaridan bepul foydalanish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">O'zbekiston yoshlar ittifoqi a'zosi bo'lgan yosh tadbirkorlarga «Yoshlar ishlab chiqarish klasterlari» hududida joylashgan ishlab chiqarish maydonlari korxona tashkil topguniga qadar, ammo 5 yildan ko'p bo'lmagan muddatga bepul foydalanish huquqi asosida beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>O'zbekiston yoshlar ittifoqi a'zosi bo'lgan yosh tadbirkorlar</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>5 yilgacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>VM-834, 16.10.2017-y. (5-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 20 -->
+          <div class="privilege-card" data-category="ijtimoiy">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">20</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ijtimoiy himoya</span>
+                <h4>Yoshlar ittifoqi so'roviga ko'ra bo'sh mulkdan bepul foydalanish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">O'zbekiston yoshlar ittifoqi a'zosi bo'lgan yosh tadbirkorlarga foydalanilmayotgan, shu jumladan erkin iqtisodiy va kichik sanoat zonalari hududida joylashgan davlat mulki, Yoshlar ittifoqining shahar va tuman kengashlari iltimosiga ko'ra 5 yildan ko'p bo'lmagan muddatga bepul foydalanish huquqi asosida beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>O'zbekiston yoshlar ittifoqi a'zosi bo'lgan yosh tadbirkorlar</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>5 yilgacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PF-6208, 20.05.2021-y. (1-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 21 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">21</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Hududiy dasturlar</span>
+                <h4>Navoiy viloyati chekka tumanlarida 10 yilgacha bepul foydalanish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Navoiy viloyatining Tomdi, Uchquduq, Konimex, Nurota tumanlari va Zarafshon shahrida joylashgan foydalanilmay bo'sh yotgan davlat obyektlari, yangi ish o'rinlari yaratish sharti bilan, ushbu obyektlar negizida tadbirkorlik faoliyatini yo'lga qo'yish istagini bildirgan tadbirkorlik subyektlariga o'n yil muddatgacha bepul foydalanish huquqi asosida beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Barcha tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>10 yilgacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>PQ-3301, 29.09.2017-y. (9-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 22 -->
+          <div class="privilege-card" data-category="talim">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">22</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ta'lim muassasalari</span>
+                <h4>Qishloq maktablari oshxonasidan bepul foydalanish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Qishloq joylardagi ta'lim muassasalari joylashgan hududning ijtimoiy-iqtisodiy rivojlanish holatidan kelib chiqib, ularning oshxonalari umumiy ovqatlanish faoliyati bilan shug'ullanuvchi tadbirkorlik subyektlariga bepul foydalanish huquqi asosida beriladi (vakolatli komissiya tomonidan ko'rib chiqiladi).</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Umumiy ovqatlanish faoliyati bilan shug'ullanuvchi tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>VM-132, 02.05.2016-y. (5-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 23 -->
+          <div class="privilege-card" data-category="boshqa">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">23</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Hunarmandchilik va meros</span>
+                <h4>Madaniy meros obyektlariga investitsiya evaziga 80% ozodlik</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Moddiy madaniy meros obyektlarini investitsiya kiritish sharti bilan ijaraga olgan tadbirkorlik subyektlari, shartnoma tuzilgan kundan boshlab besh yil muddatga ijara to'lovining hisoblab chiqilgan qiymatining 80 foizi miqdorida ijara to'lovini to'lashdan ozod etiladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Madaniy meros obyektlarini investitsiya sharti bilan olgan tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>Doimiy</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>VM-53, 06.03.2014-y. (1-ilova, 32-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 24 -->
+          <div class="privilege-card" data-category="talim">
+            <div class="privilege-head" onclick="togglePrivilege(this)">
+              <div class="privilege-num">24</div>
+              <div class="privilege-head-main">
+                <span class="privilege-tag">Ta'lim muassasalari</span>
+                <h4>Tugatilayotgan bog'chalar binosini nodavlat bog'chalarga ijaraga berish</h4>
+              </div>
+              <svg class="privilege-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </div>
+            <div class="privilege-body">
+              <div class="privilege-body-inner">
+                <p class="privilege-desc">Tugatilayotgan davlat maktabgacha ta'lim tashkilotlarining bo'shayotgan binolari va inshootlari, mavjud jihozlari va asbob-uskunalari bilan birgalikda, keyinchalik sotib olish huquqi bilan 3 yilgacha muddatga ijara haqi undirmasdan nodavlat maktabgacha ta'lim tashkilotlariga ijaraga beriladi.</p>
+                <div class="privilege-meta-grid">
+                  <div class="privilege-meta-item"><h5>Foydalanuvchi subyekt</h5><p>Barcha tadbirkorlik subyektlari</p></div>
+                  <div class="privilege-meta-item"><h5>Davriylik</h5><p>3 yilgacha</p></div>
+                  <div class="privilege-meta-item"><h5>Asos</h5><p>VM-313, 24.06.1999-y. (2-band)</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-results" id="noResults">Ushbu toifada imtiyozlar topilmadi.</div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a href="davijara-redesign.html" class="logo">
+              <div class="logo-mark">D</div>
+              <div class="logo-text">
+                <span class="logo-title">DAVIJARA.UZ</span>
+                <span class="logo-sub">Davlat mulki portali</span>
+              </div>
+            </a>
+            <p>
+              Davlat aktivlarini boshqarish agentligi huzuridagi Davlat mulki
+              ustidan doimiy nazorat foydalanuvchi portal.
+            </p>
+            <a href="tel:1082" class="footer-hotline">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.2 2 2 0 012.22 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0120.01 15h.91z" />
+              </svg>
+              1082
+            </a>
+          </div>
+          <div class="footer-col">
+            <h4>Portal</h4>
+            <ul>
+              <li><a href="#">Ijara obyektlari</a></li>
+              <li><a href="#">E-auktsion</a></li>
+              <li><a href="imtiyozlar.html">Imtiyozlar</a></li>
+              <li><a href="#">Interaktiv xizmatlar</a></li>
+              <li><a href="#">Normativ hujjatlar</a></li>
+              <li><a href="#">Yangiliklar</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Foydali havolalar</h4>
+            <ul>
+              <li><a href="#">davlat.uz</a></li>
+              <li><a href="#">e-auktsion.uz</a></li>
+              <li><a href="#">my.gov.uz</a></li>
+              <li><a href="#">lex.uz</a></li>
+              <li><a href="#">online-yanki.uz</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Bog'lanish</h4>
+            <ul>
+              <li><a href="#">100006, Toshkent sh., Islom Karimov ko'chasi 55</a></li>
+              <li><a href="tel:71-256-22-98">(71) 256-22-98</a></li>
+              <li><a href="mailto:info@davijara.uz">info@davijara.uz</a></li>
+              <li><a href="#">Korporativ haqida batafsil: (71)-256-11-97</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 Davijara.uz — Barcha huquqlar himoyalangan</p>
+          <div class="footer-links">
+            <a href="#">Maxfiylik siyosati</a>
+            <a href="#">Foydalanish shartlari</a>
+            <a href="#">Sayt xaritasi</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.querySelectorAll(".lang-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll(".lang-btn").forEach((b) => b.classList.remove("active"));
+          this.classList.add("active");
+        });
+      });
+
+      function togglePrivilege(headEl) {
+        const card = headEl.closest(".privilege-card");
+        card.classList.toggle("open");
+      }
+
+      const filterBar = document.getElementById("filterBar");
+      const cards = document.querySelectorAll(".privilege-card");
+      const noResults = document.getElementById("noResults");
+
+      filterBar.addEventListener("click", (e) => {
+        const chip = e.target.closest(".filter-chip");
+        if (!chip) return;
+        document.querySelectorAll(".filter-chip").forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+        const filter = chip.dataset.filter;
+        let visibleCount = 0;
+        cards.forEach((card) => {
+          const match = filter === "barchasi" || card.dataset.category === filter;
+          card.style.display = match ? "" : "none";
+          if (match) visibleCount++;
+        });
+        noResults.style.display = visibleCount === 0 ? "block" : "none";
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Davijara.uz — Davlat mulkini ijaraga berish yagona portali</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="topbar-left">
+          <span>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.2 2 2 0 012.22 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0120.01 15h.91z"
+              />
+            </svg>
+            (71) 256-22-98
+          </span>
+          <span>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+            info@davijara.uz
+          </span>
+        </div>
+        <div class="topbar-right">
+          <a href="#">Maxsus imkoniyatlar</a>
+          <div class="lang-switcher">
+            <button class="lang-btn active">O'z</button>
+            <button class="lang-btn">Ru</button>
+            <button class="lang-btn">En</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+      <div class="nav-inner">
+        <a href="#" class="logo">
+          <div><img src="logo-dm-light.svg" alt="Davijara.uz Logo" /></div>
+        </a>
+        <ul class="nav-links">
+          <li><a href="#" class="active">Bosh sahifa</a></li>
+          <li><a href="#">Ijara obyektlari</a></li>
+          <li><a href="#">E-auksion</a></li>
+          <li><a href="imtiyozlar.html">Imtiyozlar</a></li>
+          <li><a href="#">Interaktiv xizmatlar</a></li>
+          <li><a href="#">Normativ hujjatlar</a></li>
+          <li><a href="#">Yangiliklar</a></li>
+          <li><a href="#">Markaz haqida</a></li>
+        </ul>
+        <div class="nav-actions">
+          <button class="btn-ghost">Kirish</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-pattern"></div>
+      <div class="hero-accent"></div>
+      <div class="hero-inner">
+        <div class="hero-eyebrow">Raqamli O'zbekiston — 2030</div>
+        <h1>
+          Davlat mulkini ijaraga olish —
+          <span class="word-rotator">
+            <em>oson</em>
+            <em>shaffof</em>
+            <em>onlayn</em>
+          </span>
+        </h1>
+        <!-- <div class="hero-ctas">
+      <button class="btn-hero-primary">
+        Obyekt qidirish
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="btn-hero-ghost">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Qanday ishlaydi
+      </button>
+    </div> -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-num"><span>4 820+</span></div>
+            <div class="hero-stat-label">
+              Ijaraga taklif etilayotgan obyektlar
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num"><span>12 340</span></div>
+            <div class="hero-stat-label">
+              Amalga oshirilgan ijara shartnomalari
+            </div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num"><span>14</span></div>
+            <div class="hero-stat-label">Hudud bo'yicha xizmat</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-num"><span>1,2trln</span></div>
+            <div class="hero-stat-label">
+              so'm — 2025 yilgi ijara to'lovlari
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEARCH -->
+    <div class="search-section">
+      <div class="search-inner">
+        <div class="search-label">Ijara obyektini qidirish</div>
+        <div class="search-card">
+          <div class="search-field">
+            <label>Hudud</label>
+            <select>
+              <option>Toshkent shahri</option>
+              <option>Samarqand viloyati</option>
+              <option>Farg'ona viloyati</option>
+              <option>Andijon viloyati</option>
+              <option>Namangan viloyati</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label>Obyekt turi</label>
+            <select>
+              <option>Noturar joy binosi</option>
+              <option>Turar joy binosi</option>
+              <option>Ishlab chiqarish</option>
+              <option>Ma'muriy bino</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label>Maydon, m²</label>
+            <select>
+              <option>50 — 200</option>
+              <option>200 — 500</option>
+              <option>500 — 1000</option>
+              <option>1000+</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label>Narx (yillik)</label>
+            <select>
+              <option>Barchasi</option>
+              <option>50 mln gacha</option>
+              <option>50 — 200 mln</option>
+              <option>200 mln+</option>
+            </select>
+          </div>
+          <button class="btn-search">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            Qidirish
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPEN MAP -->
+    <section class="section">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="eyebrow">Xarita</div>
+          <div class="section-header-row">
+            <div>
+              <h2>Ijara obyektlari xaritada</h2>
+            </div>
+          </div>
+        </div>
+        <div id="map"></div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="section">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="eyebrow">Jarayon</div>
+          <div class="section-header-row">
+            <div>
+              <h2>Qanday ijaraga olinadi?</h2>
+              <p class="section-desc">
+                To'rt oddiy qadam orqali davlat mulkini rasman ijaraga oling.
+              </p>
+            </div>
+            <a href="#" class="link-arrow">Batafsil yo'riqnoma →</a>
+          </div>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">01</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </div>
+            <h3>Obyektni tanlang</h3>
+            <p>
+              Portalda rayonlar, tur va maydon bo'yicha mo'ljallangan obyektni
+              toping.
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">02</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+            </div>
+            <h3>Auksionda qatnashing</h3>
+            <p>«E-auktsion» savdo platformasida onlayn ishtirok eting.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">03</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+                <polyline points="10 9 9 9 8 9" />
+              </svg>
+            </div>
+            <h3>Shartnoma tuzing</h3>
+            <p>
+              G'olib deb topilgach, shartnoma elektron raqamli imzo bilan
+              imzolanadi.
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">04</div>
+            <div class="step-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+              </svg>
+            </div>
+            <h3>To'lovni amalga oshiring</h3>
+            <p>
+              Ijara to'lovlarini shaxsiy kabinet orqali onlayn kuzatib to'lang.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LISTINGS -->
+    <section
+      class="section"
+      style="
+        background: rgba(26, 58, 124, 0.06);
+        border-top: 1px solid rgba(200, 169, 110, 0.07);
+        border-bottom: 1px solid rgba(200, 169, 110, 0.07);
+      "
+    >
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="eyebrow">Dolzarb takliflar</div>
+          <div class="section-header-row">
+            <div>
+              <h2>Yangi qo'yilgan obyektlar</h2>
+            </div>
+            <a href="#" class="link-arrow">Barcha obyektlar →</a>
+          </div>
+        </div>
+        <div class="listings-grid">
+          <!-- Card 1 -->
+          <div class="listing-card">
+            <div class="listing-img">
+              <img
+                src="https://media.e-auksion.uz/i/d452af188e4219e6920126a85ebaf95a_S.jpg"
+                alt=""
+              />
+              <span class="listing-badge badge-auction">Auksionda</span>
+            </div>
+            <div class="listing-body">
+              <h3>Noturar joy binosi, 1-qavat, alohida kirish</h3>
+              <div class="listing-meta">
+                Toshkent sh., Yakkasaroy tumani · 126 m²
+              </div>
+              <div class="listing-footer">
+                <div class="listing-price">
+                  <div class="listing-price-num">86,4 mln</div>
+                  <div class="listing-price-unit">so'm / yil boshiga</div>
+                </div>
+                <button class="btn-sm">Batafsil</button>
+              </div>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="listing-card">
+            <div class="listing-img">
+              <img
+                src="https://media.e-auksion.uz/i/d452af188e4219e6920126a85ebaf95a_S.jpg"
+                alt=""
+              />
+              <span class="listing-badge badge-new">Yangi lot</span>
+            </div>
+            <div class="listing-body">
+              <h3>Ishlab chiqarish ombori, temir yo'l tarmog'iga yaqin</h3>
+              <div class="listing-meta">
+                Samarqand vil., Kasalaryng'i l. · 480 m²
+              </div>
+              <div class="listing-footer">
+                <div class="listing-price">
+                  <div class="listing-price-num">124,0 mln</div>
+                  <div class="listing-price-unit">so'm / yil boshiga</div>
+                </div>
+                <button class="btn-sm">Batafsil</button>
+              </div>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="listing-card">
+            <div class="listing-img">
+              <img
+                src="https://media.e-auksion.uz/i/d452af188e4219e6920126a85ebaf95a_S.jpg"
+                alt=""
+              />
+              <span class="listing-badge badge-auction">Auksionda</span>
+            </div>
+            <div class="listing-body">
+              <h3>Ma'muriy bino xonalari, ijtimoiy soha uchun</h3>
+              <div class="listing-meta">
+                Farg'ona sh., markaziy hudud · 92 m²
+              </div>
+              <div class="listing-footer">
+                <div class="listing-price">
+                  <div class="listing-price-num">51,7 mln</div>
+                  <div class="listing-price-unit">so'm / yil boshiga</div>
+                </div>
+                <button class="btn-sm">Batafsil</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="section section-light">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="eyebrow" style="color: #1a3a7c">Onlayn xizmatlar</div>
+          <div class="section-header-row">
+            <div>
+              <h2 style="color: #07102b">Interaktiv xizmatlar</h2>
+              <p class="section-desc" style="color: #3d4a6b">
+                Hamma narsani onlayn — uydan chiqmasdan hal qiling.
+              </p>
+            </div>
+            <a href="#" class="link-arrow" style="color: #1a3a7c"
+              >Barcha xizmatlar →</a
+            >
+          </div>
+        </div>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
+            </div>
+            <h3>Ijara kalkulatori</h3>
+            <p>
+              Obyekt maydoni va joylashuviga ko'ra taxminiy ijara so'lovini
+              hisoblang.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+              </svg>
+            </div>
+            <h3>Eng kam stavkalar</h3>
+            <p>
+              Joy va uchun 1m² uchun belgilangan eng kam ijara narxlarini
+              ko'ring.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.2 2 2 0 012.22 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0120.01 15h.91z"
+                />
+              </svg>
+            </div>
+            <h3>Ariza yuborish</h3>
+            <p>
+              Obyektni ijaraga chiqarish bo'yicha taklifni onlayn tartibda
+              yuboring.
+            </p>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+              </svg>
+            </div>
+            <h3>Shartnoma holati</h3>
+            <p>
+              Ijara shartnomangiz va to'lovlar holatini raqam bo'yicha kuzating.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IMTIYOZLAR -->
+    <section
+      class="section"
+      style="
+        background: rgba(26, 58, 124, 0.06);
+        border-top: 1px solid rgba(200, 169, 110, 0.07);
+        border-bottom: 1px solid rgba(200, 169, 110, 0.07);
+      "
+    >
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="eyebrow">Davlat yordami</div>
+          <div class="section-header-row">
+            <div>
+              <h2>Ijara imtiyozlari</h2>
+              <p class="section-desc">
+                Tadbirkorlik subyektlari uchun davlat mulkini ijaraga olishda
+                amaldagi asosiy yengilliklar.
+              </p>
+            </div>
+            <a href="imtiyozlar.html" class="link-arrow">Barcha imtiyozlar →</a>
+          </div>
+        </div>
+        <div class="imtiyoz-grid">
+          <div class="imtiyoz-card">
+            <div class="imtiyoz-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 10-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"
+                />
+              </svg>
+            </div>
+            <h3>Ijtimoiy himoya guruhlari</h3>
+            <p>
+              Ayollar, yoshlar va nogironligi bo'lgan shaxslar ishtirokidagi
+              tadbirkorlik subyektlari uchun ijara to'lovidan 50–100% gacha
+              chegirma.
+            </p>
+            <div class="imtiyoz-card-count">8 ta imtiyoz</div>
+          </div>
+          <div class="imtiyoz-card">
+            <div class="imtiyoz-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5z" />
+                <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
+              </svg>
+            </div>
+            <h3>Ta'lim va tarbiya muassasalari</h3>
+            <p>
+              Xususiy o'quv markazlari, kasb-hunar kolleji binolari va bolalar
+              bog'chalari uchun bepul yoki yengillashtirilgan ijara sharoiti.
+            </p>
+            <div class="imtiyoz-card-count">4 ta imtiyoz</div>
+          </div>
+          <div class="imtiyoz-card">
+            <div class="imtiyoz-icon">
+              <svg viewBox="0 0 24 24">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <rect x="9" y="9" width="6" height="6" />
+                <path
+                  d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"
+                />
+              </svg>
+            </div>
+            <h3>IT va innovatsion loyihalar</h3>
+            <p>
+              IT-park hamda raqamli texnologiyalar sohasidagi korxonalar uchun
+              bo'sh davlat obyektlaridan bepul foydalanish huquqi.
+            </p>
+            <div class="imtiyoz-card-count">3 ta imtiyoz</div>
+          </div>
+          <div class="imtiyoz-card">
+            <div class="imtiyoz-icon">
+              <svg viewBox="0 0 24 24">
+                <path
+                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                />
+              </svg>
+            </div>
+            <h3>Sport, hunarmandchilik va hududlar</h3>
+            <p>
+              Sportchi-murabbiylar, hunarmandlar hamda uzoq va kam ta'minlangan
+              hududlardagi tadbirkorlar uchun maxsus ijara stavkalari.
+            </p>
+            <div class="imtiyoz-card-count">9 ta imtiyoz</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IMPACT -->
+    <div class="impact-section">
+      <div class="impact-inner">
+        <div class="impact-item">
+          <div class="impact-num">1,2 trln</div>
+          <div class="impact-label">so'm — 2025 yilgi ijara to'lovlari</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-num">98%</div>
+          <div class="impact-label">Elektron shaklda tuzilgan shartnomalar</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-num">3 kun</div>
+          <div class="impact-label">
+            Obyektni savdoga chiqarish o'rtacha muddati
+          </div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-num">24/7</div>
+          <div class="impact-label">Portal orqali xizmatlardan foydalanish</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEWS + DOCS -->
+    <section class="section">
+      <div class="section-inner">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 48px;
+            align-items: start;
+          "
+        >
+          <!-- News -->
+          <div>
+            <div class="section-header" style="margin-bottom: 28px">
+              <div class="eyebrow">Matbuot markazi</div>
+              <div class="section-header-row">
+                <h2 style="margin-bottom: 0; font-size: 30px">Yangiliklar</h2>
+                <a href="#" class="link-arrow">Barchasi →</a>
+              </div>
+            </div>
+            <div class="news-grid" style="grid-template-columns: 1fr; gap: 2px">
+              <div class="news-list">
+                <div class="news-item">
+                  <div class="news-item-date">02.07.2025</div>
+                  <h4>
+                    Ijara shartnomalari bo'yicha to'lovlar endi QR-kod orqali
+                    qabul qilinadi
+                  </h4>
+                  <p>
+                    Shaxsiy kabinetdagi mavjusi onlaydop to'lov savollariga
+                    aksiyorlik kiritildi.
+                  </p>
+                </div>
+                <div class="news-item">
+                  <div class="news-item-date">24.06.2025</div>
+                  <h4>
+                    Ijtimoiy soha obyektlari uchun imtiyozli ijara muddati
+                    uzaytirildi
+                  </h4>
+                  <p>
+                    Maktabgacha va maktab yoshidagi bolalar uchun imtiyoz 10
+                    yilgacha berildi.
+                  </p>
+                </div>
+                <div class="news-item">
+                  <div class="news-item-date">15.06.2025</div>
+                  <h4>Hududlarda sayyor qabul kunlari e'lon qilindi</h4>
+                  <p>
+                    Markaz mutaxassislari tadbirkorlarning savollariga javob
+                    beradi.
+                  </p>
+                </div>
+                <div class="news-item">
+                  <div class="news-item-date">06.06.2025</div>
+                  <h4>Portalning yangi mobil versiyasi ishga tushirildi</h4>
+                  <p>
+                    Endi auktsion jarayonlari smartfon orqali ham xuddi oson
+                    amalga oshiriladi.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Docs -->
+          <div>
+            <div class="section-header" style="margin-bottom: 28px">
+              <div class="eyebrow">Qonunchilik</div>
+              <h2 style="margin-bottom: 0; font-size: 30px">
+                Normativ hujjatlar
+              </h2>
+            </div>
+            <div class="docs-grid" style="grid-template-columns: 1fr">
+              <div class="doc-card">
+                <div class="doc-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"
+                    />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg>
+                </div>
+                <div class="doc-info">
+                  <h4>
+                    VM qarori №660 «Davlat mulkini ijaraga berish tartibi
+                    to'g'risida»
+                  </h4>
+                  <p>14.12.2023 · 1,9 MB</p>
+                </div>
+              </div>
+              <div class="doc-card">
+                <div class="doc-icon">
+                  <svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                </div>
+                <div class="doc-info">
+                  <h4>2026-yil uchun eng kam ijara stavkalari jadvali</h4>
+                  <p>12.01.2026 · 0,8 MB</p>
+                </div>
+              </div>
+              <div class="doc-card">
+                <div class="doc-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                    />
+                  </svg>
+                </div>
+                <div class="doc-info">
+                  <h4>Ijara shartnnomasining namunaviy shakli</h4>
+                  <p>26.02.2026 · 0,4 MB</p>
+                </div>
+              </div>
+              <div class="doc-card">
+                <div class="doc-icon">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </div>
+                <div class="doc-info">
+                  <h4>Onlayn-auksionda ishtirok etish yo'riqnomasi</h4>
+                  <p>23.09.2026 · 2,1 MB</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a href="#" class="logo">
+              <div class="footer-logo">
+                <img src="logo-dm-light.svg" alt="Davijara.uz Logo" />
+              </div>
+            </a>
+            <p>
+              Davlat mulki obyektlaridan foydalanish markazi.
+            </p>
+            <a href="tel:1082" class="footer-hotline">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.2 2 2 0 012.22 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.56a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0120.01 15h.91z"
+                />
+              </svg>
+              1082
+            </a>
+          </div>
+          <div class="footer-col">
+            <h4>Portal</h4>
+            <ul>
+              <li><a href="#">Ijara obyektlari</a></li>
+              <li><a href="#">E-auksion</a></li>
+              <li><a href="imtiyozlar.html">Imtiyozlar</a></li>
+              <li><a href="#">Interaktiv xizmatlar</a></li>
+              <li><a href="#">Normativ hujjatlar</a></li>
+              <li><a href="#">Yangiliklar</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Foydali havolalar</h4>
+            <ul>
+              <li><a href="#">my.gov.uz</a></li>
+              <li><a href="#">davaktiv.uz</a></li>
+              <li><a href="#">e-auksion.uz</a></li>
+              <li><a href="#">lex.uz</a></li>
+              <li><a href="#">online-ijara.uz</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Bog'lanish</h4>
+            <ul>
+              <li>
+                <a href="#">100006, Toshkent sh., Buxoro ko'chasi 6</a>
+              </li>
+              <li><a href="tel:71-256-22-98">(71) 256-22-98</a></li>
+              <li><a href="mailto:info@davijara.uz">info@davijara.uz</a></li>
+              <li>
+                <a href="#">Korporativ haqida batafsil: (71)-256-11-97</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 Davijara.uz — Barcha huquqlar himoyalangan</p>
+          <div class="footer-links">
+            <a href="#">Maxfiylik siyosati</a>
+            <a href="#">Foydalanish shartlari</a>
+            <a href="#">Sayt xaritasi</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.querySelectorAll(".lang-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          document
+            .querySelectorAll(".lang-btn")
+            .forEach((b) => b.classList.remove("active"));
+          this.classList.add("active");
+        });
+      });
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+      // 1. O'zbekiston viloyatlari koordinatalari bazasi
+      const viloyatlar = [
+        { nom: "Toshkent viloyati", lat: 41.2213, lng: 69.6511 },
+        { nom: "Samarqand viloyati", lat: 39.6542, lng: 66.9597 },
+        { nom: "Buxoro viloyati", lat: 39.7747, lng: 64.4286 },
+        { nom: "Xorazm viloyati", lat: 41.5544, lng: 60.6277 },
+        { nom: "Farg'ona viloyati", lat: 40.3864, lng: 71.7864 },
+        { nom: "Andijon viloyati", lat: 40.7821, lng: 72.3442 },
+        { nom: "Namangan viloyati", lat: 41.0011, lng: 71.6683 },
+        { nom: "Qashqadaryo viloyati", lat: 38.861, lng: 65.7847 },
+        { nom: "Surxondaryo viloyati", lat: 37.9405, lng: 67.5708 },
+        { nom: "Jizzax viloyati", lat: 40.1158, lng: 67.8422 },
+        { nom: "Sirdaryo viloyati", lat: 40.8435, lng: 68.6618 },
+        { nom: "Navoiy viloyati", lat: 40.0844, lng: 65.3792 },
+        { nom: "Qoraqalpog'iston Respublikasi", lat: 43.7944, lng: 59.0277 },
+      ];
+
+      // 2. Xaritani O'zbekiston markaziga sozlash (Google Maps uslubidagi qatlam bilan)
+      const map = L.map("map").setView([41.3775, 64.5853], 6); // 6 - yaqinlashtirish darajasi
+
+      // Google Maps yo'ldosh/xarita qatlamini ulash
+      L.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+        maxZoom: 20,
+        subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        attribution: "&copy; Google Maps",
+      }).addTo(map);
+
+      // 3. Massivdan tasodifiy elementlarni tanlash funksiyasi
+      function getRandomViloyatlar(arr, n) {
+        const shuffled = [...arr].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, n);
+      }
+
+      // Tasodifiy 3 ta viloyatni tanlaymiz
+      const tanlanganViloyatlar = getRandomViloyatlar(viloyatlar, 7);
+      const customIcon = L.icon({
+        iconUrl: "pointOnMap.svg", // Rasm manzili (URL yoki local fayl)
+        iconSize: [38, 38], // Ikonkaning o'lchami [kengligi, balandligi] pikselda
+        iconAnchor: [19, 38], // Ikonkaning aynan qaysi nuqtasi koordinataga tegib turishi (odatda pastki o'rtasi)
+        popupAnchor: [0, -38], // Popup oyna ikonkaning qayeridan chiqishi [X, Y]
+      });
+
+      // 4. Tanlangan viloyatlarni xaritaga marker qilib joylashtirish
+      tanlanganViloyatlar.forEach((viloyat) => {
+        L.marker([viloyat.lat, viloyat.lng], { icon: customIcon })
+          .addTo(map)
+          .bindPopup(`<b>${viloyat.nom}</b><br>Ijara obyekti nomi <br> <a href="https://e-auksion.uz/lot-view?lot_id=24364329" target="_blank"> Lot raqami 24364329 </a>`)
+          .openPopup(); // Popup oynasini avtomatik ochish
+      });
+    </script>
+  </body>
+</html>

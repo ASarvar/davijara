@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Davijara.uz — Davlat mulkini ijaraga berish yagona portali</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#1A56DB;--blue-dark:#1240a8;--blue-light:#EEF3FF;--blue-mid:#DBEAFE;
+  --gold:#B8860B;--gold-light:#FEF3C7;--gold-mid:#FDE68A;
+  --navy:#0F2057;--navy-light:#1E3A8A;
+  --slate:#475569;--slate-light:#94A3B8;--slate-xlight:#F1F5F9;
+  --white:#FFFFFF;--off-white:#F8FAFC;--border:#E2E8F0;--border-strong:#CBD5E1;
+  --green:#16A34A;--green-light:#DCFCE7;
+  --red:#DC2626;--red-light:#FEE2E2;
+  --text:#0F172A;--text2:#334155;--text3:#64748B;
+  --radius:10px;--radius-lg:18px;--radius-xl:28px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 12px 40px rgba(0,0,0,.1);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.12),0 24px 64px rgba(0,0,0,.14);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--white);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,h5,.display{font-family:'Outfit',sans-serif}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+button{cursor:pointer;font-family:'Inter',sans-serif}
+
+/* === ANIMATIONS === */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes countUp{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes drawLine{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.anim-up{opacity:0;animation:fadeUp .7s ease forwards}
+.anim-up.delay-1{animation-delay:.1s}
+.anim-up.delay-2{animation-delay:.2s}
+.anim-up.delay-3{animation-delay:.3s}
+.anim-up.delay-4{animation-delay:.4s}
+.anim-up.delay-5{animation-delay:.5s}
+
+/* === TOP BAR === */
+.topbar{background:var(--navy);color:rgba(255,255,255,.75);font-size:12.5px;padding:8px 0}
+.topbar-inner{max-width:1280px;margin:0 auto;padding:0 32px;display:flex;justify-content:space-between;align-items:center}
+.topbar-left{display:flex;gap:20px}
+.topbar-left span{display:flex;align-items:center;gap:6px}
+.topbar-right{display:flex;gap:16px;align-items:center}
+.topbar-right a{color:rgba(255,255,255,.6);transition:color .2s}
+.topbar-right a:hover{color:#fff}
+.lang-btns{display:flex;gap:4px}
+.lang-btn{padding:2px 8px;border:1px solid rgba(255,255,255,.2);border-radius:4px;background:transparent;color:rgba(255,255,255,.55);font-size:11.5px;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif}
+.lang-btn.active{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.4)}
+
+/* === NAVBAR === */
+nav{position:sticky;top:0;z-index:200;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);box-shadow:0 1px 0 rgba(0,0,0,.04)}
+.nav-inner{max-width:1280px;margin:0 auto;padding:0 32px;display:flex;align-items:center;gap:28px;height:66px}
+.logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo-mark{width:38px;height:38px;background:linear-gradient(135deg,var(--blue) 0%,var(--navy) 100%);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:900;font-size:17px;color:#fff;letter-spacing:-.02em;box-shadow:0 2px 8px rgba(26,86,219,.3)}
+.logo-text .title{font-family:'Outfit',sans-serif;font-weight:800;font-size:15.5px;color:var(--navy);letter-spacing:-.02em;line-height:1}
+.logo-text .sub{font-size:10px;color:var(--text3);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.nav-links{display:flex;gap:2px;flex:1;list-style:none}
+.nav-links a{color:var(--text2);font-size:13.5px;font-weight:500;padding:7px 11px;border-radius:8px;transition:all .2s;white-space:nowrap}
+.nav-links a:hover{background:var(--blue-light);color:var(--blue)}
+.nav-links a.active{background:var(--blue-light);color:var(--blue)}
+.nav-actions{display:flex;gap:8px;flex-shrink:0}
+.btn-outline{padding:8px 18px;border:1.5px solid var(--border-strong);border-radius:var(--radius);background:#fff;color:var(--text2);font-size:13.5px;font-weight:500;transition:all .2s}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.btn-solid{padding:8px 20px;border:none;border-radius:var(--radius);background:var(--blue);color:#fff;font-size:13.5px;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-solid:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(26,86,219,.3)}
+
+/* === HERO === */
+.hero{background:linear-gradient(160deg,var(--navy) 0%,#162d7a 45%,#1a3a8f 100%);min-height:92vh;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;padding:60px 0 80px}
+.hero-mesh{position:absolute;inset:0;opacity:.06;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,.8) 1px,transparent 0);background-size:36px 36px}
+.hero-glow-1{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(99,129,255,.25) 0%,transparent 70%);top:-200px;right:-100px;pointer-events:none}
+.hero-glow-2{position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.12) 0%,transparent 70%);bottom:-100px;left:10%;pointer-events:none}
+.hero-inner{max-width:1280px;margin:0 auto;padding:0 32px;position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.9);font-size:12px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:100px;margin-bottom:24px}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:#34D399;animation:blink 2s ease-in-out infinite}
+.hero h1{font-size:clamp(36px,4.5vw,62px);font-weight:900;line-height:1.05;letter-spacing:-.04em;color:#fff;margin-bottom:20px}
+.hero h1 .accent{color:#FBD150;position:relative}
+.hero-desc{font-size:17px;color:rgba(255,255,255,.65);line-height:1.75;max-width:480px;margin-bottom:36px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:52px}
+.btn-hero-main{padding:14px 32px;background:#fff;color:var(--navy);border:none;border-radius:14px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;transition:all .2s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.btn-hero-main:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.btn-hero-ghost{padding:14px 28px;background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:14px;font-size:15px;font-weight:500;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-hero-ghost:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5)}
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.1);border-radius:16px;overflow:hidden}
+.hero-stat{background:rgba(255,255,255,.06);padding:22px 20px;text-align:center}
+.hero-stat-num{font-family:'Outfit',sans-serif;font-size:30px;font-weight:800;color:#fff;letter-spacing:-.03em;line-height:1}
+.hero-stat-num sup{font-size:16px;font-weight:700;color:#FBD150}
+.hero-stat-label{font-size:12px;color:rgba(255,255,255,.5);margin-top:5px;line-height:1.4}
+
+/* Hero right — property cards */
+.hero-right{position:relative;animation:float 5s ease-in-out infinite}
+.hero-card-main{background:#fff;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.hero-card-img{height:200px;object-fit:cover;width:100%;background:linear-gradient(135deg,#1e3a6e 0%,#2d5ab8 100%);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.hero-card-img-real{width:100%;height:100%;object-fit:cover}
+.hero-card-img svg.placeholder{width:64px;height:64px;stroke:rgba(255,255,255,.2);fill:none;stroke-width:1}
+.hero-badge-pill{position:absolute;top:14px;left:14px;background:rgba(251,191,36,.95);color:#78350F;font-size:11px;font-weight:700;padding:4px 12px;border-radius:100px;letter-spacing:.04em}
+.hero-card-body{padding:20px}
+.hero-card-title{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.hero-card-meta{font-size:12.5px;color:var(--text3);display:flex;align-items:center;gap:5px;margin-bottom:14px}
+.hero-card-footer{display:flex;justify-content:space-between;align-items:center}
+.hero-card-price{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--blue)}
+.hero-card-price span{font-size:11px;font-weight:400;color:var(--text3);display:block}
+.hero-card-btn{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s}
+.hero-card-btn:hover{background:var(--blue-dark)}
+.floating-badge{position:absolute;background:#fff;border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px}
+.floating-badge.top{top:-20px;right:-20px}
+.floating-badge.bottom{bottom:30px;left:-30px;animation:float 6s ease-in-out infinite reverse}
+.floating-badge i{font-size:20px}
+.floating-badge .fb-text{font-size:11px;color:var(--text3);font-weight:500}
+.floating-badge .fb-num{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--text);line-height:1}
+
+/* === SEARCH === */
+.search-section{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:36px 0}
+.search-inner{max-width:1280px;margin:0 auto;padding:0 32px}
+.search-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--blue);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.search-form{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:12px;align-items:end;background:var(--off-white);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 24px}
+.sf-field{display:flex;flex-direction:column;gap:6px}
+.sf-field label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3)}
+.sf-field select,.sf-field input{border:1.5px solid var(--border);border-radius:var(--radius);background:#fff;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:10px 14px;outline:none;transition:border-color .2s;appearance:none;-webkit-appearance:none;cursor:pointer}
+.sf-field select:focus,.sf-field input:focus{border-color:var(--blue)}
+.sf-field select option{background:#fff;color:var(--text)}
+.btn-search{padding:10px 28px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius);font-size:14.5px;font-weight:600;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;transition:all .2s;height:44px}
+.btn-search:hover{background:var(--blue-dark)}
+.search-tags{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search-tag{padding:4px 12px;background:var(--blue-light);color:var(--blue);border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.search-tag:hover{border-color:var(--blue)}
+
+/* === SECTION SHARED === */
+.section{padding:88px 0}
+.sec-inner{max-width:1280px;margin:0 auto;padding:0 32px}
+.eyebrow{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.eyebrow::before{content:'';width:20px;height:2px;background:var(--blue);border-radius:2px}
+.sec-h2{font-size:clamp(28px,3.5vw,44px);font-weight:800;letter-spacing:-.03em;color:var(--navy);line-height:1.1;margin-bottom:12px}
+.sec-desc{font-size:16px;color:var(--text3);max-width:500px;line-height:1.7}
+.sec-header{margin-bottom:52px}
+.sec-header-row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.link-more{color:var(--blue);font-size:13.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px;transition:gap .2s;white-space:nowrap}
+.link-more:hover{gap:10px}
+.bg-light{background:var(--off-white)}
+.bg-navy{background:var(--navy)}
+
+/* === STEPS === */
+.steps-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.steps-wrap::before{content:'';position:absolute;top:48px;left:12.5%;right:12.5%;height:2px;background:linear-gradient(90deg,var(--blue) 0%,var(--blue-light) 100%);z-index:0}
+.step-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:32px 24px;text-align:center;position:relative;z-index:1;transition:all .25s;margin:0 8px}
+.step-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md);transform:translateY(-4px)}
+.step-num-wrap{width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;position:relative;z-index:2;box-shadow:0 4px 16px rgba(26,86,219,.3)}
+.step-card h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:8px;letter-spacing:-.01em}
+.step-card p{font-size:13.5px;color:var(--text3);line-height:1.65}
+
+/* === MAP VISUAL === */
+.map-section{background:var(--blue-light);border-top:1px solid rgba(26,86,219,.1);border-bottom:1px solid rgba(26,86,219,.1)}
+.map-inner{display:grid;grid-template-columns:1fr 1.3fr;gap:60px;align-items:center}
+.map-svg-wrap{position:relative;border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg);background:#fff}
+.region-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.region-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 20px;transition:all .2s;cursor:pointer}
+.region-card:hover{border-color:var(--blue);box-shadow:var(--shadow)}
+.region-card .r-name{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.region-card .r-count{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:var(--blue)}
+.region-card .r-label{font-size:11px;color:var(--text3)}
+.region-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0}
+
+/* === LISTINGS === */
+.listings-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.listing-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .25s;cursor:pointer}
+.listing-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md);transform:translateY(-3px)}
+.listing-img-wrap{height:190px;overflow:hidden;position:relative;background:var(--slate-xlight)}
+.listing-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.listing-card:hover .listing-img-wrap img{transform:scale(1.04)}
+.listing-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.listing-img-placeholder svg{width:48px;height:48px;stroke:var(--border-strong);fill:none;stroke-width:1.2}
+.l-badge{position:absolute;top:12px;left:12px;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:.04em;backdrop-filter:blur(8px)}
+.l-badge.auction{background:rgba(251,191,36,.9);color:#78350F}
+.l-badge.new{background:rgba(22,163,74,.9);color:#fff}
+.l-badge.hot{background:rgba(220,38,38,.9);color:#fff}
+.listing-body{padding:18px 20px}
+.listing-body h3{font-size:14.5px;font-weight:700;color:var(--navy);margin-bottom:6px;line-height:1.4;letter-spacing:-.01em}
+.listing-meta{font-size:12px;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:5px}
+.listing-tags{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.l-tag{padding:2px 8px;background:var(--blue-light);color:var(--blue);border-radius:4px;font-size:11px;font-weight:600}
+.listing-footer{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border)}
+.l-price-num{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--blue)}
+.l-price-unit{font-size:11px;color:var(--text3)}
+.btn-listing{padding:7px 14px;background:var(--blue-light);color:var(--blue);border:none;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-listing:hover{background:var(--blue);color:#fff}
+
+/* === SERVICES === */
+.services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.service-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px 22px;transition:all .25s;cursor:pointer;position:relative;overflow:hidden}
+.service-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--blue);transform:scaleX(0);transition:transform .3s ease;transform-origin:left}
+.service-card:hover::before{transform:scaleX(1)}
+.service-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md);transform:translateY(-3px)}
+.svc-icon{width:52px;height:52px;border-radius:14px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:22px;color:var(--blue);transition:all .25s}
+.service-card:hover .svc-icon{background:var(--blue);color:#fff}
+.service-card h3{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:8px;letter-spacing:-.01em}
+.service-card p{font-size:13px;color:var(--text3);line-height:1.65}
+
+/* === CHARTS SECTION === */
+.charts-row{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start}
+.chart-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow)}
+.chart-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.chart-card-title{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.chart-card-sub{font-size:12.5px;color:var(--text3)}
+.chart-pill{padding:4px 10px;background:var(--green-light);color:var(--green);border-radius:100px;font-size:11.5px;font-weight:600}
+.chart-canvas-wrap{position:relative;height:240px}
+
+/* === IMPACT STRIP === */
+.impact-strip{background:linear-gradient(135deg,var(--navy) 0%,#1e3a8a 100%);padding:64px 0}
+.impact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+.impact-item{text-align:center;padding:20px;border-right:1px solid rgba(255,255,255,.1)}
+.impact-item:last-child{border-right:none}
+.impact-num{font-family:'Outfit',sans-serif;font-size:44px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1;margin-bottom:6px}
+.impact-num .accent{color:#FBD150}
+.impact-label{font-size:13px;color:rgba(255,255,255,.55)}
+
+/* === TESTIMONIALS === */
+.testimonials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.testi-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:28px;transition:all .2s}
+.testi-card:hover{box-shadow:var(--shadow-md);border-color:var(--blue)}
+.stars{display:flex;gap:3px;margin-bottom:16px;color:#FBBF24;font-size:14px}
+.testi-text{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:12px;padding-top:16px;border-top:1px solid var(--border)}
+.testi-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--blue) 0%,var(--navy) 100%);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:700;color:#fff;font-size:15px}
+.testi-name{font-size:13.5px;font-weight:600;color:var(--navy)}
+.testi-role{font-size:12px;color:var(--text3)}
+
+/* === NEWS === */
+.news-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:24px}
+.news-main{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .2s}
+.news-main:hover{box-shadow:var(--shadow-md);border-color:var(--blue);transform:translateY(-2px)}
+.news-main-img{height:220px;overflow:hidden;position:relative}
+.news-main-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.news-main:hover .news-main-img img{transform:scale(1.04)}
+.news-main-img-placeholder{width:100%;height:100%;background:linear-gradient(135deg,var(--blue) 0%,var(--navy) 100%);display:flex;align-items:center;justify-content:center}
+.news-main-img-placeholder i{font-size:48px;color:rgba(255,255,255,.2)}
+.news-tag{position:absolute;top:14px;left:14px;background:rgba(26,86,219,.9);color:#fff;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:600}
+.news-main-body{padding:24px}
+.n-date{font-size:12px;color:var(--blue);font-weight:600;margin-bottom:8px;letter-spacing:.04em}
+.news-main-body h3{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:10px;line-height:1.4;letter-spacing:-.01em}
+.news-main-body p{font-size:13.5px;color:var(--text3);line-height:1.65}
+.news-list{display:flex;flex-direction:column;gap:0;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.news-item{padding:18px 22px;border-bottom:1px solid var(--border);transition:all .2s;cursor:pointer;border-left:3px solid transparent}
+.news-item:last-child{border-bottom:none}
+.news-item:hover{background:var(--blue-light);border-left-color:var(--blue)}
+.news-item .n-date{font-size:11px;margin-bottom:5px}
+.news-item h4{font-size:13.5px;font-weight:600;color:var(--navy);line-height:1.45;margin-bottom:3px}
+.news-item p{font-size:12px;color:var(--text3);line-height:1.5}
+
+/* === DOCUMENTS === */
+.docs-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.doc-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s}
+.doc-card:hover{border-color:var(--blue);background:var(--blue-light)}
+.doc-icon{width:44px;height:44px;background:var(--blue-light);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;color:var(--blue)}
+.doc-info h4{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:3px;line-height:1.4}
+.doc-info p{font-size:11.5px;color:var(--text3)}
+
+/* === CTA BANNER === */
+.cta-banner{background:linear-gradient(135deg,var(--blue) 0%,var(--navy) 100%);border-radius:var(--radius-xl);padding:56px 56px;display:flex;justify-content:space-between;align-items:center;gap:40px;position:relative;overflow:hidden}
+.cta-banner::before{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cta-banner::after{content:'';position:absolute;left:40%;bottom:-80px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
+.cta-text{position:relative;z-index:1}
+.cta-text h2{font-size:30px;font-weight:800;color:#fff;letter-spacing:-.02em;margin-bottom:10px;line-height:1.2}
+.cta-text p{font-size:15px;color:rgba(255,255,255,.65)}
+.cta-actions{display:flex;gap:12px;flex-shrink:0;position:relative;z-index:1}
+.btn-cta-white{padding:14px 28px;background:#fff;color:var(--navy);border:none;border-radius:12px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-cta-white:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.btn-cta-ghost{padding:14px 28px;background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-cta-ghost:hover{background:rgba(255,255,255,.2)}
+
+/* === FOOTER === */
+footer{background:#060F2B;border-top:1px solid rgba(255,255,255,.06);padding:64px 0 32px}
+.footer-inner{max-width:1280px;margin:0 auto;padding:0 32px}
+.footer-top{display:grid;grid-template-columns:1.8fr 1fr 1fr 1fr;gap:48px;margin-bottom:52px;padding-bottom:52px;border-bottom:1px solid rgba(255,255,255,.07)}
+.footer-brand .logo{margin-bottom:16px;display:inline-flex}
+.footer-brand .logo .logo-text .title{color:#fff}
+.footer-brand .logo .logo-text .sub{color:rgba(255,255,255,.35)}
+.footer-brand p{font-size:13.5px;color:rgba(255,255,255,.4);line-height:1.75;max-width:260px;margin-bottom:20px}
+.footer-hotline{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.8);font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;padding:12px 20px;border-radius:12px}
+.footer-hotline i{font-size:16px;color:var(--blue);opacity:.8}
+.footer-col h4{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);margin-bottom:18px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:11px}
+.footer-col ul li a{color:rgba(255,255,255,.45);font-size:13.5px;transition:color .2s}
+.footer-col ul li a:hover{color:rgba(255,255,255,.9)}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-bottom p{font-size:12.5px;color:rgba(255,255,255,.25)}
+.footer-bottom-links{display:flex;gap:20px}
+.footer-bottom-links a{font-size:12.5px;color:rgba(255,255,255,.25);transition:color .2s}
+.footer-bottom-links a:hover{color:rgba(255,255,255,.5)}
+.footer-socials{display:flex;gap:10px;margin-top:20px}
+.footer-social-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s;cursor:pointer}
+.footer-social-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* === RESPONSIVE === */
+@media(max-width:1024px){
+  .hero-inner{grid-template-columns:1fr;gap:40px}.hero-right{display:none}
+  .listings-grid{grid-template-columns:repeat(2,1fr)}
+  .charts-row{grid-template-columns:1fr}
+  .news-grid{grid-template-columns:1fr}
+  .footer-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  .nav-links{display:none}.search-form{grid-template-columns:1fr 1fr}
+  .steps-wrap{grid-template-columns:repeat(2,1fr)}.steps-wrap::before{display:none}
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .impact-grid{grid-template-columns:repeat(2,1fr)}
+  .testimonials-grid{grid-template-columns:1fr}
+  .listings-grid{grid-template-columns:1fr}
+  .docs-grid{grid-template-columns:1fr}
+  .cta-banner{flex-direction:column;padding:36px 28px}
+  .footer-top{grid-template-columns:1fr}
+  .topbar-left{display:none}
+  .map-inner{grid-template-columns:1fr}
+}
+@media(max-width:500px){.search-form{grid-template-columns:1fr}.steps-wrap{grid-template-columns:1fr}.services-grid{grid-template-columns:1fr}.impact-grid{grid-template-columns:1fr 1fr}}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <span><i class="fa fa-phone"></i> (71) 256-22-98</span>
+      <span><i class="fa fa-envelope"></i> info@davijara.uz</span>
+      <span><i class="fa fa-clock"></i> Ish vaqti: 9:00–18:00</span>
+    </div>
+    <div class="topbar-right">
+      <a href="#">Murojaat uchun</a>
+      <a href="#">Yordam</a>
+      <div class="lang-btns">
+        <button class="lang-btn active">O'Z</button>
+        <button class="lang-btn">RU</button>
+        <button class="lang-btn">EN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-mark">D</div>
+      <div class="logo-text">
+        <div class="title">DAVIJARA.UZ</div>
+        <div class="sub">Davlat mulki portali</div>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#" class="active">Bosh sahifa</a></li>
+      <li><a href="#">Ijara obyektlari</a></li>
+      <li><a href="#">E-auktsion</a></li>
+      <li><a href="#">Interaktiv xizmatlar</a></li>
+      <li><a href="#">Normativ hujjatlar</a></li>
+      <li><a href="#">Yangiliklar</a></li>
+      <li><a href="#">Markaz haqida</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="btn-outline">Kirish</button>
+      <button class="btn-solid"><i class="fa fa-user"></i> Shaxsiy kabinet</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-badge anim-up"><span></span> Raqamli O'zbekiston 2030</div>
+      <h1 class="anim-up delay-1">Davlat mulkini<br>ijaraga olish —<br><span class="accent">oson, shaffof</span><br>va onlayn</h1>
+      <p class="hero-desc anim-up delay-2">Bo'sh turgan davlat obyektlarini toping, elektron auqsionda ishtirok eting va ijara shartnnomasini to'liq onlayn rasmiylashiring.</p>
+      <div class="hero-btns anim-up delay-3">
+        <button class="btn-hero-main"><i class="fa fa-search"></i> Obyekt qidirish</button>
+        <button class="btn-hero-ghost"><i class="fa fa-play-circle"></i> Qanday ishlaydi</button>
+      </div>
+      <div class="hero-stats anim-up delay-4">
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat1">4 820<sup>+</sup></div>
+          <div class="hero-stat-label">Ijara obyektlari</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat2">12 340</div>
+          <div class="hero-stat-label">Tuzilgan shartnomalar</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-num" id="stat3">14</div>
+          <div class="hero-stat-label">Hudud viloyatlari</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-right anim-up delay-3">
+      <div style="position:relative">
+        <div class="floating-badge top">
+          <i class="fa fa-check-circle" style="color:#16A34A"></i>
+          <div><div class="fb-num">98%</div><div class="fb-text">Elektron shartnomalar</div></div>
+        </div>
+        <div class="hero-card-main">
+          <div class="hero-card-img">
+            <img class="hero-card-img-real" src="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&auto=format&fit=crop&q=80" alt="Davlat mulk binosi" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#1e3a6e 0%,#2d5ab8 100%);align-items:center;justify-content:center"><svg viewBox="0 0 80 80" width="80" height="80" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="1"><rect x="10" y="30" width="60" height="40" rx="2"/><path d="M5 30L40 5l35 25"/><rect x="28" y="50" width="10" height="20"/><rect x="42" y="50" width="10" height="20"/><rect x="15" y="36" width="8" height="8"/><rect x="57" y="36" width="8" height="8"/></svg></div>
+            <span class="hero-badge-pill">Auksionda</span>
+          </div>
+          <div class="hero-card-body">
+            <div class="hero-card-title">Ofis binosi, markaziy tumanida</div>
+            <div class="hero-card-meta"><i class="fa fa-map-marker-alt" style="color:var(--blue)"></i> Toshkent sh., Mirzo Ulug'bek · 420 m²</div>
+            <div class="hero-card-footer">
+              <div class="hero-card-price">244 mln so'm<span>yillik ijara</span></div>
+              <button class="hero-card-btn">Batafsil</button>
+            </div>
+          </div>
+        </div>
+        <div class="floating-badge bottom">
+          <i class="fa fa-chart-line" style="color:var(--blue)"></i>
+          <div><div class="fb-num">+18%</div><div class="fb-text">Bu yil o'sish</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEARCH -->
+<div class="search-section">
+  <div class="search-inner">
+    <div class="search-label"><i class="fa fa-search"></i> Ijara obyektini qidirish</div>
+    <div class="search-form">
+      <div class="sf-field">
+        <label>Hudud</label>
+        <select>
+          <option>Toshkent shahri</option>
+          <option>Toshkent viloyati</option>
+          <option>Samarqand viloyati</option>
+          <option>Farg'ona viloyati</option>
+          <option>Andijon viloyati</option>
+          <option>Namangan viloyati</option>
+          <option>Buxoro viloyati</option>
+          <option>Qashqadaryo viloyati</option>
+        </select>
+      </div>
+      <div class="sf-field">
+        <label>Obyekt turi</label>
+        <select>
+          <option>Noturar joy binosi</option>
+          <option>Turar joy binosi</option>
+          <option>Ishlab chiqarish ombori</option>
+          <option>Ma'muriy bino</option>
+          <option>Savdo maydoni</option>
+        </select>
+      </div>
+      <div class="sf-field">
+        <label>Maydon, m²</label>
+        <select>
+          <option>Barcha o'lchamlar</option>
+          <option>50 — 200 m²</option>
+          <option>200 — 500 m²</option>
+          <option>500 — 1000 m²</option>
+          <option>1000 m² dan ortiq</option>
+        </select>
+      </div>
+      <div class="sf-field">
+        <label>Narx (yillik)</label>
+        <select>
+          <option>Barchasi</option>
+          <option>50 mln gacha</option>
+          <option>50 — 200 mln</option>
+          <option>200 — 500 mln</option>
+          <option>500 mln+</option>
+        </select>
+      </div>
+      <button class="btn-search"><i class="fa fa-search"></i> Qidirish</button>
+    </div>
+    <div class="search-tags">
+      <span style="font-size:12px;color:var(--text3);font-weight:500">Mashhur:</span>
+      <span class="search-tag">Ofis, Toshkent</span>
+      <span class="search-tag">Ombor, Samarqand</span>
+      <span class="search-tag">Savdo, 100–300 m²</span>
+      <span class="search-tag">Auksiondagi lotlar</span>
+      <span class="search-tag">Yangi qo'shilgan</span>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section bg-light reveal">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Jarayon</div>
+      <div class="sec-header-row">
+        <div>
+          <div class="sec-h2">Qanday ijaraga olinadi?</div>
+          <p class="sec-desc">To'rt oddiy qadam orqali davlat mulkini rasman ijaraga oling.</p>
+        </div>
+        <a href="#" class="link-more">Batafsil yo'riqnoma <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="steps-wrap">
+      <div class="step-card">
+        <div class="step-num-wrap">1</div>
+        <h3>Obyektni tanlang</h3>
+        <p>Portalda rayonlar, tur va maydon bo'yicha mo'ljallangan obyektni toping va xarita orqali ko'ring.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num-wrap">2</div>
+        <h3>Auksionda qatnashing</h3>
+        <p>«E-auktsion» savdo platformasida onlayn ro'yxatdan o'ting va ishtirok eting.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num-wrap">3</div>
+        <h3>Shartnoma tuzing</h3>
+        <p>G'olib deb topilgach, shartnoma elektron raqamli imzo bilan onlayn imzolanadi.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num-wrap">4</div>
+        <h3>To'lovni amalga oshiring</h3>
+        <p>Ijara to'lovlarini shaxsiy kabinet orqali onlayn kuzatib, qulay usulda to'lang.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP / REGIONS -->
+<section class="section map-section reveal">
+  <div class="sec-inner">
+    <div class="map-inner">
+      <div>
+        <div class="sec-header" style="margin-bottom:32px">
+          <div class="eyebrow">Geografiya</div>
+          <div class="sec-h2">O'zbekiston bo'ylab<br>obyektlar</div>
+          <p class="sec-desc" style="margin-top:10px">Barcha 14 viloyat va Toshkent shahridagi davlat mulklari bitta platformada.</p>
+        </div>
+        <div class="region-stats">
+          <div class="region-card"><div class="r-name"><span class="region-dot"></span>Toshkent sh.</div><div class="r-count">1 240</div><div class="r-label">obyekt</div></div>
+          <div class="region-card"><div class="r-name"><span class="region-dot"></span>Samarqand vil.</div><div class="r-count">680</div><div class="r-label">obyekt</div></div>
+          <div class="region-card"><div class="r-name"><span class="region-dot"></span>Farg'ona vil.</div><div class="r-count">540</div><div class="r-label">obyekt</div></div>
+          <div class="region-card"><div class="r-name"><span class="region-dot"></span>Andijon vil.</div><div class="r-count">430</div><div class="r-label">obyekt</div></div>
+          <div class="region-card"><div class="r-name"><span class="region-dot" style="background:#16A34A"></span>Namangan vil.</div><div class="r-count">390</div><div class="r-label">obyekt</div></div>
+          <div class="region-card"><div class="r-name"><span class="region-dot" style="background:#16A34A"></span>Buxoro vil.</div><div class="r-count">310</div><div class="r-label">obyekt</div></div>
+        </div>
+      </div>
+      <div class="map-svg-wrap">
+        <img src="https://images.unsplash.com/photo-1584551246679-0daf3d275d0f?w=700&auto=format&fit=crop&q=80" alt="O'zbekiston xaritasi" style="width:100%;height:380px;object-fit:cover;border-radius:var(--radius-xl)" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\'background:linear-gradient(135deg,#EEF3FF 0%,#DBEAFE 100%);height:380px;border-radius:var(--radius-xl);display:flex;align-items:center;justify-content:center;\'><svg viewBox=\'0 0 300 200\' width=\'100%\' height=\'100%\' style=\'padding:20px\'><text x=\'150\' y=\'80\' text-anchor=\'middle\' font-family=\'Outfit\' font-size=\'20\' font-weight=\'700\' fill=\'#1A56DB\'>O\'ZBEKISTON</text><text x=\'150\' y=\'110\' text-anchor=\'middle\' font-family=\'Inter\' font-size=\'13\' fill=\'#94A3B8\'>Xarita yuklanmoqda...</text></svg></div>'">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LISTINGS -->
+<section class="section reveal">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Dolzarb takliflar</div>
+      <div class="sec-header-row">
+        <div>
+          <div class="sec-h2">Yangi qo'yilgan obyektlar</div>
+        </div>
+        <a href="#" class="link-more">Barcha obyektlar <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="listings-grid">
+      <div class="listing-card">
+        <div class="listing-img-wrap">
+          <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&auto=format&fit=crop&q=80" alt="Ofis binosi" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'listing-img-placeholder\'><svg viewBox=\'0 0 48 48\'><rect x=\'4\' y=\'12\' width=\'40\' height=\'32\' rx=\'2\'/><path d=\'M4 16L24 4l20 12\'/></svg></div>'">
+          <span class="l-badge auction"><i class="fa fa-gavel"></i> Auksionda</span>
+        </div>
+        <div class="listing-body">
+          <h3>Noturar joy binosi, 1-qavat, alohida kirish</h3>
+          <div class="listing-meta"><i class="fa fa-map-marker-alt"></i> Toshkent sh., Yakkasaroy · 126 m²</div>
+          <div class="listing-tags"><span class="l-tag">Ofis</span><span class="l-tag">1-qavat</span><span class="l-tag">Alohida kirish</span></div>
+          <div class="listing-footer">
+            <div><div class="l-price-num">86,4 mln</div><div class="l-price-unit">so'm / yil boshiga</div></div>
+            <button class="btn-listing">Batafsil</button>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card">
+        <div class="listing-img-wrap">
+          <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=600&auto=format&fit=crop&q=80" alt="Ishlab chiqarish ombori" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'listing-img-placeholder\'><svg viewBox=\'0 0 48 48\'><rect x=\'2\' y=\'18\' width=\'44\' height=\'26\' rx=\'1\'/><path d=\'M2 20L24 8l22 12\'/></svg></div>'">
+          <span class="l-badge new"><i class="fa fa-star"></i> Yangi lot</span>
+        </div>
+        <div class="listing-body">
+          <h3>Ishlab chiqarish ombori, temir yo'l tarmog'iga yaqin</h3>
+          <div class="listing-meta"><i class="fa fa-map-marker-alt"></i> Samarqand vil., Kattaqo'rg'on · 480 m²</div>
+          <div class="listing-tags"><span class="l-tag">Ombor</span><span class="l-tag">Temir yo'l</span></div>
+          <div class="listing-footer">
+            <div><div class="l-price-num">124,0 mln</div><div class="l-price-unit">so'm / yil boshiga</div></div>
+            <button class="btn-listing">Batafsil</button>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card">
+        <div class="listing-img-wrap">
+          <img src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&auto=format&fit=crop&q=80" alt="Ma'muriy bino" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'listing-img-placeholder\'><svg viewBox=\'0 0 48 48\'><rect x=\'6\' y=\'8\' width=\'36\' height=\'36\' rx=\'1\'/><rect x=\'18\' y=\'30\' width=\'12\' height=\'14\'/><rect x=\'10\' y=\'14\' width=\'8\' height=\'8\'/><rect x=\'30\' y=\'14\' width=\'8\' height=\'8\'/></svg></div>'">
+          <span class="l-badge hot"><i class="fa fa-fire"></i> Mashhur</span>
+        </div>
+        <div class="listing-body">
+          <h3>Ma'muriy bino xonalari, ijtimoiy soha uchun</h3>
+          <div class="listing-meta"><i class="fa fa-map-marker-alt"></i> Farg'ona sh., markaziy hudud · 92 m²</div>
+          <div class="listing-tags"><span class="l-tag">Ma'muriy</span><span class="l-tag">Ijtimoiy</span></div>
+          <div class="listing-footer">
+            <div><div class="l-price-num">51,7 mln</div><div class="l-price-unit">so'm / yil boshiga</div></div>
+            <button class="btn-listing">Batafsil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section bg-light reveal">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Onlayn xizmatlar</div>
+      <div class="sec-header-row">
+        <div>
+          <div class="sec-h2">Interaktiv xizmatlar</div>
+          <p class="sec-desc">Hamma narsani uydan chiqmasdan hal qiling — 24/7 ishlaydi.</p>
+        </div>
+        <a href="#" class="link-more">Barcha xizmatlar <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-calculator"></i></div>
+        <h3>Ijara kalkulatori</h3>
+        <p>Obyekt maydoni va joylashuviga ko'ra taxminiy ijara to'lovini onlayn hisoblang.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-percentage"></i></div>
+        <h3>Eng kam stavkalar</h3>
+        <p>Joy va tur uchun 1 m² uchun belgilangan eng kam ijara narxlarini ko'ring.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-paper-plane"></i></div>
+        <h3>Ariza yuborish</h3>
+        <p>Obyektni ijaraga chiqarish bo'yicha taklifni onlayn tartibda yuboring va kuzating.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-file-contract"></i></div>
+        <h3>Shartnoma holati</h3>
+        <p>Ijara shartnomangiz va to'lovlar holatini raqam bo'yicha real vaqtda kuzating.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-map-marked-alt"></i></div>
+        <h3>Interaktiv xarita</h3>
+        <p>Barcha obyektlarni xaritada ko'ring, filter va hududlar bo'yicha qidiring.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-gavel"></i></div>
+        <h3>E-auktsion</h3>
+        <p>Elektron savdo platformasida ishtirok eting, taklif qiling va natijani kuzating.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-bell"></i></div>
+        <h3>Bildirishnomalar</h3>
+        <p>Yangi obyektlar va auktsionlar haqida SMS yoki email orqali xabar oling.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon"><i class="fa fa-headset"></i></div>
+        <h3>Onlayn maslahat</h3>
+        <p>Mutaxassis bilan video yoki chat orqali bepul maslahat oling — 1082 qo'ng'iroq markazi.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHARTS -->
+<section class="section reveal">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Tahlil va statistika</div>
+      <div class="sec-header-row">
+        <div>
+          <div class="sec-h2">Ijara bozori ko'rsatkichlari</div>
+          <p class="sec-desc">Real vaqtdagi ma'lumotlar asosida tahlil va prognozlar.</p>
+        </div>
+        <a href="#" class="link-more">To'liq hisobot <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Ijara shartnomalar soni — 2020–2025</div>
+            <div class="chart-card-sub">Yillik dinamika (ming dona)</div>
+          </div>
+          <span class="chart-pill"><i class="fa fa-arrow-trend-up"></i> +24% 2025</span>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="lineChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Obyekt turlari bo'yicha taqsimot</div>
+            <div class="chart-card-sub">Umumiy fonddan ulush</div>
+          </div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="doughnutChart"></canvas></div>
+      </div>
+    </div>
+    <div style="margin-top:24px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;text-align:center">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px">O'rtacha ijara</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--navy)">245K</div>
+        <div style="font-size:12px;color:var(--text3)">so'm/m²/yil</div>
+      </div>
+      <div style="background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;text-align:center">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px">Eng faol hudud</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:var(--navy)">Toshkent</div>
+        <div style="font-size:12px;color:var(--text3)">1 240 obyekt</div>
+      </div>
+      <div style="background:var(--green-light);border:1.5px solid rgba(22,163,74,.2);border-radius:var(--radius-lg);padding:20px 22px;text-align:center">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:8px">Ijara to'lovlari</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:#166534">1,2 trln</div>
+        <div style="font-size:12px;color:var(--green)">so'm — 2025 yil</div>
+      </div>
+      <div style="background:var(--blue-light);border:1.5px solid rgba(26,86,219,.15);border-radius:var(--radius-lg);padding:20px 22px;text-align:center">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--blue);margin-bottom:8px">Jarayon muddati</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--navy)">3 kun</div>
+        <div style="font-size:12px;color:var(--blue)">savdodan shartnomaga</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<div class="impact-strip reveal">
+  <div class="sec-inner">
+    <div class="impact-grid">
+      <div class="impact-item">
+        <div class="impact-num">1.2<span class="accent"> trln</span></div>
+        <div class="impact-label">so'm — 2025 yilgi ijara to'lovlari</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-num">98<span class="accent">%</span></div>
+        <div class="impact-label">Elektron shaklda tuzilgan shartnomalar</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-num">3<span class="accent"> kun</span></div>
+        <div class="impact-label">Savdodan shartnomaga o'rtacha muddat</div>
+      </div>
+      <div class="impact-item">
+        <div class="impact-num">24<span class="accent">/7</span></div>
+        <div class="impact-label">Portal orqali xizmatlardan foydalanish</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<section class="section reveal">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Foydalanuvchilar fikri</div>
+      <div class="sec-header-row">
+        <div><div class="sec-h2">Mijozlarimiz nima deydi?</div></div>
+        <a href="#" class="link-more">Barcha sharhlar <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testi-card">
+        <div class="stars"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+        <p class="testi-text">"Portal orqali omborimiz uchun ijara shartnomani 3 kunda rasmiylashtirib oldik. Avval bir oylab yurar edik. Ajoyib tizim!"</p>
+        <div class="testi-author">
+          <div class="testi-avatar">AK</div>
+          <div><div class="testi-name">Alisher Karimov</div><div class="testi-role">Tadbirkor, Toshkent</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div>
+        <p class="testi-text">"E-auktsion platformasi juda qulay. Uydan turib auksionlarda qatnashib, g'olib chiqdim. Hujjatlar ham onlayn imzolandi."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#16A34A,#166534)">MN</div>
+          <div><div class="testi-name">Malika Nishonova</div><div class="testi-role">Kichik biznes, Samarqand</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="stars"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star-half-alt"></i></div>
+        <p class="testi-text">"Kalkulyator va xarita funksiyasi juda foydali. Viloyatimizdagi barcha bo'sh davlat obyektlarini bir joyda ko'rish imkoniyati bor."</p>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#B8860B,#92400E)">BT</div>
+          <div><div class="testi-name">Bobur Toshmatov</div><div class="testi-role">Menejер, Farg'ona viloyati</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWS + DOCS -->
+<section class="section bg-light reveal">
+  <div class="sec-inner">
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:48px;align-items:start">
+      <div>
+        <div class="sec-header" style="margin-bottom:28px">
+          <div class="eyebrow">Matbuot markazi</div>
+          <div class="sec-header-row">
+            <div class="sec-h2" style="font-size:clamp(22px,3vw,32px)">Yangiliklar</div>
+            <a href="#" class="link-more" style="font-size:13px">Barchasi <i class="fa fa-arrow-right"></i></a>
+          </div>
+        </div>
+        <div class="news-grid" style="grid-template-columns:1fr;gap:16px">
+          <div class="news-main">
+            <div class="news-main-img">
+              <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=700&auto=format&fit=crop&q=80" alt="Yangilik" onerror="this.parentElement.classList.add('news-main-img-placeholder');this.remove()">
+              <span class="news-tag">Muhim</span>
+            </div>
+            <div class="news-main-body">
+              <div class="n-date"><i class="fa fa-calendar"></i> 02.07.2025</div>
+              <h3>Ijara shartnomalari bo'yicha to'lovlar endi QR-kod orqali qabul qilinadi</h3>
+              <p>Shaxsiy kabinetdagi mavjus onlaydop to'lov savollariga aksiyorlik kiritildi. Yangi funksiya barcha foydalanuvchilarga ochiq.</p>
+            </div>
+          </div>
+          <div class="news-list">
+            <div class="news-item">
+              <div class="n-date"><i class="fa fa-calendar"></i> 24.06.2025</div>
+              <h4>Ijtimoiy soha obyektlari uchun imtiyozli ijara muddati uzaytirildi</h4>
+              <p>Maktabgacha va maktab yoshidagi bolalar uchun imtiyoz 10 yilgacha berildi.</p>
+            </div>
+            <div class="news-item">
+              <div class="n-date"><i class="fa fa-calendar"></i> 15.06.2025</div>
+              <h4>Hududlarda sayyor qabul kunlari e'lon qilindi</h4>
+              <p>Markaz mutaxassislari tadbirkorlarning savollariga javob beradi.</p>
+            </div>
+            <div class="news-item">
+              <div class="n-date"><i class="fa fa-calendar"></i> 06.06.2025</div>
+              <h4>Portalning yangi mobil versiyasi ishga tushirildi</h4>
+              <p>Endi auktsion jarayonlari smartfon orqali ham amalga oshiriladi.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-header" style="margin-bottom:28px">
+          <div class="eyebrow">Qonunchilik</div>
+          <div class="sec-header-row">
+            <div class="sec-h2" style="font-size:clamp(22px,3vw,32px)">Normativ hujjatlar</div>
+          </div>
+        </div>
+        <div class="docs-grid" style="grid-template-columns:1fr">
+          <div class="doc-card">
+            <div class="doc-icon"><i class="fa fa-file-pdf"></i></div>
+            <div class="doc-info">
+              <h4>VM qarori №660 «Davlat mulkini ijaraga berish tartibi»</h4>
+              <p><i class="fa fa-calendar" style="font-size:10px"></i> 14.12.2023 · 1.9 MB</p>
+            </div>
+            <i class="fa fa-download" style="color:var(--blue);font-size:16px;margin-left:auto;flex-shrink:0"></i>
+          </div>
+          <div class="doc-card">
+            <div class="doc-icon"><i class="fa fa-file-excel"></i></div>
+            <div class="doc-info">
+              <h4>2026-yil uchun eng kam ijara stavkalari jadvali</h4>
+              <p><i class="fa fa-calendar" style="font-size:10px"></i> 12.01.2026 · 0.8 MB</p>
+            </div>
+            <i class="fa fa-download" style="color:var(--blue);font-size:16px;margin-left:auto;flex-shrink:0"></i>
+          </div>
+          <div class="doc-card">
+            <div class="doc-icon"><i class="fa fa-file-word"></i></div>
+            <div class="doc-info">
+              <h4>Ijara shartnnomasining namunaviy shakli</h4>
+              <p><i class="fa fa-calendar" style="font-size:10px"></i> 26.02.2026 · 0.4 MB</p>
+            </div>
+            <i class="fa fa-download" style="color:var(--blue);font-size:16px;margin-left:auto;flex-shrink:0"></i>
+          </div>
+          <div class="doc-card">
+            <div class="doc-icon"><i class="fa fa-file-alt"></i></div>
+            <div class="doc-info">
+              <h4>Onlayn-auksionda ishtirok etish yo'riqnomasi</h4>
+              <p><i class="fa fa-calendar" style="font-size:10px"></i> 23.09.2026 · 2.1 MB</p>
+            </div>
+            <i class="fa fa-download" style="color:var(--blue);font-size:16px;margin-left:auto;flex-shrink:0"></i>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:18px 20px;background:var(--blue-light);border:1.5px solid rgba(26,86,219,.2);border-radius:var(--radius-lg);display:flex;align-items:center;gap:14px">
+          <i class="fa fa-question-circle" style="font-size:24px;color:var(--blue);flex-shrink:0"></i>
+          <div>
+            <div style="font-size:13.5px;font-weight:600;color:var(--navy);margin-bottom:2px">Hujjatlar bo'yicha savollar?</div>
+            <div style="font-size:12.5px;color:var(--text3)">1082 raqamiga qo'ng'iroq qiling yoki <a href="#" style="color:var(--blue);font-weight:600">chat</a> orqali yozing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="section reveal">
+  <div class="sec-inner">
+    <div class="cta-banner">
+      <div class="cta-text">
+        <h2>Davlat mulkini ijaraga olishga<br>tayyor emissizmi?</h2>
+        <p>Hoziroq ro'yxatdan o'ting va minglab obyektlar orasidan o'zingizga mosini toping.</p>
+      </div>
+      <div class="cta-actions">
+        <button class="btn-cta-white">Ro'yxatdan o'tish</button>
+        <button class="btn-cta-ghost"><i class="fa fa-phone"></i> 1082 ga qo'ng'iroq</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="logo">
+          <div class="logo-mark">D</div>
+          <div class="logo-text">
+            <div class="title">DAVIJARA.UZ</div>
+            <div class="sub">Davlat mulki portali</div>
+          </div>
+        </a>
+        <p>Davlat aktivlarini boshqarish agentligi huzuridagi Davlat mulki ustidan doimiy nazorat foydalanuvchi portal. Barcha xizmatlar bepul.</p>
+        <div class="footer-hotline"><i class="fa fa-phone-alt"></i> 1082</div>
+        <div class="footer-socials">
+          <button class="footer-social-btn"><i class="fab fa-telegram-plane"></i></button>
+          <button class="footer-social-btn"><i class="fab fa-instagram"></i></button>
+          <button class="footer-social-btn"><i class="fab fa-facebook-f"></i></button>
+          <button class="footer-social-btn"><i class="fab fa-youtube"></i></button>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Portal</h4>
+        <ul>
+          <li><a href="#">Ijara obyektlari</a></li>
+          <li><a href="#">E-auktsion</a></li>
+          <li><a href="#">Interaktiv xizmatlar</a></li>
+          <li><a href="#">Normativ hujjatlar</a></li>
+          <li><a href="#">Yangiliklar</a></li>
+          <li><a href="#">Markaz haqida</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Foydali havolalar</h4>
+        <ul>
+          <li><a href="#">davlat.uz</a></li>
+          <li><a href="#">e-auktsion.uz</a></li>
+          <li><a href="#">my.gov.uz</a></li>
+          <li><a href="#">lex.uz</a></li>
+          <li><a href="#">online-yanki.uz</a></li>
+          <li><a href="#">opendata.gov.uz</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Bog'lanish</h4>
+        <ul>
+          <li><a href="#"><i class="fa fa-map-marker-alt" style="font-size:11px;margin-right:5px"></i>100066, Toshkent sh., Islom Karimov ko'chasi 55</a></li>
+          <li><a href="tel:71-256-22-98"><i class="fa fa-phone" style="font-size:11px;margin-right:5px"></i>(71) 256-22-98</a></li>
+          <li><a href="mailto:info@davijara.uz"><i class="fa fa-envelope" style="font-size:11px;margin-right:5px"></i>info@davijara.uz</a></li>
+          <li><a href="#"><i class="fa fa-phone-alt" style="font-size:11px;margin-right:5px"></i>Qo'ng'iroq markazi: 1082</a></li>
+          <li><a href="#"><i class="fa fa-clock" style="font-size:11px;margin-right:5px"></i>Ish vaqti: Du-Ju 9:00–18:00</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Davijara.uz — Barcha huquqlar himoyalangan</p>
+      <div class="footer-bottom-links">
+        <a href="#">Maxfiylik siyosati</a>
+        <a href="#">Foydalanish shartlari</a>
+        <a href="#">Sayt xaritasi</a>
+        <a href="#">Accessibility</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* Lang buttons */
+document.querySelectorAll('.lang-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* Search tags */
+document.querySelectorAll('.search-tag').forEach(t=>{
+  t.addEventListener('click',function(){
+    this.style.background='var(--blue)';
+    this.style.color='#fff';
+    setTimeout(()=>{this.style.background='';this.style.color='';},600);
+  });
+});
+
+/* Scroll reveal */
+const reveals=document.querySelectorAll('.reveal');
+const observer=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}
+  });
+},{threshold:0.1});
+reveals.forEach(el=>observer.observe(el));
+
+/* Chart.js — Line chart */
+const lineCtx=document.getElementById('lineChart');
+if(lineCtx){
+  new Chart(lineCtx,{
+    type:'line',
+    data:{
+      labels:['2020','2021','2022','2023','2024','2025'],
+      datasets:[{
+        label:'Ijara shartnomalari',
+        data:[4.2,5.8,7.1,8.9,10.3,12.8],
+        borderColor:'#1A56DB',
+        backgroundColor:'rgba(26,86,219,0.08)',
+        borderWidth:2.5,
+        fill:true,
+        tension:0.4,
+        pointRadius:5,
+        pointBackgroundColor:'#1A56DB',
+        pointBorderColor:'#fff',
+        pointBorderWidth:2,
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y}K shartnoma`}}},
+      scales:{
+        x:{grid:{display:false},border:{display:false},ticks:{color:'#94A3B8',font:{size:12}}},
+        y:{grid:{color:'rgba(0,0,0,0.05)'},border:{display:false},ticks:{color:'#94A3B8',font:{size:12},callback:v=>v+'K'}}
+      },
+      animation:{duration:1200,easing:'easeOutQuart'}
+    }
+  });
+}
+
+/* Chart.js — Doughnut */
+const doughCtx=document.getElementById('doughnutChart');
+if(doughCtx){
+  new Chart(doughCtx,{
+    type:'doughnut',
+    data:{
+      labels:['Noturar joy','Ishlab chiqarish','Ma\'muriy bino','Savdo maydoni','Boshqalar'],
+      datasets:[{
+        data:[38,24,18,12,8],
+        backgroundColor:['#1A56DB','#1240a8','#3B82F6','#93C5FD','#BFDBFE'],
+        borderWidth:2,
+        borderColor:'#fff'
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      cutout:'68%',
+      plugins:{
+        legend:{position:'bottom',labels:{padding:12,font:{size:12},color:'#475569'}},
+        tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed}%`}}
+      },
+      animation:{duration:1000,animateRotate:true}
+    }
+  });
+}
+</script>
+</body>
+</html>
+<!-- =====================================================
+     APPENDED ENHANCEMENTS
+     - Animated counters on scroll
+     - Rental calculator widget
+     - Auction countdown timers
+     - Active auction ticker
+     - FAQ accordion
+     - Partners / trusted logos strip
+     - Mobile bottom nav bar
+     - Micro-interactions & polish JS
+===================================================== -->
+<style>
+/* ── CALCULATOR ── */
+.calc-section{background:linear-gradient(135deg,#EEF3FF 0%,#DBEAFE 50%,#EEF3FF 100%);border-top:1px solid rgba(26,86,219,.1);border-bottom:1px solid rgba(26,86,219,.1)}
+.calc-wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.calc-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-xl);padding:36px;box-shadow:var(--shadow-md)}
+.calc-card h3{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--navy);margin-bottom:6px;letter-spacing:-.02em}
+.calc-card .c-sub{font-size:13.5px;color:var(--text3);margin-bottom:28px}
+.calc-row{margin-bottom:20px}
+.calc-row label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:8px}
+.calc-row input[type=range]{width:100%;accent-color:var(--blue);height:4px;cursor:pointer}
+.calc-row .range-vals{display:flex;justify-content:space-between;font-size:12px;color:var(--slate-light);margin-top:4px}
+.calc-row .range-current{display:inline-block;background:var(--blue);color:#fff;font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;padding:4px 12px;border-radius:6px;margin-top:6px}
+.calc-select{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);background:#fff;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:10px 14px;outline:none;appearance:none;cursor:pointer}
+.calc-select:focus{border-color:var(--blue)}
+.calc-result{background:linear-gradient(135deg,var(--blue) 0%,var(--navy) 100%);border-radius:var(--radius-lg);padding:24px;margin-top:24px;color:#fff;text-align:center}
+.calc-result .r-label{font-size:12px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.calc-result .r-price{font-family:'Outfit',sans-serif;font-size:36px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px}
+.calc-result .r-breakdown{font-size:12.5px;color:rgba(255,255,255,.65)}
+.calc-info{padding-left:8px}
+.calc-info h2{font-family:'Outfit',sans-serif;font-size:clamp(26px,3vw,40px);font-weight:800;color:var(--navy);letter-spacing:-.03em;margin-bottom:16px;line-height:1.15}
+.calc-info p{font-size:15px;color:var(--text3);line-height:1.75;margin-bottom:24px}
+.calc-features{display:flex;flex-direction:column;gap:12px}
+.calc-feature{display:flex;align-items:flex-start;gap:12px}
+.cf-icon{width:36px;height:36px;border-radius:9px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;color:var(--blue);font-size:16px;flex-shrink:0}
+.cf-text h4{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:2px}
+.cf-text p{font-size:13px;color:var(--text3)}
+
+/* ── AUCTIONS STRIP ── */
+.auction-strip{background:#fff;border-top:3px solid var(--blue);border-bottom:1px solid var(--border);padding:0}
+.auction-ticker{display:flex;align-items:stretch;overflow:hidden}
+.ticker-label{background:var(--blue);color:#fff;padding:14px 20px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;flex-shrink:0;white-space:nowrap;letter-spacing:.04em}
+.ticker-label .dot{width:8px;height:8px;border-radius:50%;background:#34D399;animation:blink 1.5s infinite}
+.ticker-scroll-wrap{overflow:hidden;flex:1;position:relative}
+.ticker-scroll{display:flex;gap:0;animation:tickerMove 30s linear infinite;width:max-content}
+.ticker-item{display:flex;align-items:center;gap:16px;padding:14px 28px;border-right:1px solid var(--border);white-space:nowrap;cursor:pointer;transition:background .2s}
+.ticker-item:hover{background:var(--blue-light)}
+.ti-name{font-size:13px;font-weight:600;color:var(--navy)}
+.ti-area{font-size:12px;color:var(--text3)}
+.ti-price{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--blue)}
+.ti-countdown{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--red);font-weight:600}
+@keyframes tickerMove{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── LIVE AUCTIONS ── */
+.auctions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.auction-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:all .25s;position:relative}
+.auction-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md);transform:translateY(-3px)}
+.ac-img{height:160px;overflow:hidden;position:relative}
+.ac-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.auction-card:hover .ac-img img{transform:scale(1.05)}
+.ac-live-badge{position:absolute;top:10px;left:10px;background:rgba(220,38,38,.9);color:#fff;padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
+.ac-live-dot{width:6px;height:6px;border-radius:50%;background:#fff;animation:blink 1s infinite}
+.ac-body{padding:18px 20px}
+.ac-title{font-size:14.5px;font-weight:700;color:var(--navy);margin-bottom:6px;line-height:1.35;letter-spacing:-.01em}
+.ac-loc{font-size:12px;color:var(--text3);margin-bottom:14px;display:flex;align-items:center;gap:5px}
+.ac-countdown{background:var(--red-light);border:1px solid rgba(220,38,38,.15);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.countdown-label{font-size:11px;color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.countdown-time{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:var(--red);letter-spacing:.04em}
+.ac-footer{display:flex;justify-content:space-between;align-items:flex-end;padding-top:12px;border-top:1px solid var(--border)}
+.ac-price-label{font-size:11px;color:var(--text3);margin-bottom:2px}
+.ac-price{font-family:'Outfit',sans-serif;font-size:17px;font-weight:800;color:var(--navy)}
+.btn-bid{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.btn-bid:hover{background:var(--blue-dark);transform:translateY(-1px)}
+
+/* ── FAQ ── */
+.faq-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.faq-item{background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:var(--blue)}
+.faq-q{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;gap:16px}
+.faq-q span{font-size:14.5px;font-weight:600;color:var(--navy);line-height:1.4}
+.faq-q i{font-size:16px;color:var(--blue);flex-shrink:0;transition:transform .3s}
+.faq-item.open .faq-q i{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease,padding .35s ease}
+.faq-a-inner{padding:0 20px 18px;font-size:13.5px;color:var(--text3);line-height:1.7}
+.faq-item.open .faq-a{max-height:200px}
+
+/* ── PARTNERS ── */
+.partners-strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#fff;padding:36px 0}
+.partners-label{text-align:center;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:28px}
+.partners-row{display:flex;justify-content:center;align-items:center;gap:40px;flex-wrap:wrap}
+.partner-logo{display:flex;align-items:center;gap:8px;opacity:.45;transition:opacity .2s;cursor:pointer;filter:grayscale(1)}
+.partner-logo:hover{opacity:.85;filter:none}
+.partner-logo i{font-size:22px;color:var(--navy)}
+.partner-logo span{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--navy);letter-spacing:-.01em}
+
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:500;padding:8px 0 env(safe-area-inset-bottom)}
+.mobile-nav-inner{display:flex;justify-content:space-around}
+.mn-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;border:none;background:transparent;color:var(--text3);font-size:10px;font-weight:500;cursor:pointer;transition:color .2s}
+.mn-btn i{font-size:20px}
+.mn-btn.active{color:var(--blue)}
+@media(max-width:768px){
+  .mobile-nav{display:block}
+  body{padding-bottom:70px}
+  .calc-wrap{grid-template-columns:1fr}
+  .faq-grid{grid-template-columns:1fr}
+  .auctions-grid{grid-template-columns:1fr}
+}
+
+/* ── FLOATING CHAT BUTTON ── */
+.chat-fab{position:fixed;bottom:88px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:none;box-shadow:0 4px 20px rgba(26,86,219,.4);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;z-index:400;transition:all .2s;animation:pulse 3s ease-in-out infinite}
+.chat-fab:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(26,86,219,.5)}
+.chat-fab-badge{position:absolute;top:-2px;right:-2px;width:18px;height:18px;border-radius:50%;background:#EF4444;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+@media(max-width:768px){.chat-fab{bottom:80px;right:16px}}
+
+/* ── SCROLL TO TOP ── */
+.scroll-top{position:fixed;bottom:160px;right:24px;width:40px;height:40px;border-radius:50%;background:#fff;border:1.5px solid var(--border);color:var(--text2);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:400;transition:all .2s;opacity:0;pointer-events:none}
+.scroll-top.show{opacity:1;pointer-events:auto}
+.scroll-top:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ── COUNTER ANIMATION ── */
+.counter-animated{display:inline-block}
+
+/* ── STAT BARS ── */
+.stat-bar-wrap{margin-top:32px}
+.stat-bar-row{margin-bottom:18px}
+.stat-bar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.stat-bar-name{font-size:13.5px;font-weight:500;color:var(--navy)}
+.stat-bar-pct{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--blue)}
+.stat-bar-track{height:8px;background:var(--blue-mid);border-radius:100px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:100px;background:var(--blue);width:0;transition:width 1.2s cubic-bezier(.22,1,.36,1)}
+</style>
+
+<!-- AUCTION LIVE TICKER -->
+<div class="auction-strip">
+  <div class="auction-ticker">
+    <div class="ticker-label"><span class="dot"></span> Jonli auktsionlar</div>
+    <div class="ticker-scroll-wrap">
+      <div class="ticker-scroll" id="ticker">
+        <div class="ticker-item"><span class="ti-name">Ofis binosi, Mirzo Ulug'bek</span><span class="ti-area">240 m²</span><span class="ti-price">186 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 2s 14d 32m</span></div>
+        <div class="ticker-item"><span class="ti-name">Savdo paviloni, Yunusobod</span><span class="ti-area">85 m²</span><span class="ti-price">54 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 0s 8d 17m</span></div>
+        <div class="ticker-item"><span class="ti-name">Ishlab chiqarish ombori, Chilonzor</span><span class="ti-area">620 m²</span><span class="ti-price">310 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 5s 2d 44m</span></div>
+        <div class="ticker-item"><span class="ti-name">Ma'muriy bino, Samarqand</span><span class="ti-area">180 m²</span><span class="ti-price">92 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 1s 22d 8m</span></div>
+        <div class="ticker-item"><span class="ti-name">Laboratoriya xonalari, TTPU</span><span class="ti-area">320 m²</span><span class="ti-price">145 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 3s 5d 51m</span></div>
+        <div class="ticker-item"><span class="ti-name">Restoran uchun bino, Navoiy</span><span class="ti-area">410 m²</span><span class="ti-price">198 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 0s 18d 3m</span></div>
+        <!-- duplicate for seamless loop -->
+        <div class="ticker-item"><span class="ti-name">Ofis binosi, Mirzo Ulug'bek</span><span class="ti-area">240 m²</span><span class="ti-price">186 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 2s 14d 32m</span></div>
+        <div class="ticker-item"><span class="ti-name">Savdo paviloni, Yunusobod</span><span class="ti-area">85 m²</span><span class="ti-price">54 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 0s 8d 17m</span></div>
+        <div class="ticker-item"><span class="ti-name">Ishlab chiqarish ombori, Chilonzor</span><span class="ti-area">620 m²</span><span class="ti-price">310 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 5s 2d 44m</span></div>
+        <div class="ticker-item"><span class="ti-name">Ma'muriy bino, Samarqand</span><span class="ti-area">180 m²</span><span class="ti-price">92 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 1s 22d 8m</span></div>
+        <div class="ticker-item"><span class="ti-name">Laboratoriya xonalari, TTPU</span><span class="ti-area">320 m²</span><span class="ti-price">145 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 3s 5d 51m</span></div>
+        <div class="ticker-item"><span class="ti-name">Restoran uchun bino, Navoiy</span><span class="ti-area">410 m²</span><span class="ti-price">198 mln</span><span class="ti-countdown"><i class="fa fa-clock"></i> 0s 18d 3m</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LIVE AUCTIONS -->
+<section class="section reveal" style="background:var(--off-white)">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Hozir faol</div>
+      <div class="sec-header-row">
+        <div>
+          <div class="sec-h2">Jonli auktsionlar</div>
+          <p class="sec-desc">Hozir ochiqlangan auktsionlar — ishtirok etish uchun tugmani bosing.</p>
+        </div>
+        <a href="#" class="link-more">Barcha auktsionlar <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="auctions-grid">
+      <div class="auction-card">
+        <div class="ac-img">
+          <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=600&auto=format&fit=crop&q=80" alt="Ofis binosi" onerror="this.style.background='linear-gradient(135deg,#1e3a6e,#2d5ab8)';this.remove()">
+          <span class="ac-live-badge"><span class="ac-live-dot"></span> JONLI</span>
+        </div>
+        <div class="ac-body">
+          <div class="ac-title">Zamonaviy ofis, 3-qavat, lift bor</div>
+          <div class="ac-loc"><i class="fa fa-map-marker-alt"></i> Toshkent sh., Mirzo Ulug'bek t. · 240 m²</div>
+          <div class="ac-countdown">
+            <span class="countdown-label"><i class="fa fa-clock"></i> Tugashiga</span>
+            <span class="countdown-time" data-end="7260">02:01:00</span>
+          </div>
+          <div class="ac-footer">
+            <div><div class="ac-price-label">Joriy taklif</div><div class="ac-price">186 mln so'm</div></div>
+            <button class="btn-bid"><i class="fa fa-gavel"></i> Ishtirok etish</button>
+          </div>
+        </div>
+      </div>
+      <div class="auction-card">
+        <div class="ac-img">
+          <img src="https://images.unsplash.com/photo-1604754742629-3e5728249d73?w=600&auto=format&fit=crop&q=80" alt="Savdo paviloni" onerror="this.style.background='linear-gradient(135deg,#064e3b,#065f46)';this.remove()">
+          <span class="ac-live-badge"><span class="ac-live-dot"></span> JONLI</span>
+        </div>
+        <div class="ac-body">
+          <div class="ac-title">Savdo paviloni, ko'cha ko'ringan</div>
+          <div class="ac-loc"><i class="fa fa-map-marker-alt"></i> Toshkent sh., Yunusobod t. · 85 m²</div>
+          <div class="ac-countdown">
+            <span class="countdown-label"><i class="fa fa-clock"></i> Tugashiga</span>
+            <span class="countdown-time" data-end="1740">00:29:00</span>
+          </div>
+          <div class="ac-footer">
+            <div><div class="ac-price-label">Joriy taklif</div><div class="ac-price">54 mln so'm</div></div>
+            <button class="btn-bid"><i class="fa fa-gavel"></i> Ishtirok etish</button>
+          </div>
+        </div>
+      </div>
+      <div class="auction-card">
+        <div class="ac-img">
+          <img src="https://images.unsplash.com/photo-1587293852726-70cdb56c2866?w=600&auto=format&fit=crop&q=80" alt="Ishlab chiqarish" onerror="this.style.background='linear-gradient(135deg,#1e1b4b,#312e81)';this.remove()">
+          <span class="ac-live-badge"><span class="ac-live-dot"></span> JONLI</span>
+        </div>
+        <div class="ac-body">
+          <div class="ac-title">Ishlab chiqarish ombori, temir yo'l yaqini</div>
+          <div class="ac-loc"><i class="fa fa-map-marker-alt"></i> Toshkent sh., Chilonzor t. · 620 m²</div>
+          <div class="ac-countdown">
+            <span class="countdown-label"><i class="fa fa-clock"></i> Tugashiga</span>
+            <span class="countdown-time" data-end="18900">05:15:00</span>
+          </div>
+          <div class="ac-footer">
+            <div><div class="ac-price-label">Joriy taklif</div><div class="ac-price">310 mln so'm</div></div>
+            <button class="btn-bid"><i class="fa fa-gavel"></i> Ishtirok etish</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CALCULATOR -->
+<section class="section calc-section reveal">
+  <div class="sec-inner">
+    <div class="calc-wrap">
+      <div class="calc-card">
+        <h3><i class="fa fa-calculator" style="color:var(--blue);margin-right:8px"></i>Ijara kalkulatori</h3>
+        <p class="c-sub">Taxminiy yillik ijara to'lovini hisoblang</p>
+
+        <div class="calc-row">
+          <label>Maydon (m²)</label>
+          <input type="range" id="areaSlider" min="20" max="2000" value="150" step="10">
+          <div class="range-vals"><span>20 m²</span><span>2000 m²</span></div>
+          <span class="range-current" id="areaVal">150 m²</span>
+        </div>
+
+        <div class="calc-row">
+          <label>Hudud</label>
+          <select class="calc-select" id="regionSelect">
+            <option value="1.0">Toshkent shahri (×1.0)</option>
+            <option value="0.8">Samarqand viloyati (×0.8)</option>
+            <option value="0.75">Farg'ona viloyati (×0.75)</option>
+            <option value="0.7">Andijon viloyati (×0.7)</option>
+            <option value="0.65">Namangan viloyati (×0.65)</option>
+            <option value="0.6">Buxoro viloyati (×0.6)</option>
+          </select>
+        </div>
+
+        <div class="calc-row">
+          <label>Obyekt turi</label>
+          <select class="calc-select" id="typeSelect">
+            <option value="245">Noturar joy binosi (245 000 so'm/m²/yil)</option>
+            <option value="320">Ofis, 1-qavat (320 000 so'm/m²/yil)</option>
+            <option value="190">Ishlab chiqarish ombori (190 000 so'm/m²/yil)</option>
+            <option value="280">Savdo maydoni (280 000 so'm/m²/yil)</option>
+            <option value="160">Ma'muriy bino (160 000 so'm/m²/yil)</option>
+          </select>
+        </div>
+
+        <div class="calc-result">
+          <div class="r-label">Taxminiy yillik ijara to'lovi</div>
+          <div class="r-price" id="calcResult">36 750 000 so'm</div>
+          <div class="r-breakdown" id="calcBreakdown">150 m² × 245 000 so'm × 1.0 (hudud koeffitsienti)</div>
+        </div>
+      </div>
+
+      <div class="calc-info">
+        <div class="eyebrow">Ijara kalkulatori</div>
+        <h2>Obyekt narxini<br>oldindan biling</h2>
+        <p>Bizning kalkulyatorimiz haqiqiy bozor ma'lumotlari asosida ishlaydi. Natija taxminiy bo'lib, auktsion narxi farq qilishi mumkin.</p>
+        <div class="calc-features">
+          <div class="calc-feature">
+            <div class="cf-icon"><i class="fa fa-map-pin"></i></div>
+            <div class="cf-text">
+              <h4>Hudud koeffitsienti</h4>
+              <p>Narx viloyat va shaharga qarab o'zgaradi.</p>
+            </div>
+          </div>
+          <div class="calc-feature">
+            <div class="cf-icon"><i class="fa fa-building"></i></div>
+            <div class="cf-text">
+              <h4>Obyekt turiga qarab</h4>
+              <p>Ofis, ombor, savdo va ma'muriy binolar uchun alohida tarifllar.</p>
+            </div>
+          </div>
+          <div class="calc-feature">
+            <div class="cf-icon"><i class="fa fa-sync-alt"></i></div>
+            <div class="cf-text">
+              <h4>Real vaqtda yangilanadi</h4>
+              <p>Stavkalar VM qarori asosida har yil yangilanadi.</p>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn-solid" style="padding:12px 24px;font-size:14px"><i class="fa fa-search"></i> Obyekt izlash</button>
+          <button class="btn-outline" style="padding:12px 24px;font-size:14px"><i class="fa fa-download"></i> Hisob-kitob yuklab olish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REGIONAL STATS BAR CHART -->
+<section class="section reveal">
+  <div class="sec-inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+      <div>
+        <div class="eyebrow">Hududlar bo'yicha</div>
+        <div class="sec-h2">Viloyatlardagi<br>obyektlar soni</div>
+        <p class="sec-desc" style="margin-top:10px;margin-bottom:0">Eng ko'p davlat mulki bo'sh joylashgan hududlar statistikasi.</p>
+        <div class="stat-bar-wrap">
+          <div class="stat-bar-row">
+            <div class="stat-bar-top"><span class="stat-bar-name">Toshkent shahri</span><span class="stat-bar-pct">27%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" data-width="27"></div></div>
+          </div>
+          <div class="stat-bar-row">
+            <div class="stat-bar-top"><span class="stat-bar-name">Samarqand viloyati</span><span class="stat-bar-pct">15%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" data-width="15"></div></div>
+          </div>
+          <div class="stat-bar-row">
+            <div class="stat-bar-top"><span class="stat-bar-name">Farg'ona viloyati</span><span class="stat-bar-pct">12%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" data-width="12"></div></div>
+          </div>
+          <div class="stat-bar-row">
+            <div class="stat-bar-top"><span class="stat-bar-name">Andijon viloyati</span><span class="stat-bar-pct">9%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" data-width="9"></div></div>
+          </div>
+          <div class="stat-bar-row">
+            <div class="stat-bar-top"><span class="stat-bar-name">Namangan viloyati</span><span class="stat-bar-pct">8%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" data-width="8"></div></div>
+          </div>
+          <div class="stat-bar-row">
+            <div class="stat-bar-top"><span class="stat-bar-name">Boshqa hududlar</span><span class="stat-bar-pct">29%</span></div>
+            <div class="stat-bar-track"><div class="stat-bar-fill" data-width="29"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-card" style="height:fit-content">
+        <div class="chart-card-header">
+          <div>
+            <div class="chart-card-title">Oylik auktsion natijalari</div>
+            <div class="chart-card-sub">2025-yil (million so'm)</div>
+          </div>
+        </div>
+        <div style="position:relative;height:280px"><canvas id="barChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section bg-light reveal">
+  <div class="sec-inner">
+    <div class="sec-header">
+      <div class="eyebrow">Ko'p so'raladigan savollar</div>
+      <div class="sec-header-row">
+        <div class="sec-h2">Savollar va javoblar</div>
+        <a href="#" class="link-more">Barcha savollar <i class="fa fa-arrow-right"></i></a>
+      </div>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item open">
+        <div class="faq-q"><span>Davlat mulkini ijaraga olish uchun kimlar ariza bera oladi?</span><i class="fa fa-chevron-down"></i></div>
+        <div class="faq-a"><div class="faq-a-inner">Jismoniy shaxslar, yuridik shaxslar va yakka tartibdagi tadbirkorlar ariza bera oladi. Buning uchun shaxsiy kabinet orqali ro'yxatdan o'tish va kerakli hujjatlarni yuklash kifoya.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Auktsionlarda qatnashish uchun garov to'lovi kerakmi?</span><i class="fa fa-chevron-down"></i></div>
+        <div class="faq-a"><div class="faq-a-inner">Ha, auktsion boshlanishidan oldin boshlang'ich garov to'lovi (lotning 10-30%) to'lanishi kerak. G'olib bo'lmasangiz, garov to'lov qaytariladi.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Shartnoma qancha muddatga tuziladi?</span><i class="fa fa-chevron-down"></i></div>
+        <div class="faq-a"><div class="faq-a-inner">Ijara shartnomasi odatda 1 yildan 5 yilgacha bo'lgan muddatga tuziladi. Ijtimoiy soha uchun 10 yilgacha uzaytirilishi mumkin. Muddatni auktsion shartlari belgilaydi.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>E-auktsionlarda qatnashish uchun elektron imzo kerakmi?</span><i class="fa fa-chevron-down"></i></div>
+        <div class="faq-a"><div class="faq-a-inner">Ha, elektron raqamli imzo (ERI) talab etiladi. Uni "My.gov.uz" portali yoki vakolatli markazlar orqali bepul olish mumkin. Jarayon taxminan 30 daqiqa davom etadi.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>Ijaraga olgan obyektni subijaragа bersak bo'ladimi?</span><i class="fa fa-chevron-down"></i></div>
+        <div class="faq-a"><div class="faq-a-inner">Subijaraga berish qonun bo'yicha man etilgan. Faqatgina mulkdorning yozma roziligidan keyin ba'zi hollarda mumkin. Shartnomani diqqat bilan o'qib chiqing.</div></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q"><span>To'lovni qanday usullarda amalga oshirish mumkin?</span><i class="fa fa-chevron-down"></i></div>
+        <div class="faq-a"><div class="faq-a-inner">To'lovni bank o'tkazmasi, QR-kod skanerlash, Uzum, Click, Payme va boshqa elektron to'lov tizimlari orqali amalga oshirishingiz mumkin. Barcha to'lovlar shaxsiy kabinetda ko'rinadi.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERS STRIP -->
+<div class="partners-strip reveal">
+  <div class="sec-inner">
+    <div class="partners-label">Hamkor tashkilotlar va platformalar</div>
+    <div class="partners-row">
+      <div class="partner-logo"><i class="fa fa-landmark"></i><span>Davlat.uz</span></div>
+      <div class="partner-logo"><i class="fa fa-balance-scale"></i><span>Lex.uz</span></div>
+      <div class="partner-logo"><i class="fa fa-id-card"></i><span>My.gov.uz</span></div>
+      <div class="partner-logo"><i class="fa fa-gavel"></i><span>E-auktsion.uz</span></div>
+      <div class="partner-logo"><i class="fa fa-university"></i><span>Markaziy bank</span></div>
+      <div class="partner-logo"><i class="fa fa-chart-pie"></i><span>Opendata.gov.uz</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING CHAT -->
+<button class="chat-fab" title="Online maslahat">
+  <i class="fa fa-comments"></i>
+  <span class="chat-fab-badge">3</span>
+</button>
+
+<!-- SCROLL TO TOP -->
+<button class="scroll-top" id="scrollTop" title="Yuqoriga qaytish"><i class="fa fa-arrow-up"></i></button>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mn-btn active"><i class="fa fa-home"></i>Asosiy</button>
+    <button class="mn-btn"><i class="fa fa-search"></i>Qidirish</button>
+    <button class="mn-btn"><i class="fa fa-gavel"></i>Auktsion</button>
+    <button class="mn-btn"><i class="fa fa-file-alt"></i>Xizmatlar</button>
+    <button class="mn-btn"><i class="fa fa-user"></i>Kabinet</button>
+  </div>
+</div>
+
+<script>
+/* ── CALCULATOR ── */
+function calcRent(){
+  const area=parseInt(document.getElementById('areaSlider').value)||150;
+  const rate=parseInt(document.getElementById('typeSelect').value)||245;
+  const region=parseFloat(document.getElementById('regionSelect').value)||1.0;
+  document.getElementById('areaVal').textContent=area+' m²';
+  const total=Math.round(area*rate*1000*region);
+  const fmt=n=>n.toLocaleString('uz-UZ');
+  document.getElementById('calcResult').textContent=fmt(total)+' so\'m';
+  document.getElementById('calcBreakdown').textContent=`${area} m² × ${fmt(rate*1000)} so'm × ${region} (hudud)`;
+}
+['areaSlider','regionSelect','typeSelect'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el) el.addEventListener('input',calcRent);
+});
+calcRent();
+
+/* ── COUNTDOWN TIMERS ── */
+function updateCountdowns(){
+  document.querySelectorAll('.countdown-time').forEach(el=>{
+    let secs=parseInt(el.dataset.end)||0;
+    if(secs<=0){el.textContent='Tugadi';el.style.color='#6B7280';return;}
+    secs--;
+    el.dataset.end=secs;
+    const h=Math.floor(secs/3600);
+    const m=Math.floor((secs%3600)/60);
+    const s=secs%60;
+    el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if(secs<300) el.style.animation='blink .8s infinite';
+  });
+}
+setInterval(updateCountdowns,1000);
+
+/* ── FAQ ACCORDION ── */
+document.querySelectorAll('.faq-q').forEach(q=>{
+  q.addEventListener('click',()=>{
+    const item=q.parentElement;
+    const isOpen=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+    if(!isOpen) item.classList.add('open');
+  });
+});
+
+/* ── SCROLL REVEAL ENHANCED ── */
+const scrollObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      // Animate stat bars
+      e.target.querySelectorAll('.stat-bar-fill').forEach(bar=>{
+        setTimeout(()=>{bar.style.width=bar.dataset.width+'%';},200);
+      });
+      scrollObserver.unobserve(e.target);
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>scrollObserver.observe(el));
+
+/* ── ANIMATED COUNTERS ── */
+function animateCounter(el,target,suffix){
+  let current=0;
+  const increment=Math.ceil(target/60);
+  const timer=setInterval(()=>{
+    current=Math.min(current+increment,target);
+    el.textContent=current.toLocaleString()+(suffix||'');
+    if(current>=target) clearInterval(timer);
+  },25);
+}
+
+const counterObserver=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const targets={
+        'stat1':[4820,'+'],
+        'stat2':[12340,''],
+        'stat3':[14,''],
+      };
+      Object.entries(targets).forEach(([id,[val,suf]])=>{
+        const el=document.getElementById(id);
+        if(el && !el.dataset.counted){
+          el.dataset.counted=1;
+          animateCounter(el,val,suf);
+        }
+      });
+    }
+  });
+},{threshold:0.5});
+
+const heroStats=document.querySelector('.hero-stats');
+if(heroStats) counterObserver.observe(heroStats);
+
+/* ── SCROLL TO TOP ── */
+const scrollBtn=document.getElementById('scrollTop');
+window.addEventListener('scroll',()=>{
+  if(scrollBtn) scrollBtn.classList.toggle('show',window.scrollY>400);
+});
+if(scrollBtn) scrollBtn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+/* ── MOBILE NAV ACTIVE ── */
+document.querySelectorAll('.mn-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.mn-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* ── LANG BTN ── */
+document.querySelectorAll('.lang-btn').forEach(btn=>{
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* ── BAR CHART ── */
+const barCtx=document.getElementById('barChart');
+if(barCtx && window.Chart){
+  new Chart(barCtx,{
+    type:'bar',
+    data:{
+      labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets:[{
+        label:'Auktsion summasi (mln so\'m)',
+        data:[82,95,110,88,132,148,125,162,178,155,190,210],
+        backgroundColor:'rgba(26,86,219,0.15)',
+        borderColor:'#1A56DB',
+        borderWidth:2,
+        borderRadius:6,
+        hoverBackgroundColor:'rgba(26,86,219,0.3)',
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y} mln so'm`}}},
+      scales:{
+        x:{grid:{display:false},border:{display:false},ticks:{color:'#94A3B8',font:{size:11}}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},border:{display:false},ticks:{color:'#94A3B8',font:{size:11},callback:v=>v+'M'}}
+      },
+      animation:{duration:1000}
+    }
+  });
+}
+
+/* ── LISTING CARD HOVER GLOW ── */
+document.querySelectorAll('.listing-card,.auction-card,.service-card,.testi-card').forEach(card=>{
+  card.addEventListener('mouseenter',()=>{card.style.willChange='transform';});
+  card.addEventListener('mouseleave',()=>{card.style.willChange='';});
+});
+
+/* ── SMOOTH SEARCH TAG FEEDBACK ── */
+document.querySelectorAll('.search-tag').forEach(t=>{
+  t.addEventListener('click',function(){
+    this.innerHTML='<i class="fa fa-check" style="margin-right:4px"></i>'+this.textContent;
+    this.style.background='var(--blue)';
+    this.style.color='#fff';
+    setTimeout(()=>{
+      this.style.background='';this.style.color='';
+      this.textContent=this.textContent.replace('✓ ','');
+    },1200);
+  });
+});
+
+/* ── TICKER PAUSE ON HOVER ── */
+const ticker=document.getElementById('ticker');
+if(ticker){
+  ticker.addEventListener('mouseenter',()=>{ticker.style.animationPlayState='paused'});
+  ticker.addEventListener('mouseleave',()=>{ticker.style.animationPlayState='running'});
+}
+</script>
+</body></html>
