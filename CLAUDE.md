@@ -88,6 +88,9 @@ something genuinely needs the browser:
 | `bottom-nav` | reads pathname for the active item |
 | `scroll-to-top` | scroll position listener |
 | `accessibility-controls` | reads/writes `data-contrast` + `data-text-size` on `<html>` |
+| `accessibility-dialog` | Dialog open/close state for the topbar trigger |
+
+Scroll reveals are **not** a reason to add `"use client"` — they are pure CSS.
 
 Filtering and search state belong in the **URL**, not React state. The
 privileges filter is a set of links to real routes (`/imtiyozlar/it`), not a
@@ -105,6 +108,58 @@ API can replace their bodies without touching a single component.
 
 Derived values stay derived: privilege category counts are computed from the
 data, never typed into markup.
+
+## Shared primitives
+
+`src/components/common/` holds the deduplicated building blocks. Reach for
+these before writing a new card or icon tile — the same shapes were previously
+copy-pasted across nine section files with drifting radii and three different
+hover treatments.
+
+| Primitive | Use |
+|---|---|
+| `SurfaceCard` | every card surface; `interactive` adds the hover lift |
+| `IconTile` | the accent tile behind a section icon (`sm`/`md`/`lg`) |
+| `ActionLink` | "see all →" links; animates the underline and arrow |
+| `Eyebrow` | uppercase label; `as="h2"` when it IS the section's heading |
+| `StatList` | figure + label grid (hero, impact band) |
+
+`src/components/common/placeholder/` holds inline-SVG imagery. These are
+**abstract architectural motifs, never photographs** — a photo on a listing
+card reads as a photo *of that property*, which we cannot support for a state
+asset. They are inline SVG so they inherit the tone tokens, cost no request,
+and need no `next/image` config.
+
+Note `ui/` is still shadcn CLI output — do not hand-edit it, and do not put
+project primitives there.
+
+## Motion
+
+All CSS. **No animation library, and no section is a client component** — the
+homepage still ships zero page-level JavaScript.
+
+- `data-reveal="up|fade|scale"` — scroll reveal via `animation-timeline: view()`.
+  Stagger with an inline `--i`.
+- `data-enter` with `--enter-delay` — time-based entrance for above-the-fold
+  content.
+
+**Two rules that are load-bearing, not stylistic:**
+
+1. **Never write `opacity: 0` as a static declaration to hide something an
+   animation will reveal.** Put the hidden state in the keyframe's `from` and
+   let `animation-fill-mode: both` apply it. If the timeline turns out to be
+   inactive at runtime — which `@supports` cannot predict — the animation then
+   produces no output and the content is simply visible, instead of being
+   stranded invisible forever.
+2. **`data-enter` animates transform only, never opacity.** Its document
+   timeline is *active but frozen at 0* in a background tab, and a frozen
+   active timeline still applies the `from` keyframe. Fading here would hide
+   the hero headline from anyone opening the page in a background tab, and
+   from search-engine and print renderers. `data-reveal` does not have this
+   problem because its timeline goes *inactive* rather than frozen.
+
+The word-rotator's delays are negative for the same reason — see the comment in
+`globals.css`.
 
 ## Layout of the repo
 
@@ -156,8 +211,14 @@ Carried over from the legacy site and resolved as follows:
 
 ## Accessibility mode
 
-`/maxsus-imkoniyatlar` is real, not decorative. Two independent switches are
-set as attributes on `<html>` and mirrored to localStorage:
+"Maxsus imkoniyatlar" opens as a **dialog from the topbar**, not a route —
+the user changes contrast or text size without losing their place on the page.
+There is deliberately no `/maxsus-imkoniyatlar` page: these controls write to
+`<html>` and localStorage, so they were always JavaScript-dependent and a
+standalone page bought nothing a no-JS visitor could use.
+
+Two independent switches are set as attributes on `<html>` and mirrored to
+localStorage:
 
 - `data-contrast="high"` — black/white/yellow palette at 21:1. It overrides
   **both** tones: in this mode the deep/light alternation is abandoned, because
@@ -170,6 +231,30 @@ set as attributes on `<html>` and mirrored to localStorage:
 `AccessibilityScript` is a **blocking inline script in `<head>`**. It has to
 be: applying the preference from an effect would flash the navy palette on
 every navigation, for exactly the people who chose not to see it.
+
+## Logo lockups
+
+Two files, one component — always use `components/layout/logo.tsx`, never
+reference the SVGs directly:
+
+| File | Size | Used |
+|---|---|---|
+| `logo-dm-light.svg` | 313×69, 9.9 KB | full wordmark, from the given breakpoint up |
+| `logo-short-light.svg` | 57×69, ~0.6 KB | mark only, below it |
+
+`<Logo from="lg" priority />` in the header (the wordmark only fits once the
+full nav appears at `lg`), `<Logo from="sm" />` in the footer.
+
+It is a `<picture>` with a media-qualified `<source>`, not `next/image`, for
+two reasons: the browser then fetches **only** the matching lockup — rendering
+both and hiding one with CSS would still pull the 9.9 KB wordmark onto phones
+that never show it — and `next/image` does not optimise SVG anyway without
+`dangerouslyAllowSVG`, so it would add nothing. Widths are pinned per
+breakpoint rather than `w-auto` because the two lockups have different aspect
+ratios and `w-auto` would shift the header as the file arrives.
+
+The favicon is the **short** mark: a 4.5:1 wordmark letterboxes into
+illegibility at 16px.
 
 ## Number formatting
 

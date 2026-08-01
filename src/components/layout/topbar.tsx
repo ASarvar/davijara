@@ -1,14 +1,13 @@
 import { Mail, Phone } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/navigation";
 import { contacts } from "@/content/site";
 import { Container } from "./section";
 import { LangSwitcher } from "./lang-switcher";
+import { AccessibilityDialog } from "./accessibility-dialog";
 
-export async function Topbar() {
-  const t = await getTranslations("topbar");
-
+// Sign-in lives in the navbar (desktop) and the mobile menu, so the topbar
+// carries only contacts, accessibility and language.
+export function Topbar() {
   return (
     <div
       data-tone="deep"
@@ -32,20 +31,17 @@ export async function Topbar() {
           </a>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
           {/*
-            "Maxsus imkoniyatlar" is a dead `href="#"` in the legacy site. On
-            Uzbek government portals this conventionally opens a
-            visually-impaired mode. Wired to a real route here; the
-            high-contrast theme itself is implemented in the optimisation pass.
+            "Maxsus imkoniyatlar" was a dead href="#" in the legacy site. It
+            opens the accessibility settings as a dialog so the user keeps their
+            place on the page instead of being sent to a separate route.
           */}
-          <Link
-            href="/maxsus-imkoniyatlar"
-            className="text-muted-foreground hover:text-accent-foreground transition-colors"
-          >
-            {t("accessibility")}
-          </Link>
+          <AccessibilityDialog />
+
           <LangSwitcher />
+
+          
         </div>
       </Container>
     </div>

@@ -2,6 +2,7 @@ import { Search } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { getRegionOptions } from "@/lib/data/catalog";
+import { Eyebrow } from "@/components/common/eyebrow";
 import { Container } from "@/components/layout/section";
 
 /**
@@ -24,14 +25,14 @@ export async function SearchWidget() {
   const regions = await getRegionOptions();
 
   const fieldClass =
-    "border-input bg-card text-foreground focus-visible:ring-ring w-full appearance-none rounded-md border px-3 py-2.5 text-sm focus-visible:ring-2 focus-visible:outline-none";
+    "border-input bg-card text-foreground focus-visible:ring-ring hover:border-ring/40 w-full appearance-none rounded-md border px-3 py-2.5 text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none";
 
   return (
     <section data-tone="deep" className="bg-background border-border border-y">
       <Container className="py-8">
-        <h2 className="text-accent-foreground mb-4 text-xs font-semibold tracking-[0.18em] uppercase">
+        <Eyebrow as="h2" className="mb-4">
           {t("label")}
-        </h2>
+        </Eyebrow>
 
         <form
           action={`/${locale}/obyektlar`}
@@ -93,9 +94,12 @@ export async function SearchWidget() {
           <div className="flex items-end">
             <button
               type="submit"
-              className="bg-[color:var(--color-gold)] text-[color:var(--color-navy)] focus-visible:ring-ring inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-md px-6 text-sm font-semibold transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 lg:w-auto"
+              className="bg-[color:var(--color-gold)] text-[color:var(--color-navy)] focus-visible:ring-ring group inline-flex h-[42px] w-full items-center justify-center gap-2 rounded-md px-6 text-sm font-semibold transition-[opacity,transform] duration-200 hover:-translate-y-0.5 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 lg:w-auto"
             >
-              <Search aria-hidden="true" className="size-4" />
+              <Search
+                aria-hidden="true"
+                className="size-4 transition-transform duration-200 group-hover:scale-110"
+              />
               {t("submit")}
             </button>
           </div>

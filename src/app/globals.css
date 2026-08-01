@@ -54,6 +54,10 @@
   --radius-2xl: 36px;
 
   --animate-rotate-words: rotateWords 9s infinite;
+
+  /* Shared easing. Slightly overshooting ease-out reads as "settling" rather
+     than "stopping", which is what makes a reveal feel unhurried. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* ── Semantic contract ───────────────────────────────────────────────────
@@ -307,14 +311,28 @@
   animation: var(--animate-rotate-words);
 }
 
+/*
+  Delays are shifted back by 1.5s rather than starting at 0.
+
+  Why: the words are hidden at the 0% keyframe, so at animation time zero
+  none of them is visible and the <h1> reads "Davlat mulkini ijaraga olish —"
+  with nothing after it. That is exactly what a renderer sees whenever the
+  document timeline is not advancing — a background tab, and more importantly
+  a search-engine or print renderer. Losing the final word of the site's main
+  heading there is a real cost.
+
+  A negative delay starts word one already inside its visible band (6%–30% of
+  the 9s cycle), so a frozen clock shows a complete headline. The 3s spacing
+  between words is preserved, so the visible rotation is unchanged.
+*/
 .word-rotator > em:nth-of-type(1) {
-  animation-delay: 0s;
+  animation-delay: -1.5s;
 }
 .word-rotator > em:nth-of-type(2) {
-  animation-delay: 3s;
+  animation-delay: 1.5s;
 }
 .word-rotator > em:nth-of-type(3) {
-  animation-delay: 6s;
+  animation-delay: 4.5s;
 }
 
 @keyframes rotateWords {
@@ -344,3 +362,184 @@
     opacity: 1;
   }
 }
+
+/*
+  Backdrop for the branded listing placeholders: brand gradient plus a faint
+  plan grid. Lives in CSS rather than SVG <defs> so the markup carries no ids
+  — duplicate SVG ids are document-global and would cross-wire every card's
+  url(#…) reference to the first matching def.
+*/
+.placeholder-blueprint {
+  background-color: var(--color-navy);
+  /*
+    Grid layers sit ABOVE the gradient (background-image paints first layer on
+    top), and no blend mode — `overlay` blending a mostly-transparent layer
+    over dark navy cancelled the lines out entirely.
+  */
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      color-mix(in srgb, var(--color-gold) 14%, transparent) 0 1px,
+      transparent 1px 16px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-gold) 14%, transparent) 0 1px,
+      transparent 1px 16px
+    ),
+    linear-gradient(
+      135deg,
+      var(--color-navy-mid) 0%,
+      var(--color-navy) 100%
+    );
+}
+
+/*
+  ── Scroll reveals ───────────────────────────────────────────────────────
+
+  Elements opt in with a `data-reveal` attribute, so a Server Component adds
+  motion with a plain HTML attribute and ships no JavaScript. Progress is
+  driven by `animation-timeline: view()` — the compositor, not the main
+  thread, and no IntersectionObserver.
+
+  READ THIS BEFORE EDITING —
+
+  The hidden start state (`opacity: 0`) is authored ONLY inside the two
+  guards below. That is deliberate and load-bearing. A reveal that starts
+  hidden and never animates leaves content permanently invisible, which on a
+  public-service portal is a total failure rather than a cosmetic one. Two
+  independent things can stop the animation running:
+
+    1. No `animation-timeline` support (Firefox is still partial).
+    2. The user prefers reduced motion.
+
+  Nesting the hidden state inside `@supports` AND
+  `prefers-reduced-motion: no-preference` means that in either case
+  `opacity: 0` is never applied at all, so the content is simply visible.
+  Failsafe by construction — not by an `!important` override that a later
+  rule could out-order.
+
+  Note the global reduced-motion guard in @layer base does NOT cover this:
+  it clamps `animation-duration`, and scroll-driven animations ignore
+  duration entirely because progress comes from the timeline.
+*/
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal] {
+      /*
+        NOTE: there is deliberately no `opacity: 0` here.
+
+        The hidden state lives in the keyframe's `from` and is applied by
+        `animation-fill-mode: both`. That distinction is the difference
+        between safe and broken: if the timeline turns out to be INACTIVE at
+        runtime — which can happen for scroll-container reasons that
+        `@supports` cannot predict — the animation produces no output at all,
+        so the element simply keeps its natural opacity and stays visible.
+
+        Writing `opacity: 0` as a static declaration here would instead leave
+        the content permanently invisible in that case. Verified empirically:
+        with an inactive timeline, keyframe-only resolves to opacity 1.
+      */
+      animation: reveal-up both linear;
+      animation-timeline: view();
+
+      /*
+        Stagger. `--i` is set inline on list items; each subsequent item
+        starts its reveal a little later in its own view progress, which
+        reads as a cascade without needing per-item classes or JS.
+      */
+      animation-range: entry calc(4% + var(--i, 0) * 3%) cover
+        calc(30% + var(--i, 0) * 3%);
+    }
+
+    [data-reveal="fade"] {
+      animation-name: reveal-fade;
+    }
+
+    [data-reveal="scale"] {
+      animation-name: reveal-scale;
+    }
+  }
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes reveal-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+  Transform only — deliberately no opacity. Used for the hero entrance; see
+  the [data-enter] rule below for why fading that content would be unsafe.
+*/
+@keyframes rise-in {
+  from {
+    transform: translateY(1.5rem);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/*
+  ── Hero entrance ────────────────────────────────────────────────────────
+
+  Time-based, not scroll-driven: the hero is above the fold, so a view()
+  timeline would already be past its range on load and resolve straight to
+  the end state — no animation at all.
+
+  Being time-based means the global reduced-motion guard in @layer base DOES
+  neutralise it (that guard clamps animation-duration, which time-based
+  animations respect). `both` fill keeps the end state after it plays.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  [data-enter] {
+    /*
+      Rises into place but never fades. That is a deliberate constraint, not
+      an aesthetic preference.
+
+      Unlike [data-reveal], this runs on the document timeline, which is
+      ACTIVE but frozen at 0 whenever the page is in a background tab —
+      Chrome does not advance it until the tab becomes visible. A frozen
+      active timeline still applies the `from` keyframe, so fading from
+      opacity 0 here would leave the hero headline — the most important text
+      on the site — invisible for anyone who opens the page in a background
+      tab, until they focus it.
+
+      Animating transform alone sidesteps that entirely: worst case the text
+      sits 1.5rem low and perfectly readable. Verified against a genuinely
+      backgrounded tab, where document.timeline.currentTime never left 0.
+
+      [data-reveal] does not need this treatment: its timeline goes INACTIVE
+      rather than frozen, and an inactive timeline produces no output at all.
+    */
+    animation: rise-in 0.7s var(--ease-out-soft) both;
+    animation-delay: calc(var(--enter-delay, 0) * 90ms);
+  }
+}
+

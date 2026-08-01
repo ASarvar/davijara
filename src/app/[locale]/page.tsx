@@ -25,6 +25,11 @@ export default async function HomePage({
     Every section is a Server Component — the homepage ships no page-level
     JavaScript at all. The only client code on this route is the nav's active-
     link highlighting and the mobile menu, both in the shared layout.
+
+    Tone rhythm: deep and light alternate down the page. Previously nine of
+    eleven sections were deep, so the light tone read as an accident rather
+    than a cadence. Each section sets its own tone (see the component), and
+    `data-tone` re-binds the colour tokens for that subtree.
   */
   return (
     <>

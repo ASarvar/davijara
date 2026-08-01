@@ -15,13 +15,24 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
   script-src uses 'unsafe-inline' only as the ignored fallback for browsers
   that do not support nonces/strict-dynamic.
 */
+/*
+  React's development build uses eval() for debugging features (reconstructing
+  call stacks across environments) and logs a CSP error on every page load
+  without it. Production never uses eval — React says so explicitly — so this
+  is allowed in dev only. A permanent false alarm in the console is worse than
+  useless: it trains you to ignore the console, which is where real problems
+  appear.
+*/
+const isDev = process.env.NODE_ENV === "development";
+
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  // Dev needs the HMR websocket.
+  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -57,10 +68,34 @@ const nextConfig: NextConfig = {
   // useCallback is needed in the handful of client components here.
   reactCompiler: true,
 
+  experimental: {
+    /*
+      React's <ViewTransition> integration. Route navigations are already
+      Transitions in the App Router, so wrapping the page content is enough to
+      get a cross-fade between routes.
+
+      Degrades silently: browsers without the View Transitions API just
+      navigate normally. Remove this flag to turn the feature off entirely.
+    */
+    viewTransition: true,
+  },
+
   images: {
     // AVIF first, WebP fallback. The legacy site hotlinked every photo to
     // third-party hosts with no format negotiation at all.
     formats: ["image/avif", "image/webp"],
+
+    /*
+      Required as of Next.js 16 — a `quality` value outside this allowlist
+      throws at runtime rather than falling back. Nothing uses next/image yet
+      (placeholders are inline SVG), but this is here so the first real
+      photograph does not hit a confusing error.
+
+      When adding remote images later, `remotePatterns` AND the CSP `img-src`
+      below must be widened together, or the browser blocks the image even
+      after Next allows it.
+    */
+    qualities: [75],
   },
 
   async headers() {

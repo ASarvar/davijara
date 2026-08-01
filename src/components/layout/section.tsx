@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Eyebrow } from "@/components/common/eyebrow";
 
 export type Tone = "deep" | "light";
 
@@ -69,6 +70,13 @@ interface SectionHeaderProps {
   description?: React.ReactNode;
   /** Optional trailing link, rendered right-aligned on wide viewports. */
   action?: React.ReactNode;
+  /**
+   * `compact` is for headers inside a column rather than spanning the page —
+   * smaller type and tighter margins. news-and-docs used to hand-roll this,
+   * which is how its eyebrow drifted to `mb-2` and its heading to `text-2xl`
+   * while every other section used `mb-3` / `text-3xl`.
+   */
+  size?: "default" | "compact";
   className?: string;
 }
 
@@ -77,18 +85,32 @@ export function SectionHeader({
   title,
   description,
   action,
+  size = "default",
   className,
 }: SectionHeaderProps) {
+  const compact = size === "compact";
+
   return (
-    <div className={cn("mb-10 sm:mb-14", className)}>
-      {eyebrow ? (
-        <p className="text-accent-foreground mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
-          {eyebrow}
-        </p>
-      ) : null}
-      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div
+      data-reveal="up"
+      className={cn(compact ? "mb-7" : "mb-10 sm:mb-14", className)}
+    >
+      {eyebrow ? <Eyebrow className="mb-3">{eyebrow}</Eyebrow> : null}
+      <div
+        className={cn(
+          "flex flex-col gap-4",
+          compact
+            ? "sm:flex-row sm:items-end sm:justify-between"
+            : "md:flex-row md:items-end md:justify-between",
+        )}
+      >
         <div className="max-w-2xl">
-          <h2 className="text-3xl font-semibold text-balance sm:text-4xl">
+          <h2
+            className={cn(
+              "font-semibold text-balance",
+              compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl",
+            )}
+          >
             {title}
           </h2>
           {description ? (

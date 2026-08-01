@@ -9,6 +9,7 @@ import {
   objectRates,
   regionCoefficients,
 } from "@/content/calculator";
+import { SurfaceCard } from "@/components/common/surface-card";
 import { formatNumber } from "@/lib/format";
 
 /**
@@ -35,10 +36,10 @@ export function RentCalculator() {
   const total = calculateAnnualRent(area, type.ratePerM2, region.coefficient);
 
   const selectClass =
-    "border-input bg-background text-foreground focus-visible:ring-ring w-full appearance-none rounded-md border px-3 py-2.5 text-sm focus-visible:ring-2 focus-visible:outline-none";
+    "border-input bg-background text-foreground focus-visible:ring-ring hover:border-ring/40 w-full appearance-none rounded-md border px-3 py-2.5 text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none";
 
   return (
-    <div className="border-border bg-card rounded-2xl border p-6 sm:p-8">
+    <SurfaceCard radius="xl" padding="lg">
       <h3 className="flex items-center gap-2.5 text-lg font-semibold">
         <Calculator aria-hidden="true" className="text-accent-foreground size-5" />
         Ijara kalkulatori
@@ -146,6 +147,6 @@ export function RentCalculator() {
           Mahkamasi qarori bilan har yili yangilanadi.
         </span>
       </p>
-    </div>
+    </SurfaceCard>
   );
 }

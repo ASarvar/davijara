@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { IconTile } from "@/components/common/icon-tile";
 import { Section } from "./section";
 
 /**
@@ -25,9 +26,9 @@ export async function PlaceholderPage({
   return (
     <Section tone="deep" className="flex-1">
       <div className="mx-auto max-w-xl py-10 text-center">
-        <div className="bg-accent text-accent-foreground mx-auto mb-6 flex size-14 items-center justify-center rounded-full">
+        <IconTile size="lg" className="mx-auto mb-6">
           <Construction aria-hidden="true" className="size-7" />
-        </div>
+        </IconTile>
         <h1 className="font-heading text-3xl font-semibold sm:text-4xl">
           {title}
         </h1>

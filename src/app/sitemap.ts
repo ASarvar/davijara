@@ -17,7 +17,9 @@ const staticPaths = [
   "/maxfiylik",
   "/shartlar",
   "/sayt-xaritasi",
-  "/maxsus-imkoniyatlar",
+  // No /maxsus-imkoniyatlar entry — accessibility settings are a dialog in the
+  // topbar, available from every page, rather than a route of their own.
+  "/xizmatlar/kalkulyator",
 ];
 
 /**

@@ -7,6 +7,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { IconTile } from "@/components/common/icon-tile";
+import { SurfaceCard } from "@/components/common/surface-card";
 import type { Privilege } from "@/types/content";
 
 /**
@@ -35,64 +37,69 @@ export async function PrivilegeList({ items }: { items: Privilege[] }) {
 
   return (
     <Accordion type="multiple" className="space-y-3">
-      {items.map((item) => (
-        <AccordionItem
+      {items.map((item, i) => (
+        <SurfaceCard
           key={item.id}
-          value={String(item.id)}
-          className="border-border bg-card rounded-xl border px-5 last:border-b"
+          padding="inline"
+          interactive
+          data-reveal="up"
+          style={{ "--i": Math.min(i, 6) } as React.CSSProperties}
         >
-          <AccordionTrigger className="gap-4 text-left hover:no-underline">
-            <span className="flex flex-1 items-start gap-4">
-              <span
-                aria-hidden="true"
-                className="font-heading text-accent-foreground bg-accent flex size-9 shrink-0 items-center justify-center rounded-lg text-sm font-semibold"
-              >
-                {String(item.id).padStart(2, "0")}
-              </span>
-              <span className="min-w-0 flex-1">
-                <Badge variant="secondary" className="mb-1.5">
-                  {item.tag}
-                </Badge>
-                <span className="block text-base font-semibold text-balance">
-                  {item.title}
+          <AccordionItem value={String(item.id)} className="border-0">
+            <AccordionTrigger className="gap-4 text-left hover:no-underline">
+              <span className="flex flex-1 items-start gap-4">
+                <IconTile
+                  size="sm"
+                  aria-hidden="true"
+                  className="font-heading text-sm font-semibold"
+                >
+                  {String(item.id).padStart(2, "0")}
+                </IconTile>
+                <span className="min-w-0 flex-1">
+                  <Badge variant="secondary" className="mb-1.5">
+                    {item.tag}
+                  </Badge>
+                  <span className="block text-base font-semibold text-balance">
+                    {item.title}
+                  </span>
                 </span>
               </span>
-            </span>
-          </AccordionTrigger>
+            </AccordionTrigger>
 
-          <AccordionContent className="pl-13">
-            <p className="text-muted-foreground text-sm text-pretty">
-              {item.description}
-            </p>
+            <AccordionContent className="pl-13">
+              <p className="text-muted-foreground text-sm text-pretty">
+                {item.description}
+              </p>
 
-            <dl className="border-border mt-5 grid gap-4 border-t pt-4 sm:grid-cols-3">
-              <div>
-                <dt className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                  {t("subject")}
-                </dt>
-                <dd className="mt-1 text-sm">{item.subject}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                  {t("duration")}
-                </dt>
-                <dd className="mt-1 text-sm">{item.duration}</dd>
-              </div>
-              <div>
-                <dt className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
-                  {t("basis")}
-                </dt>
-                {/*
-                  Binding legal citation, reproduced verbatim from the source
-                  legislation. Never reword, reformat or translate.
-                */}
-                <dd className="text-accent-foreground mt-1 text-sm font-medium">
-                  {item.legalBasis}
-                </dd>
-              </div>
-            </dl>
-          </AccordionContent>
-        </AccordionItem>
+              <dl className="border-border mt-5 grid gap-4 border-t pt-4 sm:grid-cols-3">
+                <div>
+                  <dt className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                    {t("subject")}
+                  </dt>
+                  <dd className="mt-1 text-sm">{item.subject}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                    {t("duration")}
+                  </dt>
+                  <dd className="mt-1 text-sm">{item.duration}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                    {t("basis")}
+                  </dt>
+                  {/*
+                    Binding legal citation, reproduced verbatim from the source
+                    legislation. Never reword, reformat or translate.
+                  */}
+                  <dd className="text-accent-foreground mt-1 text-sm font-medium">
+                    {item.legalBasis}
+                  </dd>
+                </div>
+              </dl>
+            </AccordionContent>
+          </AccordionItem>
+        </SurfaceCard>
       ))}
     </Accordion>
   );

@@ -61,7 +61,6 @@ export interface ExternalNavItem {
 export const mainNav: NavItem[] = [
   { key: "home", href: "/" },
   { key: "objects", href: "/obyektlar" },
-  { key: "auction", href: "/e-auksion" },
   { key: "privileges", href: "/imtiyozlar" },
   { key: "services", href: "/xizmatlar" },
   { key: "documents", href: "/hujjatlar" },

@@ -1,8 +1,10 @@
-import { ArrowRight, Building2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { getFeaturedListings, getRegions } from "@/lib/data/catalog";
+import { ActionLink } from "@/components/common/action-link";
+import { SurfaceCard } from "@/components/common/surface-card";
+import { ListingPlaceholder } from "@/components/common/placeholder/listing-placeholder";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Section, SectionHeader } from "@/components/layout/section";
@@ -19,38 +21,43 @@ export async function FeaturedListings() {
     regions.find((r) => r.slug === slug)?.name ?? slug;
 
   return (
-    <Section tone="deep" className="bg-[color:var(--color-cobalt)]/6 border-y border-[color:var(--color-gold)]/8">
+    <Section tone="deep">
       <SectionHeader
         eyebrow={t("eyebrow")}
         title={t("title")}
-        action={
-          <Link
-            href="/obyektlar"
-            className="text-accent-foreground inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
-          >
-            {t("action")}
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </Link>
-        }
+        action={<ActionLink href="/obyektlar">{t("action")}</ActionLink>}
       />
 
       <ul className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {listings.map((listing) => (
-          <li
+        {listings.map((listing, i) => (
+          <SurfaceCard
+            as="li"
             key={listing.id}
-            className="border-border bg-card flex flex-col overflow-hidden rounded-xl border"
+            padding="none"
+            interactive
+            data-reveal="up"
+            style={{ "--i": i } as React.CSSProperties}
+            className="group flex flex-col overflow-hidden"
           >
             {/*
               The legacy markup showed the SAME hotlinked photo on all three
-              cards. Rather than repeat one building three times, cards render
-              a branded placeholder until real, self-hosted photography exists.
-              `aspect-video` reserves the box either way, so swapping images in
-              later cannot introduce layout shift.
+              cards. These are branded architectural placeholders, with the
+              variant derived from the listing id so the cards look distinct
+              and each listing keeps a stable identity. `aspect-video`
+              reserves the box, so swapping in real photography later cannot
+              introduce layout shift.
             */}
-            <div className="bg-secondary relative flex aspect-video items-center justify-center">
-              <Building2
-                aria-hidden="true"
-                className="text-muted-foreground/40 size-10"
+            <div className="bg-secondary relative aspect-video overflow-hidden">
+              {/*
+                Variant by index, not by id hash. Hashing gives no guarantee
+                of distinctness — three ids into four buckets collide about
+                62% of the time, and these ids differ only in their last few
+                digits. Index guarantees the visible cards look different,
+                which is the actual requirement here.
+              */}
+              <ListingPlaceholder
+                variant={(i % 4) as 0 | 1 | 2 | 3}
+                className="transition-transform duration-500 ease-out group-hover:scale-[1.04]"
               />
               <Badge className="absolute top-3 left-3">
                 {listing.auctionUrl ? t("badgeAuction") : t("badgeNew")}
@@ -58,7 +65,7 @@ export async function FeaturedListings() {
             </div>
 
             <div className="flex flex-1 flex-col p-5">
-              <h3 className="text-base leading-snug font-semibold text-balance">
+              <h3 className="group-hover:text-accent-foreground text-base leading-snug font-semibold text-balance transition-colors duration-200">
                 {listing.title}
               </h3>
               <p className="text-muted-foreground mt-2 text-sm">
@@ -83,7 +90,7 @@ export async function FeaturedListings() {
                 </Button>
               </div>
             </div>
-          </li>
+          </SurfaceCard>
         ))}
       </ul>
     </Section>

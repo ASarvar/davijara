@@ -1,10 +1,11 @@
-import { ArrowRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { getPrivilegeCategoryCards } from "@/lib/data/catalog";
 import { getPrivilegeCounts } from "@/lib/data/privileges";
-import { Icon } from "@/components/icon";
+import { ActionLink } from "@/components/common/action-link";
+import { IconTile } from "@/components/common/icon-tile";
+import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 
 export async function PrivilegesTeaser() {
@@ -23,28 +24,30 @@ export async function PrivilegesTeaser() {
         eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
-        action={
-          <Link
-            href="/imtiyozlar"
-            className="text-accent-foreground inline-flex items-center gap-1.5 text-sm font-medium hover:underline"
-          >
-            {t("action")}
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </Link>
-        }
+        action={<ActionLink href="/imtiyozlar">{t("action")}</ActionLink>}
       />
 
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card) => (
-          <li key={card.category}>
+        {cards.map((card, i) => (
+          <SurfaceCard
+            as="li"
+            key={card.category}
+            padding="none"
+            interactive
+            data-reveal="up"
+            style={{ "--i": i } as React.CSSProperties}
+          >
             <Link
               href={`/imtiyozlar/${card.category}`}
-              className="border-border bg-card hover:border-[color:var(--color-gold)]/40 flex h-full flex-col rounded-xl border p-6 transition-colors"
+              className="group flex h-full flex-col p-6"
             >
-              <span className="bg-accent text-accent-foreground mb-4 flex size-11 items-center justify-center rounded-lg">
-                <Icon name={card.icon} className="size-5" />
-              </span>
-              <h3 className="text-base font-semibold">{card.title}</h3>
+              <IconTile
+                name={card.icon}
+                className="mb-4 group-hover:scale-105"
+              />
+              <h3 className="group-hover:text-accent-foreground text-base font-semibold transition-colors duration-200">
+                {card.title}
+              </h3>
               <p className="text-muted-foreground mt-2 flex-1 text-sm">
                 {card.description}
               </p>
@@ -56,7 +59,7 @@ export async function PrivilegesTeaser() {
                 {t("count", { count: counts[card.category] })}
               </span>
             </Link>
-          </li>
+          </SurfaceCard>
         ))}
       </ul>
     </Section>

@@ -4,6 +4,8 @@ import { setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
+import { Eyebrow } from "@/components/common/eyebrow";
+import { IconTile } from "@/components/common/icon-tile";
 import { RentCalculator } from "@/components/sections/rent-calculator";
 
 export const metadata: Metadata = {
@@ -42,9 +44,7 @@ export default async function CalculatorPage({
     <Section tone="deep">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
         <div>
-          <p className="text-accent-foreground mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
-            Interaktiv xizmatlar
-          </p>
+          <Eyebrow className="mb-3">Interaktiv xizmatlar</Eyebrow>
           <h1 className="font-heading text-3xl font-semibold text-balance sm:text-4xl">
             Obyekt narxini oldindan biling
           </h1>
@@ -55,11 +55,16 @@ export default async function CalculatorPage({
           </p>
 
           <ul className="mt-9 space-y-6">
-            {features.map((f) => (
-              <li key={f.title} className="flex gap-4">
-                <span className="bg-accent text-accent-foreground flex size-10 shrink-0 items-center justify-center rounded-lg">
+            {features.map((f, i) => (
+              <li
+                key={f.title}
+                data-reveal="up"
+                style={{ "--i": i } as React.CSSProperties}
+                className="flex gap-4"
+              >
+                <IconTile>
                   <f.icon aria-hidden="true" className="size-5" />
-                </span>
+                </IconTile>
                 <span>
                   <span className="block text-sm font-semibold">{f.title}</span>
                   <span className="text-muted-foreground mt-1 block text-sm">

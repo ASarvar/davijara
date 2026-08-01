@@ -33,6 +33,9 @@
     "price": "Price (annual)",
     "submit": "Search"
   },
+  "partners": {
+    "heading": "Partner organisations and platforms"
+  },
   "footer": {
     "hotline": "Hotline",
     "contact": "Contact",

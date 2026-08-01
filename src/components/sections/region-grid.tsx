@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { getRegions } from "@/lib/data/catalog";
+import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 import { formatNumber } from "@/lib/format";
 
@@ -43,24 +44,36 @@ export async function RegionGrid() {
       />
 
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {regions.map((region) => (
-          <li key={region.slug}>
+        {regions.map((region, i) => (
+          <SurfaceCard
+            as="li"
+            key={region.slug}
+            radius="md"
+            padding="none"
+            interactive
+            data-reveal="up"
+            style={{ "--i": i % 4 } as React.CSSProperties}
+          >
             <Link
               href={`/obyektlar?hudud=${region.slug}`}
-              className="border-border bg-card hover:border-[color:var(--color-gold)]/40 hover:bg-accent group flex h-full items-start gap-3 rounded-lg border p-4 transition-colors"
+              className="group flex h-full items-start gap-3 p-4"
             >
               <MapPin
                 aria-hidden="true"
-                className="text-accent-foreground mt-0.5 size-4 shrink-0"
+                className="text-accent-foreground mt-0.5 size-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5"
               />
               <span className="min-w-0">
-                <span className="block text-sm font-medium">{region.name}</span>
+                <span className="group-hover:text-accent-foreground block text-sm font-medium transition-colors duration-200">
+                  {region.name}
+                </span>
                 <span className="text-muted-foreground mt-0.5 block text-xs">
-                  {t("objectsCount", { count: formatNumber(region.objectCount) })}
+                  {t("objectsCount", {
+                    count: formatNumber(region.objectCount),
+                  })}
                 </span>
               </span>
             </Link>
-          </li>
+          </SurfaceCard>
         ))}
       </ul>
     </Section>

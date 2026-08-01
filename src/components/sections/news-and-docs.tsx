@@ -1,9 +1,12 @@
-import { ArrowRight, Download, FileText } from "lucide-react";
+import { Download, FileText } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { getDocuments, getNews } from "@/lib/data/catalog";
-import { Section } from "@/components/layout/section";
+import { ActionLink } from "@/components/common/action-link";
+import { IconTile } from "@/components/common/icon-tile";
+import { SurfaceCard } from "@/components/common/surface-card";
+import { Section, SectionHeader } from "@/components/layout/section";
 import { formatDate } from "@/lib/format";
 
 export async function NewsAndDocs() {
@@ -14,34 +17,33 @@ export async function NewsAndDocs() {
   const [news, documents] = await Promise.all([getNews(4), getDocuments(4)]);
 
   return (
-    <Section tone="deep">
+    <Section tone="light">
       <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
         {/* News */}
         <div>
-          <div className="mb-7">
-            <p className="text-accent-foreground mb-2 text-xs font-semibold tracking-[0.18em] uppercase">
-              {tn("eyebrow")}
-            </p>
-            <div className="flex items-end justify-between gap-4">
-              <h2 className="font-heading text-2xl font-semibold sm:text-3xl">
-                {tn("title")}
-              </h2>
-              <Link
-                href="/yangiliklar"
-                className="text-accent-foreground inline-flex shrink-0 items-center gap-1.5 text-sm font-medium hover:underline"
-              >
-                {tn("action")}
-                <ArrowRight aria-hidden="true" className="size-4" />
-              </Link>
-            </div>
-          </div>
+          {/*
+            `size="compact"` rather than a hand-rolled header. This block used
+            to fork SectionHeader, which is how its eyebrow drifted to mb-2
+            and its heading to text-2xl while the rest of the site used mb-3
+            and text-3xl.
+          */}
+          <SectionHeader
+            size="compact"
+            eyebrow={tn("eyebrow")}
+            title={tn("title")}
+            action={<ActionLink href="/yangiliklar">{tn("action")}</ActionLink>}
+          />
 
           <ul className="divide-border divide-y">
-            {news.map((item) => (
-              <li key={item.slug}>
+            {news.map((item, i) => (
+              <li
+                key={item.slug}
+                data-reveal="up"
+                style={{ "--i": i } as React.CSSProperties}
+              >
                 <Link
                   href={`/yangiliklar/${item.slug}`}
-                  className="hover:bg-card group block py-5 transition-colors"
+                  className="group hover:bg-card block rounded-lg px-3 py-5 transition-colors duration-200"
                 >
                   <div className="text-muted-foreground flex items-center gap-3 text-xs">
                     {/* <time> with a machine-readable datetime — absent from
@@ -56,7 +58,7 @@ export async function NewsAndDocs() {
                       </>
                     ) : null}
                   </div>
-                  <h3 className="group-hover:text-accent-foreground mt-2 text-base font-semibold text-balance transition-colors">
+                  <h3 className="group-hover:text-accent-foreground mt-2 text-base font-semibold text-balance transition-colors duration-200">
                     {item.title}
                   </h3>
                   <p className="text-muted-foreground mt-1.5 text-sm">
@@ -70,29 +72,34 @@ export async function NewsAndDocs() {
 
         {/* Documents */}
         <div>
-          <div className="mb-7">
-            <p className="text-accent-foreground mb-2 text-xs font-semibold tracking-[0.18em] uppercase">
-              {td("eyebrow")}
-            </p>
-            <h2 className="font-heading text-2xl font-semibold sm:text-3xl">
-              {td("title")}
-            </h2>
-          </div>
+          <SectionHeader
+            size="compact"
+            eyebrow={td("eyebrow")}
+            title={td("title")}
+          />
 
           <ul className="space-y-3">
-            {documents.map((doc) => (
-              <li key={doc.id}>
+            {documents.map((doc, i) => (
+              <SurfaceCard
+                as="li"
+                key={doc.id}
+                radius="md"
+                padding="none"
+                interactive
+                data-reveal="up"
+                style={{ "--i": i } as React.CSSProperties}
+              >
                 <a
                   href={doc.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="border-border bg-card hover:border-[color:var(--color-gold)]/40 group flex gap-3 rounded-lg border p-4 transition-colors"
+                  className="group flex gap-3 p-4"
                 >
-                  <span className="bg-accent text-accent-foreground flex size-9 shrink-0 items-center justify-center rounded-md">
+                  <IconTile size="sm">
                     <FileText aria-hidden="true" className="size-4" />
-                  </span>
+                  </IconTile>
                   <span className="min-w-0 flex-1">
-                    <span className="group-hover:text-accent-foreground block text-sm font-medium transition-colors">
+                    <span className="group-hover:text-accent-foreground block text-sm font-medium transition-colors duration-200">
                       {doc.title}
                     </span>
                     <span className="text-muted-foreground mt-1 block text-xs">
@@ -101,10 +108,10 @@ export async function NewsAndDocs() {
                   </span>
                   <Download
                     aria-hidden="true"
-                    className="text-muted-foreground size-4 shrink-0"
+                    className="text-muted-foreground size-4 shrink-0 transition-transform duration-200 group-hover:translate-y-0.5"
                   />
                 </a>
-              </li>
+              </SurfaceCard>
             ))}
           </ul>
         </div>

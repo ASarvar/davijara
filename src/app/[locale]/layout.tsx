@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -62,8 +63,14 @@ export async function generateMetadata({
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "any" },
-        { url: "/logo-dm-light.svg", type: "image/svg+xml" },
+        /*
+          The short mark, not the wordmark. A 4.5:1 lockup letterboxes down to
+          a few unreadable pixels in a browser tab; the mark is near-square and
+          stays legible at 16px.
+        */
+        { url: "/logo-short-light.svg", type: "image/svg+xml" },
       ],
+      apple: "/logo-short-light.svg",
     },
     robots: { index: true, follow: true },
   };
@@ -112,20 +119,32 @@ export default async function LocaleLayout({
   };
 
   return (
-    <html lang={locale} className={`${fontVariables} h-full`}>
+    /*
+      No height class on <html>. Capping the root element at viewport height
+      while the body overflows it is a common source of scroll-container
+      confusion — including for scroll-driven animations, which resolve
+      `view()` against the nearest scrollport. `min-h-dvh` on the body gives
+      the same "footer sits at the bottom on short pages" result without
+      constraining the root.
+    */
+    <html lang={locale} className={fontVariables}>
       <head>
         {/* Must run before paint — see the component for why. */}
         <AccessibilityScript />
       </head>
-      <body className="flex min-h-full flex-col">
+      <body className="flex min-h-dvh flex-col">
         <OrganizationJsonLd />
         <NextIntlClientProvider messages={clientMessages}>
           <SkipLink />
           <Topbar />
           <Navbar />
-          {/* Skip-link target. */}
+          {/*
+            Skip-link target. Wrapped in <ViewTransition> so route navigations
+            cross-fade instead of snapping; the chrome around it stays put,
+            which is what makes the transition read as "same site, new page".
+          */}
           <div id="main" className="flex flex-1 flex-col">
-            {children}
+            <ViewTransition default="cross-fade">{children}</ViewTransition>
           </div>
           <Footer />
           <ScrollToTop />

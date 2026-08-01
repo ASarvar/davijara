@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ExternalLink, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
@@ -11,6 +10,7 @@ import {
   site,
 } from "@/content/site";
 import { Container } from "./section";
+import { Logo } from "./logo";
 
 export async function Footer() {
   const t = await getTranslations("footer");
@@ -26,13 +26,13 @@ export async function Footer() {
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand */}
           <div>
-            <Image
-              src="/logo-dm-light.svg"
-              alt={site.name}
-              width={313}
-              height={69}
-              className="h-9 w-auto"
-            />
+            {/*
+              Same responsive lockup as the header. Without this the footer
+              would pull the 9.9 KB wordmark on phones that only ever show the
+              mark up top — so the header's saving would be undone further
+              down the page.
+            */}
+            <Logo from="sm" />
             <p className="text-muted-foreground mt-4 text-sm">{t("operator")}</p>
             <a
               href={contacts.hotlineHref}

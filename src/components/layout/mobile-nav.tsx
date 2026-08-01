@@ -47,7 +47,20 @@ export function MobileNav() {
 
       <SheetContent side="right" data-tone="deep" className="w-[300px] p-0">
         <SheetHeader className="border-border border-b">
-          <SheetTitle className="text-left">{tc("menu")}</SheetTitle>
+          <SheetTitle className="flex items-center gap-2.5 text-left">
+            {/* Mark only — the sheet is 300px wide, the wordmark would crowd it. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- static SVG;
+                next/image passes SVGs through without optimising them. */}
+            <img
+              src="/logo-short-light.svg"
+              alt=""
+              width={57}
+              height={69}
+              aria-hidden="true"
+              className="h-6 w-[22px]"
+            />
+            {tc("menu")}
+          </SheetTitle>
         </SheetHeader>
 
         <nav className="flex flex-col p-2">

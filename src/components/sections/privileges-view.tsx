@@ -40,10 +40,17 @@ export async function PrivilegesView({
           </ol>
         </nav>
 
-        <h1 className="font-heading max-w-3xl text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
+        <h1
+          data-enter
+          className="font-heading max-w-3xl text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl"
+        >
           {t("pageTitle")}
         </h1>
-        <p className="text-muted-foreground mt-4 max-w-2xl text-pretty">
+        <p
+          data-enter
+          style={{ "--enter-delay": 1 } as React.CSSProperties}
+          className="text-muted-foreground mt-4 max-w-2xl text-pretty"
+        >
           {t("pageDescription")}
         </p>
       </Section>
