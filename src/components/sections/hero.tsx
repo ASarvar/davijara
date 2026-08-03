@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { getHeroStats } from "@/lib/data/catalog";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { StatList } from "@/components/common/stat-list";
-import { HeroPattern } from "@/components/common/placeholder/hero-pattern";
 import { Container } from "@/components/layout/section";
 
 export async function Hero() {
@@ -15,36 +14,47 @@ export async function Hero() {
       data-tone="deep"
       className="bg-background relative isolate overflow-hidden"
     >
-      {/* Decorative layers — ported from the legacy .hero-bg / .hero-pattern /
-          .hero-accent stack. Purely presentational, hidden from a11y tree. */}
+      {/* Decorative layers — ported verbatim from legacy .hero-bg /
+          .hero-accent / .hero-pattern (styles.css:268-311). Purely
+          presentational, hidden from the a11y tree. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-navy-mid),var(--color-navy)_60%)]" />
-        <div className="absolute -top-40 -right-32 size-[36rem] rounded-full bg-[color:var(--color-cobalt)]/20 blur-3xl" />
-        <div className="absolute -bottom-52 -left-24 size-[30rem] rounded-full bg-[color:var(--color-gold)]/10 blur-3xl" />
-
-        {/*
-          Blueprint motif filling the right half, which was empty at lg:
-          because the hero is a single left-aligned column. Hidden below lg
-          where the text uses the full width.
-        */}
-        <div className="absolute top-0 right-0 hidden h-full w-[46%] lg:block">
-          <HeroPattern className="h-full w-full object-cover" />
-        </div>
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 70% 60% at 60% 30%, rgba(26,58,124,0.45) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(200,169,110,0.08) 0%, transparent 60%)",
+          }}
+        />
+        <div
+          className="absolute top-0 right-0 h-full w-[45%]"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 80% at 80% 40%, rgba(26,58,124,0.3) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(60deg, rgba(200,169,110,1) 0, rgba(200,169,110,1) 1px, transparent 0, transparent 50%), repeating-linear-gradient(120deg, rgba(200,169,110,1) 0, rgba(200,169,110,1) 1px, transparent 0, transparent 50%), repeating-linear-gradient(0deg, rgba(200,169,110,1) 0, rgba(200,169,110,1) 1px, transparent 0, transparent 50%)",
+            backgroundSize: "60px 60px",
+          }}
+        />
       </div>
 
       <Container className="py-20 sm:py-28">
         <div className="lg:max-w-[58%]">
-          <Eyebrow data-enter className="mb-4">
+          <Eyebrow dot data-enter className="mb-4">
             {t("eyebrow")}
           </Eyebrow>
 
           <h1
             data-enter
             style={{ "--enter-delay": 1 } as React.CSSProperties}
-            className="font-heading max-w-4xl text-4xl leading-[1.1] font-semibold text-balance sm:text-5xl lg:text-6xl"
+            className="font-heading max-w-6xl text-4xl leading-[1.1] font-black text-balance sm:text-5xl lg:text-6xl"
           >
             {t("titleLead")}{" "}
             <span className="word-rotator">
@@ -64,7 +74,7 @@ export async function Hero() {
         </div>
 
         <div data-enter style={{ "--enter-delay": 2 } as React.CSSProperties}>
-          <StatList stats={stats} bordered reveal={false} className="mt-14" />
+          <StatList stats={stats}  reveal={false} className="mt-14" />
         </div>
       </Container>
     </section>

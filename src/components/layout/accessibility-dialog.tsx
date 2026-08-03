@@ -35,7 +35,13 @@ export function AccessibilityDialog() {
           className="text-muted-foreground hover:text-accent-foreground focus-visible:ring-ring flex items-center gap-1.5 rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           <Eye aria-hidden="true" className="size-3.5" />
-          {t("accessibility")}
+          {/*
+            Icon-only below sm so the header's utility strip stays on one line
+            on a handset. `sr-only` keeps the accessible name intact — an
+            unlabelled icon button would be exactly the wrong thing to ship on
+            the control that opens the accessibility settings.
+          */}
+          <span className="sr-only sm:not-sr-only">{t("accessibility")}</span>
         </button>
       </DialogTrigger>
 

@@ -9,6 +9,7 @@ import {
   objectRates,
   regionCoefficients,
 } from "@/content/calculator";
+import { SelectField } from "@/components/common/select-field";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { formatNumber } from "@/lib/format";
 
@@ -34,9 +35,6 @@ export function RentCalculator() {
     regionCoefficients[0];
 
   const total = calculateAnnualRent(area, type.ratePerM2, region.coefficient);
-
-  const selectClass =
-    "border-input bg-background text-foreground focus-visible:ring-ring hover:border-ring/40 w-full appearance-none rounded-md border px-3 py-2.5 text-sm transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none";
 
   return (
     <SurfaceCard radius="xl" padding="lg">
@@ -77,44 +75,27 @@ export function RentCalculator() {
           </div>
         </div>
 
-        <div>
-          <label htmlFor="calc-type" className="mb-2 block text-sm font-medium">
-            Obyekt turi
-          </label>
-          <select
-            id="calc-type"
-            value={typeValue}
-            onChange={(e) => setTypeValue(e.target.value)}
-            className={selectClass}
-          >
-            {objectRates.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label} ({formatNumber(o.ratePerM2)} so&apos;m/m²/yil)
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          id="calc-type"
+          label="Obyekt turi"
+          value={typeValue}
+          onValueChange={setTypeValue}
+          options={objectRates.map((o) => ({
+            value: o.value,
+            label: `${o.label} (${formatNumber(o.ratePerM2)} so'm/m²/yil)`,
+          }))}
+        />
 
-        <div>
-          <label
-            htmlFor="calc-region"
-            className="mb-2 block text-sm font-medium"
-          >
-            Hudud
-          </label>
-          <select
-            id="calc-region"
-            value={regionValue}
-            onChange={(e) => setRegionValue(e.target.value)}
-            className={selectClass}
-          >
-            {regionCoefficients.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label} (×{r.coefficient})
-              </option>
-            ))}
-          </select>
-        </div>
+        <SelectField
+          id="calc-region"
+          label="Hudud"
+          value={regionValue}
+          onValueChange={setRegionValue}
+          options={regionCoefficients.map((r) => ({
+            value: r.value,
+            label: `${r.label} (×${r.coefficient})`,
+          }))}
+        />
       </div>
 
       <div className="border-border mt-7 rounded-xl border border-dashed p-5">

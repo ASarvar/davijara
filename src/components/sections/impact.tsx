@@ -18,7 +18,7 @@ export async function Impact() {
   return (
     <section
       data-tone="deep"
-      className="border-y border-[color:var(--color-gold)]/12 bg-[linear-gradient(90deg,var(--color-navy),var(--color-navy-mid))]"
+      className="border-hairline border-y bg-[linear-gradient(90deg,var(--color-navy),var(--color-navy-mid))]"
     >
       <Container className="py-14">
         <StatList stats={stats} align="center" />

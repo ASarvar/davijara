@@ -37,10 +37,14 @@ export function LangSwitcher({ className }: { className?: string }) {
             title={localeNames[locale]}
             className={cn(
               "rounded px-2 py-0.5 text-xs leading-5 transition-colors",
-              "border border-[color:var(--color-gold)]/20",
+              // Semantic border tokens, not raw gold: these keep their gold
+              // tint in the brand palette but become solid white / yellow in
+              // high-contrast mode, where a 20%-alpha gold chip outline is
+              // invisible on black.
+              "border-hairline border",
               isActive
-                ? "bg-accent text-accent-foreground border-[color:var(--color-gold)]/50 font-semibold"
-                : "text-muted-foreground hover:text-accent-foreground hover:border-[color:var(--color-gold)]/40",
+                ? "bg-accent text-accent-foreground border-outline font-semibold"
+                : "text-muted-foreground hover:text-accent-foreground hover:border-outline",
             )}
           >
             {localeLabels[locale]}

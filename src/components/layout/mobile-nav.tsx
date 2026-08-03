@@ -38,7 +38,7 @@ export function MobileNav() {
         <Button
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="xl:hidden"
           aria-label={tc("menu")}
         >
           <Menu aria-hidden="true" className="size-5" />

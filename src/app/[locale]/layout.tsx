@@ -10,8 +10,7 @@ import { site } from "@/content/site";
 import { OrganizationJsonLd } from "@/components/json-ld";
 import { AccessibilityScript } from "@/components/layout/accessibility-script";
 import { SkipLink } from "@/components/layout/skip-link";
-import { Topbar } from "@/components/layout/topbar";
-import { Navbar } from "@/components/layout/navbar";
+import { SiteHeader } from "@/components/layout/site-header";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { ScrollToTop } from "@/components/layout/scroll-to-top";
@@ -136,8 +135,7 @@ export default async function LocaleLayout({
         <OrganizationJsonLd />
         <NextIntlClientProvider messages={clientMessages}>
           <SkipLink />
-          <Topbar />
-          <Navbar />
+          <SiteHeader />
           {/*
             Skip-link target. Wrapped in <ViewTransition> so route navigations
             cross-fade instead of snapping; the chrome around it stays put,

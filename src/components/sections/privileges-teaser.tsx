@@ -18,7 +18,7 @@ export async function PrivilegesTeaser() {
   return (
     <Section
       tone="deep"
-      className="bg-[color:var(--color-cobalt)]/6 border-y border-[color:var(--color-gold)]/8"
+      className="bg-[color:var(--color-cobalt)]/6 border-hairline border-y"
     >
       <SectionHeader
         eyebrow={t("eyebrow")}

@@ -20,7 +20,7 @@ export async function Footer() {
   return (
     <footer
       data-tone="deep"
-      className="bg-background text-foreground mt-auto border-t border-[color:var(--color-gold)]/12"
+      className="bg-background text-foreground border-hairline mt-auto border-t"
     >
       <Container className="py-14">
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
@@ -32,7 +32,7 @@ export async function Footer() {
               mark up top — so the header's saving would be undone further
               down the page.
             */}
-            <Logo from="sm" />
+            <Logo variant="footer" />
             <p className="text-muted-foreground mt-4 text-sm">{t("operator")}</p>
             <a
               href={contacts.hotlineHref}

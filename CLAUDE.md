@@ -95,9 +95,14 @@ Scroll reveals are **not** a reason to add `"use client"` — they are pure CSS.
 Filtering and search state belong in the **URL**, not React state. The
 privileges filter is a set of links to real routes (`/imtiyozlar/it`), not a
 click handler — so each view is linkable, back-button-correct, statically
-prerendered, and crawlable. The homepage search is a native GET form with real
-`<select>` elements, which is why it costs zero JavaScript and still works
-before hydration.
+prerendered, and crawlable. The homepage search is a real GET form targeting
+`/obyektlar`, so results stay addressable as `?hudud=&tur=&maydon=&narx=` and
+a search can be linked and indexed. Its dropdowns are shadcn's `Select`
+(Radix, client JS), not native `<select>` elements — a deliberate trade of the
+former zero-JS approach so the open dropdown panel can carry the site's
+rounded/gold-bordered styling, which Chromium won't apply to a native
+`<select>` popup. Radix's hidden bubble `<select>` still submits `name=value`
+on the form, so GET submission needs no `onSubmit` handler of our own.
 
 ### 4. Content flows through the data layer
 
@@ -108,6 +113,46 @@ API can replace their bodies without touching a single component.
 
 Derived values stay derived: privilege category counts are computed from the
 data, never typed into markup.
+
+## Header
+
+`layout/site-header.tsx` is one component, not a topbar stacked on a navbar.
+The brand occupies a tall left column and the two rows stack to its right:
+
+```
+┌───────┬──────────────── phone · email · a11y · lang ──┐
+│ LOGO  ├───────────────────────────────────────────────┤
+└───────┴─ nav links ─────────────────────── Kirish ────┘
+```
+
+This is a two-column grid with the brand explicitly placed across both rows —
+which is *why* the old topbar and navbar had to merge: the logo must be a
+sibling of both rows to span them.
+
+**The full layout starts at `xl`, not `lg`, and that is measured rather than
+arbitrary.** The seven nav labels are long in Uzbek and total 782px; with the
+brand column, the Kirish button, gaps and gutters the row needs **~1214px**.
+At `lg` (1024px) it overflowed the viewport by ~160px, because a `1fr` grid
+track defaults to `min-width: auto` and will not shrink below its content.
+Tracks are therefore `minmax(0, 1fr)`, and 1024–1279px uses the sheet menu.
+
+If you add a nav item, re-measure. The margin at 1280px is only ~48px.
+
+Responsive steps, all verified for overflow at 375 / 640 / 768 / 1024 / 1280:
+
+| Width | Logo | Nav |
+|---|---|---|
+| `< sm` | mark, 30px | sheet |
+| `sm`–`xl` | wordmark, 163px | sheet |
+| `≥ xl` | wordmark, 218px | full row + Kirish |
+
+The logo's file swap (`<picture>` media) and its size steps use *different*
+breakpoints on purpose — the mark exists to save space on a 375px header, but
+the wordmark fits comfortably from `sm`, long before the nav does.
+
+On a handset the utility strip must stay on one line or the sticky header eats
+~130px, so the email is hidden below `sm` and the accessibility trigger goes
+icon-only — with `sr-only` text, never an unlabelled icon.
 
 ## Shared primitives
 
@@ -123,6 +168,15 @@ hover treatments.
 | `ActionLink` | "see all →" links; animates the underline and arrow |
 | `Eyebrow` | uppercase label; `as="h2"` when it IS the section's heading |
 | `StatList` | figure + label grid (hero, impact band) |
+| `SelectField` | labelled native `<select>` with a visible chevron |
+
+**Native `<select>` needs two things or it breaks.** `appearance-none` removes
+the dropdown arrow, so a replacement chevron must be drawn (with
+`pointer-events-none`) or the control looks like a plain text input. And the
+option popup inherits `color` from the select while the UA paints its own
+background — white-on-white on a dark surface. `color-scheme` is bound to the
+tone in `globals.css` to fix that at the root; use `SelectField` and both are
+handled.
 
 `src/components/common/placeholder/` holds inline-SVG imagery. These are
 **abstract architectural motifs, never photographs** — a photo on a listing
@@ -225,8 +279,28 @@ localStorage:
   the goal is uniform legibility rather than brand expression. Note that
   `--muted-foreground` becomes full white — "muted" text must not stay dimmed
   for the users this mode exists for.
-- `data-text-size="large" | "xlarge"` — scales the root font size. Every size
-  in the app is in `rem`, so the whole layout scales with it.
+- `data-text-size="large" | "xlarge"` — scales the root font size. This only
+  works for `rem`-based sizes: a `text-[13.5px]` silently opts an element out
+  of the control entirely. **Never size text in `px`.** Where an exact optical
+  size is needed, write the rem equivalent (`text-[0.84375rem]` === 13.5px at
+  the default root) — the header's nav and utility strip both do this.
+
+### Borders must use the semantic tokens, not raw gold
+
+`--hairline` (structural dividers) and `--outline` (emphasis borders) exist
+precisely so decorative gold rules survive accessibility mode:
+
+| | deep | light | high contrast |
+|---|---|---|---|
+| `border-hairline` | gold @ 12% | gold-ink @ 18% | **white** |
+| `border-outline` | gold @ 40% | gold-ink @ 45% | **yellow** |
+
+Writing `border-gold/12` instead looks correct in the brand palette but is
+invisible in high contrast — a 12%-alpha gold line on pure black is nothing,
+and because the alpha is baked into the utility, overriding `--color-gold`
+cannot rescue it. The tokens carry the alpha themselves so the high-contrast
+block can swap in solid colours. The header's bottom edge, the Kirish button,
+the language chips and the active-nav underline all went through this bug.
 
 `AccessibilityScript` is a **blocking inline script in `<head>`**. It has to
 be: applying the preference from an effect would flash the navy palette on

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { Stat } from "@/types/content";
+import { AnimatedStatValue } from "@/components/common/animated-stat-value";
 
 /*
   Figure + label grid, shared by the hero and the impact band.
@@ -44,9 +45,10 @@ export function StatList({
         >
           <dt className="sr-only">{stat.label}</dt>
           <dd>
-            <span className="font-heading text-accent-foreground block text-3xl font-semibold sm:text-4xl">
-              {stat.value}
-            </span>
+            <AnimatedStatValue
+              value={stat.value}
+              className="font-heading text-accent-foreground block text-3xl font-extrabold sm:text-4xl"
+            />
             <span
               className={cn(
                 "text-muted-foreground mt-1.5 block text-sm",

@@ -23,7 +23,7 @@ function group(intPart: string): string {
   return intPart.replace(/\B(?=(\d{3})+(?!\d))/g, NBSP);
 }
 
-function formatFixed(value: number, maxFractionDigits: number): string {
+export function formatFixed(value: number, maxFractionDigits: number): string {
   const rounded =
     Math.round(value * 10 ** maxFractionDigits) / 10 ** maxFractionDigits;
   const [int, frac] = String(rounded).split(".");

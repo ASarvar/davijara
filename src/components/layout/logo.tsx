@@ -25,10 +25,43 @@ import { site } from "@/content/site";
   `w-auto` would shift the header as the image arrives.
 */
 
+/*
+  Two call sites, two size/breakpoint pairings. Enumerated rather than
+  composed from separate props because Tailwind only sees literal class
+  strings — a template-built class would not survive the build.
+
+  Heights are paired with an explicit width at the SAME aspect ratio as the
+  file (wordmark 313:69, mark 57:69) so the box is correct before the SVG
+  arrives.
+*/
+const VARIANTS = {
+  /*
+    Header. Two independent decisions here, which is why the media query and
+    the size classes use different breakpoints:
+
+      WHICH FILE  — the mark only below `sm`, where a 4.5:1 wordmark would
+                    eat a third of a 375px header. From `sm` there is ample
+                    room, so the wordmark loads.
+      HOW BIG     — 36px tall through the tablet range, growing to 48px at
+                    `xl` where the brand gets its own full-height column.
+
+    Widths are pinned per step at the file's own aspect ratio (mark 57:69,
+    wordmark 313:69) so the box is correct before the SVG arrives.
+  */
+  header: {
+    media: 640,
+    className: "h-9 w-[30px] sm:w-[163px] xl:h-12 xl:w-[218px]",
+  },
+  /** Footer: smaller, and there is room for the wordmark from sm up. */
+  footer: {
+    media: 640,
+    className: "h-8 w-[26px] sm:w-[145px]",
+  },
+} as const;
+
 export function Logo({
   className,
-  /** Breakpoint at which the full wordmark takes over. */
-  from = "sm",
+  variant = "footer",
   /**
    * Set for the header logo, which is above the fold on every page. Leave off
    * elsewhere (the footer) so it loads lazily and stays off the critical path.
@@ -36,16 +69,10 @@ export function Logo({
   priority = false,
 }: {
   className?: string;
-  from?: "sm" | "md" | "lg";
+  variant?: keyof typeof VARIANTS;
   priority?: boolean;
 }) {
-  const media = { sm: 640, md: 768, lg: 1024 }[from];
-
-  const widthClass = {
-    sm: "w-[26px] sm:w-[145px]",
-    md: "w-[26px] md:w-[145px]",
-    lg: "w-[26px] lg:w-[145px]",
-  }[from];
+  const { media, className: sizeClass } = VARIANTS[variant];
 
   return (
     <picture>
@@ -58,7 +85,7 @@ export function Logo({
         fetchPriority={priority ? "high" : "auto"}
         loading={priority ? "eager" : "lazy"}
         decoding="async"
-        className={cn("h-8", widthClass, className)}
+        className={cn(sizeClass, className)}
       />
     </picture>
   );

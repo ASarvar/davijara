@@ -43,8 +43,11 @@
      --color-gold-ink for any gold-toned text on light surfaces. */
   --color-gold-ink: #7d6229;
 
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-outfit);
+  /* Must match the variable names exported from src/app/fonts.ts. Roboto
+     carries the cyrillic subset, so it is the body face the /ru locale needs;
+     Inter is latin-only and used for display. */
+  --font-sans: var(--font-roboto);
+  --font-heading: var(--font-inter);
 
   /* Legacy radius scale, preserved exactly (8 / 14 / 20 / 28). */
   --radius-sm: 8px;
@@ -83,6 +86,22 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  /*
+    Two border tokens that exist specifically so decorative gold rules survive
+    accessibility mode.
+
+      --hairline  structural dividers (header/footer edges, section rules)
+      --outline   emphasis borders (buttons, the active language chip)
+
+    Writing these as `border-gold/12` instead looks right in the brand palette
+    but is invisible in high contrast: a 12%-alpha gold line on pure black is
+    effectively nothing, and the alpha means overriding --color-gold cannot
+    rescue it. These tokens carry the alpha themselves, so the high-contrast
+    block can replace them with solid white / solid yellow.
+  */
+  --color-hairline: var(--hairline);
+  --color-outline: var(--outline);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -92,6 +111,17 @@
 
 /* ── DEEP tone (default) ─────────────────────────────────────────────── */
 :root {
+  /*
+    Tells the browser to render NATIVE UI — <select> popups, scrollbars, date
+    pickers — in its dark palette. Without this, an <option> list opens with
+    the UA's white popup background while inheriting our light `color` from
+    the <select>, so the text is white-on-white and unreadable.
+
+    This is the standards-correct fix; explicitly colouring <option> only
+    patches the browsers that let you.
+  */
+  color-scheme: dark;
+
   --radius: 20px;
 
   --background: #07102b;
@@ -121,6 +151,9 @@
   --input: rgba(255, 255, 255, 0.12);
   --ring: #c8a96e;
 
+  --hairline: rgba(200, 169, 110, 0.12);
+  --outline: rgba(200, 169, 110, 0.4);
+
   --chart-1: #c8a96e;
   --chart-2: #1a3a7c;
   --chart-3: #e8d5a8;
@@ -130,6 +163,9 @@
 
 /* ── LIGHT tone ──────────────────────────────────────────────────────── */
 [data-tone="light"] {
+  /* Native controls inside a bone section follow the light palette. */
+  color-scheme: light;
+
   --background: #f4f2ee;
   --foreground: #07102b;
 
@@ -157,6 +193,9 @@
   --border: #e8e4dc;
   --input: #d8d3c8;
   --ring: #7d6229;
+
+  --hairline: rgba(125, 98, 41, 0.18);
+  --outline: rgba(125, 98, 41, 0.45);
 
   --chart-1: #7d6229;
   --chart-2: #1a3a7c;
@@ -217,6 +256,15 @@
   --input: #ffffff;
   --ring: #ffff00;
 
+  /*
+    Full opacity, not a tint. These are decorative gold rules in the brand
+    palette; here they have to be real lines, or the header's bottom edge,
+    the Kirish button and the active language chip all lose their boundary
+    on a black background.
+  */
+  --hairline: #ffffff;
+  --outline: #ffff00;
+
   color: var(--foreground);
   background-color: var(--background);
 }
@@ -260,6 +308,18 @@
   h4,
   h5 {
     @apply font-heading;
+  }
+
+  /*
+    Belt-and-braces for the <select> popup. `color-scheme` above is the real
+    fix and handles the popup chrome; these give the option rows explicit
+    colours in the browsers that honour them, so the list matches the section
+    tone instead of relying on the UA's idea of "dark".
+  */
+  select option,
+  select optgroup {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
   }
 
   /* Focus is invisible in the legacy site. Make it unmissable — this is a
@@ -360,6 +420,28 @@
   }
   .word-rotator > em:nth-of-type(1) {
     opacity: 1;
+  }
+}
+
+/*
+  Pulsing dot for the hero eyebrow pill, ported from legacy
+  `.hero-eyebrow::before` (styles.css:347-354). A plain infinite decorative
+  loop, not an entrance/reveal — the data-enter/data-reveal safety rules
+  above don't apply to it.
+*/
+@keyframes eyebrowPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .eyebrow-pulse-dot {
+    animation: eyebrowPulse 2s ease-in-out infinite;
   }
 }
 

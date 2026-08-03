@@ -1,4 +1,4 @@
-import { Inter, Outfit } from "next/font/google";
+import { Roboto, Inter } from "next/font/google";
 
 /*
   The legacy site declared these two families in styles.css but loaded Noto
@@ -14,18 +14,18 @@ import { Inter, Outfit } from "next/font/google";
     cyrillic  — required for the /ru locale
 */
 
-export const inter = Inter({
+export const roboto = Roboto({
   subsets: ["latin", "latin-ext", "cyrillic"],
-  variable: "--font-inter",
+  variable: "--font-roboto",
   display: "swap",
 });
 
 // Display face — headings only, so it can skip cyrillic and let Russian
 // headings fall back to Inter rather than shipping a subset nothing uses.
-export const outfit = Outfit({
+export const inter = Inter({
   subsets: ["latin", "latin-ext"],
-  variable: "--font-outfit",
+  variable: "--font-inter",
   display: "swap",
 });
 
-export const fontVariables = `${inter.variable} ${outfit.variable}`;
+export const fontVariables = `${roboto.variable} ${inter.variable}`;
