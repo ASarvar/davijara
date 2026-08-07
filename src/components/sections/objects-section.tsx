@@ -5,6 +5,7 @@ import {
   isEmptyQuery,
   parseListingQuery,
   summariseByRegion,
+  withFilters,
 } from "@/lib/data/listings";
 import { ActionLink } from "@/components/common/action-link";
 import { Section, SectionHeader } from "@/components/layout/section";
@@ -32,20 +33,14 @@ export async function ObjectsSection({
   const summaries = summariseByRegion(listings);
 
   /*
-    Carry the active filters into the "see all" link. Without this, following
-    it from a filtered homepage would silently drop the search and land the
-    reader on the full catalogue — the filters are in the URL, so they have to
-    be copied across explicitly.
+    Both links out of this section carry the active filters. Following either
+    one from a filtered homepage used to drop the search, landing the reader on
+    a different result set than the one they were looking at — filters live in
+    the URL, so they have to be copied across explicitly.
+
+    `withFilters` is the single place that knows which keys those are.
   */
-  const forwarded = new URLSearchParams();
-  for (const key of ["hudud", "tur", "maydon", "narx"] as const) {
-    const raw = searchParams[key];
-    const value = Array.isArray(raw) ? raw[0] : raw;
-    if (value && value !== "all") forwarded.set(key, value);
-  }
-  const moreHref = forwarded.size
-    ? `/obyektlar?${forwarded}`
-    : "/obyektlar";
+  const moreHref = withFilters("/obyektlar", searchParams);
 
   return (
     <Section tone="deep" id="obyektlar-xarita" className="scroll-mt-24">
@@ -53,7 +48,7 @@ export async function ObjectsSection({
         eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
-        action={<ActionLink href="/obyektlar">Barcha obyektlar</ActionLink>}
+        action={<ActionLink href={moreHref}>Barcha obyektlar</ActionLink>}
       />
 
       {/*

@@ -33,6 +33,8 @@ export function SelectField({
   value,
   defaultValue,
   onValueChange,
+  disabled = false,
+  placeholder,
   className,
 }: {
   id: string;
@@ -45,6 +47,10 @@ export function SelectField({
   /** Uncontrolled starting value — e.g. a GET form submitted via `name`. */
   defaultValue?: string;
   onValueChange?: (value: string) => void;
+  /** For a select whose options depend on another field not yet chosen. */
+  disabled?: boolean;
+  /** Shown when there is no value — e.g. the reason a select is disabled. */
+  placeholder?: string;
   className?: string;
 }) {
   return (
@@ -61,12 +67,13 @@ export function SelectField({
         value={value}
         defaultValue={value === undefined ? defaultValue : undefined}
         onValueChange={onValueChange}
+        disabled={disabled}
       >
         <SelectTrigger
           id={id}
-          className="border-input bg-card text-foreground hover:border-ring/50 data-[size=default]:h-11 w-full rounded-md px-3 text-sm"
+          className="border-input bg-card text-foreground hover:border-ring/50 data-[size=default]:h-11 w-full rounded-md px-3 text-sm disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <SelectValue />
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (

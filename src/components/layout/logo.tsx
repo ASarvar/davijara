@@ -42,15 +42,19 @@ const VARIANTS = {
       WHICH FILE  — the mark only below `sm`, where a 4.5:1 wordmark would
                     eat a third of a 375px header. From `sm` there is ample
                     room, so the wordmark loads.
-      HOW BIG     — 36px tall through the tablet range, growing to 48px at
-                    `xl` where the brand gets its own full-height column.
+      HOW BIG     — 40px tall through the tablet range, growing to 52px at
+                    `xl`, where the nav row is wide enough to carry it.
+
+    The `xl` step is capped by the nav, not by taste: logo + seven nav labels
+    + Kirish has to fit the 1200px container, and 236px is what is left over
+    with ~50px of slack. Growing it further wraps the nav onto a second line.
 
     Widths are pinned per step at the file's own aspect ratio (mark 57:69,
     wordmark 313:69) so the box is correct before the SVG arrives.
   */
   header: {
     media: 640,
-    className: "h-9 w-[30px] sm:w-[163px] xl:h-12 xl:w-[218px]",
+    className: "h-10 w-[33px] sm:w-[181px] xl:h-13 xl:w-[236px]",
   },
   /** Footer: smaller, and there is room for the wordmark from sm up. */
   footer: {

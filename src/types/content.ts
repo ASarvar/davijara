@@ -37,11 +37,28 @@ export interface Listing {
   /** Region slug, matches Region.slug. */
   region: string;
   address: string;
-  type: ListingType;
+  /**
+   * Optional because the auction service does not classify its lots — it
+   * returns no type field at all. Deriving one from the lot name ("… xonasi"
+   * → noturar) would be a guess about a specific state asset, so live lots
+   * carry no type rather than a plausible-looking invented one. Only the
+   * verified local records set it.
+   */
+  type?: ListingType;
+  /** Tuman/shahar within the region, when upstream supplies it. */
+  district?: string;
   /** Square metres. */
   area: number;
   /** Annual rent in so'm. */
   pricePerYear: number;
+  /** ISO 8601 auction date, server-provided so no client clock is involved. */
+  auctionDate?: string;
+  /**
+   * Upstream's own words for where the lot is in the auction process. Shown
+   * verbatim, never re-worded: it is the difference between a lot a citizen
+   * can still bid on and one that has already concluded.
+   */
+  lotStatus?: string;
   /** WGS84 coordinates — required to place the lot on the map. */
   lat: number;
   lng: number;
@@ -60,6 +77,8 @@ export interface Listing {
 /** Filters shared by the search form, the map and the region list. */
 export interface ListingQuery {
   region?: string;
+  /** Tuman/shahar name, exactly as upstream spells it. */
+  district?: string;
   type?: ListingType;
   minArea?: number;
   maxArea?: number;
@@ -85,13 +104,20 @@ export interface RegionSummary {
   maxPrice: number;
   /** Mean annual rent across the matching lots. */
   avgPrice: number;
-  /** Most common lot type in the region, for a one-glance label. */
+  /** Most common lot type, where the source classifies lots at all. */
   topType?: ListingType;
+  /** Distinct tumans represented — the live data's stand-in for `topType`. */
+  districtCount?: number;
 }
 
 export interface Region {
   slug: string;
   name: string;
+  /**
+   * Numeric id the auction service knows this region by. Required on every
+   * request — see the note in content/regions.ts before changing one.
+   */
+  apiId: number;
   /** Count of currently available objects. */
   objectCount: number;
   lat: number;

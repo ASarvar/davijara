@@ -40,6 +40,9 @@
   "search": {
     "label": "Ijara obyektini qidirish",
     "region": "Hudud",
+    "district": "Tuman / shahar",
+    "anyDistrict": "Barcha tumanlar",
+    "regionFirst": "Avval hududni tanlang",
     "type": "Obyekt turi",
     "area": "Maydon, m²",
     "price": "Narx (yillik)",

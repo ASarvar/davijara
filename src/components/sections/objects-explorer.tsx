@@ -16,7 +16,7 @@ import { Link } from "@/i18n/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { ImagePlaceholder } from "@/components/common/placeholder/image-placeholder";
-import { formatArea, formatNumber, formatSom } from "@/lib/format";
+import { formatArea, formatDate, formatNumber, formatSom } from "@/lib/format";
 import type { Listing, RegionSummary } from "@/types/content";
 
 /*
@@ -59,7 +59,17 @@ const TYPE_LABELS: Record<string, string> = {
 
 /* ── Region total ─────────────────────────────────────────────────────── */
 
-function RegionCard({
+/*
+  Region totals are a LIST, not a grid of cards.
+
+  A card implies a thing you look at; these are four numbers per region whose
+  whole purpose is to be compared down the column — "where is there most
+  space, and where is it cheapest". Cards scatter those figures across a grid
+  so no two are ever vertically aligned, and they carry an image well that has
+  no image to put in it. Fixed-width, right-aligned metric columns line the
+  numbers up, which is what makes the set scannable.
+*/
+function RegionRow({
   summary,
   index,
 }: {
@@ -67,58 +77,65 @@ function RegionCard({
   index: number;
 }) {
   return (
-    <SurfaceCard
-      as="li"
-      radius="md"
-      padding="none"
-      interactive
-      data-reveal="up"
-      style={{ "--i": index % 4 } as React.CSSProperties}
-      className="group overflow-hidden"
-    >
+    <li data-reveal="up" style={{ "--i": index % 6 } as React.CSSProperties}>
       <Link
         href={`/obyektlar?hudud=${summary.slug}`}
-        className="flex h-full flex-col"
+        className="group hover:bg-secondary/60 focus-visible:ring-ring flex flex-col gap-3 px-4 py-3.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:-outline-offset-2 sm:flex-row sm:items-center sm:gap-6"
       >
-        <div className="relative aspect-[16/7]">
-          <ImagePlaceholder />
-          <span className="bg-[color:var(--color-navy)]/85 text-[color:var(--color-gold-light)] absolute top-2.5 left-2.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur-sm">
-            {formatNumber(summary.count)} ta obyekt
-          </span>
+        <div className="flex min-w-0 flex-1 items-start gap-2.5">
+          <MapPin
+            aria-hidden="true"
+            className="text-accent-foreground mt-0.5 size-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5"
+          />
+          <div className="min-w-0">
+            <h3 className="group-hover:text-accent-foreground truncate text-sm font-semibold transition-colors duration-200">
+              {summary.name}
+            </h3>
+            {/* `topType` needs a source that classifies lots; the live service
+                does not, so districts stand in. Both are derived from the
+                matching set — neither is ever typed into markup. */}
+            {summary.topType ? (
+              <p className="text-muted-foreground mt-0.5 truncate text-xs">
+                Asosan: {TYPE_LABELS[summary.topType] ?? summary.topType}
+              </p>
+            ) : summary.districtCount ? (
+              <p className="text-muted-foreground mt-0.5 truncate text-xs">
+                {formatNumber(summary.districtCount)} ta tuman va shaharda
+              </p>
+            ) : null}
+          </div>
         </div>
 
-        <div className="flex flex-1 flex-col p-4">
-          <h3 className="group-hover:text-accent-foreground flex items-start gap-2 text-sm font-semibold transition-colors duration-200">
-            <MapPin
-              aria-hidden="true"
-              className="text-accent-foreground mt-0.5 size-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5"
-            />
-            {summary.name}
-          </h3>
+        {/* Indented to the heading below sm, where the row stacks. */}
+        <dl className="flex shrink-0 items-baseline gap-5 pl-[1.625rem] sm:gap-8 sm:pl-0">
+          <div className="sm:w-20 sm:text-right">
+            <dt className="text-muted-foreground text-[11px]">Obyektlar</dt>
+            <dd className="mt-0.5 text-sm font-medium">
+              {formatNumber(summary.count)} ta
+            </dd>
+          </div>
+          <div className="sm:w-28 sm:text-right">
+            <dt className="text-muted-foreground text-[11px]">Umumiy maydon</dt>
+            <dd className="mt-0.5 text-sm font-medium">
+              {formatArea(summary.totalArea)}
+            </dd>
+          </div>
+          <div className="sm:w-36 sm:text-right">
+            <dt className="text-muted-foreground text-[11px]">
+              O&apos;rtacha narx
+            </dt>
+            <dd className="text-accent-foreground mt-0.5 text-sm font-semibold">
+              {formatSom(summary.avgPrice)}
+            </dd>
+          </div>
+        </dl>
 
-          {summary.topType ? (
-            <p className="text-muted-foreground mt-1.5 pl-6 text-xs">
-              Asosan: {TYPE_LABELS[summary.topType] ?? summary.topType}
-            </p>
-          ) : null}
-
-          <dl className="border-border mt-3 grid grid-cols-2 gap-x-3 gap-y-2 border-t pt-3 text-xs">
-            <div>
-              <dt className="text-muted-foreground">Umumiy maydon</dt>
-              <dd className="mt-0.5 font-medium">
-                {formatArea(summary.totalArea)}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">O&apos;rtacha narx</dt>
-              <dd className="text-accent-foreground mt-0.5 font-semibold">
-                {formatSom(summary.avgPrice)}
-              </dd>
-            </div>
-          </dl>
-        </div>
+        <ChevronRight
+          aria-hidden="true"
+          className="text-muted-foreground group-hover:text-accent-foreground hidden size-4 shrink-0 transition-all duration-200 group-hover:translate-x-0.5 sm:block"
+        />
       </Link>
-    </SurfaceCard>
+    </li>
   );
 }
 
@@ -150,7 +167,28 @@ function ListingCard({
         className="flex h-full flex-col"
       >
         <div className="relative aspect-[16/9]">
-          <ImagePlaceholder />
+          {/*
+            A photo only when upstream actually supplies one for THIS lot —
+            otherwise the placeholder. Never a stock image: on a state portal a
+            photograph on a lot card reads as a photograph of that lot.
+
+            Plain <img>, not next/image: these are remote files on a host we do
+            not control, and optimising them would proxy every one through our
+            own server for no gain. `loading="lazy"` keeps them off the
+            critical path.
+          */}
+          {listing.image ? (
+            // eslint-disable-next-line @next/next/no-img-element -- remote lot photo on a host we do not control; see above.
+            <img
+              src={listing.image}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <ImagePlaceholder />
+          )}
           {listing.isMock ? (
             <span className="bg-[color:var(--color-navy)]/85 text-[color:var(--color-gold-light)] absolute top-2.5 right-2.5 rounded-full px-2.5 py-0.5 text-[11px] backdrop-blur-sm">
               Namunaviy
@@ -164,22 +202,46 @@ function ListingCard({
           </h3>
 
           <p className="text-muted-foreground mt-1.5 text-xs">
+            {listing.district ? `${listing.district} · ` : ""}
             {regionName} · {formatArea(listing.area)}
             {listing.lotNumber ? ` · Lot №${listing.lotNumber}` : ""}
           </p>
 
+          {/*
+            No lot status on the card. It is still read in the data layer —
+            `isOpenForApplications` drops concluded lots before they ever reach
+            here — so every card on screen is open for applications and saying
+            so on each one adds nothing.
+
+            Label above value on both sides, so the two read as a matched pair.
+            "so'm" stays on the number because `formatSom` returns "1,1 mln"
+            with no currency of its own; without it the card would show a sum
+            of money with no unit.
+          */}
           <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-3">
             <span>
+              <span className="text-muted-foreground block text-[11px]">
+                Boshlang&apos;ich narx
+              </span>
               <span className="font-heading text-accent-foreground block text-base font-semibold">
-                {formatSom(listing.pricePerYear)}
-              </span>
-              <span className="text-muted-foreground text-[11px]">
-                so&apos;m / yil boshiga
+                {formatSom(listing.pricePerYear)} so&apos;m
               </span>
             </span>
-            <span className="text-muted-foreground text-[11px] capitalize">
-              {TYPE_LABELS[listing.type] ?? listing.type}
-            </span>
+
+            {listing.auctionDate ? (
+              <span className="shrink-0 text-right">
+                <span className="text-muted-foreground block text-[11px]">
+                  Savdo kuni
+                </span>
+                <span className="block text-xs font-medium">
+                  {formatDate(listing.auctionDate)}
+                </span>
+              </span>
+            ) : listing.type ? (
+              <span className="text-muted-foreground shrink-0 text-right text-[11px]">
+                {TYPE_LABELS[listing.type]}
+              </span>
+            ) : null}
           </div>
         </div>
       </a>
@@ -472,9 +534,9 @@ export function ObjectsExplorer({
               ) : null}
             </>
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="border-border divide-border divide-y overflow-hidden rounded-xl border">
               {summaries.map((summary, i) => (
-                <RegionCard key={summary.slug} summary={summary} index={i} />
+                <RegionRow key={summary.slug} summary={summary} index={i} />
               ))}
             </ul>
           )}

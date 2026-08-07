@@ -28,6 +28,9 @@
   "search": {
     "label": "Search for a rental object",
     "region": "Region",
+    "district": "District / city",
+    "anyDistrict": "All districts",
+    "regionFirst": "Select a region first",
     "type": "Object type",
     "area": "Area, m²",
     "price": "Price (annual)",

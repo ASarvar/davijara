@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import {
+  buildFilterQuery,
   getListings,
   isEmptyQuery,
   parseListingQuery,
@@ -45,13 +46,12 @@ export default async function ObjectsPage({
     link-building function: functions cannot cross the server/client boundary,
     and doing so threw "Functions cannot be passed directly to Client
     Components" — a 500 on every request here.
+
+    Built by `buildFilterQuery` so the pager cannot drift out of step with the
+    parser again; hand-listing the keys here is what dropped `tuman` from every
+    page link.
   */
-  const filterParams = new URLSearchParams();
-  for (const key of ["hudud", "tur", "maydon", "narx"] as const) {
-    const raw = sp[key];
-    const value = Array.isArray(raw) ? raw[0] : raw;
-    if (value && value !== "all") filterParams.set(key, value);
-  }
+  const filterParams = buildFilterQuery(sp);
 
   return (
     <>

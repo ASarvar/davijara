@@ -2,6 +2,8 @@ import { Search } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { getRegionOptions } from "@/lib/data/catalog";
+import { getDistrictsByRegion } from "@/lib/data/listings";
+import { RegionDistrictFields } from "./region-district-fields";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { ALL_VALUE, SelectField } from "@/components/common/select-field";
 import { Container } from "@/components/layout/section";
@@ -49,8 +51,19 @@ export async function SearchWidget({
     return v && v.length > 0 ? v : ALL_VALUE;
   };
 
+  // The whole region→district map, so the tuman dropdown can narrow the
+  // instant a region is picked rather than after a submit. Reads through the
+  // same cached per-region fetches the results do.
+  const districtsByRegion = await getDistrictsByRegion();
+
+  /*
+    `bg-band` + `border-hairline`, not `bg-navy-mid` + `border-border`: raw
+    brand values do not flip in accessibility mode, so this panel used to stay
+    navy — with a near-invisible edge — while the rest of the page went black.
+    Same fix as the header's utility strip.
+  */
   return (
-    <section data-tone="deep" className="bg-navy-mid border-border border-y">
+    <section data-tone="deep" className="bg-band border-hairline border-y">
       <Container className="py-16">
         <Eyebrow as="h2" className="mb-4">
           {t("label")}
@@ -67,26 +80,32 @@ export async function SearchWidget({
           method="get"
           className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
         >
-          <SelectField
-            id="hudud"
-            name="hudud"
-            label={t("region")}
-            defaultValue={current("hudud")}
-            options={[{ value: ALL_VALUE, label: t("anyRegion") }, ...regions]}
-          />
+          {/*
+            Hudud + Tuman are one coupled control — picking a region has to
+            narrow the district list immediately, so they live in a small
+            client island together. See region-district-fields.tsx.
 
-          <SelectField
-            id="tur"
-            name="tur"
-            label={t("type")}
-            defaultValue={current("tur")}
-            options={[
-              { value: ALL_VALUE, label: t("anyType") },
-              { value: "noturar", label: t("types.noturar") },
-              { value: "turar", label: t("types.turar") },
-              { value: "ishlab-chiqarish", label: t("types.ishlab-chiqarish") },
-              { value: "mamuriy", label: t("types.mamuriy") },
-            ]}
+            Tuman occupies the slot "Obyekt turi" used to. The auction service
+            returns no property classification, so a type filter could only be
+            populated by inferring a type from the lot's name — a guess about a
+            specific state asset, which this portal does not make. District is
+            the real second axis the data supports.
+
+            `tur` is still honoured by parseListingQuery, so old links keep
+            their meaning against the typed fallback records.
+          */}
+          <RegionDistrictFields
+            regions={regions}
+            districtsByRegion={districtsByRegion}
+            initialRegion={current("hudud")}
+            initialDistrict={current("tuman")}
+            labels={{
+              region: t("region"),
+              anyRegion: t("anyRegion"),
+              district: t("district"),
+              anyDistrict: t("anyDistrict"),
+              regionFirst: t("regionFirst"),
+            }}
           />
 
           <SelectField
@@ -94,11 +113,19 @@ export async function SearchWidget({
             name="maydon"
             label={t("area")}
             defaultValue={current("maydon")}
+            /*
+              Edges taken from the live catalogue's quartiles, not round
+              numbers. The previous set started at 50 m², which against real
+              data made 59% of lots — every kiosk, ATM bay and technical plot,
+              780 of 1319 — unreachable by ANY choice in the dropdown. These
+              five each hold 6–30% of the catalogue.
+            */
             options={[
               { value: ALL_VALUE, label: t("anyArea") },
+              { value: "0-10", label: "0 — 10" },
+              { value: "10-50", label: "10 — 50" },
               { value: "50-200", label: "50 — 200" },
-              { value: "200-500", label: "200 — 500" },
-              { value: "500-1000", label: "500 — 1000" },
+              { value: "200-1000", label: "200 — 1000" },
               { value: "1000-", label: "1000+" },
             ]}
           />
@@ -108,12 +135,18 @@ export async function SearchWidget({
             name="narx"
             label={t("price")}
             defaultValue={current("narx")}
+            /*
+              Also from the live quartiles. "10 mln+" used to collect 39% of
+              the catalogue in one bucket, across a range running to 2 224 mln
+              — too coarse to narrow anything.
+            */
             options={[
               { value: ALL_VALUE, label: t("anyPrice") },
               { value: "0-1", label: "0 — 1 mln" },
               { value: "1-5", label: "1 — 5 mln" },
-              { value: "5-10", label: "5 — 10 mln" },
-              { value: "10-", label: "10 mln+" },
+              { value: "5-20", label: "5 — 20 mln" },
+              { value: "20-100", label: "20 — 100 mln" },
+              { value: "100-", label: "100 mln+" },
             ]}
           />
 

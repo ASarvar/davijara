@@ -102,6 +102,18 @@
   --color-hairline: var(--hairline);
   --color-outline: var(--outline);
 
+  /*
+    A band lifted one step off the page surface: the header's utility strip
+    and the search panel. Both sit between full-width sections and read as
+    "raised" rather than as a section of their own.
+
+    A token rather than `bg-navy-mid` for the same reason as the two above: a
+    raw brand colour does not flip in high contrast, so these bands would stay
+    navy while the rest of the page went black — and they are the two widest
+    bands on the site.
+  */
+  --color-band: var(--band);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -153,6 +165,10 @@
 
   --hairline: rgba(200, 169, 110, 0.12);
   --outline: rgba(200, 169, 110, 0.4);
+
+  /* Muted text on this composites to ~5.7:1 — above AA. Lightening it further
+     would drop the utility strip's links below the threshold. */
+  --band: #0d1e45;
 
   --chart-1: #c8a96e;
   --chart-2: #1a3a7c;
@@ -264,6 +280,10 @@
   */
   --hairline: #ffffff;
   --outline: #ffff00;
+
+  /* Black like everything else; the white --hairline around them is what keeps
+     these bands distinct without reintroducing a second background. */
+  --band: #000000;
 
   color: var(--foreground);
   background-color: var(--background);

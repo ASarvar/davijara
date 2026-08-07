@@ -39,7 +39,14 @@ const csp = [
     renders. The legacy site scraped Google's tiles instead, against their
     terms; that is not restored.
   */
-  "img-src 'self' data: blob: https://*.basemaps.cartocdn.com",
+  /*
+    `media.e-auksion.uz` is where the auction service stores lot photographs.
+    Allowed here so that the day the listings API returns a photo reference,
+    the image renders instead of being silently blocked — the file names are
+    opaque content hashes, so they can only ever arrive as data, never be
+    constructed from a lot number.
+  */
+  "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://media.e-auksion.uz",
   "font-src 'self' data:",
   // Dev needs the HMR websocket.
   `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
