@@ -29,7 +29,17 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  /*
+    Carto's basemap CDN serves the Leaflet map tiles. They are plain raster
+    <img> requests made by Leaflet, so the tile hosts must be allowed here or
+    the map renders as an empty grid — Next's image config has no say in it.
+    Scoped to the specific CDN rather than a wildcard.
+
+    Carto basemaps are free for this use with attribution, which the map
+    renders. The legacy site scraped Google's tiles instead, against their
+    terms; that is not restored.
+  */
+  "img-src 'self' data: blob: https://*.basemaps.cartocdn.com",
   "font-src 'self' data:",
   // Dev needs the HMR websocket.
   `connect-src 'self'${isDev ? " ws: wss:" : ""}`,

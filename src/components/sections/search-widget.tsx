@@ -21,10 +21,33 @@ import { Container } from "@/components/layout/section";
  * hidden bubble `<select>` still submits `name=value` on this form, so GET
  * submission keeps working with no `onSubmit` handler of our own.
  */
-export async function SearchWidget() {
+export async function SearchWidget({
+  /**
+   * Where the form submits. Defaults to the homepage's own explorer anchor, so
+   * a search filters the map and region list directly below the panel instead
+   * of navigating away. /obyektlar passes its own path to filter in place.
+   */
+  action,
+  /**
+   * Current values from the URL. Without these the form resets to "Barcha
+   * hududlar" after each submit, so the user cannot see what is filtered or
+   * change one field without re-entering the rest.
+   */
+  values,
+}: {
+  action?: string;
+  values?: Record<string, string | string[] | undefined>;
+} = {}) {
   const t = await getTranslations("search");
   const locale = await getLocale();
   const regions = await getRegionOptions();
+
+  /** Reads a param back, falling back to the "all" sentinel. */
+  const current = (key: string) => {
+    const raw = values?.[key];
+    const v = Array.isArray(raw) ? raw[0] : raw;
+    return v && v.length > 0 ? v : ALL_VALUE;
+  };
 
   return (
     <section data-tone="deep" className="bg-navy-mid border-border border-y">
@@ -33,8 +56,14 @@ export async function SearchWidget() {
           {t("label")}
         </Eyebrow>
 
+        {/*
+          Still a plain GET form. Submitting reloads with the filters in the
+          URL, which is what makes a result set linkable and lets the server
+          send only matching records. The `#obyektlar-xarita` fragment drops
+          the reader at the explorer rather than back at the top of the page.
+        */}
         <form
-          action={`/${locale}/obyektlar`}
+          action={action ?? `/${locale}#obyektlar-xarita`}
           method="get"
           className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
         >
@@ -42,7 +71,7 @@ export async function SearchWidget() {
             id="hudud"
             name="hudud"
             label={t("region")}
-            defaultValue={ALL_VALUE}
+            defaultValue={current("hudud")}
             options={[{ value: ALL_VALUE, label: t("anyRegion") }, ...regions]}
           />
 
@@ -50,7 +79,7 @@ export async function SearchWidget() {
             id="tur"
             name="tur"
             label={t("type")}
-            defaultValue={ALL_VALUE}
+            defaultValue={current("tur")}
             options={[
               { value: ALL_VALUE, label: t("anyType") },
               { value: "noturar", label: t("types.noturar") },
@@ -64,7 +93,7 @@ export async function SearchWidget() {
             id="maydon"
             name="maydon"
             label={t("area")}
-            defaultValue={ALL_VALUE}
+            defaultValue={current("maydon")}
             options={[
               { value: ALL_VALUE, label: t("anyArea") },
               { value: "50-200", label: "50 — 200" },
@@ -78,7 +107,7 @@ export async function SearchWidget() {
             id="narx"
             name="narx"
             label={t("price")}
-            defaultValue={ALL_VALUE}
+            defaultValue={current("narx")}
             options={[
               { value: ALL_VALUE, label: t("anyPrice") },
               { value: "0-1", label: "0 — 1 mln" },

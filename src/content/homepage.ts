@@ -142,6 +142,11 @@ export const featuredListings: Listing[] = [
     type: "noturar",
     area: 126,
     pricePerYear: 86_400_000,
+    // District centres, not surveyed plot coordinates — precise positions
+    // should arrive with the listings API rather than be guessed here.
+    lat: 41.2802,
+    lng: 69.2418,
+    lotNumber: "24364329",
     auctionUrl: "https://e-auksion.uz/lot-view?lot_id=24364329",
   },
   {
@@ -152,6 +157,9 @@ export const featuredListings: Listing[] = [
     type: "ishlab-chiqarish",
     area: 480,
     pricePerYear: 124_000_000,
+    lat: 39.8993,
+    lng: 66.2536,
+    lotNumber: "24364512",
   },
   {
     id: "lot-24364718",
@@ -161,6 +169,9 @@ export const featuredListings: Listing[] = [
     type: "mamuriy",
     area: 92,
     pricePerYear: 51_700_000,
+    lat: 40.3894,
+    lng: 71.7869,
+    lotNumber: "24364718",
   },
 ];
 

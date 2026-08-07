@@ -3,7 +3,7 @@ import type { Locale } from "@/i18n/routing";
 
 import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/sections/search-widget";
-import { RegionGrid } from "@/components/sections/region-grid";
+import { ObjectsSection } from "@/components/sections/objects-section";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { FeaturedListings } from "@/components/sections/featured-listings";
 import { Services } from "@/components/sections/services";
@@ -15,27 +15,30 @@ import { Partners } from "@/components/sections/partners";
 
 export default async function HomePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  // Next.js 16: searchParams is async.
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
+  const sp = await searchParams;
 
   /*
-    Every section is a Server Component — the homepage ships no page-level
-    JavaScript at all. The only client code on this route is the nav's active-
-    link highlighting and the mobile menu, both in the shared layout.
+    Tone rhythm: deep and light alternate down the page. Each section sets its
+    own tone, and `data-tone` re-binds the colour tokens for that subtree.
 
-    Tone rhythm: deep and light alternate down the page. Previously nine of
-    eleven sections were deep, so the light tone read as an accident rather
-    than a cadence. Each section sets its own tone (see the component), and
-    `data-tone` re-binds the colour tokens for that subtree.
+    On rendering: reading `searchParams` opts this route into dynamic
+    rendering. That is the deliberate cost of letting the search panel filter
+    the map and the region list in place. Every other section is still a
+    Server Component, and the map is code-split so it never blocks paint.
   */
   return (
     <>
       <Hero />
-      <SearchWidget />
-      <RegionGrid />
+      <SearchWidget values={sp} />
+      <ObjectsSection searchParams={sp} />
       <HowItWorks />
       <FeaturedListings />
       <Services />

@@ -42,9 +42,51 @@ export interface Listing {
   area: number;
   /** Annual rent in so'm. */
   pricePerYear: number;
+  /** WGS84 coordinates — required to place the lot on the map. */
+  lat: number;
+  lng: number;
+  /** Lot number as shown on e-auksion.uz. */
+  lotNumber?: string;
   image?: string;
   /** Deep link to the e-auksion lot, when one exists. */
   auctionUrl?: string;
+  /**
+   * True for generated sample records. The UI surfaces this so a mock lot is
+   * never mistaken for a real state asset — see lib/data/listings.ts.
+   */
+  isMock?: boolean;
+}
+
+/** Filters shared by the search form, the map and the region list. */
+export interface ListingQuery {
+  region?: string;
+  type?: ListingType;
+  minArea?: number;
+  maxArea?: number;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+/**
+ * Per-region aggregate, computed from whatever set the current filters match.
+ * This is what the "Ro'yxat" tab renders — a summary of each region rather
+ * than a wall of individual lots.
+ */
+export interface RegionSummary {
+  slug: string;
+  name: string;
+  lat: number;
+  lng: number;
+  /** Lots matching the active filters in this region. */
+  count: number;
+  /** Combined floor area of those lots, m². */
+  totalArea: number;
+  minPrice: number;
+  maxPrice: number;
+  /** Mean annual rent across the matching lots. */
+  avgPrice: number;
+  /** Most common lot type in the region, for a one-glance label. */
+  topType?: ListingType;
 }
 
 export interface Region {

@@ -625,3 +625,89 @@
   }
 }
 
+
+/*
+  ── Leaflet map skin ─────────────────────────────────────────────────────
+
+  Leaflet ships its own chrome (zoom buttons, popups, attribution) styled for
+  a default light page. These overrides bring it onto the brand palette so the
+  map does not look like a third-party widget dropped into the section.
+
+  Written against Leaflet's own class names rather than by passing options,
+  because the plugin renders that chrome itself and gives no styling hooks.
+*/
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: var(--color-navy-mid);
+}
+
+/* Zoom controls */
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--color-navy);
+  color: var(--color-gold-light);
+  border-color: color-mix(in srgb, var(--color-gold) 30%, transparent);
+  transition:
+    background-color 0.2s ease-out,
+    color 0.2s ease-out;
+}
+.leaflet-bar a:hover {
+  background: var(--color-navy-mid);
+  color: var(--color-gold);
+}
+
+/* Popup shell */
+/*
+  Popups are portalled into Leaflet's own pane, OUTSIDE any [data-tone]
+  wrapper, so the semantic tokens there resolve to the deep-tone defaults
+  regardless of the section. They are pinned to explicit light values instead:
+  a popup sits on a light basemap and must read against it, not against the
+  navy section behind the map.
+*/
+.leaflet-popup-content-wrapper {
+  border-radius: var(--radius-md);
+  border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
+  box-shadow: 0 10px 32px rgb(7 16 43 / 0.28);
+  background: #ffffff;
+  color: var(--color-navy);
+}
+.leaflet-popup-content {
+  margin: 0.75rem 0.9rem;
+  min-width: 11rem;
+}
+.leaflet-popup-tip {
+  background: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--color-gold) 35%, transparent);
+}
+
+.leaflet-control-attribution {
+  background: rgb(255 255 255 / 0.82);
+  font-size: 10px;
+}
+
+/*
+  Pin and cluster entrance + hover.
+
+  `leaflet-marker-icon` is the wrapper Leaflet puts around our divIcon, so the
+  transition has to live here rather than on the SVG inside it.
+*/
+.listing-marker,
+.listing-cluster {
+  transition: transform 0.2s var(--ease-out-soft);
+}
+.listing-marker:hover,
+.listing-cluster:hover {
+  transform: scale(1.12);
+  z-index: 1000 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listing-marker,
+  .listing-cluster {
+    transition: none;
+  }
+  .listing-marker:hover,
+  .listing-cluster:hover {
+    transform: none;
+  }
+}
