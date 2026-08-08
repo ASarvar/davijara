@@ -20,14 +20,13 @@ export async function HowItWorks() {
       />
 
       <ol className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {steps.map((step, i) => (
+        {steps.map((step) => (
           <SurfaceCard
             as="li"
             key={step.number}
             interactive
             className="group relative"
-            data-reveal="up"
-            style={{ "--i": i } as React.CSSProperties}
+            data-reveal="left"
           >
             <span
               aria-hidden="true"

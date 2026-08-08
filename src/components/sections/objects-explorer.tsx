@@ -69,15 +69,9 @@ const TYPE_LABELS: Record<string, string> = {
   no image to put in it. Fixed-width, right-aligned metric columns line the
   numbers up, which is what makes the set scannable.
 */
-function RegionRow({
-  summary,
-  index,
-}: {
-  summary: RegionSummary;
-  index: number;
-}) {
+function RegionRow({ summary }: { summary: RegionSummary }) {
   return (
-    <li data-reveal="up" style={{ "--i": index % 6 } as React.CSSProperties}>
+    <li data-reveal="left">
       <Link
         href={`/obyektlar?hudud=${summary.slug}`}
         className="group hover:bg-secondary/60 focus-visible:ring-ring flex flex-col gap-3 px-4 py-3.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:-outline-offset-2 sm:flex-row sm:items-center sm:gap-6"
@@ -144,11 +138,9 @@ function RegionRow({
 function ListingCard({
   listing,
   regionName,
-  index,
 }: {
   listing: Listing;
   regionName: string;
-  index: number;
 }) {
   return (
     <SurfaceCard
@@ -157,7 +149,6 @@ function ListingCard({
       padding="none"
       interactive
       data-reveal="up"
-      style={{ "--i": index % 3 } as React.CSSProperties}
       className="group overflow-hidden"
     >
       <a
@@ -166,7 +157,10 @@ function ListingCard({
         rel="noopener noreferrer"
         className="flex h-full flex-col"
       >
-        <div className="relative aspect-[16/9]">
+        {/* `data-clip` — wipes up from its own bottom edge as the card
+            arrives, which reads as the image being uncovered rather than
+            switched on. */}
+        <div data-clip className="relative aspect-[16/9] overflow-hidden">
           {/*
             A photo only when upstream actually supplies one for THIS lot —
             otherwise the placeholder. Never a stock image: on a state portal a
@@ -506,12 +500,11 @@ export function ObjectsExplorer({
           ) : showLots ? (
             <>
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {pagedListings.map((listing, i) => (
+                {pagedListings.map((listing) => (
                   <ListingCard
                     key={listing.id}
                     listing={listing}
                     regionName={regionName(listing.region)}
-                    index={i}
                   />
                 ))}
               </ul>
@@ -546,8 +539,8 @@ export function ObjectsExplorer({
             </>
           ) : (
             <ul className="border-border divide-border divide-y overflow-hidden rounded-xl border">
-              {summaries.map((summary, i) => (
-                <RegionRow key={summary.slug} summary={summary} index={i} />
+              {summaries.map((summary) => (
+                <RegionRow key={summary.slug} summary={summary} />
               ))}
             </ul>
           )}

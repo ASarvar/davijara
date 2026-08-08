@@ -9,6 +9,8 @@ import { routing, type Locale } from "@/i18n/routing";
 import { site } from "@/content/site";
 import { OrganizationJsonLd } from "@/components/json-ld";
 import { AccessibilityScript } from "@/components/layout/accessibility-script";
+import { MotionArmScript } from "@/components/motion/motion-arm-script";
+import { MotionProvider } from "@/components/motion/motion-provider";
 import { SkipLink } from "@/components/layout/skip-link";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Footer } from "@/components/layout/footer";
@@ -128,12 +130,23 @@ export default async function LocaleLayout({
     */
     <html lang={locale} className={fontVariables}>
       <head>
-        {/* Must run before paint — see the component for why. */}
+        {/* Both must run before paint — see each component for why. */}
         <AccessibilityScript />
+        <MotionArmScript />
       </head>
       <body className="flex min-h-dvh flex-col">
         <OrganizationJsonLd />
         <NextIntlClientProvider messages={clientMessages}>
+          {/*
+            One client island drives every animation on the site off the
+            `data-reveal` / `data-split` / `data-clip` / `data-parallax`
+            attributes the Server Components already render, so no section has
+            to become a client component to move.
+
+            Inside the intl provider because it re-runs on route change via
+            `usePathname` from @/i18n/navigation, which reads that context.
+          */}
+          <MotionProvider />
           <SkipLink />
           <SiteHeader />
           {/*

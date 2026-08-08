@@ -499,133 +499,75 @@
 /*
   ── Scroll reveals ───────────────────────────────────────────────────────
 
-  Elements opt in with a `data-reveal` attribute, so a Server Component adds
-  motion with a plain HTML attribute and ships no JavaScript. Progress is
-  driven by `animation-timeline: view()` — the compositor, not the main
-  thread, and no IntersectionObserver.
+  Driven by GSAP + ScrollTrigger (components/motion/motion-provider.tsx).
+  What lives here is only the START state — nothing animates from this file.
+
+  WHY NOT `animation-timeline: view()` ANY MORE
+  That bound keyframe progress directly to scroll offset, so an element was
+  exactly as revealed as the scrollbar said: stop scrolling and it stopped
+  half-faded, which reads as dimmed content rather than as motion. The
+  reference sites in this genre (250broadway, era-residence, white-desert)
+  all TRIGGER a time-based animation on entry and use scroll-linked progress
+  for at most one element each. A triggered animation owns its duration and
+  easing and finishes on its own terms. The old approach also never ran at
+  all outside Chromium, so Safari and Firefox got no motion whatsoever.
 
   READ THIS BEFORE EDITING —
 
-  The hidden start state (`opacity: 0`) is authored ONLY inside the two
-  guards below. That is deliberate and load-bearing. A reveal that starts
-  hidden and never animates leaves content permanently invisible, which on a
-  public-service portal is a total failure rather than a cosmetic one. Two
-  independent things can stop the animation running:
+  The hidden start state is applied ONLY under `.motion-armed`, a class added
+  by the inline script in components/motion/motion-arm-script.tsx. That is
+  load-bearing on a public-service portal: content that starts hidden and is
+  never animated is content nobody can read. Four independent guards, each of
+  which ends with the content simply visible:
 
-    1. No `animation-timeline` support (Firefox is still partial).
-    2. The user prefers reduced motion.
-
-  Nesting the hidden state inside `@supports` AND
-  `prefers-reduced-motion: no-preference` means that in either case
-  `opacity: 0` is never applied at all, so the content is simply visible.
-  Failsafe by construction — not by an `!important` override that a later
-  rule could out-order.
-
-  Note the global reduced-motion guard in @layer base does NOT cover this:
-  it clamps `animation-duration`, and scroll-driven animations ignore
-  duration entirely because progress comes from the timeline.
+    1. No JavaScript — the class is never added.
+    2. `prefers-reduced-motion: reduce` — the script returns before adding it.
+    3. JS runs but GSAP never initialises (chunk fails, slow network, throw) —
+       a deadman timer in that same script strips the class.
+    4. `:not([data-revealed])` — the provider stamps that attribute on every
+       element it has finished with, so nothing can be re-hidden later, and
+       elements that appear after setup (tab panels, pagination) are picked up
+       by the provider's MutationObserver rather than stranded invisible.
 */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    [data-reveal] {
-      /*
-        NOTE: there is deliberately no `opacity: 0` here.
-
-        The hidden state lives in the keyframe's `from` and is applied by
-        `animation-fill-mode: both`. That distinction is the difference
-        between safe and broken: if the timeline turns out to be INACTIVE at
-        runtime — which can happen for scroll-container reasons that
-        `@supports` cannot predict — the animation produces no output at all,
-        so the element simply keeps its natural opacity and stays visible.
-
-        Writing `opacity: 0` as a static declaration here would instead leave
-        the content permanently invisible in that case. Verified empirically:
-        with an inactive timeline, keyframe-only resolves to opacity 1.
-      */
-      animation-name: reveal-up;
-      animation-fill-mode: both;
-
-      /*
-        Eased, not linear — this is what makes the reveal read as motion
-        rather than as content dimmed in proportion to the scrollbar.
-
-        A scroll-driven animation maps scroll position straight onto keyframe
-        progress, so with `linear` an element sits at exactly 50% opacity when
-        it is halfway through its range and simply tracks the wheel. Stop
-        scrolling and it stops, half-faded. The same settling curve the hero
-        entrance uses front-loads the change instead: the element is
-        essentially arrived within the first third of its range, and the rest
-        of the scroll only takes the last few percent off.
-      */
-      animation-timing-function: var(--ease-out-soft);
-      animation-timeline: view();
-
-      /*
-        Both ends land inside `entry`, so a reveal finishes while the element
-        is still arriving and is fully settled by the time it is comfortably
-        in view.
-
-        It used to run `entry 4%` → `cover 30%`. Mixing the two phases made
-        the range far longer than it looked: `cover` spans the viewport plus
-        the element, so for a 300px card in a 900px viewport the reveal was
-        stretched over ~350px of scrolling and the card was still fading up
-        long after it had fully arrived. Confined to `entry` the same reveal
-        takes ~155px — less than half — which is the difference between
-        "the page is animating" and "the page is lagging behind my scroll".
-
-        Stagger: `--i` is set inline on list items so each starts a little
-        later, which reads as a cascade with no per-item classes and no JS.
-
-        The 6% step is bounded, and the bound is tight. The largest `--i`
-        rendered anywhere is 6 — privilege-list.tsx caps its own index with
-        `Math.min(i, 6)` — which ends at 58 + 36 = 94%, leaving just 6% of
-        headroom. Raising either this step or that cap pushes the last items
-        past `entry 100%`, where the range never completes and they are left
-        permanently part-way through arriving. Re-check both together.
-      */
-      animation-range: entry calc(6% + var(--i, 0) * 6%) entry
-        calc(58% + var(--i, 0) * 6%);
-    }
-
-    [data-reveal="fade"] {
-      animation-name: reveal-fade;
-    }
-
-    [data-reveal="scale"] {
-      animation-name: reveal-scale;
-    }
-  }
+.motion-armed [data-reveal]:not([data-revealed]) {
+  opacity: 0;
 }
 
-@keyframes reveal-up {
-  from {
-    opacity: 0;
-    transform: translateY(1.25rem);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/*
+  Headings are split into lines and masked by the provider. Hidden until that
+  has happened, or the un-split heading paints at full width for a frame and
+  then jumps as the lines are wrapped.
+*/
+.motion-armed [data-split]:not([data-revealed]) {
+  opacity: 0;
 }
 
-@keyframes reveal-fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Wipes up from its own bottom edge instead of fading. */
+.motion-armed [data-clip]:not([data-revealed]) {
+  clip-path: inset(100% 0 0 0);
 }
 
-@keyframes reveal-scale {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+/*
+  SplitText wraps each visual line in `.split-line`, and `mask: "lines"` adds
+  a `.split-line-mask` parent with `overflow: clip` set inline — that clip is
+  what makes a line rise out of nothing rather than slide across the line
+  above it. GSAP writes it itself, so nothing is needed here.
+
+  The rule below is only a guard for the moment between the wrapper being
+  inserted and GSAP setting its inline style.
+*/
+.split-line-mask {
+  display: block;
+  overflow: clip;
+}
+
+/*
+  Parallax and any other transform the provider drives are composited, so hint
+  the layer only while it is actually being animated — a permanent
+  `will-change` on many elements costs more memory than it saves.
+*/
+[data-parallax] {
+  will-change: transform;
 }
 
 /*

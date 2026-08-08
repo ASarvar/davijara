@@ -36,11 +36,12 @@ export function StatList({
         className,
       )}
     >
-      {stats.map((stat, i) => (
+      {stats.map((stat) => (
         <div
           key={stat.label}
-          data-reveal={reveal ? "up" : undefined}
-          style={reveal ? ({ "--i": i } as React.CSSProperties) : undefined}
+          /* "down" — figures drop in from above, which sets them apart from the
+             card grids that rise. See the FROM map in motion-provider.tsx. */
+          data-reveal={reveal ? "down" : undefined}
           className={cn(bordered && "border-border border-t pt-4")}
         >
           <dt className="sr-only">{stat.label}</dt>

@@ -55,11 +55,10 @@ export default async function CalculatorPage({
           </p>
 
           <ul className="mt-9 space-y-6">
-            {features.map((f, i) => (
+            {features.map((f) => (
               <li
                 key={f.title}
-                data-reveal="up"
-                style={{ "--i": i } as React.CSSProperties}
+                data-reveal="left"
                 className="flex gap-4"
               >
                 <IconTile>

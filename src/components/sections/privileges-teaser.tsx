@@ -28,14 +28,13 @@ export async function PrivilegesTeaser() {
       />
 
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {cards.map((card, i) => (
+        {cards.map((card) => (
           <SurfaceCard
             as="li"
             key={card.category}
             padding="none"
             interactive
             data-reveal="up"
-            style={{ "--i": i } as React.CSSProperties}
           >
             <Link
               href={`/imtiyozlar/${card.category}`}

@@ -92,7 +92,7 @@ export function SectionHeader({
 
   return (
     <div
-      data-reveal="up"
+      data-reveal="fade"
       className={cn(compact ? "mb-7" : "mb-10 sm:mb-14", className)}
     >
       {eyebrow ? <Eyebrow className="mb-3">{eyebrow}</Eyebrow> : null}
@@ -112,7 +112,12 @@ export function SectionHeader({
             title of the whole page, and six of them down the homepage read as
             six page titles rather than as sections of one.
           */}
+          {/* `data-split` — the motion provider splits this into visual lines
+              and rises each one out of its own mask. Every section heading on
+              the site goes through here, so this one attribute is the whole
+              line-reveal treatment. */}
           <h2
+            data-split
             className={cn(
               "font-semibold text-balance",
               compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl",

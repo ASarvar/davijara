@@ -35,11 +35,10 @@ export async function NewsAndDocs() {
           />
 
           <ul className="divide-border divide-y">
-            {news.map((item, i) => (
+            {news.map((item) => (
               <li
                 key={item.slug}
-                data-reveal="up"
-                style={{ "--i": i } as React.CSSProperties}
+                data-reveal="left"
               >
                 <Link
                   href={`/yangiliklar/${item.slug}`}
@@ -79,15 +78,14 @@ export async function NewsAndDocs() {
           />
 
           <ul className="space-y-3">
-            {documents.map((doc, i) => (
+            {documents.map((doc) => (
               <SurfaceCard
                 as="li"
                 key={doc.id}
                 radius="md"
                 padding="none"
                 interactive
-                data-reveal="up"
-                style={{ "--i": i } as React.CSSProperties}
+                data-reveal="left"
               >
                 <a
                   href={doc.url}

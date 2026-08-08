@@ -26,11 +26,10 @@ export async function Partners() {
         </Eyebrow>
 
         <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
-          {partners.map((partner, i) => (
+          {partners.map((partner) => (
             <li
               key={partner.label}
-              data-reveal="fade"
-              style={{ "--i": i } as React.CSSProperties}
+              data-reveal="scale"
             >
               <a
                 href={partner.href}

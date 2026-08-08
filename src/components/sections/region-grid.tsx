@@ -44,7 +44,7 @@ export async function RegionGrid() {
       />
 
       <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {regions.map((region, i) => (
+        {regions.map((region) => (
           <SurfaceCard
             as="li"
             key={region.slug}
@@ -52,7 +52,6 @@ export async function RegionGrid() {
             padding="none"
             interactive
             data-reveal="up"
-            style={{ "--i": i % 4 } as React.CSSProperties}
           >
             <Link
               href={`/obyektlar?hudud=${region.slug}`}

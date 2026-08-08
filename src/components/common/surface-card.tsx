@@ -16,7 +16,12 @@ import { cn } from "@/lib/utils";
   gold-ink on light), so we lean on the semantic token and the card adapts.
 */
 const surfaceCard = cva(
-  "border-border bg-card border transition-[border-color,box-shadow,transform] duration-200 ease-out",
+  /*
+    350ms, not 200. The reference sites (250broadway, era-residence,
+    white-desert) all sit in the 300-400ms band for hover; 200ms reads as a
+    state flip rather than as movement.
+  */
+  "border-border bg-card border transition-[border-color,box-shadow,transform] duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]",
   {
     variants: {
       radius: {
@@ -37,7 +42,7 @@ const surfaceCard = cva(
        * which costs nothing and keeps the class list uniform.
        */
       interactive: {
-        true: "hover:border-ring/45 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5",
+        true: "hover:border-ring/45 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/10",
         false: "",
       },
     },

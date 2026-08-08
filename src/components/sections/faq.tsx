@@ -35,8 +35,7 @@ export async function Faq() {
             key={item.question}
             padding="inline"
             interactive
-            data-reveal="up"
-            style={{ "--i": i } as React.CSSProperties}
+            data-reveal="left"
           >
             <AccordionItem value={String(i)} className="border-0">
               <AccordionTrigger className="text-left text-base font-medium hover:no-underline">

@@ -17,9 +17,23 @@ export async function Hero() {
       {/* Decorative layers — ported verbatim from legacy .hero-bg /
           .hero-accent / .hero-pattern (styles.css:268-311). Purely
           presentational, hidden from the a11y tree. */}
+      {/*
+        `data-parallax` drifts these gradient layers against the scroll. This
+        is the one place scroll-LINKED motion is right — the whole effect is
+        that it tracks the scroll — which is why the provider uses `scrub`
+        here and a triggered animation everywhere else.
+
+        Applied to the decorative layer only, never to the headline: text that
+        moves at a different rate than the page is harder to read, and this
+        block is already `aria-hidden`.
+
+        `-mt-[10%] h-[120%]` gives the layer room to travel without exposing
+        the section background at either end of its range.
+      */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-10"
+        data-parallax="0.12"
+        className="pointer-events-none absolute inset-x-0 -top-[10%] -z-10 h-[120%]"
       >
         <div
           className="absolute inset-0"

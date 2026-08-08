@@ -36,7 +36,6 @@ export async function FeaturedListings() {
             padding="none"
             interactive
             data-reveal="up"
-            style={{ "--i": i } as React.CSSProperties}
             className="group flex flex-col overflow-hidden"
           >
             {/*
@@ -47,7 +46,14 @@ export async function FeaturedListings() {
               reserves the box, so swapping in real photography later cannot
               introduce layout shift.
             */}
-            <div className="bg-secondary relative aspect-video overflow-hidden">
+            {/* `data-clip` — uncovers upward with the card. The provider
+                batches every clip that enters together and staggers them, so
+                a row of three arrives one after another rather than all at
+                once. */}
+            <div
+              data-clip
+              className="bg-secondary relative aspect-video overflow-hidden"
+            >
               {/*
                 Variant by index, not by id hash. Hashing gives no guarantee
                 of distinctness — three ids into four buckets collide about
@@ -55,6 +61,7 @@ export async function FeaturedListings() {
                 digits. Index guarantees the visible cards look different,
                 which is the actual requirement here.
               */}
+              {/* Wipes up with the card; see objects-explorer for the note. */}
               <ListingPlaceholder
                 variant={(i % 4) as 0 | 1 | 2 | 3}
                 className="transition-transform duration-500 ease-out group-hover:scale-[1.04]"

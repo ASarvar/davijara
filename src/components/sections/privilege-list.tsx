@@ -37,13 +37,12 @@ export async function PrivilegeList({ items }: { items: Privilege[] }) {
 
   return (
     <Accordion type="multiple" className="space-y-3">
-      {items.map((item, i) => (
+      {items.map((item) => (
         <SurfaceCard
           key={item.id}
           padding="inline"
           interactive
-          data-reveal="up"
-          style={{ "--i": Math.min(i, 6) } as React.CSSProperties}
+          data-reveal="left"
         >
           <AccordionItem value={String(item.id)} className="border-0">
             <AccordionTrigger className="gap-4 text-left hover:no-underline">

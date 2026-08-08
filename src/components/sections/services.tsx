@@ -28,14 +28,13 @@ export async function Services() {
       />
 
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-        {services.map((service, i) => (
+        {services.map((service) => (
           <SurfaceCard
             as="li"
             key={service.slug}
             padding="none"
             interactive
             data-reveal="up"
-            style={{ "--i": i } as React.CSSProperties}
           >
             <Link
               href={service.href}
