@@ -22,8 +22,25 @@ export async function Footer() {
       data-tone="deep"
       className="bg-background text-foreground border-hairline mt-auto border-t"
     >
-      <Container className="py-14">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+      <Container className="pt-12 pb-4">
+        {/*
+          Uneven tracks, not four equal columns. The outer two carry prose that
+          has to wrap — the operator sentence, the street address, "Korporativ
+          haqida batafsil: …" — while the middle two are single-word nav links
+          that left most of their column empty. Equal columns spent the width
+          on the blocks that did not need it and made the contact block wrap.
+
+          `minmax(0, …)` rather than a bare `fr` for the same reason as the
+          header grid: an `fr` track defaults to `min-width: auto` and will not
+          shrink below its content, so one long unbroken string (an email, a
+          URL) would push the row wider than the container.
+
+          Positional, so it assumes exactly four children — brand, ONE
+          footerNav column, external links, contact. Adding a second entry to
+          `footerNav` in content/site.ts puts five blocks into four tracks and
+          wraps the contact block onto its own row; widen this list to match.
+        */}
+        <div className="grid gap-16 md:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,0.85fr)_minmax(0,0.85fr)_minmax(0,1.3fr)]">
           {/* Brand */}
           <div>
             {/*
@@ -33,10 +50,10 @@ export async function Footer() {
               down the page.
             */}
             <Logo variant="footer" />
-            <p className="text-muted-foreground mt-4 text-sm">{t("operator")}</p>
+            <p className="text-muted-foreground mt-6 text-sm">{t("operator")}</p>
             <a
               href={contacts.hotlineHref}
-              className="text-accent-foreground mt-5 inline-flex items-center gap-2 text-2xl font-semibold"
+              className="text-accent-foreground mt-10 inline-flex items-center gap-2 text-2xl font-semibold"
             >
               <Phone aria-hidden="true" className="size-5" />
               {contacts.hotline}

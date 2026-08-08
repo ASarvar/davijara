@@ -542,16 +542,49 @@
         the content permanently invisible in that case. Verified empirically:
         with an inactive timeline, keyframe-only resolves to opacity 1.
       */
-      animation: reveal-up both linear;
+      animation-name: reveal-up;
+      animation-fill-mode: both;
+
+      /*
+        Eased, not linear — this is what makes the reveal read as motion
+        rather than as content dimmed in proportion to the scrollbar.
+
+        A scroll-driven animation maps scroll position straight onto keyframe
+        progress, so with `linear` an element sits at exactly 50% opacity when
+        it is halfway through its range and simply tracks the wheel. Stop
+        scrolling and it stops, half-faded. The same settling curve the hero
+        entrance uses front-loads the change instead: the element is
+        essentially arrived within the first third of its range, and the rest
+        of the scroll only takes the last few percent off.
+      */
+      animation-timing-function: var(--ease-out-soft);
       animation-timeline: view();
 
       /*
-        Stagger. `--i` is set inline on list items; each subsequent item
-        starts its reveal a little later in its own view progress, which
-        reads as a cascade without needing per-item classes or JS.
+        Both ends land inside `entry`, so a reveal finishes while the element
+        is still arriving and is fully settled by the time it is comfortably
+        in view.
+
+        It used to run `entry 4%` → `cover 30%`. Mixing the two phases made
+        the range far longer than it looked: `cover` spans the viewport plus
+        the element, so for a 300px card in a 900px viewport the reveal was
+        stretched over ~350px of scrolling and the card was still fading up
+        long after it had fully arrived. Confined to `entry` the same reveal
+        takes ~155px — less than half — which is the difference between
+        "the page is animating" and "the page is lagging behind my scroll".
+
+        Stagger: `--i` is set inline on list items so each starts a little
+        later, which reads as a cascade with no per-item classes and no JS.
+
+        The 6% step is bounded, and the bound is tight. The largest `--i`
+        rendered anywhere is 6 — privilege-list.tsx caps its own index with
+        `Math.min(i, 6)` — which ends at 58 + 36 = 94%, leaving just 6% of
+        headroom. Raising either this step or that cap pushes the last items
+        past `entry 100%`, where the range never completes and they are left
+        permanently part-way through arriving. Re-check both together.
       */
-      animation-range: entry calc(4% + var(--i, 0) * 3%) cover
-        calc(30% + var(--i, 0) * 3%);
+      animation-range: entry calc(6% + var(--i, 0) * 6%) entry
+        calc(58% + var(--i, 0) * 6%);
     }
 
     [data-reveal="fade"] {

@@ -38,7 +38,10 @@ export function RentCalculator() {
 
   return (
     <SurfaceCard radius="xl" padding="lg">
-      <h3 className="flex items-center gap-2.5 text-lg font-semibold">
+      {/* text-base like every other card heading on the site. This was the
+          only h3 at text-lg, which made the calculator look like it belonged
+          to a different page. */}
+      <h3 className="flex items-center gap-2.5 text-base font-semibold">
         <Calculator aria-hidden="true" className="text-accent-foreground size-5" />
         Ijara kalkulatori
       </h3>

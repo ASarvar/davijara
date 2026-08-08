@@ -105,16 +105,25 @@ export function SectionHeader({
         )}
       >
         <div className="max-w-2xl">
+          {/*
+            One step below the page <h1> (1.875/2.25/3rem), not level with it.
+            These were 1.875/2.25rem — the same size as the h1 at its first two
+            breakpoints — so a section heading carried as much weight as the
+            title of the whole page, and six of them down the homepage read as
+            six page titles rather than as sections of one.
+          */}
           <h2
             className={cn(
               "font-semibold text-balance",
-              compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl",
+              compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl",
             )}
           >
             {title}
           </h2>
           {description ? (
-            <p className="text-muted-foreground mt-3 text-base text-pretty sm:text-lg">
+            /* Body copy, so it sits on the same step as the rest of the page
+               rather than a size of its own. */
+            <p className="text-muted-foreground mt-3 text-sm text-pretty sm:text-base">
               {description}
             </p>
           ) : null}

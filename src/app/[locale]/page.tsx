@@ -46,7 +46,7 @@ export default async function HomePage({
       <Impact />
       <NewsAndDocs />
       <Faq />
-      <Partners />
+      {/* <Partners /> */}
     </>
   );
 }

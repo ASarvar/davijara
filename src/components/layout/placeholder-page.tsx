@@ -29,7 +29,7 @@ export async function PlaceholderPage({
         <IconTile size="lg" className="mx-auto mb-6">
           <Construction aria-hidden="true" className="size-7" />
         </IconTile>
-        <h1 className="font-heading text-3xl font-semibold sm:text-4xl">
+        <h1 className="font-heading text-3xl font-semibold sm:text-4xl lg:text-5xl">
           {title}
         </h1>
         <p className="text-muted-foreground mt-4 text-pretty">

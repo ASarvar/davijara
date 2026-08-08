@@ -38,7 +38,17 @@ export function BottomNav() {
                 href={item.href}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-1 py-2.5 text-[10px] transition-colors",
+                  /*
+                    0.625rem === 10px at the default root. Deliberately below
+                    the named scale: five columns on a 375px screen leave ~67px
+                    each, and "Ijara obyektlari" already truncates there — a
+                    step up to text-xs would clip more of every label.
+
+                    But rem, not `text-[10px]`. A px value silently opts the
+                    whole tab bar out of the "Matn o'lchami" control, which is
+                    the one piece of chrome a low-vision user needs most.
+                  */
+                  "flex flex-col items-center gap-1 px-1 py-2.5 text-[0.625rem] transition-colors",
                   isActive
                     ? "text-accent-foreground font-semibold"
                     : "text-muted-foreground",

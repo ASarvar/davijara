@@ -88,7 +88,7 @@ function RegionRow({
             className="text-accent-foreground mt-0.5 size-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5"
           />
           <div className="min-w-0">
-            <h3 className="group-hover:text-accent-foreground truncate text-sm font-semibold transition-colors duration-200">
+            <h3 className="group-hover:text-accent-foreground truncate text-base font-semibold transition-colors duration-200">
               {summary.name}
             </h3>
             {/* `topType` needs a source that classifies lots; the live service
@@ -109,19 +109,19 @@ function RegionRow({
         {/* Indented to the heading below sm, where the row stacks. */}
         <dl className="flex shrink-0 items-baseline gap-5 pl-[1.625rem] sm:gap-8 sm:pl-0">
           <div className="sm:w-20 sm:text-right">
-            <dt className="text-muted-foreground text-[11px]">Obyektlar</dt>
+            <dt className="text-muted-foreground text-xs">Obyektlar</dt>
             <dd className="mt-0.5 text-sm font-medium">
               {formatNumber(summary.count)} ta
             </dd>
           </div>
           <div className="sm:w-28 sm:text-right">
-            <dt className="text-muted-foreground text-[11px]">Umumiy maydon</dt>
+            <dt className="text-muted-foreground text-xs">Umumiy maydon</dt>
             <dd className="mt-0.5 text-sm font-medium">
               {formatArea(summary.totalArea)}
             </dd>
           </div>
           <div className="sm:w-36 sm:text-right">
-            <dt className="text-muted-foreground text-[11px]">
+            <dt className="text-muted-foreground text-xs">
               O&apos;rtacha narx
             </dt>
             <dd className="text-accent-foreground mt-0.5 text-sm font-semibold">
@@ -190,18 +190,25 @@ function ListingCard({
             <ImagePlaceholder />
           )}
           {listing.isMock ? (
-            <span className="bg-[color:var(--color-navy)]/85 text-[color:var(--color-gold-light)] absolute top-2.5 right-2.5 rounded-full px-2.5 py-0.5 text-[11px] backdrop-blur-sm">
+            <span className="bg-[color:var(--color-navy)]/85 text-[color:var(--color-gold-light)] absolute top-2.5 right-2.5 rounded-full px-2.5 py-0.5 text-xs backdrop-blur-sm">
               Namunaviy
             </span>
           ) : null}
         </div>
 
-        <div className="flex flex-1 flex-col p-4">
-          <h3 className="group-hover:text-accent-foreground text-sm leading-snug font-semibold text-balance transition-colors duration-200">
+        {/*
+          Type scale matches featured-listings.tsx exactly — title 1rem, meta
+          .875rem, price 1.25rem, captions .75rem, p-5. Both components render
+          the same thing (a rental lot as a card), and this one used to sit a
+          whole step below it, so the two card grids on the homepage read as
+          different systems.
+        */}
+        <div className="flex flex-1 flex-col p-5">
+          <h3 className="group-hover:text-accent-foreground text-base leading-snug font-semibold text-balance transition-colors duration-200">
             {listing.title}
           </h3>
 
-          <p className="text-muted-foreground mt-1.5 text-xs">
+          <p className="text-muted-foreground mt-2 text-sm">
             {listing.district ? `${listing.district} · ` : ""}
             {regionName} · {formatArea(listing.area)}
             {listing.lotNumber ? ` · Lot №${listing.lotNumber}` : ""}
@@ -218,27 +225,31 @@ function ListingCard({
             with no currency of its own; without it the card would show a sum
             of money with no unit.
           */}
-          <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-3">
+          {/* `mt-auto`, not featured-listings' `mt-5`: lot titles here run to
+              three lines, and mt-auto pins the price row to the bottom so it
+              lines up across a row of cards. The type scale is shared; this one
+              spacing rule is not. */}
+          <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-4">
             <span>
-              <span className="text-muted-foreground block text-[11px]">
+              <span className="text-muted-foreground block text-xs">
                 Boshlang&apos;ich narx
               </span>
-              <span className="font-heading text-accent-foreground block text-base font-semibold">
+              <span className="font-heading text-accent-foreground block text-xl font-semibold">
                 {formatSom(listing.pricePerYear)} so&apos;m
               </span>
             </span>
 
             {listing.auctionDate ? (
               <span className="shrink-0 text-right">
-                <span className="text-muted-foreground block text-[11px]">
+                <span className="text-muted-foreground block text-xs">
                   Savdo kuni
                 </span>
-                <span className="block text-xs font-medium">
+                <span className="block text-sm font-medium">
                   {formatDate(listing.auctionDate)}
                 </span>
               </span>
             ) : listing.type ? (
-              <span className="text-muted-foreground shrink-0 text-right text-[11px]">
+              <span className="text-muted-foreground shrink-0 text-right text-xs">
                 {TYPE_LABELS[listing.type]}
               </span>
             ) : null}

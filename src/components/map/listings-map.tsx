@@ -283,22 +283,22 @@ export function ListingsMap({
             icon={markerIcon}
           >
             <Popup>
-              <span className="block text-[13px] leading-snug font-semibold text-[#07102b]">
+              <span className="block text-sm leading-snug font-semibold text-[#07102b]">
                 {listing.title}
               </span>
-              <span className="mt-1 block text-[11px] text-[#3d4a6b]">
+              <span className="mt-1 block text-xs text-[#3d4a6b]">
                 {regionName(listing.region)} · {formatArea(listing.area)}
               </span>
-              <span className="mt-1.5 block text-[13px] font-semibold text-[#7d6229]">
+              <span className="mt-1.5 block text-sm font-semibold text-[#7d6229]">
                 {formatSom(listing.pricePerYear)}
               </span>
               {listing.lotNumber ? (
-                <span className="mt-0.5 block text-[11px] text-[#3d4a6b]">
+                <span className="mt-0.5 block text-xs text-[#3d4a6b]">
                   {labels.lot} {listing.lotNumber}
                 </span>
               ) : null}
               {listing.isMock ? (
-                <span className="mt-1.5 block text-[11px] text-[#3d4a6b] italic">
+                <span className="mt-1.5 block text-xs text-[#3d4a6b] italic">
                   {labels.mock}
                 </span>
               ) : (
@@ -306,7 +306,7 @@ export function ListingsMap({
                   href={detailHref(listing)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-2 inline-block text-[11px] font-medium text-[#1a3a7c] underline"
+                  className="mt-2 inline-block text-xs font-medium text-[#1a3a7c] underline"
                 >
                   {labels.details}
                 </a>

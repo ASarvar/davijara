@@ -45,7 +45,7 @@ export default async function CalculatorPage({
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
         <div>
           <Eyebrow className="mb-3">Interaktiv xizmatlar</Eyebrow>
-          <h1 className="font-heading text-3xl font-semibold text-balance sm:text-4xl">
+          <h1 className="font-heading text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
             Obyekt narxini oldindan biling
           </h1>
           <p className="text-muted-foreground mt-4 text-pretty">

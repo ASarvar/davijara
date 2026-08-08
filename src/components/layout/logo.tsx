@@ -56,10 +56,23 @@ const VARIANTS = {
     media: 640,
     className: "h-10 w-[33px] sm:w-[181px] xl:h-13 xl:w-[236px]",
   },
-  /** Footer: smaller, and there is room for the wordmark from sm up. */
+  /*
+    Footer. There is room for the wordmark from sm up, and no nav competing
+    for the row, so it runs slightly taller than the header's small step.
+
+    ⚠ Height and width must be changed TOGETHER. Both are set on the <img>, so
+    the SVG is stretched to whatever box they describe — it is not fitted to
+    it. This pairing drifted once already: the height went 32px → 40px while
+    the width stayed at 145px (which had been correct for 32px), leaving the
+    wordmark rendered at 3.625:1 against its true 4.536:1 — squashed 20%
+    horizontally, with no error anywhere to say so.
+
+      wordmark 313:69 → 4.536  ·  44px tall → 200px
+      mark      57:69 → 0.826  ·  44px tall →  36px
+  */
   footer: {
     media: 640,
-    className: "h-8 w-[26px] sm:w-[145px]",
+    className: "h-11 w-[36px] sm:w-[200px]",
   },
 } as const;
 

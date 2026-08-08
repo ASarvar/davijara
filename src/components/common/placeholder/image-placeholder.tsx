@@ -45,7 +45,7 @@ export function ImagePlaceholder({
       <div className="text-muted-foreground/70 relative flex flex-col items-center gap-1.5">
         <ImageIcon className="size-6" />
         {label ? (
-          <span className="max-w-[12rem] truncate px-3 text-center text-[11px]">
+          <span className="max-w-[12rem] truncate px-3 text-center text-xs">
             {label}
           </span>
         ) : null}
