@@ -54,6 +54,31 @@ npm install
 # read at runtime — the build step needs the real env, not just the systemd
 # unit's EnvironmentFile (which only affects the running server afterward).
 echo "==> Building (env from $ENV_FILE)"
+
+# CRLF check. A .env pasted together on Windows carries \r at every line end,
+# and that breaks BOTH readers of this file, differently:
+#   · bash `source` treats the \r as a command  -> "$'\r': command not found"
+#     and, under `set -e`, kills this script mid-build. Seen for real.
+#   · systemd's EnvironmentFile= does NOT fail — it silently folds the \r into
+#     the VALUE, so PORT becomes "3001\r" and LISTINGS_API_URL gets a trailing
+#     carriage return. That one produces confusing runtime errors, not a clear
+#     parse error, which is the more dangerous of the two.
+# Stripping it below only fixes the build; systemd still reads the raw file,
+# so the file itself has to be repaired. Refusing to continue is the honest
+# option — this is a credentials file, so it is not edited automatically here.
+# Detected via `od`, not `grep $'\r'`: some greps read in text mode and
+# translate CRLF away before the pattern ever sees it, so the check silently
+# passes on a file that is genuinely broken. `od -c` renders a carriage
+# return as the literal two-character text \r, which greps reliably. Both
+# branches were verified against a CRLF file and a clean LF one.
+if od -c "$ENV_FILE" | grep -q '\\r'; then
+  echo "$ENV_FILE has Windows (CRLF) line endings." >&2
+  echo "systemd reads this file directly and would fold the \\r into every value." >&2
+  echo "Fix it with:" >&2
+  echo "  sudo sed -i 's/\\r\$//' $ENV_FILE" >&2
+  exit 1
+fi
+
 set -a
 # shellcheck disable=SC1090
 source "$ENV_FILE"
