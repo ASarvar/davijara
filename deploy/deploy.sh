@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Builds the app and atomically cuts the running server over to the new
+# build. Run this ON THE SERVER, from a checkout of the repo.
+#
+# One-time setup this script assumes is already done:
+#   useradd --system --home /var/www/davijara davijara
+#   mkdir -p /var/www/davijara/{releases,shared}
+#   chown -R davijara:davijara /var/www/davijara
+#   # then, as the davijara user, create /var/www/davijara/shared/.env with
+#   # the real NEXT_PUBLIC_SITE_URL / LISTINGS_API_URL / API_USER /
+#   # API_PASSWORD values (see .env.example) and: chmod 600 that file.
+#   cp deploy/davijara.service /etc/systemd/system/
+#   systemctl daemon-reload && systemctl enable davijara
+#
+# Re-run this same script for every future deploy.
+
+set -euo pipefail
+
+APP_DIR="/var/www/davijara"
+ENV_FILE="$APP_DIR/shared/.env"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RELEASE_DIR="$APP_DIR/releases/$(date +%Y%m%d%H%M%S)"
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "Missing $ENV_FILE — see the one-time setup notes at the top of this script." >&2
+  exit 1
+fi
+
+cd "$REPO_DIR"
+
+echo "==> Pulling latest"
+git pull --ff-only
+
+echo "==> Installing dependencies"
+npm ci
+
+# NEXT_PUBLIC_* values are baked into the client bundle at build time, not
+# read at runtime — the build step needs the real env, not just the systemd
+# unit's EnvironmentFile (which only affects the running server afterward).
+echo "==> Building (env from $ENV_FILE)"
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
+npm run build
+
+echo "==> Assembling release at $RELEASE_DIR"
+mkdir -p "$RELEASE_DIR"
+cp -r .next/standalone/. "$RELEASE_DIR/"
+# Not included in `standalone` by design — Next's own docs call this out.
+cp -r .next/static "$RELEASE_DIR/.next/static"
+cp -r public "$RELEASE_DIR/public"
+
+echo "==> Switching current -> $RELEASE_DIR"
+ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
+
+echo "==> Restarting service"
+sudo systemctl restart davijara
+sleep 1
+systemctl is-active --quiet davijara && echo "davijara is running" || {
+  echo "davijara failed to start — check: journalctl -u davijara -n 50" >&2
+  exit 1
+}
+
+echo "==> Pruning old releases (keeping the last 5)"
+cd "$APP_DIR/releases"
+ls -1t | tail -n +6 | xargs -r -I{} rm -rf -- {}
+
+echo "Done."
