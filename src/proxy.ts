@@ -12,10 +12,25 @@ import { routing } from "@/i18n/routing";
 export default createMiddleware(routing);
 
 export const config = {
-  /*
-    Run on everything except Next internals, API routes, and anything that
-    looks like a static file (has a dot). Without the file exclusion the
-    proxy would try to locale-prefix /logo-dm-light.svg and 404 it.
-  */
-  matcher: "/((?!api|_next|_vercel|.*\\..*).*)",
+  matcher: [
+    /*
+      The root, listed explicitly.
+
+      The catch-all below does not reach it once the app is mounted under a
+      basePath: Next strips the base before the proxy sees the path, so a
+      request for "/site" arrives as a bare root that the pattern misses.
+      Symptom, reproduced against a production build: "/site/" 308-redirected
+      to "/site", which then 404'd — a dead end on the site's own front door,
+      while every deeper path ("/site/imtiyozlar" -> "/site/uz/imtiyozlar")
+      redirected fine. This entry is also what next-intl's own documented
+      matcher starts with.
+    */
+    "/",
+    /*
+      Everything except Next internals, API routes, and anything that looks
+      like a static file (has a dot). Without the file exclusion the proxy
+      would try to locale-prefix /logo-dm-light.svg and 404 it.
+    */
+    "/((?!api|_next|_vercel|.*\\..*).*)",
+  ],
 };

@@ -15,6 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { withBasePath } from "@/lib/base-path";
 
 /**
  * Mobile navigation.
@@ -52,7 +53,8 @@ export function MobileNav() {
             {/* eslint-disable-next-line @next/next/no-img-element -- static SVG;
                 next/image passes SVGs through without optimising them. */}
             <img
-              src="/logo-short-light.svg"
+              // Raw <img>, so basePath does not apply automatically.
+              src={withBasePath("/logo-short-light.svg")}
               alt=""
               width={57}
               height={69}

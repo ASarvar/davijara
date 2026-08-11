@@ -20,7 +20,8 @@ EnvironmentFile=/var/www/davijara/shared/.env
 Environment=NODE_ENV=production
 # 3001, not the default 3000 — the `markaz` server already runs a separate
 # Auth.js-based app on 127.0.0.1:3000 (confirmed: curl there returns that
-# app's own login redirect, not ours). Must match nginx.conf's proxy_pass.
+# app's own login redirect, not ours). 3001 is the port the existing
+# `location /site` block in nginx already forwards to.
 Environment=PORT=3001
 # Loopback only — nginx is the one thing allowed to reach this port; see
 # deploy/nginx.conf. The app is never exposed directly to the internet.

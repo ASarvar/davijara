@@ -7,10 +7,16 @@
 #   mkdir -p /var/www/davijara/{releases,shared}
 #   chown -R davijara:davijara /var/www/davijara
 #   # then, as the davijara user, create /var/www/davijara/shared/.env with
-#   # the real NEXT_PUBLIC_SITE_URL / LISTINGS_API_URL / API_USER /
-#   # API_PASSWORD values (see .env.example) and: chmod 600 that file.
+#   # the real NEXT_PUBLIC_SITE_URL / NEXT_PUBLIC_BASE_PATH /
+#   # LISTINGS_API_URL / API_USER / API_PASSWORD values (see .env.example)
+#   # and: chmod 600 that file.
 #   cp deploy/davijara.service /etc/systemd/system/
 #   systemctl daemon-reload && systemctl enable davijara
+#   # and put deploy/nginx-site-location.conf's `location /site` block into
+#   # the existing davijara.uz vhost, then: nginx -t && systemctl reload nginx
+#
+# NOTE: neither the systemd unit nor the nginx block is re-copied by this
+# script. Changing either in the repo means copying it across by hand again.
 #
 # Re-run this same script for every future deploy.
 

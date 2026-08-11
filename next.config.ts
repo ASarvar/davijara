@@ -82,6 +82,27 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR || ".next",
 
   /*
+    Served under a sub-path, not at the domain root: davijara.uz/ already
+    belongs to a different project on the same server, and nginx routes only
+    `location /site` here.
+
+    `basePath` is what makes that work — Next then emits its own asset URLs
+    (`/site/_next/...`) and prefixes every `<Link>`/`next/navigation` href
+    automatically. WITHOUT it, proxying alone gives a page whose CSS, JS and
+    routes all 404, because the browser would ask for `/_next/...` at the
+    domain root, where the other project answers.
+
+    What basePath does NOT rewrite: raw `<img src="/…">`, `<source srcSet>`
+    and `<form action="/…">` — those are plain HTML, untouched by Next. They
+    go through `withBasePath()` in src/lib/base-path.ts instead.
+
+    Env-driven so a local `npm run dev` still serves at the root, and so this
+    one value stays in step with NEXT_PUBLIC_BASE_PATH, which the helper above
+    reads on both server and client.
+  */
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || "",
+
+  /*
     Self-hosted, not deployed to Vercel: `LISTINGS_API_URL` (see .env, never
     committed) points at a private LAN address on the ministry's own network,
     so the production server has to sit on that same network — a serverless

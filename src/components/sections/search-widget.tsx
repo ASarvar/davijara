@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { withBasePath } from "@/lib/base-path";
 import { getRegionOptions } from "@/lib/data/catalog";
 import { getDistrictsByRegion } from "@/lib/data/listings";
 import { RegionDistrictFields } from "./region-district-fields";
@@ -74,9 +75,13 @@ export async function SearchWidget({
           URL, which is what makes a result set linkable and lets the server
           send only matching records. The `#obyektlar-xarita` fragment drops
           the reader at the explorer rather than back at the top of the page.
+
+          `withBasePath` because a form's `action` is raw HTML — Next rewrites
+          `<Link>` hrefs under a basePath, never this. Unprefixed, every search
+          would submit to the domain root, which is a different project.
         */}
         <form
-          action={action ?? `/${locale}#obyektlar-xarita`}
+          action={withBasePath(action ?? `/${locale}#obyektlar-xarita`)}
           method="get"
           className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
         >

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { withBasePath } from "@/lib/base-path";
 import { site } from "@/content/site";
 
 /*
@@ -91,11 +92,20 @@ export function Logo({
 }) {
   const { media, className: sizeClass } = VARIANTS[variant];
 
+  /*
+    `withBasePath` because these are raw <picture>/<img> attributes: Next's
+    basePath rewriting covers `<Link>` and its own chunk URLs, not plain HTML.
+    Under the /site mount an unprefixed "/logo-…svg" would resolve against
+    the domain root, which is a different project entirely.
+  */
   return (
     <picture>
-      <source media={`(min-width: ${media}px)`} srcSet="/logo-dm-light.svg" />
+      <source
+        media={`(min-width: ${media}px)`}
+        srcSet={withBasePath("/logo-dm-light.svg")}
+      />
       <img
-        src="/logo-short-light.svg"
+        src={withBasePath("/logo-short-light.svg")}
         alt={`${site.name} — ${site.tagline}`}
         width={57}
         height={69}

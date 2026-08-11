@@ -8,6 +8,7 @@ import { fontVariables } from "../fonts";
 import { routing, type Locale } from "@/i18n/routing";
 import { site } from "@/content/site";
 import { OrganizationJsonLd } from "@/components/json-ld";
+import { withBasePath } from "@/lib/base-path";
 import { AccessibilityScript } from "@/components/layout/accessibility-script";
 import { MotionArmScript } from "@/components/motion/motion-arm-script";
 import { MotionProvider } from "@/components/motion/motion-provider";
@@ -61,17 +62,24 @@ export async function generateMetadata({
       title: t("title"),
       description: t("description"),
     },
+    /*
+      `withBasePath` on every one of these: Next does NOT apply `basePath` to
+      icon URLs given in metadata — verified by scanning the built HTML, where
+      these were the only root-absolute paths left after the basePath build
+      (144 occurrences across 50 pages, all pointing at the domain root, which
+      on this server is a different project).
+    */
     icons: {
       icon: [
-        { url: "/favicon.ico", sizes: "any" },
+        { url: withBasePath("/favicon.ico"), sizes: "any" },
         /*
           The short mark, not the wordmark. A 4.5:1 lockup letterboxes down to
           a few unreadable pixels in a browser tab; the mark is near-square and
           stays legible at 16px.
         */
-        { url: "/logo-short-light.svg", type: "image/svg+xml" },
+        { url: withBasePath("/logo-short-light.svg"), type: "image/svg+xml" },
       ],
-      apple: "/logo-short-light.svg",
+      apple: withBasePath("/logo-short-light.svg"),
     },
     robots: { index: true, follow: true },
   };
