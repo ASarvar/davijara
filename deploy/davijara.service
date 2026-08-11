@@ -52,8 +52,10 @@ Environment=PORT=3001
 # not have masked it. Matching the two names makes the rewrite resolve as
 # relative and route internally.
 #
-# Still loopback: `localhost` resolves to 127.0.0.1 from /etc/hosts. If this
-# box ever resolves it to ::1 first, nginx's proxy_pass would need to match.
+# Still loopback either way. On THIS box Node resolves `localhost` to ::1, so
+# the listener is IPv6 loopback only — which is why the nginx block proxies to
+# [::1]:3001 rather than 127.0.0.1. Changing this value means re-checking
+# `ss -ltnp | grep 3001` and matching deploy/nginx-site-location.conf to it.
 Environment=HOSTNAME=localhost
 
 # `output: "standalone"` in next.config.ts writes exactly this entry point.
