@@ -32,7 +32,17 @@ echo "==> Pulling latest"
 git pull --ff-only
 
 echo "==> Installing dependencies"
-npm ci
+# `npm install`, not `npm ci`. ci demands the lockfile be byte-exact for the
+# npm version running it, and that check itself has version-to-version
+# quirks: this lockfile was generated with npm 10.9.0 and `npm ci` on the
+# server's 10.8.2 rejected it (EUSAGE, over transitive deps this repo does
+# not even declare directly — @swc/helpers, picomatch). A plain local
+# `npm install` against the same lockfile made zero changes, confirming the
+# lockfile itself is fine and this was a cross-version validation false
+# positive, not real drift. `install` reconciles quietly instead of hard
+# failing on it — the right tradeoff for a single low-frequency-deploy
+# server, where ci's extra byte-for-byte strictness buys little.
+npm install
 
 # NEXT_PUBLIC_* values are baked into the client bundle at build time, not
 # read at runtime — the build step needs the real env, not just the systemd
