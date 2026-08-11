@@ -84,6 +84,12 @@ cp -r public "$RELEASE_DIR/public"
 # means the path always exists before the service is asked to start.
 mkdir -p "$RELEASE_DIR/.next/cache"
 
+# This script runs as root; the service runs as `davijara` (User= in the
+# unit). Without this the whole release stays root-owned and the app cannot
+# write the very cache directory the unit grants it — a failure that would
+# only surface later, at the first cache write, rather than at startup.
+sudo chown -R davijara:davijara "$RELEASE_DIR"
+
 echo "==> Switching current -> $RELEASE_DIR"
 ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
 

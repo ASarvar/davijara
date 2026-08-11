@@ -2,6 +2,17 @@
 Description=Davijara.uz — Next.js production server
 After=network.target
 
+# Give up after 5 failed starts in 5 minutes instead of retrying forever.
+#
+# Restart=on-failure with RestartSec=5 never trips systemd's default limit
+# (5 starts per 10s), so a genuinely broken deploy just loops: this unit was
+# observed at "restart counter is at 2367" against a WorkingDirectory that
+# did not exist. A service that stops in `failed` state is far easier to
+# notice than one perpetually "activating (auto-restart)", and it stops
+# filling the journal with the same line.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
 [Service]
 Type=simple
 User=davijara
