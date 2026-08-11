@@ -24,7 +24,7 @@ Environment=NODE_ENV=production
 # `location /site` block in nginx already forwards to.
 Environment=PORT=3001
 # Loopback only — nginx is the one thing allowed to reach this port; see
-# deploy/nginx.conf. The app is never exposed directly to the internet.
+# deploy/nginx-site-location.conf. Never exposed directly to the internet.
 Environment=HOSTNAME=127.0.0.1
 
 # `output: "standalone"` in next.config.ts writes exactly this entry point.
@@ -38,7 +38,21 @@ RestartSec=5
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
-ReadWritePaths=/var/www/davijara/current/.next/cache
+
+# Leading "-" means "skip if missing" instead of refusing to start.
+#
+# Without it the service died at boot with status=226/NAMESPACE: with
+# ProtectSystem=strict, systemd sets up a mount namespace and bind-mounts
+# each ReadWritePaths entry, and a path that does not exist yet is a hard
+# failure of that setup — not a warning. Next only creates .next/cache the
+# first time it writes to it, so on a brand-new release the directory is
+# genuinely absent and the unit could never reach its first start.
+#
+# deploy.sh now also mkdir's this per release, so the "-" is the belt to that
+# braces: it keeps a missing cache dir from being fatal no matter how the
+# release was assembled.
+ReadWritePaths=-/var/www/davijara/current/.next/cache
+
 LimitNOFILE=65535
 
 [Install]

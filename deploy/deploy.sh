@@ -77,6 +77,13 @@ cp -r .next/standalone/. "$RELEASE_DIR/"
 cp -r .next/static "$RELEASE_DIR/.next/static"
 cp -r public "$RELEASE_DIR/public"
 
+# Next creates this lazily, on its first cache write — but the systemd unit
+# bind-mounts it as its one writable path under ProtectSystem=strict, and a
+# missing bind-mount source makes the whole namespace setup fail
+# (status=226/NAMESPACE, hit for real on the first deploy). Creating it here
+# means the path always exists before the service is asked to start.
+mkdir -p "$RELEASE_DIR/.next/cache"
+
 echo "==> Switching current -> $RELEASE_DIR"
 ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
 
