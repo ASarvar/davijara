@@ -132,6 +132,22 @@ echo "==> Switching current -> $RELEASE_DIR"
 ln -sfn "$RELEASE_DIR" "$APP_DIR/current"
 
 echo "==> Restarting service"
+
+# Clear any rate-limit lockout from a PREVIOUS broken release first.
+#
+# The unit sets StartLimitBurst=5 so a crash-loop stops instead of retrying
+# forever. The side effect: once tripped, systemd refuses every further start
+# for StartLimitIntervalSec — including this one — with "Start request
+# repeated too quickly", and reports it as a failure of the new deploy even
+# though the new release is fine. Seen exactly that: the symlink had just been
+# repointed at a good build and the restart was still refused because of
+# failures from minutes earlier.
+#
+# Safe here because a deploy is precisely the moment the old failure stops
+# being relevant. `|| true` since it errors when the unit is not in a failed
+# state, which is the normal case.
+sudo systemctl reset-failed davijara || true
+
 sudo systemctl restart davijara
 sleep 1
 systemctl is-active --quiet davijara && echo "davijara is running" || {

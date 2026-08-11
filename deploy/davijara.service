@@ -36,7 +36,25 @@ Environment=NODE_ENV=production
 Environment=PORT=3001
 # Loopback only — nginx is the one thing allowed to reach this port; see
 # deploy/nginx-site-location.conf. Never exposed directly to the internet.
-Environment=HOSTNAME=127.0.0.1
+#
+# "localhost", NOT "127.0.0.1", and that distinction is load-bearing.
+#
+# Next builds the origin it validates middleware rewrites against from THIS
+# value, not from the Host header:
+#     initUrl = `${protocol}://${formatHostname(opts.hostname || 'localhost')}:${port}`
+#         — next/dist/server/lib/router-utils/resolve-routes.js
+# It then compares that origin to the rewrite next-intl emits, which is built
+# on next-intl's own default of `localhost`. With HOSTNAME=127.0.0.1 the two
+# disagree, Next classifies its OWN rewrite as an external destination, and
+# proxies the request to itself — every page 500'd with
+# "Failed to proxy … socket hang up". Reproduced against a production build
+# under both `Host: 127.0.0.1:<port>` and `Host: davijara.uz`, so nginx would
+# not have masked it. Matching the two names makes the rewrite resolve as
+# relative and route internally.
+#
+# Still loopback: `localhost` resolves to 127.0.0.1 from /etc/hosts. If this
+# box ever resolves it to ::1 first, nginx's proxy_pass would need to match.
+Environment=HOSTNAME=localhost
 
 # `output: "standalone"` in next.config.ts writes exactly this entry point.
 ExecStart=/usr/bin/node server.js
