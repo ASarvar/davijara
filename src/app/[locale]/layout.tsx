@@ -128,7 +128,21 @@ export default async function LocaleLayout({
       the same "footer sits at the bottom on short pages" result without
       constraining the root.
     */
-    <html lang={locale} className={fontVariables}>
+    /*
+      `suppressHydrationWarning` is required, not cosmetic: two inline scripts
+      in <head> deliberately write to <html> BEFORE React hydrates —
+      AccessibilityScript sets `data-contrast` / `data-text-size`, and
+      MotionArmScript adds `motion-armed`. React then compares the DOM it finds
+      against the HTML the server sent, sees attributes it did not write, and
+      logs a mismatch on every single page load.
+
+      Scoped to this one element and one level deep, which is exactly the
+      pre-paint writes above and nothing else. Both scripts have to run before
+      paint — that is the whole point of them — so the alternative is a flash
+      of the wrong palette and a flash of un-hidden content on every
+      navigation.
+    */
+    <html lang={locale} className={fontVariables} suppressHydrationWarning>
       <head>
         {/* Both must run before paint — see each component for why. */}
         <AccessibilityScript />

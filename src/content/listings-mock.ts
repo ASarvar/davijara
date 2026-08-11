@@ -112,7 +112,7 @@ function generate(): Listing[] {
         pricePerYear: Math.round((area * rate) / 100_000) * 100_000,
         lat: +lat.toFixed(5),
         lng: +lng.toFixed(5),
-        // No `image`: the UI falls back to the branded ListingPlaceholder.
+        // No `image`: the card falls back to ImagePlaceholder.
         // Pointing these at real e-auksion photos would attach a genuine
         // building to an invented record.
         auctionUrl: `https://e-auksion.uz/lot-view?lot_id=${lotNumber}`,

@@ -75,3 +75,27 @@ export function formatDate(iso: string): string {
   const [y, m, d] = iso.split("T")[0].split("-");
   return `${d}.${m}.${y}`;
 }
+
+/**
+ * Uzbekistan is UTC+5 all year and observes no daylight saving.
+ *
+ * A fixed offset rather than `toLocaleString(..., { timeZone })`: the server
+ * and the browser run in different zones, and anything that resolves the zone
+ * at runtime can format the same instant two different ways either side of
+ * hydration. Verified against the source: the service sends
+ * `2026-08-21T05:00:00.000Z` for lot 24823151 and e-auksion shows that auction
+ * starting at 10:00.
+ */
+export const TASHKENT_OFFSET_MS = 5 * 60 * 60 * 1000;
+
+/** ISO instant -> "21.08.2026, 10:00" in Tashkent time. */
+export function formatDateTime(iso: string): string {
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return "";
+  const local = new Date(t + TASHKENT_OFFSET_MS);
+  const p = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${p(local.getUTCDate())}.${p(local.getUTCMonth() + 1)}.${local.getUTCFullYear()}` +
+    `, ${p(local.getUTCHours())}:${p(local.getUTCMinutes())}`
+  );
+}

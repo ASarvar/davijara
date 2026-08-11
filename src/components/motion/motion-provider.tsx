@@ -35,7 +35,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const EASE = "power3.out";
 const DURATION = 0.8;
 /** Gap between neighbours in a cascade. */
-const STAGGER = 0.07;
+const STAGGER = 0.15;
 /** No cascade may run longer than this, however many items are in it. */
 const STAGGER_CAP = 0.7;
 const RISE = 24;
@@ -238,6 +238,36 @@ export function MotionProvider() {
       });
     };
 
+    /* ── Drawn lines ────────────────────────────────────────────────────
+       Scrubbed, like the parallax below and unlike everything above it: a
+       progress line that does not track the scroll is not a progress line.
+       Drives a `--p` custom property from 0 to 1; the CSS decides which axis
+       that scales, because the rail is vertical on a phone and horizontal
+       from `lg`. */
+    const setupDraw = (scope: ParentNode) => {
+      scope.querySelectorAll<HTMLElement>("[data-draw]").forEach((el) => {
+        // The line is absolutely positioned inside its track, so the trigger
+        // has to be the list it runs through, not the line itself.
+        const trigger = el.closest("ol, ul, section") ?? el.parentElement ?? el;
+        gsap.fromTo(
+          el,
+          { "--p": 0 },
+          {
+            "--p": 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger,
+              start: "top 75%",
+              // Completes a little before the list leaves, so the last step is
+              // reached while it is still comfortably on screen.
+              end: "bottom 70%",
+              scrub: true,
+            },
+          },
+        );
+      });
+    };
+
     /* ── Parallax ───────────────────────────────────────────────────────
        The one place scroll-LINKED progress belongs: the whole point is that
        it tracks the scroll. `scrub` is correct here and wrong for everything
@@ -264,7 +294,8 @@ export function MotionProvider() {
         });
     };
 
-    const SELECTOR = "[data-reveal],[data-split],[data-clip],[data-parallax]";
+    const SELECTOR =
+      "[data-reveal],[data-split],[data-clip],[data-parallax],[data-draw]";
 
     /*
       `busy` is not an optimisation — without it this deadlocks the page.
@@ -284,6 +315,7 @@ export function MotionProvider() {
         setupSplits(scope);
         setupReveals(scope);
         setupClips(scope);
+        setupDraw(scope);
         setupParallax(scope);
       });
       busy = false;

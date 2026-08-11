@@ -81,6 +81,19 @@ const nextConfig: NextConfig = {
   */
   distDir: process.env.NEXT_DIST_DIR || ".next",
 
+  /*
+    Self-hosted, not deployed to Vercel: `LISTINGS_API_URL` points at a
+    private LAN address (192.168.1.254), so the production server has to sit
+    on that same network — a serverless platform could never reach it. Given
+    that, `standalone` is the right output mode: it traces the exact
+    `node_modules` subset the server needs and writes a self-contained
+    `server.js`, so the deploy artifact is a few tens of MB instead of the
+    full repo + `node_modules`, and the server doesn't need `npm install` at
+    all. See deploy/ for the systemd unit, nginx config, and deploy script
+    built around this.
+  */
+  output: "standalone",
+
   // Stable in Next.js 16. Auto-memoises components, so no manual useMemo /
   // useCallback is needed in the handful of client components here.
   reactCompiler: true,

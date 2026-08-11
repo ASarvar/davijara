@@ -1,0 +1,41 @@
+[Unit]
+Description=Davijara.uz — Next.js production server
+After=network.target
+
+[Service]
+Type=simple
+User=davijara
+Group=davijara
+
+# `current` is a symlink deploy.sh points at the newest release — see
+# deploy/deploy.sh. Restarting this unit after the symlink flips is what
+# actually cuts over to a new build.
+WorkingDirectory=/var/www/davijara/current
+
+# Server-only secrets (LISTINGS_API_URL, API_USER, API_PASSWORD). Lives
+# outside any release directory so redeploys can never touch or overwrite it.
+# Create once by hand on the server: chmod 600, owned by the davijara user.
+EnvironmentFile=/var/www/davijara/shared/.env
+
+Environment=NODE_ENV=production
+Environment=PORT=3000
+# Loopback only — nginx is the one thing allowed to reach this port; see
+# deploy/nginx.conf. The app is never exposed directly to the internet.
+Environment=HOSTNAME=127.0.0.1
+
+# `output: "standalone"` in next.config.ts writes exactly this entry point.
+ExecStart=/usr/bin/node server.js
+
+Restart=on-failure
+RestartSec=5
+
+# Sandboxing. NoNewPrivileges + ProtectSystem=strict run the app read-only
+# outside its own tree; the one thing it writes is its ISR/data cache.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/www/davijara/current/.next/cache
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

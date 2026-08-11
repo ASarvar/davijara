@@ -48,5 +48,11 @@
     "title": "Page not found",
     "description": "The page you are looking for does not exist or has been moved.",
     "action": "Return to homepage"
+  },
+  "auctions": {
+    "eyebrow": "AUCTIONS",
+    "title": "Upcoming auctions",
+    "description": "Objects whose auction opens shortly. Applications close one hour before the auction begins.",
+    "action": "All objects"
   }
 }

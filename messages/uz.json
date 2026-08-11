@@ -79,6 +79,12 @@
     "badgeNew": "Yangi lot",
     "empty": "Tanlangan shartlarga mos obyekt topilmadi."
   },
+  "auctions": {
+    "eyebrow": "SAVDOLAR",
+    "title": "Yaqinlashayotgan savdolar",
+    "description": "Savdosi ochilishiga sanoqli vaqt qolgan obyektlar. Ariza qabuli savdo boshlanishidan bir soat oldin yopiladi.",
+    "action": "Barcha obyektlar"
+  },
   "services": {
     "eyebrow": "Onlayn xizmatlar",
     "title": "Interaktiv xizmatlar",

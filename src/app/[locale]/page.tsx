@@ -5,7 +5,7 @@ import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsSection } from "@/components/sections/objects-section";
 import { HowItWorks } from "@/components/sections/how-it-works";
-import { FeaturedListings } from "@/components/sections/featured-listings";
+import { UpcomingAuctions } from "@/components/sections/upcoming-auctions";
 import { Services } from "@/components/sections/services";
 import { PrivilegesTeaser } from "@/components/sections/privileges-teaser";
 import { Impact } from "@/components/sections/impact";
@@ -40,7 +40,7 @@ export default async function HomePage({
       <SearchWidget values={sp} />
       <ObjectsSection searchParams={sp} />
       <HowItWorks />
-      <FeaturedListings />
+      <UpcomingAuctions />
       <Services />
       <PrivilegesTeaser />
       <Impact />

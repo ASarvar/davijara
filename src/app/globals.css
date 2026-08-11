@@ -571,6 +571,37 @@
 }
 
 /*
+  ── Process rail ─────────────────────────────────────────────────────────
+
+  The line running through "Qanday ijaraga olinadi?". `--p` is its fill, 0 to
+  1, scrubbed against scroll by the motion provider (`data-draw`).
+
+  Note the default is 1, not 0: with no JavaScript, or if GSAP never
+  initialises, the rail is simply drawn in full. The empty state is applied
+  only under `.motion-armed`, exactly like the reveal start states — a section
+  about a four-step process must never render with the line missing.
+
+  The axis flips with the layout: the rail is vertical beside the steps on a
+  phone and horizontal above them from `lg`, so the same variable has to drive
+  scaleY at one breakpoint and scaleX at the other.
+*/
+.step-rail-fill {
+  transform-origin: center top;
+  transform: scaleY(var(--p, 1));
+}
+
+@media (min-width: 64rem) {
+  .step-rail-fill {
+    transform-origin: left center;
+    transform: scaleX(var(--p, 1));
+  }
+}
+
+.motion-armed .step-rail-fill {
+  --p: 0;
+}
+
+/*
   Transform only — deliberately no opacity. Used for the hero entrance; see
   the [data-enter] rule below for why fading that content would be unsafe.
 */

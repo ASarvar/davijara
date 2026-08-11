@@ -15,7 +15,8 @@ import "leaflet/dist/leaflet.css";
 */
 import "leaflet.markercluster/dist/MarkerCluster.css";
 
-import { formatArea, formatSom } from "@/lib/format";
+import { AuctionCountdown } from "@/components/common/auction-countdown";
+import { formatArea, formatDateTime, formatNumber } from "@/lib/format";
 import type { Listing } from "@/types/content";
 
 /*
@@ -242,7 +243,14 @@ export function ListingsMap({
   regionName: (slug: string) => string;
   /** Locale-prefixed link for a lot. */
   detailHref: (listing: Listing) => string;
-  labels: { mock: string; details: string; lot: string; zoomHint: string };
+  labels: {
+    mock: string;
+    details: string;
+    lot: string;
+    zoomHint: string;
+    auctionCountdown: string;
+    auctionStarted: string;
+  };
 }) {
   return (
     <MapContainer
@@ -289,12 +297,44 @@ export function ListingsMap({
               <span className="mt-1 block text-xs text-[#3d4a6b]">
                 {regionName(listing.region)} · {formatArea(listing.area)}
               </span>
+              {/*
+                `formatNumber`, not `formatSom` — full figure, same as
+                e-auksion's own lot pages ("1 095 412,50 UZS" there; whole
+                so'm here, no kopek precision a citizen has any use for). One
+                string expression, not two JSX children: split apart, the
+                space between the number and "so'm" was silently dropped by
+                the time it reached the DOM (see lot-card.tsx for the same
+                bug, found there first).
+              */}
               <span className="mt-1.5 block text-sm font-semibold text-[#7d6229]">
-                {formatSom(listing.pricePerYear)}
+                {`${formatNumber(listing.pricePerYear)} so'm`}
               </span>
               {listing.lotNumber ? (
                 <span className="mt-0.5 block text-xs text-[#3d4a6b]">
                   {labels.lot} {listing.lotNumber}
+                </span>
+              ) : null}
+              {/*
+                Same live countdown as the homepage's LotCard — "the numbers on
+                the map should get the timer effect too". Mock/fallback
+                listings never carry `auctionDate` (see content/listings-mock.ts),
+                so this simply does not render for them rather than fabricating
+                a time for a sample record.
+
+                Ticks on its own client-side clock; nothing here re-renders the
+                marker or the map to drive it.
+              */}
+              {listing.auctionDate ? (
+                <span className="mt-1.5 block">
+                  <span className="block text-[11px] text-[#3d4a6b]">
+                    {labels.auctionCountdown}
+                  </span>
+                  <AuctionCountdown
+                    iso={listing.auctionDate}
+                    fallback={formatDateTime(listing.auctionDate)}
+                    startedLabel={labels.auctionStarted}
+                    className="block text-sm font-semibold text-[#07102b] tabular-nums"
+                  />
                 </span>
               ) : null}
               {listing.isMock ? (

@@ -14,9 +14,8 @@ import {
 
 import { Link } from "@/i18n/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SurfaceCard } from "@/components/common/surface-card";
-import { ImagePlaceholder } from "@/components/common/placeholder/image-placeholder";
-import { formatArea, formatDate, formatNumber, formatSom } from "@/lib/format";
+import { LotCard } from "@/components/common/lot-card";
+import { formatArea, formatNumber, formatSom } from "@/lib/format";
 import type { Listing, RegionSummary } from "@/types/content";
 
 /*
@@ -133,126 +132,6 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
   );
 }
 
-/* ── Individual lot ───────────────────────────────────────────────────── */
-
-function ListingCard({
-  listing,
-  regionName,
-}: {
-  listing: Listing;
-  regionName: string;
-}) {
-  return (
-    <SurfaceCard
-      as="li"
-      radius="md"
-      padding="none"
-      interactive
-      data-reveal="up"
-      className="group overflow-hidden"
-    >
-      <a
-        href={listing.auctionUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex h-full flex-col"
-      >
-        {/* `data-clip` — wipes up from its own bottom edge as the card
-            arrives, which reads as the image being uncovered rather than
-            switched on. */}
-        <div data-clip className="relative aspect-[16/9] overflow-hidden">
-          {/*
-            A photo only when upstream actually supplies one for THIS lot —
-            otherwise the placeholder. Never a stock image: on a state portal a
-            photograph on a lot card reads as a photograph of that lot.
-
-            Plain <img>, not next/image: these are remote files on a host we do
-            not control, and optimising them would proxy every one through our
-            own server for no gain. `loading="lazy"` keeps them off the
-            critical path.
-          */}
-          {listing.image ? (
-            // eslint-disable-next-line @next/next/no-img-element -- remote lot photo on a host we do not control; see above.
-            <img
-              src={listing.image}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <ImagePlaceholder />
-          )}
-          {listing.isMock ? (
-            <span className="bg-[color:var(--color-navy)]/85 text-[color:var(--color-gold-light)] absolute top-2.5 right-2.5 rounded-full px-2.5 py-0.5 text-xs backdrop-blur-sm">
-              Namunaviy
-            </span>
-          ) : null}
-        </div>
-
-        {/*
-          Type scale matches featured-listings.tsx exactly — title 1rem, meta
-          .875rem, price 1.25rem, captions .75rem, p-5. Both components render
-          the same thing (a rental lot as a card), and this one used to sit a
-          whole step below it, so the two card grids on the homepage read as
-          different systems.
-        */}
-        <div className="flex flex-1 flex-col p-5">
-          <h3 className="group-hover:text-accent-foreground text-base leading-snug font-semibold text-balance transition-colors duration-200">
-            {listing.title}
-          </h3>
-
-          <p className="text-muted-foreground mt-2 text-sm">
-            {listing.district ? `${listing.district} · ` : ""}
-            {regionName} · {formatArea(listing.area)}
-            {listing.lotNumber ? ` · Lot №${listing.lotNumber}` : ""}
-          </p>
-
-          {/*
-            No lot status on the card. It is still read in the data layer —
-            `isOpenForApplications` drops concluded lots before they ever reach
-            here — so every card on screen is open for applications and saying
-            so on each one adds nothing.
-
-            Label above value on both sides, so the two read as a matched pair.
-            "so'm" stays on the number because `formatSom` returns "1,1 mln"
-            with no currency of its own; without it the card would show a sum
-            of money with no unit.
-          */}
-          {/* `mt-auto`, not featured-listings' `mt-5`: lot titles here run to
-              three lines, and mt-auto pins the price row to the bottom so it
-              lines up across a row of cards. The type scale is shared; this one
-              spacing rule is not. */}
-          <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-4">
-            <span>
-              <span className="text-muted-foreground block text-xs">
-                Boshlang&apos;ich narx
-              </span>
-              <span className="font-heading text-accent-foreground block text-xl font-semibold">
-                {formatSom(listing.pricePerYear)} so&apos;m
-              </span>
-            </span>
-
-            {listing.auctionDate ? (
-              <span className="shrink-0 text-right">
-                <span className="text-muted-foreground block text-xs">
-                  Savdo kuni
-                </span>
-                <span className="block text-sm font-medium">
-                  {formatDate(listing.auctionDate)}
-                </span>
-              </span>
-            ) : listing.type ? (
-              <span className="text-muted-foreground shrink-0 text-right text-xs">
-                {TYPE_LABELS[listing.type]}
-              </span>
-            ) : null}
-          </div>
-        </div>
-      </a>
-    </SurfaceCard>
-  );
-}
 
 /* ── Pagination ───────────────────────────────────────────────────────── */
 
@@ -413,6 +292,10 @@ export function ObjectsExplorer({
       details: "E-auksionda ko'rish",
       lot: "Lot №",
       zoomHint: "Kattalashtirish uchun Ctrl + g'ildirak",
+      // Same wording as LotCard's countdown, so a pin's popup and a card read
+      // as the same feature rather than two different ones.
+      auctionCountdown: "Savdo boshlanishiga",
+      auctionStarted: "Savdo boshlandi",
     }),
     [],
   );
@@ -475,7 +358,23 @@ export function ObjectsExplorer({
         </div>
 
         <TabsContent value="xarita" className="mt-0">
-          <div className="border-border relative h-[26rem] overflow-hidden rounded-xl border sm:h-[32rem]">
+          {/*
+            `isolate` is load-bearing, not tidiness.
+
+            Leaflet stacks its own chrome high inside the map: panes at
+            z-index 700, controls at 800, the corner containers at 1000. None
+            of this wrapper's ancestors created a stacking context, so those
+            numbers were competing directly with the rest of the page — and the
+            sticky site header is only `z-40`. Scrolling the map under it, the
+            map won and painted straight over the navigation.
+
+            `isolation: isolate` makes this element a stacking context, so
+            Leaflet's 700/800/1000 are resolved WITHIN the map and the map as a
+            whole then sits below the header like any other content. Raising
+            the header's z-index instead would have been a race we would keep
+            re-running every time a plugin picked a bigger number.
+          */}
+          <div className="border-border relative isolate h-[26rem] overflow-hidden rounded-xl border sm:h-[32rem]">
             {listings.length === 0 ? (
               <div className="text-muted-foreground flex h-full items-center justify-center gap-2 text-sm">
                 <Building2 aria-hidden="true" className="size-4" />
@@ -501,7 +400,7 @@ export function ObjectsExplorer({
             <>
               <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {pagedListings.map((listing) => (
-                  <ListingCard
+                  <LotCard
                     key={listing.id}
                     listing={listing}
                     regionName={regionName(listing.region)}

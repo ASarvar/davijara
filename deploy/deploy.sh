@@ -48,6 +48,16 @@ echo "==> Assembling release at $RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
 cp -r .next/standalone/. "$RELEASE_DIR/"
 # Not included in `standalone` by design — Next's own docs call this out.
+#
+# The nested path is `.next/standalone/.next/static`, matching this repo's
+# DEFAULT distDir. next.config.ts lets that be overridden with
+# NEXT_DIST_DIR (used locally to measure a build without a live dev server
+# fighting over the same folder) — verified that with such an override the
+# standalone build mirrors the custom name instead (e.g.
+# `standalone/.next-prod/`). This script deliberately never sets that env
+# var, so `.next/static` is the right path here; if a future CI pipeline
+# does set NEXT_DIST_DIR for its own build step, this line has to change to
+# match.
 cp -r .next/static "$RELEASE_DIR/.next/static"
 cp -r public "$RELEASE_DIR/public"
 

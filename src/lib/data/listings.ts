@@ -3,6 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
+import { TASHKENT_OFFSET_MS } from "@/lib/format";
 import { regions } from "@/content/regions";
 import { featuredListings } from "@/content/homepage";
 import { mockListings } from "@/content/listings-mock";
@@ -202,7 +203,16 @@ interface ApiLot {
   name?: string;
   /** Decimal string, m². */
   rent_area?: string;
-  /** Decimal string, MILLIONS of so'm — see SOM_PER_UNIT. */
+  /**
+   * Decimal string, plain so'm — e.g. "1095412.50", not "1.10" mln.
+   *
+   * Was millions, rounded to 2 decimals (±5,000 so'm of imprecision); the
+   * service switched to raw so'm at some point after this integration was
+   * first verified. Confirmed both ways against the SAME lot: 24823151 sent
+   * "1.10" before, sends "1095412.50" now, and e-auksion's own page for that
+   * lot has always shown the exact figure, 1 095 412.50 UZS/year — so this is
+   * not a guess, and the new format is strictly more precise than the old one.
+   */
   start_price?: string;
   sold_price?: string | null;
   order_status?: string;
@@ -231,19 +241,6 @@ interface ApiResponse {
   summary?: { name?: string; total_lots?: number };
   data?: ApiLot[];
 }
-
-/**
- * `start_price` is quoted in millions of so'm.
- *
- * Not a guess: at this factor the live set works out to a median ~188 000
- * so'm/m²/year, which sits inside the range of the verified records already in
- * `content/homepage.ts` (258 000 – 686 000). Read as plain so'm the same lots
- * would rent for under a so'm per square metre per year. Every other candidate
- * unit is wrong by a factor of a million, so this is the only reading the
- * portal's own verified figures support — but it IS an inference about money
- * on a state portal, so it lives here, named, rather than inline.
- */
-const SOM_PER_UNIT = 1_000_000;
 
 /**
  * How far back to ask for lots. Results saturate well inside this: widening
@@ -288,7 +285,8 @@ function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
     address: "",
     // No `type` — upstream does not classify lots. See the note on Listing.
     area: Number(lot.rent_area) || 0,
-    pricePerYear: (Number(lot.start_price) || 0) * SOM_PER_UNIT,
+    // Already plain so'm — see the note on ApiLot.start_price. No scaling.
+    pricePerYear: Number(lot.start_price) || 0,
     auctionDate: lot.auction_date,
     lotStatus: lot.lot_status?.trim() || undefined,
     image: lot.image ?? lot.photo_url,
@@ -490,6 +488,84 @@ export async function getListings(
  * because the country has ~200 districts — one flat list would be unusable,
  * and the per-region fetch it reads from is already cached.
  */
+/**
+ * Lots from the NEXT auction day, as a pool for the homepage rotator.
+ *
+ * "Next" means the soonest day that still has an auction ahead of it —
+ * including today. A day is only ever considered because a lot is actually
+ * scheduled on it, so weekends need no special handling: the service simply
+ * never returns Saturday or Sunday auctions, and those days fall out on their
+ * own rather than by a rule here that could drift out of step with the
+ * calendar the auctions actually run on.
+ *
+ * Only that one day is returned. Mixing "in 1 day" with "in 12 days" made the
+ * three cards look arbitrary — the point of the section is imminence, and a
+ * card twelve days out is not imminent.
+ *
+ * WHY A POOL AND NOT THREE
+ * The caller shows three at a time and rotates. Sending a pool lets that
+ * rotation happen without another request, and the pool is capped because the
+ * nearest day can hold hundreds of lots — every one of them would otherwise be
+ * serialised into the page.
+ *
+ * WHY THE SHUFFLE IS SEEDED
+ * The legacy site shuffled its region markers with `Math.random()` on every
+ * page load, so the page rearranged itself on every refresh and nothing could
+ * be pointed at. The seed here is a five-minute bucket — the same window the
+ * upstream fetch is cached for — so the pool is stable for as long as the data
+ * behind it is, every visitor in that window sees the same thing, and there is
+ * no hydration risk.
+ */
+export async function getUpcomingAuctions(poolSize = 12): Promise<ListingsResult> {
+  const { listings, source } = await getListings();
+
+  const now = Date.now();
+  const at = (l: Listing) => new Date(l.auctionDate!).getTime();
+
+  const upcoming = listings.filter((l) => {
+    if (!l.auctionDate) return false;
+    const t = new Date(l.auctionDate).getTime();
+    return Number.isFinite(t) && t > now;
+  });
+  if (upcoming.length === 0) {
+    return { listings: [], hasMock: false, source };
+  }
+
+  /* The Tashkent calendar day an auction falls on, as "YYYY-MM-DD". */
+  const dayOf = (l: Listing) =>
+    new Date(at(l) + TASHKENT_OFFSET_MS).toISOString().slice(0, 10);
+
+  const nextDay = upcoming.reduce(
+    (min, l) => (dayOf(l) < min ? dayOf(l) : min),
+    dayOf(upcoming[0]),
+  );
+  const sameDay = upcoming.filter((l) => dayOf(l) === nextDay);
+
+  /* Mulberry32 — small, fast, and identical everywhere it runs. */
+  let state = Math.floor(now / 300_000) >>> 0;
+  const rand = () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+
+  // Fisher-Yates over a copy; sorting by a random comparator is biased.
+  const pool = [...sameDay];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  const picked = pool.slice(0, poolSize);
+  return {
+    listings: picked,
+    hasMock: picked.some((l) => l.isMock),
+    source,
+  };
+}
+
 /**
  * Districts for every region at once, keyed by region slug.
  *

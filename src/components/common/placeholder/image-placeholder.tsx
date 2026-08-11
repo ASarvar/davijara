@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils";
 /*
   Neutral "image goes here" placeholder.
 
-  Distinct from `ListingPlaceholder`, which draws stylised architecture: that
-  reads as artwork — as though the card were *illustrated* — and at a glance
-  is easy to mistake for a picture of the property. This one is unmistakably a
-  gap waiting for a photograph, which is the honest state until real,
-  self-hosted photography exists.
+  This replaced a `ListingPlaceholder` that drew stylised architecture (see
+  git history). That read as artwork — as though the card were *illustrated* —
+  and at a glance was easy to mistake for a picture of the property. This one
+  is unmistakably a gap waiting for a photograph, which is the honest state
+  until real, self-hosted photography exists.
 
   Deliberately NOT a stock photo. On a state property portal a photograph on a
   lot card reads as a photograph OF THAT LOT, so generic imagery would imply
