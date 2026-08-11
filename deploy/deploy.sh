@@ -83,7 +83,20 @@ set -a
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 set +a
-npm run build
+
+# Turbopack by default (the project's documented build engine — see
+# CLAUDE.md). BUILD_FLAGS is an escape hatch for the build engine only, e.g.
+#   BUILD_FLAGS=--webpack bash deploy/deploy.sh
+#
+# Worth knowing on this box: `next build` once died with a bare "Bus error"
+# (SIGBUS) under BOTH engines. The cause was not the engine — it was stale
+# native binaries left by an `npm install` run under Node 18 before the
+# runtime was upgraded; `npm install` afterwards reported "up to date" and
+# rebuilt nothing. `rm -rf node_modules && npm install` fixed it and Turbopack
+# was never re-tested against the clean tree. If a build ever SIGBUSes again,
+# try that reinstall first, and only then reach for --webpack.
+# shellcheck disable=SC2086
+npm run build -- ${BUILD_FLAGS:-}
 
 echo "==> Assembling release at $RELEASE_DIR"
 mkdir -p "$RELEASE_DIR"
