@@ -291,11 +291,13 @@ export function ObjectsExplorer({
       mock: "Namunaviy yozuv",
       details: "E-auksionda ko'rish",
       lot: "Lot №",
-      zoomHint: "Kattalashtirish uchun Ctrl + g'ildirak",
+      zoomHint: "Kattalashtirish uchun Ctrl + Scroll",
       // Same wording as LotCard's countdown, so a pin's popup and a card read
       // as the same feature rather than two different ones.
       auctionCountdown: "Savdo boshlanishiga",
       auctionStarted: "Savdo boshlandi",
+      fullscreenEnter: "Butun ekranga ochish",
+      fullscreenExit: "Butun ekrandan chiqish",
     }),
     [],
   );
@@ -374,7 +376,10 @@ export function ObjectsExplorer({
             the header's z-index instead would have been a race we would keep
             re-running every time a plugin picked a bigger number.
           */}
-          <div className="border-border relative isolate h-[26rem] overflow-hidden rounded-xl border sm:h-[32rem]">
+          {/* rounded-md (14px), not rounded-xl (28px) — the scale here is
+              custom, so `xl` is nearly twice the usual Tailwind value and
+              read as over-rounded on a box this large. */}
+          <div className="border-border relative isolate h-[26rem] overflow-hidden rounded-md border sm:h-[32rem]">
             {listings.length === 0 ? (
               <div className="text-muted-foreground flex h-full items-center justify-center gap-2 text-sm">
                 <Building2 aria-hidden="true" className="size-4" />

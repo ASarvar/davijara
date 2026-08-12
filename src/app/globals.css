@@ -444,6 +444,107 @@
 }
 
 /*
+  ── "Sinov rejimi" badge — per-letter shimmer ────────────────────────────
+
+  A wave that dips each letter and flares it back through gold, offset by
+  index so it travels left to right.
+
+  THE 0% KEYFRAME IS THE FULLY-LEGIBLE STATE, and that is the whole design
+  constraint rather than a detail. A frozen document timeline — background
+  tab, print, search-engine renderer — pins every letter at 0%, and this
+  badge is the notice telling a citizen the portal's data is not final. It
+  must never be the thing that fails to render. Same reasoning as the word
+  rotator above, which reaches it via negative delays; here it falls out of
+  putting the resting state at 0% instead.
+
+  Positive stagger delays are therefore safe: `animation-fill-mode` is left
+  at `none`, so before a letter's delay elapses it simply shows its normal
+  inherited style.
+
+  Timing is deliberately slow. WCAG 2.3.1 forbids more than three flashes a
+  second; one 3s cycle per letter is 0.33Hz, an order of magnitude under. The
+  dim step bottoms out at 0.45 opacity, never at 0 — this is a legibility
+  wave, not a blink.
+
+  `--pos` is a 0–1 position through the label (set in site-header.tsx), NOT a
+  letter index, so the sweep always takes --test-mode-sweep to cross no matter
+  how long the label is. With a fixed per-letter delay the animation is only
+  correct for one particular string: at 80ms per letter the current 27-letter
+  label put the last delay at 2.3s inside a 2.6s cycle, so the wave relapped
+  itself and the rest band vanished.
+*/
+.test-mode-letter {
+  --test-mode-sweep: 1.2s;
+
+  /*
+    The flare must NOT be --color-gold-light: on the deep tone that token and
+    --accent-foreground are both #e8d5a8, so animating between them changes
+    nothing and the letters only pulse in opacity. A warm near-white is a real
+    step up from the resting gold, and stays inside the palette's warmth
+    rather than reading as a second brand colour.
+  */
+  --test-mode-flare: color-mix(in srgb, #ffffff 55%, var(--color-gold-light));
+
+  animation: test-mode-shimmer 3s var(--ease-out-soft) infinite;
+  animation-delay: calc(var(--pos, 0) * var(--test-mode-sweep));
+}
+
+/*
+  The header is always data-tone="deep", so this is defensive rather than
+  currently exercised — but a near-white flare on the bone surface would be
+  a letter briefly vanishing, which is the one failure mode this badge cannot
+  have. On light, flare toward navy instead: darker than the resting gold-ink,
+  so the wave still reads.
+*/
+[data-tone="light"] .test-mode-letter {
+  --test-mode-flare: var(--color-navy);
+}
+
+@keyframes test-mode-shimmer {
+  /* Resting state — held for over half the cycle so the wave reads as a
+     pass-through rather than a constant throb. */
+  0%,
+  55%,
+  100% {
+    opacity: 1;
+    color: var(--accent-foreground);
+    text-shadow: none;
+  }
+  /* Dim step also shifts to the deeper gold, so the dip is a colour change
+     and not merely a fade — the two ends of the wave differ in hue. */
+  18% {
+    opacity: 0.45;
+    color: var(--color-gold);
+    text-shadow: none;
+  }
+  34% {
+    opacity: 1;
+    color: var(--test-mode-flare);
+    text-shadow: 0 0 7px color-mix(in srgb, var(--color-gold) 65%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .test-mode-letter {
+    animation: none;
+  }
+}
+
+/*
+  Off entirely in high contrast.
+
+  That mode exists for people who need text to hold still and stay at maximum
+  legibility; dimming letters to 45% and washing them through a gold glow is
+  the opposite of what it is for. The badge keeps its border, dot and text —
+  only the motion goes.
+*/
+:root[data-contrast="high"] .test-mode-letter {
+  animation: none;
+  color: inherit;
+  text-shadow: none;
+}
+
+/*
   Pulsing dot for the hero eyebrow pill, ported from legacy
   `.hero-eyebrow::before` (styles.css:347-354). A plain infinite decorative
   loop, not an entrance/reveal — the data-enter/data-reveal safety rules
@@ -665,6 +766,25 @@
 .leaflet-container {
   font-family: var(--font-sans);
   background: var(--color-navy-mid);
+}
+
+/*
+  Fullscreen sizing, stated rather than inherited.
+
+  The container carries inline `width/height: 100%` (see listings-map.tsx), and
+  inline styles outrank a UA stylesheet — so filling the screen depends on the
+  browser marking its `:fullscreen` width/height `!important`. Chrome does;
+  that is not a guarantee across engines, and an inline style quietly winning
+  would leave the map at its inline size on a black screen.
+
+  100% here resolves against the fullscreen element's own fixed-position box,
+  i.e. the viewport. Radius/border live on the wrapper in objects-explorer, and
+  a fullscreen element is lifted into the top layer where an ancestor cannot
+  clip it — so there is nothing to undo on that front.
+*/
+.leaflet-container:fullscreen {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Zoom controls */

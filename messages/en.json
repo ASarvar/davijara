@@ -11,7 +11,9 @@
   },
   "topbar": {
     "accessibility": "Accessibility options",
-    "languageLabel": "Choose site language"
+    "languageLabel": "Choose site language",
+    "testMode": "Test mode",
+    "testModeDescription": "The site is currently running in test mode — data may not be final"
   },
   "nav": {
     "home": "Home",

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
+import { Maximize2, Minimize2 } from "lucide-react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 /*
@@ -109,6 +110,120 @@ function KeepSizeInSync() {
   return null;
 }
 
+/*
+  Module scope, not inline: useSyncExternalStore re-subscribes whenever the
+  callback identity changes, and a fresh arrow on every render would tear the
+  subscription down and set it up again each time.
+*/
+const subscribeToNothing = () => () => {};
+
+/**
+ * Fullscreen toggle.
+ *
+ * The map is the one thing on the page a reader may genuinely want the whole
+ * screen for — a 26rem box showing 1 100+ clustered lots forces constant
+ * zoom-and-pan, and clusters only break apart at zoom levels that box cannot
+ * usefully hold.
+ *
+ * The element handed to the API is Leaflet's own container, not the wrapper
+ * around it in objects-explorer. That keeps the whole feature inside this file
+ * (no prop drilling, no ref threading), and it sidesteps the wrapper's
+ * `rounded-*` + `overflow-hidden`: a fullscreen element is promoted to the
+ * browser's top layer, where an ancestor's clipping no longer applies, so the
+ * map fills the screen square-cornered without needing a `:fullscreen`
+ * override to undo the radius.
+ *
+ * Feature-detected rather than assumed. `document.fullscreenEnabled` is false
+ * on iOS Safari, which only ever allows `<video>` to go fullscreen — showing a
+ * button there would give a dead control instead of an honest absence.
+ *
+ * Escape is handled by the browser; adding our own key listener would fight it.
+ */
+function FullscreenControl({ labels }: { labels: { enter: string; exit: string } }) {
+  const map = useMap();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  /*
+    `document` does not exist on the server, so the capability cannot simply be
+    read during render. useSyncExternalStore is the sanctioned way to pull a
+    value out of the platform: it takes a server snapshot (false) and a client
+    snapshot, so React never renders one and hydrates the other.
+
+    Not a `useState` + `useEffect` pair, which is the obvious shape and is
+    wrong here — setting state from an effect body schedules a second render
+    purely to learn something the first render could have known, and the
+    project's React Compiler lint rejects it (react-hooks/set-state-in-effect).
+
+    The subscribe callback is a no-op: `fullscreenEnabled` reflects permissions
+    policy, which does not change over a page's lifetime.
+  */
+  const supported = useSyncExternalStore(
+    subscribeToNothing,
+    () => document.fullscreenEnabled === true,
+    () => false,
+  );
+
+  useEffect(() => {
+    const onChange = () => {
+      setIsFullscreen(document.fullscreenElement === map.getContainer());
+      /*
+        Leaflet caches its container size, and neither entering nor leaving
+        fullscreen fires a window `resize`. KeepSizeInSync's ResizeObserver
+        does catch this, but it lands a frame later — re-measuring here as
+        well removes the flash of stretched tiles on the way in.
+      */
+      map.invalidateSize({ animate: false });
+    };
+
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, [map]);
+
+  // Without this the button sits on the map's drag surface: a click would
+  // also reach Leaflet and register as a map interaction.
+  useEffect(() => {
+    const node = buttonRef.current;
+    if (node) L.DomEvent.disableClickPropagation(node);
+  }, [supported]);
+
+  if (!supported) return null;
+
+  const toggle = () => {
+    if (document.fullscreenElement) {
+      void document.exitFullscreen().catch(() => {});
+    } else {
+      // Rejects if the gesture is not trusted or a policy forbids it. There is
+      // no useful recovery — the map simply stays inline.
+      void map.getContainer().requestFullscreen().catch(() => {});
+    }
+  };
+
+  const label = isFullscreen ? labels.exit : labels.enter;
+
+  return (
+    <button
+      ref={buttonRef}
+      type="button"
+      onClick={toggle}
+      title={label}
+      aria-label={label}
+      /*
+        z above Leaflet's own chrome (panes 700, controls 800, corners 1000).
+        Top-right is the one free corner: zoom sits top-left, attribution
+        bottom-right.
+      */
+      className="absolute top-3 right-3 z-[1000] flex size-9 items-center justify-center rounded-md border border-[color:var(--color-gold)]/30 bg-[color:var(--color-navy)] text-[color:var(--color-gold-light)] shadow-md transition-colors duration-200 hover:bg-[color:var(--color-navy-mid)] hover:text-[color:var(--color-gold)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:outline-none"
+    >
+      {isFullscreen ? (
+        <Minimize2 aria-hidden="true" className="size-4" />
+      ) : (
+        <Maximize2 aria-hidden="true" className="size-4" />
+      )}
+    </button>
+  );
+}
+
 /**
  * Ctrl (or ⌘) + wheel zooms; a bare wheel scrolls the page.
  *
@@ -121,6 +236,11 @@ function KeepSizeInSync() {
  * it is released. `onWheel` is registered non-passively because the modifier
  * case must call `preventDefault()` — otherwise Ctrl+wheel triggers the
  * browser's own page zoom instead.
+ *
+ * The guard lifts in fullscreen. Its entire justification is that a trapped
+ * wheel stops the PAGE scrolling — in fullscreen there is no page behind the
+ * map to scroll, so demanding a modifier there would be friction protecting
+ * nothing.
  */
 function ModifierWheelZoom({ hint }: { hint: string }) {
   const map = useMap();
@@ -145,7 +265,16 @@ function ModifierWheelZoom({ hint }: { hint: string }) {
       if (node) node.style.opacity = visible ? "1" : "0";
     };
 
+    const isFullscreen = () => document.fullscreenElement === container;
+
     const onWheel = (e: WheelEvent) => {
+      if (isFullscreen()) {
+        map.scrollWheelZoom.enable();
+        clearTimeout(hintTimer);
+        setHint(false);
+        return;
+      }
+
       if (e.ctrlKey || e.metaKey) {
         // Stop the browser zooming the whole page instead.
         e.preventDefault();
@@ -161,8 +290,11 @@ function ModifierWheelZoom({ hint }: { hint: string }) {
     };
 
     // Releasing the modifier must re-arm the guard, or the map would keep
-    // swallowing the wheel for the rest of the session.
-    const onKeyUp = () => map.scrollWheelZoom.disable();
+    // swallowing the wheel for the rest of the session — except in fullscreen,
+    // where plain-wheel zoom is the intended behaviour.
+    const onKeyUp = () => {
+      if (!isFullscreen()) map.scrollWheelZoom.disable();
+    };
 
     container.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keyup", onKeyUp);
@@ -250,6 +382,8 @@ export function ListingsMap({
     zoomHint: string;
     auctionCountdown: string;
     auctionStarted: string;
+    fullscreenEnter: string;
+    fullscreenExit: string;
   };
 }) {
   return (
@@ -269,6 +403,12 @@ export function ListingsMap({
 
       <KeepSizeInSync />
       <ModifierWheelZoom hint={labels.zoomHint} />
+      <FullscreenControl
+        labels={{
+          enter: labels.fullscreenEnter,
+          exit: labels.fullscreenExit,
+        }}
+      />
       <FitToListings listings={listings} />
 
       {/*

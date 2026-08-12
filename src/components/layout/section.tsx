@@ -111,24 +111,29 @@ export function SectionHeader({
             breakpoints — so a section heading carried as much weight as the
             title of the whole page, and six of them down the homepage read as
             six page titles rather than as sections of one.
+
+            Trimmed again here: 1.25/1.5rem, one notch below the original
+            "smaller" pass. `compact` used to be the one step down from
+            `default` (text-xl sm:text-2xl vs text-2xl sm:text-3xl) — now both
+            sizes share the same type scale, and `compact` is purely the
+            tighter margins/breakpoint its name promises.
           */}
           {/* `data-split` — the motion provider splits this into visual lines
               and rises each one out of its own mask. Every section heading on
               the site goes through here, so this one attribute is the whole
               line-reveal treatment. */}
-          <h2
-            data-split
-            className={cn(
-              "font-semibold text-balance",
-              compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl",
-            )}
-          >
+          <h2 data-split className="font-semibold text-balance text-xl sm:text-2xl">
             {title}
           </h2>
           {description ? (
-            /* Body copy, so it sits on the same step as the rest of the page
-               rather than a size of its own. */
-            <p className="text-muted-foreground mt-3 text-sm text-pretty sm:text-base">
+            /*
+              Flat text-sm, not text-sm sm:text-base. Every other paragraph on
+              the site — LotCard, FAQ answers, privileges, the hero lede — is a
+              plain text-sm with no breakpoint bump; this was the one outlier
+              that grew at sm, which is what made the whole header block read
+              oversized against the rest of the page's type.
+            */
+            <p className="text-muted-foreground mt-3 text-sm text-pretty">
               {description}
             </p>
           ) : null}

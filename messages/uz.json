@@ -14,7 +14,9 @@
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",
-    "languageLabel": "Saytning tilini tanlang"
+    "languageLabel": "Saytning tilini tanlang",
+    "testMode": "Sayt sinov rejimida ishlamoqda",
+    "testModeDescription": "Sayt hozircha sinov rejimida ishlamoqda — ma'lumotlar yakuniy bo'lmasligi mumkin"
   },
   "nav": {
     "home": "Bosh sahifa",
