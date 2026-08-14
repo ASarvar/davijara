@@ -7,8 +7,9 @@ import { IconTile } from "@/components/common/icon-tile";
   Figure + label grid, shared by the hero and the impact band.
 
   Semantics matter here: the visible big number is meaningless to a screen
-  reader on its own, so each pair is a <dt>/<dd> with the label as the term
-  (visually hidden, since it is repeated below the figure).
+  reader on its own, so each pair is a <dt>/<dd> with the label as the term.
+  The `plain` variant hides the <dt> and repeats the label visually below the
+  figure; `card` shows the <dt> itself, above the figure, next to its icon.
 */
 export function StatList({
   stats,
@@ -28,7 +29,7 @@ export function StatList({
    * on the children would be two animations fighting over the same content.
    */
   reveal?: boolean;
-  /** "card" wraps each stat in a bordered surface with its icon above the figure. */
+  /** "card" wraps each stat in a bordered surface with an icon + label row above the figure. */
   variant?: "plain" | "card";
   className?: string;
 }) {
@@ -50,27 +51,42 @@ export function StatList({
             bordered && "border-border border-t pt-4",
             variant === "card" &&
               "border-hairline bg-card rounded-xl border p-5 sm:p-6",
-            variant === "card" && align === "center" && "flex flex-col items-center",
           )}
         >
-          {variant === "card" && stat.icon && (
-            <IconTile name={stat.icon} size="md" className="mb-4" />
+          {variant === "card" ? (
+            <>
+              <div className="mb-3 flex items-center gap-3">
+                {stat.icon && <IconTile name={stat.icon} size="sm" />}
+                <dt className="text-muted-foreground text-sm">
+                  {stat.label}
+                </dt>
+              </div>
+              <dd>
+                <AnimatedStatValue
+                  value={stat.value}
+                  className="font-heading text-accent-foreground block text-center text-3xl font-extrabold sm:text-4xl pt-3"
+                />
+              </dd>
+            </>
+          ) : (
+            <>
+              <dt className="sr-only">{stat.label}</dt>
+              <dd>
+                <AnimatedStatValue
+                  value={stat.value}
+                  className="font-heading text-accent-foreground block text-3xl font-extrabold sm:text-4xl"
+                />
+                <span
+                  className={cn(
+                    "text-muted-foreground mt-1.5 block text-sm",
+                    align === "center" && "mx-auto max-w-[16rem]",
+                  )}
+                >
+                  {stat.label}
+                </span>
+              </dd>
+            </>
           )}
-          <dt className="sr-only">{stat.label}</dt>
-          <dd>
-            <AnimatedStatValue
-              value={stat.value}
-              className="font-heading text-accent-foreground block text-3xl font-extrabold sm:text-4xl"
-            />
-            <span
-              className={cn(
-                "text-muted-foreground mt-1.5 block text-sm",
-                align === "center" && "mx-auto max-w-[16rem]",
-              )}
-            >
-              {stat.label}
-            </span>
-          </dd>
         </div>
       ))}
     </dl>
