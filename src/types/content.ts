@@ -162,6 +162,8 @@ export interface Step {
 export interface Stat {
   value: string;
   label: string;
+  /** Name from the icon registry — only rendered by `StatList`'s `card` variant. */
+  icon?: string;
 }
 
 export interface Auction {

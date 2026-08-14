@@ -88,7 +88,12 @@ export async function Hero() {
         </div>
 
         <div data-enter style={{ "--enter-delay": 2 } as React.CSSProperties}>
-          <StatList stats={stats}  reveal={false} className="mt-14" />
+          <StatList
+            stats={stats}
+            reveal={false}
+            variant="card"
+            className="mt-14 grid-cols-1 gap-4 sm:grid-cols-3"
+          />
         </div>
       </Container>
     </section>

@@ -17,14 +17,25 @@ import type {
 */
 
 export const heroStats: Stat[] = [
-  { value: "4 820+", label: "Ijaraga taklif etilayotgan obyektlar" },
-  { value: "12 340", label: "Amalga oshirilgan ijara shartnomalari" },
-  { value: "14", label: "Hudud bo'yicha xizmat" },
-  { value: "1,2 trln", label: "so'm — 2025 yilgi ijara to'lovlari" },
+  {
+    value: "1 390+",
+    label: "Ijaraga taklif etilayotgan obyektlar",
+    icon: "Building2",
+  },
+  {
+    value: "28 075",
+    label: "Amalga oshirilgan ijara shartnomalari",
+    icon: "FileText",
+  },
+  {
+    value: "145,9",
+    label: "Ijaraga olingan umumiy maydon (mln m²)",
+    icon: "LandPlot",
+  },
 ];
 
 export const impactStats: Stat[] = [
-  { value: "1,2 trln", label: "so'm — 2025 yilgi ijara to'lovlari" },
+  { value: "469,9 mlrd", label: "so'm — 2026 yilgi ijara to'lovlari" },
   { value: "98%", label: "Elektron shaklda tuzilgan shartnomalar" },
   { value: "3 kun", label: "Obyektni savdoga chiqarish o'rtacha muddati" },
   { value: "24/7", label: "Portal orqali xizmatlardan foydalanish" },

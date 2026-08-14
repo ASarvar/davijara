@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { Stat } from "@/types/content";
 import { AnimatedStatValue } from "@/components/common/animated-stat-value";
+import { IconTile } from "@/components/common/icon-tile";
 
 /*
   Figure + label grid, shared by the hero and the impact band.
@@ -14,6 +15,7 @@ export function StatList({
   align = "start",
   bordered = false,
   reveal = true,
+  variant = "plain",
   className,
 }: {
   stats: Stat[];
@@ -26,6 +28,8 @@ export function StatList({
    * on the children would be two animations fighting over the same content.
    */
   reveal?: boolean;
+  /** "card" wraps each stat in a bordered surface with its icon above the figure. */
+  variant?: "plain" | "card";
   className?: string;
 }) {
   return (
@@ -42,8 +46,16 @@ export function StatList({
           /* "down" — figures drop in from above, which sets them apart from the
              card grids that rise. See the FROM map in motion-provider.tsx. */
           data-reveal={reveal ? "down" : undefined}
-          className={cn(bordered && "border-border border-t pt-4")}
+          className={cn(
+            bordered && "border-border border-t pt-4",
+            variant === "card" &&
+              "border-hairline bg-card rounded-xl border p-5 sm:p-6",
+            variant === "card" && align === "center" && "flex flex-col items-center",
+          )}
         >
+          {variant === "card" && stat.icon && (
+            <IconTile name={stat.icon} size="md" className="mb-4" />
+          )}
           <dt className="sr-only">{stat.label}</dt>
           <dd>
             <AnimatedStatValue
