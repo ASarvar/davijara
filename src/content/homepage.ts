@@ -24,12 +24,12 @@ export const heroStats: Stat[] = [
   },
   {
     value: "28 075",
-    label: "Amalga oshirilgan ijara shartnomalari",
+    label: "Ijara shartnomalari",
     icon: "FileText",
   },
   {
     value: "145,9",
-    label: "Ijaraga olingan umumiy maydon (mln m²)",
+    label: "Ijaraga olingan maydon (mln m²)",
     icon: "LandPlot",
   },
 ];
