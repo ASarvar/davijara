@@ -15,11 +15,17 @@ export async function PrivilegesTeaser() {
     getPrivilegeCounts(),
   ]);
 
+  /*
+    Raised, as part of the page's base/raised rhythm.
+
+    The cobalt tint and hairline rules this Section used to carry are gone and
+    deliberately not reproduced: both existed to separate it from the navy
+    sections either side. `surface="raised"` is now that separation, and it is
+    the same device every other lifted section uses instead of one section
+    hand-rolling its own.
+  */
   return (
-    <Section
-      tone="deep"
-      className="bg-[color:var(--color-cobalt)]/6 border-hairline border-y"
-    >
+    <Section tone="deep" surface="raised">
       <SectionHeader
         eyebrow={t("eyebrow")}
         title={t("title")}

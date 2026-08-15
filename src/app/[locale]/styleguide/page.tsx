@@ -24,7 +24,8 @@ const brandScale = [
   { name: "gold", value: "#c8a96e", cls: "bg-gold" },
   { name: "gold-light", value: "#e8d5a8", cls: "bg-gold-light" },
   { name: "gold-ink", value: "#7d6229", cls: "bg-gold-ink" },
-  { name: "bone", value: "#f4f2ee", cls: "bg-bone" },
+  { name: "mist", value: "#eef1f8", cls: "bg-mist" },
+  { name: "mist-edge", value: "#dce2ec", cls: "bg-mist-edge" },
   { name: "slate", value: "#3d4a6b", cls: "bg-slate" },
 ];
 
@@ -43,7 +44,7 @@ function ToneSpecimen({ tone }: { tone: Tone }) {
     <Section tone={tone}>
       <SectionHeader
         eyebrow={`data-tone="${tone}"`}
-        title={tone === "deep" ? "Deep tone (navy)" : "Light tone (bone)"}
+        title={tone === "deep" ? "Deep tone (navy)" : "Light tone (mist)"}
         description="Every component below is identical markup. Only the data-tone attribute on the section wrapper differs — the semantic tokens re-bind and everything adapts."
         action={<Button variant="outline">Batafsil</Button>}
       />
@@ -174,9 +175,10 @@ export default async function StyleguidePage({
           </div>
           <p className="text-muted-foreground mt-4 max-w-2xl text-sm">
             <strong className="text-accent-foreground">Contrast note:</strong>{" "}
-            gold on bone measures 2.01:1 and fails WCAG AA outright. gold-ink
-            (5.14:1) is its text-safe replacement on light surfaces; gold stays
-            for ornament and for text on deep surfaces (8.37:1).
+            gold on the mist surface measures about 1.9:1 and fails WCAG AA
+            outright. gold-ink (5.09:1) is its text-safe replacement on light
+            surfaces; gold stays for ornament and for text on deep surfaces
+            (8.37:1).
           </p>
         </div>
       </Section>

@@ -25,7 +25,7 @@ export async function HowItWorks() {
   const steps = await getSteps();
 
   return (
-    <Section tone="light">
+    <Section tone="deep" surface="raised">
       <SectionHeader
         eyebrow={t("eyebrow")}
         title={t("title")}
@@ -111,7 +111,7 @@ export async function HowItWorks() {
               <h3 className="flex items-baseline gap-2.5 text-base font-semibold">
                 {/*
                   `text-muted-foreground`, not a faded accent. At
-                  `text-accent-foreground/45` this measured 1.89:1 on the bone
+                  `text-accent-foreground/45` this measured 1.89:1 on the light
                   surface — fine for the decorative corner numeral it used to
                   be, not fine now that it sits in the heading and is the only
                   place the step order is written down.

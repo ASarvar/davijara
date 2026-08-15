@@ -56,9 +56,15 @@ export async function UpcomingAuctions() {
         only chooses which slice is on screen, so no lot data crosses into the
         client bundle as props.
       */}
+      {/*
+        10s between waves, not 8. The wave itself now takes ~2.9s (three
+        slots turning over one after another), so 8 would leave only ~5s of
+        rest — the row would feel permanently in motion. This leaves ~7s
+        settled, which is enough to actually read a card.
+      */}
       <CardRotator
         perView={3}
-        interval={8}
+        interval={6}
         className="grid gap-5 md:grid-cols-2 lg:grid-cols-3"
       >
         {listings.map((listing) => (

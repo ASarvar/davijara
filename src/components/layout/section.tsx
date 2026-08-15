@@ -4,6 +4,15 @@ import { Eyebrow } from "@/components/common/eyebrow";
 export type Tone = "deep" | "light";
 
 /**
+ * How far forward the section's own background sits within its tone.
+ *
+ * `raised` is one small step up from `base` — the mechanism that gives the
+ * page its rhythm now that sections no longer alternate deep/light. See the
+ * surface ladder in globals.css for why the step is as small as it is.
+ */
+export type Surface = "base" | "raised";
+
+/**
  * Constrains content to the legacy 1200px measure with 32px gutters.
  * Use standalone inside a bare <section>, or via `<Section>` which wraps
  * its children in one automatically.
@@ -25,7 +34,8 @@ export function Container({
 
 interface SectionProps extends Omit<React.ComponentProps<"section">, "children"> {
   /**
-   * Surface tone. `deep` is navy (the page default), `light` is bone.
+   * Surface tone. `deep` is navy (the page default), `light` is mist — a
+   * pale tint of the same navy, not a warm cream.
    *
    * This sets `data-tone`, which re-binds every semantic colour token for
    * the whole subtree (see globals.css). Descendants — including shadcn/ui
@@ -34,6 +44,11 @@ interface SectionProps extends Omit<React.ComponentProps<"section">, "children">
    * foreground`) rather than raw brand colours.
    */
   tone?: Tone;
+  /**
+   * Elevation within the tone. Alternate `base` and `raised` down the page —
+   * that alternation is what replaced the old deep/light flip.
+   */
+  surface?: Surface;
   /** Set false to opt out of the max-width wrapper (e.g. full-bleed maps). */
   contained?: boolean;
   containerClassName?: string;
@@ -42,6 +57,7 @@ interface SectionProps extends Omit<React.ComponentProps<"section">, "children">
 
 export function Section({
   tone = "deep",
+  surface = "base",
   contained = true,
   className,
   containerClassName,
@@ -51,6 +67,12 @@ export function Section({
   return (
     <section
       data-tone={tone}
+      /*
+        Omitted entirely at `base` rather than written as data-surface="base".
+        The attribute then means one thing — "this section is lifted" — and
+        the DOM shows at a glance which sections carry the rhythm.
+      */
+      data-surface={surface === "raised" ? "raised" : undefined}
       className={cn("bg-background text-foreground py-16 sm:py-24", className)}
       {...props}
     >

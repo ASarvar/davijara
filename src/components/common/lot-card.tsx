@@ -90,7 +90,23 @@ export function LotCard({
         </div>
 
         <div className="flex flex-1 flex-col p-5">
-          <h3 className="group-hover:text-accent-foreground text-base leading-snug font-semibold text-balance transition-colors duration-200">
+          {/*
+            Fixed three-line box: `line-clamp-3` caps a long title, `min-h`
+            reserves the same space for a short one.
+
+            Both halves are needed and neither is cosmetic. These cards sit in
+            a CSS grid, so the row stretches to its tallest card — a title that
+            wrapped to three lines made every card in the row taller, and the
+            next one that wrapped to two made them all shorter again. In the
+            rotator that happens mid-swap, so the whole row jumped as the
+            content changed. The clamp stops tall titles pushing the row out;
+            the min-height stops short ones letting it collapse.
+
+            4.125rem === 3 x leading-snug (1.375) at text-base. If either the
+            size or the leading changes here, this number has to change with
+            them.
+          */}
+          <h3 className="group-hover:text-accent-foreground line-clamp-3 min-h-[4.125rem] text-base leading-snug font-semibold text-balance transition-colors duration-200">
             {listing.title}
           </h3>
 
@@ -104,7 +120,11 @@ export function LotCard({
             {listing.district ? `${listing.district} · ` : ""}
             {regionName}
           </p>
-          <p className="text-muted-foreground mt-1 text-sm">
+          {/* `truncate` for the same reason as the line above it: a long
+              district plus a six-digit lot number wraps to two lines on a
+              narrow card, and one card wrapping while its neighbours do not
+              is another way the row height moves. */}
+          <p className="text-muted-foreground mt-1 truncate text-sm">
             {`Maydoni: ${formatArea(listing.area)}`}
             {listing.lotNumber ? ` · Lot №${listing.lotNumber}` : ""}
           </p>

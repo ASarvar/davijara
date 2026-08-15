@@ -17,7 +17,7 @@ export async function NewsAndDocs() {
   const [news, documents] = await Promise.all([getNews(4), getDocuments(4)]);
 
   return (
-    <Section tone="light">
+    <Section tone="deep">
       <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
         {/* News */}
         <div>

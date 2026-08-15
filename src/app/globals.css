@@ -8,15 +8,34 @@
   ─────────────────────────────────────────────────────────────────────────
 
   This site is NOT light/dark themed. It is one fixed brand palette with two
-  surface TONES that alternate down the page:
+  surface TONES:
 
     tone="deep"   navy  #07102b   (the default — set on <body>)
-    tone="light"  bone  #f4f2ee   (interleaved sections)
+    tone="light"  mist  #eef1f8   (a pale navy-mid)
 
   Tone is switched with a `data-tone` attribute on a section wrapper. Every
   semantic token below is re-bound under [data-tone="light"], so shadcn/ui
   components placed inside a light section adapt automatically — no props,
   no variants, no prop drilling.
+
+  THE PAGE NO LONGER ALTERNATES THE TWO TONES. Every section is deep; the
+  light tone is kept because it is real, working infrastructure the styleguide
+  exercises, but nothing on the site currently renders in it. Flipping between
+  a navy section and a near-white one is a hard cut down the page, and on a
+  dark-first brand it reads as two different sites stitched together.
+
+  Rhythm comes from a SURFACE LADDER inside the dark instead — each step small
+  enough to be felt rather than seen, and ordered so nothing outranks the
+  thing above it:
+
+    base section     navy #07102b        1.000   (reference)
+    raised section   navy-raised         1.053   data-surface="raised"
+    card             white @ 4%          1.091
+    search band      navy-mid            1.153
+
+  A card must always sit above its own section, which is why the raised step
+  is deliberately smaller than the card step — push it past 1.09 and cards
+  stop reading as raised in the sections that need them most.
 
   RULE: components consume SEMANTIC tokens (bg-background, text-foreground,
   border-border, text-muted-foreground…). They must never reach for the raw
@@ -31,16 +50,40 @@
   --color-navy: #07102b;
   --color-navy-mid: #0d1e45;
   --color-cobalt: #1a3a7c;
+
+  /*
+    A barely-raised navy for alternating sections — navy with 40% navy-mid
+    mixed in. This is what carries the page's rhythm now that sections are all
+    dark; see the surface ladder note at the top of this file.
+  */
+  --color-navy-raised: #091635;
   --color-gold: #c8a96e;
   --color-gold-light: #e8d5a8;
-  --color-bone: #f4f2ee;
-  --color-bone-edge: #e8e4dc;
   --color-slate: #3d4a6b;
 
-  /* Gold is unusable as TEXT on light surfaces — #c8a96e on #f4f2ee is
-     2.01:1, a hard WCAG AA failure. This darkened bronze is the text-safe
-     substitute at 5.14:1. Use --color-gold for ornament on deep surfaces,
-     --color-gold-ink for any gold-toned text on light surfaces. */
+  /*
+    The light tone's surface family — pale tints of --color-navy-mid, NOT the
+    warm bone (#f4f2ee / #e8e4dc / #d8d3c8) this replaced.
+
+    Bone was a cream from the legacy palette and sat apart from the brand: on
+    a page that alternates with navy every other section, a warm cream reads
+    as a second, unrelated palette. These are the same hue as navy-mid
+    (hsl 222) carried up to surface lightness, so the light sections read as
+    the pale end of ONE colour rather than a different one.
+
+    Steps are matched to the relationships bone had, so nothing shifts in
+    weight — only in hue:
+      mist -> mist-edge  1.15  (bone -> bone-edge was 1.19)
+      mist -> mist-deep  1.38  (bone -> #d8d3c8 was 1.40)
+  */
+  --color-mist: #eef1f8;
+  --color-mist-edge: #dce2ec;
+  --color-mist-deep: #c7cfdf;
+
+  /* Gold is unusable as TEXT on light surfaces — #c8a96e on the mist surface
+     is ~1.9:1, a hard WCAG AA failure. This darkened bronze is the text-safe
+     substitute at 5.09:1 there. Use --color-gold for ornament on deep
+     surfaces, --color-gold-ink for any gold-toned text on light ones. */
   --color-gold-ink: #7d6229;
 
   /* Must match the variable names exported from src/app/fonts.ts. Roboto
@@ -177,12 +220,45 @@
   --chart-5: #8a7440;
 }
 
+/*
+  ── Raised surface ───────────────────────────────────────────────────────
+
+  Overrides `--background` ONLY. Everything else — cards, borders, muted
+  text — stays on the deep tone's tokens, so a raised section is the same
+  palette sitting one step forward, not a third theme to maintain.
+
+  Scoped under [data-tone="deep"] so it can never accidentally lift a light
+  section to a navy background, which would put white-on-navy tokens over a
+  surface the rest of that subtree still treats as pale.
+*/
+[data-tone="deep"][data-surface="raised"] {
+  --background: var(--color-navy-raised);
+}
+
 /* ── LIGHT tone ──────────────────────────────────────────────────────── */
 [data-tone="light"] {
-  /* Native controls inside a bone section follow the light palette. */
+  /* Native controls inside a light section follow the light palette. */
   color-scheme: light;
 
-  --background: #f4f2ee;
+  /*
+    Pale navy-mid, not the old warm bone — see --color-mist in the brand
+    scale above for why the whole family moved from cream to a tint of the
+    brand navy.
+
+    The warm neighbours had to move with it. Leaving --secondary / --muted /
+    --border / --input on the old bone-edge cream (#e8e4dc, #d8d3c8) over a
+    cool surface is the failure mode here: warm grey on cool blue reads as
+    dirty rather than as a second surface. They are now the matching mist
+    steps, so the whole light tone is one hue.
+
+    Contrast, measured rather than assumed, against the new #eef1f8:
+      foreground #07102b   16.61:1
+      gold-ink   #7d6229    5.09:1   (was 5.14:1 on bone — AA still clear)
+      slate      #3d4a6b    7.77:1
+    Cards actually separate slightly BETTER than before: white on mist is
+    1.13:1 where white on bone was 1.07:1.
+  */
+  --background: var(--color-mist);
   --foreground: #07102b;
 
   --card: #ffffff;
@@ -191,23 +267,26 @@
   --popover: #ffffff;
   --popover-foreground: #07102b;
 
-  /* On bone, navy carries actions — gold cannot meet contrast here. */
+  /* On a light surface, navy carries actions — gold cannot meet contrast. */
   --primary: #0d1e45;
   --primary-foreground: #ffffff;
 
-  --secondary: #e8e4dc;
+  --secondary: var(--color-mist-edge);
   --secondary-foreground: #07102b;
 
-  --muted: #e8e4dc;
+  --muted: var(--color-mist-edge);
   --muted-foreground: #3d4a6b;
 
+  /* Gold stays the accent. It is the brand's one warm note, and on a cool
+     surface it reads as a deliberate counterpoint rather than a clash — the
+     same role it plays on navy. */
   --accent: rgba(200, 169, 110, 0.18);
   --accent-foreground: #7d6229;
 
   --destructive: #c02730;
 
-  --border: #e8e4dc;
-  --input: #d8d3c8;
+  --border: var(--color-mist-edge);
+  --input: var(--color-mist-deep);
   --ring: #7d6229;
 
   --hairline: rgba(125, 98, 41, 0.18);
@@ -491,10 +570,10 @@
 
 /*
   The header is always data-tone="deep", so this is defensive rather than
-  currently exercised — but a near-white flare on the bone surface would be
-  a letter briefly vanishing, which is the one failure mode this badge cannot
-  have. On light, flare toward navy instead: darker than the resting gold-ink,
-  so the wave still reads.
+  currently exercised — but a near-white flare on the pale mist surface would
+  be a letter briefly vanishing, which is the one failure mode this badge
+  cannot have. On light, flare toward navy instead: darker than the resting
+  gold-ink, so the wave still reads.
 */
 [data-tone="light"] .test-mode-letter {
   --test-mode-flare: var(--color-navy);
@@ -542,6 +621,80 @@
   animation: none;
   color: inherit;
   text-shadow: none;
+}
+
+/*
+  ── Card rotator swap ────────────────────────────────────────────────────
+
+  One slot of the upcoming-auctions row turning over: the outgoing card rises
+  and fades, the incoming one rises in from below. Durations are mirrored in
+  card-rotator.tsx (OUT_MS / IN_MS) — change both together.
+
+  The travel is 2.5rem, not the card's full height. A full-height slide would
+  need `overflow: hidden` on the row to mask it, and that clips the cards' own
+  hover lift and shadow. 2.5rem is far enough that the direction is
+  unmistakable — the first pass used 1.75rem and the rise was too slight to
+  register as a direction at all — while the opacity reaching 0 at the
+  extremes means nothing is ever seen outside its own box.
+
+  These are NOT subject to the "never fade an entrance" rule that governs
+  [data-enter]: this animation is driven by the rotator's own timers, which
+  do not run at all while the tab is hidden or under reduced motion, so there
+  is no frozen-timeline case that could strand a card invisible. The resting
+  state carries no animation and no attribute, so anything unexpected leaves
+  the card plainly visible.
+*/
+/* Leaves upward. */
+@keyframes lot-swap-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-2.5rem);
+  }
+}
+
+/* Arrives from below, travelling upward — the same direction the outgoing
+   card left in, so the pair reads as one movement rather than two. */
+@keyframes lot-swap-in {
+  from {
+    opacity: 0;
+    transform: translateY(2.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/*
+  `forwards` on the way out holds the hidden end state for the one frame
+  between the content swapping and the "in" animation starting — without it
+  the old card flashes back at full opacity mid-swap.
+
+  CSS animations sit above inline styles in the cascade, which is what lets
+  these override the transform/opacity GSAP leaves on a revealed card.
+*/
+[data-swap="out"] {
+  animation: lot-swap-out 400ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+[data-swap="in"] {
+  animation: lot-swap-in 460ms var(--ease-out-soft) both;
+}
+
+/*
+  Belt to the rotator's braces. It already refuses to start under reduced
+  motion, so this should never be reachable — but if a swap is ever triggered
+  another way, neutralising the animation here leaves the card at its natural
+  visible state rather than part-way through a fade.
+*/
+@media (prefers-reduced-motion: reduce) {
+  [data-swap] {
+    animation: none;
+  }
 }
 
 /*
