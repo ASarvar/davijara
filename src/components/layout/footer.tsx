@@ -51,14 +51,14 @@ export async function Footer() {
             */}
             <Logo variant="footer" />
             <p className="text-muted-foreground mt-6 text-sm">{t("operator")}</p>
-            <a
+            {/* <a
               href={contacts.hotlineHref}
               className="text-accent-foreground mt-10 inline-flex items-center gap-2 text-2xl font-semibold"
             >
               <Phone aria-hidden="true" className="size-5" />
               {contacts.hotline}
               <span className="sr-only"> — {t("hotline")}</span>
-            </a>
+            </a> */}
           </div>
 
           {/* Portal links */}
@@ -129,7 +129,7 @@ export async function Footer() {
                   {contacts.email}
                 </a>
               </li>
-              <li>
+              {/* <li>
                 {t("corporate")}:{" "}
                 <a
                   href={contacts.corporatePhoneHref}
@@ -137,7 +137,7 @@ export async function Footer() {
                 >
                   {contacts.corporatePhone}
                 </a>
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>

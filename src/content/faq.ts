@@ -18,9 +18,9 @@ export const faq: FaqItem[] = [
       "Jismoniy shaxslar, yuridik shaxslar va yakka tartibdagi tadbirkorlar ariza bera oladi. Buning uchun shaxsiy kabinet orqali ro'yxatdan o'tish va kerakli hujjatlarni yuklash kifoya.",
   },
   {
-    question: "Auktsionlarda qatnashish uchun garov to'lovi kerakmi?",
+    question: "Auksionlarda qatnashish uchun garov to'lovi kerakmi?",
     answer:
-      "Ha, auktsion boshlanishidan oldin boshlang'ich garov to'lovi (lotning 10-30%) to'lanishi kerak. G'olib bo'lmasangiz, garov to'lov qaytariladi.",
+      "Ha, auksion boshlanishidan oldin boshlang'ich garov to'lovi (lotning 10-30%) to'lanishi kerak. G'olib bo'lmasangiz, garov to'lov qaytariladi.",
   },
   {
     question: "Shartnoma qancha muddatga tuziladi?",
@@ -28,7 +28,7 @@ export const faq: FaqItem[] = [
       "Ijara shartnomasi odatda 1 yildan 5 yilgacha bo'lgan muddatga tuziladi. Ijtimoiy soha uchun 10 yilgacha uzaytirilishi mumkin. Muddatni auktsion shartlari belgilaydi.",
   },
   {
-    question: "E-auktsionlarda qatnashish uchun elektron imzo kerakmi?",
+    question: "E-auksionlarda qatnashish uchun elektron imzo kerakmi?",
     answer:
       "Ha, elektron raqamli imzo (ERI) talab etiladi. Uni «My.gov.uz» portali yoki vakolatli markazlar orqali bepul olish mumkin. Jarayon taxminan 30 daqiqa davom etadi.",
   },

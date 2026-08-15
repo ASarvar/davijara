@@ -24,10 +24,10 @@ export const site = {
 } as const;
 
 export const contacts = {
-  phone: "(71) 256-22-98",
-  phoneHref: "tel:+998712562298",
-  corporatePhone: "(71) 256-11-97",
-  corporatePhoneHref: "tel:+998712561197",
+  phone: "(71) 259-20-64",
+  phoneHref: "tel:+998712592064",
+  corporatePhone: "(71) 259-20-64",
+  corporatePhoneHref: "tel:+998712592064",
   hotline: "1082",
   hotlineHref: "tel:1082",
   email: "info@davijara.uz",
@@ -62,7 +62,7 @@ export const mainNav: NavItem[] = [
   { key: "home", href: "/" },
   { key: "objects", href: "/obyektlar" },
   { key: "privileges", href: "/imtiyozlar" },
-  { key: "services", href: "/xizmatlar" },
+  // { key: "services", href: "/xizmatlar" },
   { key: "documents", href: "/hujjatlar" },
   { key: "news", href: "/yangiliklar" },
   { key: "about", href: "/markaz" },
@@ -87,7 +87,7 @@ export const footerNav: Array<{ heading: string; items: NavItem[] }> = [
       { key: "objects", href: "/obyektlar" },
       { key: "auction", href: "/e-auksion" },
       { key: "privileges", href: "/imtiyozlar" },
-      { key: "services", href: "/xizmatlar" },
+      // { key: "services", href: "/xizmatlar" },
       { key: "documents", href: "/hujjatlar" },
       { key: "news", href: "/yangiliklar" },
     ],
