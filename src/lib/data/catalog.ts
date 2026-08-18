@@ -12,6 +12,8 @@ import {
   steps,
 } from "@/content/homepage";
 import { faq, partners } from "@/content/faq";
+import { formatNumber } from "@/lib/format";
+import { getListings as getLiveListings } from "@/lib/data/listings";
 import type {
   DocItem,
   FaqItem,
@@ -85,8 +87,28 @@ export async function getSteps(): Promise<Step[]> {
   return steps;
 }
 
+/*
+  The first card — "Ijaraga taklif etilayotgan obyektlar" — is the one figure
+  here that a live service can answer, so it is replaced with the count of
+  currently open lots from the real e-auksion feed. The other two (signed
+  contracts, leased area) are cumulative totals the operator reports
+  separately; `listings.ts` has no endpoint for those, so they stay the
+  verified static figures from `content/homepage.ts`.
+
+  `getLiveListings` already falls back to `source: "mock"` when
+  `LISTINGS_API_URL` is unset or the service is unreachable, so the static
+  "1 390+" is kept in that case rather than showing a count from sample data.
+*/
 export async function getHeroStats(): Promise<Stat[]> {
-  return heroStats;
+  const [objectsStat, ...rest] = heroStats;
+  const { listings, source } = await getLiveListings();
+
+  const live: Stat =
+    source === "api"
+      ? { ...objectsStat, value: formatNumber(listings.length) }
+      : objectsStat;
+
+  return [live, ...rest];
 }
 
 export async function getImpactStats(): Promise<Stat[]> {

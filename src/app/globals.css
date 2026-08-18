@@ -18,15 +18,15 @@
   components placed inside a light section adapt automatically — no props,
   no variants, no prop drilling.
 
-  THE PAGE NO LONGER ALTERNATES THE TWO TONES. Every section is deep; the
-  light tone is kept because it is real, working infrastructure the styleguide
-  exercises, but nothing on the site currently renders in it. Flipping between
-  a navy section and a near-white one is a hard cut down the page, and on a
-  dark-first brand it reads as two different sites stitched together.
+  Sections alternate deep/light strictly down the page from the map onward
+  (see the rhythm comment in app/[locale]/page.tsx) — the masthead (hero +
+  search band) is the one exception, staying deep as a single unit.
+  `data-tone` is per-section, so any component can opt into either at any
+  point in the page.
 
-  Rhythm comes from a SURFACE LADDER inside the dark instead — each step small
-  enough to be felt rather than seen, and ordered so nothing outranks the
-  thing above it:
+  A `data-surface="raised"` step also exists — a barely-lifted navy, one step
+  forward from `deep` without switching tone — for a deep section that needs
+  separation from its neighbours without going all the way to `light`:
 
     base section     navy #07102b        1.000   (reference)
     raised section   navy-raised         1.053   data-surface="raised"
@@ -35,7 +35,10 @@
 
   A card must always sit above its own section, which is why the raised step
   is deliberately smaller than the card step — push it past 1.09 and cards
-  stop reading as raised in the sections that need them most.
+  stop reading as raised in the sections that need them most. Nothing on the
+  homepage currently uses `raised` — it is kept as working infrastructure the
+  styleguide exercises, available for a deep section that needs lifting
+  without a full tone switch.
 
   RULE: components consume SEMANTIC tokens (bg-background, text-foreground,
   border-border, text-muted-foreground…). They must never reach for the raw

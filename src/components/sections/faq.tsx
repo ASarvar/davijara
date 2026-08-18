@@ -19,7 +19,7 @@ export async function Faq() {
   const items = await getFaq();
 
   return (
-    <Section tone="deep" surface="raised">
+    <Section tone="light">
       <SectionHeader
         eyebrow="Ko'p so'raladigan savollar"
         title="Savollar va javoblar"

@@ -25,7 +25,7 @@ export async function HowItWorks() {
   const steps = await getSteps();
 
   return (
-    <Section tone="deep" surface="raised">
+    <Section tone="light">
       <SectionHeader
         eyebrow={t("eyebrow")}
         title={t("title")}
