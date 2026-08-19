@@ -140,7 +140,11 @@ const subscribeToNothing = () => () => {};
  *
  * Escape is handled by the browser; adding our own key listener would fight it.
  */
-function FullscreenControl({ labels }: { labels: { enter: string; exit: string } }) {
+function FullscreenControl({
+  labels,
+}: {
+  labels: { enter: string; exit: string };
+}) {
   const map = useMap();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -196,7 +200,10 @@ function FullscreenControl({ labels }: { labels: { enter: string; exit: string }
     } else {
       // Rejects if the gesture is not trusted or a policy forbids it. There is
       // no useful recovery — the map simply stays inline.
-      void map.getContainer().requestFullscreen().catch(() => {});
+      void map
+        .getContainer()
+        .requestFullscreen()
+        .catch(() => {});
     }
   };
 
@@ -314,7 +321,7 @@ function ModifierWheelZoom({ hint }: { hint: string }) {
       style={{ opacity: 0 }}
       className="pointer-events-none absolute inset-0 z-[500] flex items-center justify-center bg-[color:var(--color-navy)]/45 backdrop-blur-[1px] transition-opacity duration-200"
     >
-      <span className="bg-[color:var(--color-navy)] text-[color:var(--color-gold-light)] rounded-full border border-[color:var(--color-gold)]/40 px-4 py-2 text-sm font-medium shadow-lg">
+      <span className="rounded-full border border-[color:var(--color-gold)]/40 bg-[color:var(--color-navy)] px-4 py-2 text-sm font-medium text-[color:var(--color-gold-light)] shadow-lg">
         {hint}
       </span>
     </div>
@@ -433,54 +440,62 @@ export function ListingsMap({
           >
             <Popup>
               {/*
-                Photograph left, everything else right.
+                Name across the top, then photograph left and figures right.
+
+                The name spans the full width because it is the one field that
+                has to be readable in one go — these are long official object
+                names, and in a half-width column they wrap to six or seven
+                lines and dictate the height of everything beside them.
 
                 Two layouts, switched at `sm`, and the stacked one is not a
                 nicety: the side-by-side row needs ~22rem, and the map is
                 full-bleed on a phone, so at 375px a popup that wide has
                 nowhere to sit — Leaflet would pan the map trying to fit it.
-                Below `sm` the photo goes full width on top instead, which is
-                the same information in the space that exists. The two popup
-                widths that pair with this are in globals.css.
+                Below `sm` the photo goes full width instead, which is the same
+                information in the space that exists. The two popup widths that
+                pair with this are in globals.css.
+
+                EVERY block here carries its own padding, because
+                `.leaflet-popup-content` is stripped to `margin: 0` (see
+                globals.css). That is deliberate: it puts the spacing under
+                this component's control instead of Leaflet's, so the photo can
+                be inset by a different amount than the text beside it.
               */}
-              <span className="flex flex-col sm:flex-row">
+              <span className="block px-3.5 pt-3.5 pb-2.5 text-sm leading-snug font-semibold text-[#07102b]">
+                {listing.title}
+              </span>
+
+              <div className="flex flex-col sm:flex-row">
                 {/*
-                  `sm:self-stretch` is what makes the photo run the full height
-                  of the popup rather than sitting as a small square at the
-                  top: the column takes the row's height, and LotImage fills
-                  it. `min-h` keeps it substantial when the text beside it is
-                  short — a two-line lot would otherwise leave a sliver.
+                  Inset and rounded rather than bleeding to the popup edge.
 
-                  `shrink-0` so a long region name in the column beside it
-                  cannot squeeze the photo narrower.
+                  `px-3.5` matches the title above and the details beside it,
+                  so the photo's left edge lines up with the text rather than
+                  sitting on its own margin. `sm:pr-0` is the one asymmetry:
+                  on the row, the gap to the right of the photo is already
+                  supplied by the details column's own left padding, and adding
+                  it here too would double it. Stacked below `sm` there is no
+                  column beside it, so the right padding comes back.
 
-                  `eager` — no visibility check. A popup only exists once the
-                  reader has clicked its pin, so waiting for an intersection
-                  callback would only delay a photo already asked for.
-
-                  Sample records get no lookup: they have no real order behind
-                  them, so they keep the placeholder.
+                  The tint and the radius are on the INNER wrapper, never the
+                  padded outer one — on the outer they paint the padding too,
+                  which puts a grey band around the photo instead of sitting
+                  behind it.
                 */}
-                <span className="block w-full shrink-0 bg-[#eef1f8] sm:w-[9.5rem] sm:self-stretch">
-                  <LotImage
-                    orderId={listing.isMock ? undefined : listing.orderId}
-                    eager
-                    className="block aspect-[16/10] w-full sm:aspect-auto sm:h-full sm:min-h-[13.5rem]"
-                  />
-                </span>
+                <div className="w-full shrink-0 px-3.5 pb-3.5 sm:w-1/2 sm:self-stretch sm:pr-0">
+                  <div className="h-full overflow-hidden rounded-[10px] bg-[#eef1f8]">
+                    <LotImage
+                      orderId={listing.isMock ? undefined : listing.orderId}
+                      eager
+                      className="block aspect-[16/10] w-full sm:aspect-auto sm:h-full sm:min-h-[10.5rem]"
+                    />
+                  </div>
+                </div>
 
-                {/*
-                  The text column carries the padding, because
-                  `.leaflet-popup-content` has none — that is what lets the
-                  photo bleed to the popup's edge. `min-w-0` so a long word
-                  wraps instead of forcing the row wider than the popup.
-                */}
-                <span className="block min-w-0 flex-1 p-3.5">
-                  <span className="block text-sm leading-snug font-semibold text-[#07102b]">
-                    {listing.title}
-                  </span>
-
-                  <span className="mt-2 block text-xs text-[#3d4a6b]">
+                {/* `min-w-0` so a long word wraps instead of forcing the row
+                    wider than the popup. */}
+                <span className="block min-w-0 flex-1 px-3.5 pt-1 pb-3.5 sm:pt-0">
+                  <span className="block text-xs text-[#3d4a6b]">
                     {regionName(listing.region)} · {formatArea(listing.area)}
                   </span>
 
@@ -542,7 +557,7 @@ export function ListingsMap({
                     </a>
                   )}
                 </span>
-              </span>
+              </div>
             </Popup>
           </Marker>
         ))}

@@ -974,12 +974,13 @@
   color: var(--color-navy);
 
   /*
-    The lot photograph runs to the popup's own edge, so the rounded corner has
-    to do the clipping. Leaflet's default 1px padding would otherwise leave a
-    white hairline down the image side, and without `overflow: hidden` the
-    square image corners would poke out past the radius.
+    Spacing inside the popup belongs to the layout in listings-map.tsx, not to
+    Leaflet: the title, the photo and the figures are each inset by different
+    amounts. Leaflet's own 1px padding would sit under all of them and shift
+    the whole block off-centre, so it is zeroed and each block pads itself.
 
-    Safe for the pointer: `.leaflet-popup-tip` lives in its own
+    `overflow: hidden` keeps anything inside from squaring off the rounded
+    corner. Safe for the pointer: `.leaflet-popup-tip` lives in its own
     `.leaflet-popup-tip-container` outside this element, so clipping here does
     not cut it off.
 
@@ -1002,11 +1003,10 @@
   gets overridden and the image renders as a stamp. `!important` is the only
   way to beat an inline style Leaflet sets itself.
 
-  `margin: 0` because the photo bleeds to the popup edge — the inner layout
-  carries its own padding on the text column instead, so the image can sit
-  flush while the words stay inset. `!important` for the same cascade reason
-  as the wrapper's padding above: Leaflet's own `margin: 13px 24px` ships in a
-  later stylesheet and wins any tie.
+  `margin: 0` because the inner layout owns its own spacing — see the note on
+  the wrapper above. `!important` for the same cascade reason as the wrapper's
+  padding: Leaflet's own `margin: 13px 24px` ships in a later stylesheet and
+  wins any tie.
 
   TWO WIDTHS, and the narrow one is not optional. The side-by-side layout
   needs ~22rem (352px) to give the photo 9.5rem and still leave the figures
