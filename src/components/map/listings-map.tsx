@@ -433,91 +433,116 @@ export function ListingsMap({
           >
             <Popup>
               {/*
-                Order: title, then photograph, then the figures.
+                Photograph left, everything else right.
 
-                The name is what identifies the lot, so it leads — a reader who
-                opened the wrong pin should know before the image has even
-                loaded. The photo then sits between the name and the numbers
-                rather than above everything, which keeps the popup anchored to
-                its pin instead of growing upward off the top of the map.
+                Two layouts, switched at `sm`, and the stacked one is not a
+                nicety: the side-by-side row needs ~22rem, and the map is
+                full-bleed on a phone, so at 375px a popup that wide has
+                nowhere to sit — Leaflet would pan the map trying to fit it.
+                Below `sm` the photo goes full width on top instead, which is
+                the same information in the space that exists. The two popup
+                widths that pair with this are in globals.css.
               */}
-              <span className="block text-sm leading-snug font-semibold text-[#07102b]">
-                {listing.title}
-              </span>
+              <span className="flex flex-col sm:flex-row">
+                {/*
+                  `sm:self-stretch` is what makes the photo run the full height
+                  of the popup rather than sitting as a small square at the
+                  top: the column takes the row's height, and LotImage fills
+                  it. `min-h` keeps it substantial when the text beside it is
+                  short — a two-line lot would otherwise leave a sliver.
 
-              {/*
-                `eager` — no visibility check. A popup only exists once the
-                reader has clicked its pin, so the intersection callback would
-                only delay a photo that has already been asked for.
+                  `shrink-0` so a long region name in the column beside it
+                  cannot squeeze the photo narrower.
 
-                Sample records get no lookup: they have no real order behind
-                them, so they keep the placeholder.
-              */}
-              <span className="mt-2 block overflow-hidden rounded-[10px] bg-[#eef1f8]">
-                <LotImage
-                  orderId={listing.isMock ? undefined : listing.orderId}
-                  eager
-                  className="block aspect-[16/9] w-full"
-                />
-              </span>
+                  `eager` — no visibility check. A popup only exists once the
+                  reader has clicked its pin, so waiting for an intersection
+                  callback would only delay a photo already asked for.
 
-              <span className="mt-2 block text-xs text-[#3d4a6b]">
-                {regionName(listing.region)} · {formatArea(listing.area)}
-              </span>
-              {/*
-                `formatNumber`, not `formatSom` — full figure, same as
-                e-auksion's own lot pages ("1 095 412,50 UZS" there; whole
-                so'm here, no kopek precision a citizen has any use for). One
-                string expression, not two JSX children: split apart, the
-                space between the number and "so'm" was silently dropped by
-                the time it reached the DOM (see lot-card.tsx for the same
-                bug, found there first).
-              */}
-              <span className="mt-1.5 block text-sm font-semibold text-[#7d6229]">
-                {`${formatNumber(listing.pricePerYear)} so'm`}
-              </span>
-              {listing.lotNumber ? (
-                <span className="mt-0.5 block text-xs text-[#3d4a6b]">
-                  {labels.lot} {listing.lotNumber}
-                </span>
-              ) : null}
-              {/*
-                Same live countdown as the homepage's LotCard — "the numbers on
-                the map should get the timer effect too". Mock/fallback
-                listings never carry `auctionDate` (see content/listings-mock.ts),
-                so this simply does not render for them rather than fabricating
-                a time for a sample record.
-
-                Ticks on its own client-side clock; nothing here re-renders the
-                marker or the map to drive it.
-              */}
-              {listing.auctionDate ? (
-                <span className="mt-1.5 block">
-                  <span className="block text-[11px] text-[#3d4a6b]">
-                    {labels.auctionCountdown}
-                  </span>
-                  <AuctionCountdown
-                    iso={listing.auctionDate}
-                    fallback={formatDateTime(listing.auctionDate)}
-                    startedLabel={labels.auctionStarted}
-                    className="block text-sm font-semibold text-[#07102b] tabular-nums"
+                  Sample records get no lookup: they have no real order behind
+                  them, so they keep the placeholder.
+                */}
+                <span className="block w-full shrink-0 bg-[#eef1f8] sm:w-[9.5rem] sm:self-stretch">
+                  <LotImage
+                    orderId={listing.isMock ? undefined : listing.orderId}
+                    eager
+                    className="block aspect-[16/10] w-full sm:aspect-auto sm:h-full sm:min-h-[13.5rem]"
                   />
                 </span>
-              ) : null}
-              {listing.isMock ? (
-                <span className="mt-1.5 block text-xs text-[#3d4a6b] italic">
-                  {labels.mock}
+
+                {/*
+                  The text column carries the padding, because
+                  `.leaflet-popup-content` has none — that is what lets the
+                  photo bleed to the popup's edge. `min-w-0` so a long word
+                  wraps instead of forcing the row wider than the popup.
+                */}
+                <span className="block min-w-0 flex-1 p-3.5">
+                  <span className="block text-sm leading-snug font-semibold text-[#07102b]">
+                    {listing.title}
+                  </span>
+
+                  <span className="mt-2 block text-xs text-[#3d4a6b]">
+                    {regionName(listing.region)} · {formatArea(listing.area)}
+                  </span>
+
+                  {/*
+                    `formatNumber`, not `formatSom` — full figure, same as
+                    e-auksion's own lot pages ("1 095 412,50 UZS" there; whole
+                    so'm here, no kopek precision a citizen has any use for).
+                    One string expression, not two JSX children: split apart,
+                    the space between the number and "so'm" was silently
+                    dropped by the time it reached the DOM (see lot-card.tsx
+                    for the same bug, found there first).
+                  */}
+                  <span className="mt-1.5 block text-sm font-semibold text-[#7d6229]">
+                    {`${formatNumber(listing.pricePerYear)} so'm`}
+                  </span>
+
+                  {listing.lotNumber ? (
+                    <span className="mt-0.5 block text-xs text-[#3d4a6b]">
+                      {labels.lot} {listing.lotNumber}
+                    </span>
+                  ) : null}
+
+                  {/*
+                    Same live countdown as the homepage's LotCard. Mock and
+                    fallback listings never carry `auctionDate` (see
+                    content/listings-mock.ts), so this simply does not render
+                    for them rather than fabricating a time for a sample
+                    record.
+
+                    Ticks on its own client-side clock; nothing here re-renders
+                    the marker or the map to drive it.
+                  */}
+                  {listing.auctionDate ? (
+                    <span className="mt-2 block">
+                      <span className="block text-[11px] text-[#3d4a6b]">
+                        {labels.auctionCountdown}
+                      </span>
+                      <AuctionCountdown
+                        iso={listing.auctionDate}
+                        fallback={formatDateTime(listing.auctionDate)}
+                        startedLabel={labels.auctionStarted}
+                        className="block text-sm font-semibold text-[#07102b] tabular-nums"
+                      />
+                    </span>
+                  ) : null}
+
+                  {listing.isMock ? (
+                    <span className="mt-2 block text-xs text-[#3d4a6b] italic">
+                      {labels.mock}
+                    </span>
+                  ) : (
+                    <a
+                      href={detailHref(listing)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2.5 inline-block text-xs font-medium text-[#1a3a7c] underline"
+                    >
+                      {labels.details}
+                    </a>
+                  )}
                 </span>
-              ) : (
-                <a
-                  href={detailHref(listing)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-block text-xs font-medium text-[#1a3a7c] underline"
-                >
-                  {labels.details}
-                </a>
-              )}
+              </span>
             </Popup>
           </Marker>
         ))}

@@ -972,23 +972,60 @@
   box-shadow: 0 10px 32px rgb(7 16 43 / 0.28);
   background: #ffffff;
   color: var(--color-navy);
+
+  /*
+    The lot photograph runs to the popup's own edge, so the rounded corner has
+    to do the clipping. Leaflet's default 1px padding would otherwise leave a
+    white hairline down the image side, and without `overflow: hidden` the
+    square image corners would poke out past the radius.
+
+    Safe for the pointer: `.leaflet-popup-tip` lives in its own
+    `.leaflet-popup-tip-container` outside this element, so clipping here does
+    not cut it off.
+
+    `!important` on the padding, and it is not optional. Leaflet's own
+    stylesheet is a SEPARATE file that loads AFTER this one — it arrives with
+    the dynamically imported map chunk (`import "leaflet/dist/leaflet.css"` in
+    listings-map.tsx). Its `.leaflet-popup-content-wrapper { padding: 1px }`
+    has identical specificity to ours, so later-wins hands it the cascade and
+    a plain `padding: 0` here is silently ignored. Verified by reading the two
+    served stylesheets: ours declares it, Leaflet's re-declares it downstream.
+  */
+  padding: 0 !important;
+  overflow: hidden;
 }
 /*
-  Widened from 11rem for the lot photograph.
+  Widened from 11rem, and un-padded, for the lot photograph.
 
   `width` as well as `min-width`, and both matter: Leaflet writes an inline
   `width` on this element after it measures the content, so a min-width alone
-  gets overridden on the narrow popups and the 16:9 image renders as a stamp.
-  `!important` is the only way to beat an inline style Leaflet sets itself.
+  gets overridden and the image renders as a stamp. `!important` is the only
+  way to beat an inline style Leaflet sets itself.
 
-  17rem keeps the popup inside a 375px viewport with room for its own margins
-  — the map is full-bleed on a phone, so anything wider is clipped by the
-  screen rather than by the map.
+  `margin: 0` because the photo bleeds to the popup edge — the inner layout
+  carries its own padding on the text column instead, so the image can sit
+  flush while the words stay inset. `!important` for the same cascade reason
+  as the wrapper's padding above: Leaflet's own `margin: 13px 24px` ships in a
+  later stylesheet and wins any tie.
+
+  TWO WIDTHS, and the narrow one is not optional. The side-by-side layout
+  needs ~22rem (352px) to give the photo 9.5rem and still leave the figures
+  enough room for "405 319 950 so'm" without breaking mid-number. But the map
+  is full-bleed on a phone, so a 352px popup on a 375px screen has nowhere to
+  go — Leaflet would pan the map trying to fit it. Below `sm` the layout
+  stacks instead (see listings-map.tsx) and 17rem is plenty.
 */
 .leaflet-popup-content {
-  margin: 0.75rem 0.9rem;
+  margin: 0 !important;
   width: 17rem !important;
   min-width: 17rem;
+}
+
+@media (min-width: 40rem) {
+  .leaflet-popup-content {
+    width: 22rem !important;
+    min-width: 22rem;
+  }
 }
 .leaflet-popup-tip {
   background: #ffffff;
