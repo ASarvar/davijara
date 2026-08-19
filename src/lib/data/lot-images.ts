@@ -95,8 +95,36 @@ function pickMainImage(images: OrderApiImage[] | undefined): string | null {
   no entry, which keeps a partially-configured deployment working for whatever
   is filled in instead of failing everywhere.
 */
+/*
+  An INN is 9 digits. Anything else in this variable is a configuration
+  mistake, and the one that actually happened is worth naming: systemd's
+  `EnvironmentFile=` does NOT strip a trailing `#` comment, so
+
+      ORDER_API_INN_1727=300393445   # Toshkent viloyati
+
+  sets the username to the whole string after the `=`. The service answers
+  `result_code 25: Foydalanuvchi aniqlanmadi`, which reads as a wrong password
+  rather than as a malformed file — and it works locally the whole time,
+  because `dotenv` (which the build step uses) DOES strip those comments.
+
+  Checking the shape turns that into one obvious log line instead of an
+  afternoon. Deliberately a format check, not a strip: silently trimming
+  whatever follows would hide the same mistake in any other variable.
+*/
+const INN_PATTERN = /^\d{9}$/;
+
 function credentialsFor(apiId: number): { user: string; pass: string } | null {
-  const inn = process.env[`ORDER_API_INN_${apiId}`];
+  const raw = process.env[`ORDER_API_INN_${apiId}`];
+  const inn = raw?.trim();
+
+  if (inn && !INN_PATTERN.test(inn)) {
+    console.warn(
+      `[lot-images] ORDER_API_INN_${apiId} is not a 9-digit INN — check for a ` +
+        `trailing "#" comment on that line, which systemd folds into the value.`,
+    );
+    return null;
+  }
+
   if (inn) return { user: inn, pass: inn };
 
   const user = process.env.ORDER_API_USER ?? process.env.API_USER;
