@@ -15,6 +15,8 @@
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",
     "languageLabel": "Saytning tilini tanlang",
+    "themeToLight": "Yorug' rejimga o'tish",
+    "themeToDark": "Qorong'i rejimga o'tish",
     "testMode": "Sayt sinov rejimida ishlamoqda",
     "testModeDescription": "Sayt hozircha sinov rejimida ishlamoqda — ma'lumotlar yakuniy bo'lmasligi mumkin"
   },

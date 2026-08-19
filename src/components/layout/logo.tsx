@@ -98,22 +98,71 @@ export function Logo({
     Under the /site mount an unprefixed "/logo-…svg" would resolve against
     the domain root, which is a different project entirely.
   */
+  const alt = `${site.name} — ${site.tagline}`;
+  const imgProps = {
+    alt,
+    width: 57,
+    height: 69,
+    fetchPriority: priority ? ("high" as const) : ("auto" as const),
+    loading: priority ? ("eager" as const) : ("lazy" as const),
+    decoding: "async" as const,
+    className: cn(sizeClass, className),
+  };
+
+  /*
+    TWO lockups, one per theme, swapped by CSS rather than by JavaScript.
+
+    The colour is baked into each SVG (white throughout in one, #07102B in the
+    other), so there is no way to recolour a single file from a token — an
+    <img> is opaque to CSS `color`. Rendering both and hiding one keeps the
+    switch instant and flash-free: the correct logo is in the server HTML,
+    chosen by the same `data-theme` attribute the pre-paint script sets.
+
+    Cost is one extra request, and a small one: each <picture> independently
+    resolves to the tiny mark below its breakpoint, so a phone fetches two
+    0.6 KB files, not two 9.9 KB ones. Doing this in JS instead would either
+    flash the wrong logo for a frame or drag the header into a client
+    component for a purely visual swap.
+
+    ARIA: only ONE carries the alt text. `display: none` keeps the hidden one
+    out of the accessibility tree, but if both were named, any tool that
+    ignores the CSS — some crawlers, reader modes — would announce the site
+    name twice. The second is marked decorative instead.
+  */
   return (
-    <picture>
-      <source
-        media={`(min-width: ${media}px)`}
-        srcSet={withBasePath("/logo-dm-light.svg")}
-      />
-      <img
-        src={withBasePath("/logo-short-light.svg")}
-        alt={`${site.name} — ${site.tagline}`}
-        width={57}
-        height={69}
-        fetchPriority={priority ? "high" : "auto"}
-        loading={priority ? "eager" : "lazy"}
-        decoding="async"
-        className={cn(sizeClass, className)}
-      />
-    </picture>
+    <>
+      {/*
+        The white lockup — shown for the dark theme AND under high contrast.
+
+        The two selectors below are exact complements of each other, and that
+        is deliberate rather than tidy. High contrast paints everything on pure
+        black whatever the theme, so navy-on-black would be near-invisible and
+        the white lockup is the right one there. Writing the navy rule as a
+        plain `[data-theme='light']` and then trying to undo it with a separate
+        high-contrast rule leaves both pictures hidden when a reader has light
+        theme AND high contrast on — no logo at all. Excluding high contrast
+        inside the one condition makes that state unreachable.
+      */}
+      <picture className="[:root:not([data-contrast='high'])[data-theme='light']_&]:hidden">
+        <source
+          media={`(min-width: ${media}px)`}
+          srcSet={withBasePath("/logo-dm-light.svg")}
+        />
+        {/* eslint-disable-next-line jsx-a11y/alt-text -- alt is supplied via imgProps. */}
+        <img src={withBasePath("/logo-short-light.svg")} {...imgProps} />
+      </picture>
+
+      {/* The navy lockup — light theme only, and only at normal contrast. */}
+      <picture className="hidden [:root:not([data-contrast='high'])[data-theme='light']_&]:inline">
+        <source
+          media={`(min-width: ${media}px)`}
+          srcSet={withBasePath("/logo.svg")}
+        />
+        {/* `alt=""` after the spread, deliberately: decorative duplicate, so
+            the empty alt must override imgProps' name rather than be
+            overridden by it. The lockup above is the one that carries it. */}
+        <img {...imgProps} src={withBasePath("/logo-short.svg")} alt="" />
+      </picture>
+    </>
   );
 }

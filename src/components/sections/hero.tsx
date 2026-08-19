@@ -35,25 +35,31 @@ export async function Hero() {
         data-parallax="0.12"
         className="pointer-events-none absolute inset-x-0 -top-[10%] -z-10 h-[120%]"
       >
+        {/*
+          Colours come from tokens, not literals, so the same markup serves
+          both themes — the alphas that read as a glow on navy read as a stain
+          on white. See --hero-* in globals.css.
+        */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 70% 60% at 60% 30%, rgba(26,58,124,0.45) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 80%, rgba(200,169,110,0.08) 0%, transparent 60%)",
+              "radial-gradient(ellipse 70% 60% at 60% 30%, var(--hero-wash) 0%, transparent 70%), radial-gradient(ellipse 50% 40% at 20% 80%, var(--hero-gold) 0%, transparent 60%)",
           }}
         />
         <div
           className="absolute top-0 right-0 h-full w-[45%]"
           style={{
             background:
-              "radial-gradient(ellipse 80% 80% at 80% 40%, rgba(26,58,124,0.3) 0%, transparent 70%)",
+              "radial-gradient(ellipse 80% 80% at 80% 40%, var(--hero-wash-soft) 0%, transparent 70%)",
           }}
         />
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0"
           style={{
+            opacity: "var(--hero-grid-opacity)",
             backgroundImage:
-              "repeating-linear-gradient(60deg, rgba(200,169,110,1) 0, rgba(200,169,110,1) 1px, transparent 0, transparent 50%), repeating-linear-gradient(120deg, rgba(200,169,110,1) 0, rgba(200,169,110,1) 1px, transparent 0, transparent 50%), repeating-linear-gradient(0deg, rgba(200,169,110,1) 0, rgba(200,169,110,1) 1px, transparent 0, transparent 50%)",
+              "repeating-linear-gradient(60deg, var(--hero-grid-line) 0, var(--hero-grid-line) 1px, transparent 0, transparent 50%), repeating-linear-gradient(120deg, var(--hero-grid-line) 0, var(--hero-grid-line) 1px, transparent 0, transparent 50%), repeating-linear-gradient(0deg, var(--hero-grid-line) 0, var(--hero-grid-line) 1px, transparent 0, transparent 50%)",
             backgroundSize: "60px 60px",
           }}
         />

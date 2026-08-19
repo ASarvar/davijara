@@ -12,6 +12,8 @@
   "topbar": {
     "accessibility": "Accessibility options",
     "languageLabel": "Choose site language",
+    "themeToLight": "Switch to light theme",
+    "themeToDark": "Switch to dark theme",
     "testMode": "Test mode",
     "testModeDescription": "The site is currently running in test mode — data may not be final"
   },

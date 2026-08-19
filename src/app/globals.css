@@ -7,16 +7,27 @@
   DAVIJARA.UZ DESIGN SYSTEM
   ─────────────────────────────────────────────────────────────────────────
 
-  This site is NOT light/dark themed. It is one fixed brand palette with two
-  surface TONES:
+  ONE brand palette, on TWO independent axes. Nothing here is a second set of
+  colours — every value comes from the raw brand scale below.
 
-    tone="deep"   navy  #07102b   (the default — set on <body>)
-    tone="light"  mist  #eef1f8   (a pale navy-mid)
+    THEME   `data-theme` on <html>       what the surfaces are made of
+            (unset)  dark — the default, and the brand
+            "light"  opt-in, via the header toggle
 
-  Tone is switched with a `data-tone` attribute on a section wrapper. Every
-  semantic token below is re-bound under [data-tone="light"], so shadcn/ui
-  components placed inside a light section adapt automatically — no props,
-  no variants, no prop drilling.
+    TONE    `data-tone` on a section     which of two surfaces this is
+            "deep"   the primary surface
+            "light"  the alternate, so sections alternate down the page
+
+  The two multiply out to four surfaces, and no new colour is invented:
+
+                    dark (default)      light
+      tone="deep"   navy   #07102b      white  #ffffff
+      tone="light"  mist   #eef1f8      mist   #eef1f8
+
+  Every semantic token is re-bound per tone AND per theme, so shadcn/ui
+  components adapt automatically — no props, no variants, no prop drilling.
+  A component that styles with `bg-card` / `text-muted-foreground` is already
+  correct in all four combinations and needs no theme awareness of its own.
 
   Sections alternate deep/light strictly down the page from the map onward
   (see the rhythm comment in app/[locale]/page.tsx) — the masthead (hero +
@@ -216,6 +227,18 @@
      would drop the utility strip's links below the threshold. */
   --band: #0d1e45;
 
+  /*
+    Hero decorative layers. Tokens rather than literals in hero.tsx, because
+    the alphas that read as a glow on navy read as a stain on white — the
+    cobalt wash alone has to drop from 45% to 10%. Keeping them here means the
+    hero markup is identical in both themes and only these five values move.
+  */
+  --hero-wash: rgba(26, 58, 124, 0.45);
+  --hero-wash-soft: rgba(26, 58, 124, 0.3);
+  --hero-gold: rgba(200, 169, 110, 0.08);
+  --hero-grid-line: rgba(200, 169, 110, 1);
+  --hero-grid-opacity: 0.04;
+
   --chart-1: #c8a96e;
   --chart-2: #1a3a7c;
   --chart-3: #e8d5a8;
@@ -303,6 +326,113 @@
 
   color: var(--foreground);
   background-color: var(--background);
+}
+
+/*
+  ══ LIGHT THEME ══════════════════════════════════════════════════════════
+
+  `data-theme="light"` on <html>, opt-in, written by the header toggle and
+  re-applied before first paint by AccessibilityScript. Dark stays the default
+  — it is the brand.
+
+  This introduces NO new colours. Every value below is already in the brand
+  scale; the theme only changes which surface each tone resolves to:
+
+                    dark (default)      light
+      tone="deep"   navy   #07102b      white  #ffffff
+      tone="light"  mist   #eef1f8      mist   #eef1f8
+
+  So the page keeps alternating in both themes — navy/mist in dark, white/mist
+  in light. The card colour inverts with it: on white the card is mist, on
+  mist the card is white, so a card always reads as a distinct surface from
+  the section it sits on.
+
+  BOTH BLOCKS ARE REQUIRED, and the second is not redundant. `[data-tone=
+  "light"]` above is specificity (0,1,0) while `:root[data-theme="light"]` is
+  (0,2,0), so without an explicit (0,3,0) rule the theme would win inside
+  light-tone sections too and every section on the page would go white.
+
+  ORDER IS LOAD-BEARING: the high-contrast block below has the SAME
+  specificity as these (0,2,0 and 0,3,0 respectively), so it only wins by
+  coming later in the file. Never move it above this, and never add a theme
+  rule after it.
+*/
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --background: #ffffff;
+  --foreground: #07102b;
+
+  /* Mist, not white: on a white section a white card is invisible, and the
+     border alone is too weak to carry a whole card at this scale. */
+  --card: var(--color-mist);
+  --card-foreground: #07102b;
+
+  --popover: #ffffff;
+  --popover-foreground: #07102b;
+
+  /* Navy carries actions on any light surface — gold cannot meet contrast. */
+  --primary: #0d1e45;
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--color-mist);
+  --secondary-foreground: #07102b;
+
+  --muted: var(--color-mist);
+  --muted-foreground: #3d4a6b;
+
+  /* Same gold-ink substitution the light tone already makes: raw gold is
+     ~1.9:1 on a pale surface and fails AA outright. */
+  --accent: rgba(200, 169, 110, 0.18);
+  --accent-foreground: #7d6229;
+
+  --destructive: #c02730;
+
+  --border: var(--color-mist-edge);
+  --input: var(--color-mist-deep);
+  --ring: #7d6229;
+
+  --hairline: rgba(125, 98, 41, 0.18);
+  --outline: rgba(125, 98, 41, 0.45);
+
+  /* The header strip and search panel. Mist rather than navy-mid, so they
+     still read as one step off the page instead of as a dark slab. */
+  --band: var(--color-mist);
+
+  /*
+    Cobalt at 10% over white lands on #e8ebf2 — the same family as mist, so
+    the hero reads as a soft wash of the brand blue rather than a blue stain.
+    At the dark theme's 45% it would be a solid block.
+
+    The grid switches to gold-ink: raw gold at 4% on white is invisible, and
+    the hatching is the one thing giving the hero any texture in this theme.
+  */
+  --hero-wash: rgba(26, 58, 124, 0.1);
+  --hero-wash-soft: rgba(26, 58, 124, 0.07);
+  --hero-gold: rgba(200, 169, 110, 0.14);
+  --hero-grid-line: rgba(125, 98, 41, 1);
+  --hero-grid-opacity: 0.06;
+
+  --chart-1: #7d6229;
+  --chart-2: #1a3a7c;
+  --chart-3: #3d4a6b;
+  --chart-4: #a08544;
+  --chart-5: #4c6bb3;
+
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+/*
+  Light-tone sections inside the light theme: mist surface, white cards — the
+  inverse of the block above, which is what keeps the alternation visible.
+*/
+:root[data-theme="light"] [data-tone="light"] {
+  --background: var(--color-mist);
+  --card: #ffffff;
+  --secondary: var(--color-mist-edge);
+  --muted: var(--color-mist-edge);
+  --band: var(--color-mist-edge);
 }
 
 /*

@@ -8,6 +8,7 @@ import { Logo } from "./logo";
 import { NavLinks } from "./nav-links";
 import { MobileNav } from "./mobile-nav";
 import { AccessibilityDialog } from "./accessibility-dialog";
+import { ThemeToggle } from "./theme-toggle";
 
 /**
  * Site header — a thin utility strip stacked above the navigation row.
@@ -147,6 +148,10 @@ export async function SiteHeader() {
               underneath; this is a UI-visibility decision, not a locale
               removal, so re-adding the control is a one-line change. */}
           <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+            {/* Theme first, then the accessibility dialog: this one is a
+                single-tap switch, the other opens a panel, and the lighter
+                control reads better closest to the content it changes. */}
+            <ThemeToggle />
             <AccessibilityDialog />
           </div>
         </Container>
