@@ -104,6 +104,24 @@ function credentialsFor(apiId: number): { user: string; pass: string } | null {
   return user && pass ? { user, pass } : null;
 }
 
+/*
+  One line per failed lookup, and it exists because this feature fails
+  INVISIBLY by design: every failure path ends in the same placeholder a
+  photo-less lot shows, so "no images on the server" and "these lots have no
+  photos" look identical from outside. Without this the only way to tell them
+  apart is to reproduce the call by hand.
+
+  Never logs the credentials, only which region's account was used.
+*/
+function warn(apiId: number, orderId: string, reason: string): void {
+  console.warn(
+    `[lot-images] region ${apiId}, order ${orderId}: ${reason}` +
+      (process.env[`ORDER_API_INN_${apiId}`]
+        ? ""
+        : " (no ORDER_API_INN_" + apiId + " — used the fallback account)"),
+  );
+}
+
 async function fetchLotImage(
   orderId: string,
   apiId: number,
@@ -138,17 +156,35 @@ async function fetchLotImage(
       */
       signal: AbortSignal.timeout(10_000),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      warn(apiId, orderId, `HTTP ${res.status}`);
+      return null;
+    }
 
     const json = (await res.json()) as OrderApiResponse;
     // 200 with a non-zero result_code is this service's failure shape — the
     // listings endpoint behaves the same way with `success: false`.
-    if (json.result_code !== 0) return null;
+    if (json.result_code !== 0) {
+      warn(apiId, orderId, `result_code ${json.result_code}: ${json.result_msg}`);
+      return null;
+    }
 
-    return pickMainImage(json.orders?.[0]?.images);
-  } catch {
+    const images = json.orders?.[0]?.images;
+    const picked = pickMainImage(images);
+    if (!picked) {
+      warn(
+        apiId,
+        orderId,
+        json.orders?.length
+          ? `${images?.length ?? 0} image(s), none usable`
+          : "no order in response",
+      );
+    }
+    return picked;
+  } catch (error) {
     // Network unreachable, timeout, malformed JSON — all the same to a caller
     // that just wants "a photo, or the placeholder".
+    warn(apiId, orderId, error instanceof Error ? error.name : "unknown error");
     return null;
   }
 }
@@ -161,10 +197,20 @@ async function fetchLotImage(
  * also part of the cache key by virtue of being an argument, which is what
  * keeps a miss under one region's account from being served for another's.
  *
- * Cached for a day: a published lot's photographs do not change, and the map
- * re-requests the same handful of orders as a reader pans around.
+ * AN HOUR, NOT A DAY, and the reason is failures rather than freshness.
+ * A published lot's photographs never change, so a day would be right for a
+ * hit — but `unstable_cache` stores whatever the function returns, and a
+ * `null` from a missing credential or an unreachable service is a return
+ * value like any other. At 24h one bad lookup pinned the placeholder for a
+ * full day: after the credentials were corrected the route still answered
+ * `{"image":null}` in ~12ms, never re-contacting the service, which reads
+ * exactly like the fix not having worked. An hour bounds that.
+ *
+ * A config change should not be waited out. Restarting the service drops the
+ * cache, and a deploy does it anyway — deploy.sh builds each release its own
+ * `.next/cache`.
  */
 export const getLotImage = unstable_cache(fetchLotImage, ["lot-image"], {
-  revalidate: 86_400,
+  revalidate: 3_600,
   tags: ["lot-images"],
 });
