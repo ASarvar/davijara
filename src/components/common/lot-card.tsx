@@ -82,6 +82,7 @@ export function LotCard({
           ) : (
             <LotImage
               orderId={listing.isMock ? undefined : listing.orderId}
+              region={listing.region}
               className="h-full w-full"
             />
           )}

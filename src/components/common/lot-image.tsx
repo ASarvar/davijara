@@ -28,6 +28,7 @@ import { withBasePath } from "@/lib/base-path";
 */
 export function LotImage({
   orderId,
+  region,
   eager = false,
   className,
 }: {
@@ -38,6 +39,14 @@ export function LotImage({
    * placeholder rather than sending a request that cannot match.
    */
   orderId?: string;
+  /**
+   * The lot's region slug. Required, because each territorial office has its
+   * own account on the order service and a lot must be requested with its own
+   * region's credentials — the wrong account returns nothing rather than an
+   * error. The listings endpoint does not carry the owning office, so this is
+   * how the server learns which account to use.
+   */
+  region?: string;
   /**
    * Skip the visibility check and fetch immediately. For the map popup, which
    * only exists once the reader has opened it — waiting for an intersection
@@ -51,7 +60,9 @@ export function LotImage({
   const boxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!orderId) return;
+    // Both are required: without the region the server has no account to
+    // authenticate with, so the request could only ever come back empty.
+    if (!orderId || !region) return;
 
     let cancelled = false;
     const controller = new AbortController();
@@ -59,7 +70,9 @@ export function LotImage({
     const load = async () => {
       try {
         const res = await fetch(
-          withBasePath(`/api/lot-image?order=${encodeURIComponent(orderId)}`),
+          withBasePath(
+            `/api/lot-image?order=${encodeURIComponent(orderId)}&region=${encodeURIComponent(region)}`,
+          ),
           { signal: controller.signal },
         );
         if (!res.ok) throw new Error(String(res.status));
@@ -104,7 +117,7 @@ export function LotImage({
       controller.abort();
       observer.disconnect();
     };
-  }, [orderId, eager]);
+  }, [orderId, region, eager]);
 
   const showPhoto = src !== null && !failed;
 

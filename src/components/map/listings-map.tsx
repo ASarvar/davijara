@@ -486,6 +486,7 @@ export function ListingsMap({
                   <div className="h-full overflow-hidden rounded-[10px] bg-[#eef1f8]">
                     <LotImage
                       orderId={listing.isMock ? undefined : listing.orderId}
+                      region={listing.region}
                       eager
                       className="block aspect-[16/10] w-full sm:aspect-auto sm:h-full sm:min-h-[10.5rem]"
                     />

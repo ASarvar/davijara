@@ -76,20 +76,44 @@ function pickMainImage(images: OrderApiImage[] | undefined): string | null {
   }
 }
 
-async function fetchLotImage(orderId: string): Promise<string | null> {
+/*
+  Credentials are PER REGION, not per service.
+
+  Each of the fourteen territorial offices has its own account, and the
+  username and password are both that office's INN — confirmed against a live
+  response, where `customer_inn` and the working credentials were the same
+  value. A lot therefore has to be requested with ITS OWN region's account;
+  the wrong one does not error loudly, it just comes back with nothing, which
+  is why every region but the configured one silently showed placeholders.
+
+  Read as `ORDER_API_INN_<apiId>`, keyed by the SOATO id already in
+  content/regions.ts — so a region is configured by pasting one line, and the
+  key is greppable against the region table rather than being a private
+  ordering of its own.
+
+  `ORDER_API_USER` / `ORDER_API_PASSWORD` stay as a fallback for a region with
+  no entry, which keeps a partially-configured deployment working for whatever
+  is filled in instead of failing everywhere.
+*/
+function credentialsFor(apiId: number): { user: string; pass: string } | null {
+  const inn = process.env[`ORDER_API_INN_${apiId}`];
+  if (inn) return { user: inn, pass: inn };
+
+  const user = process.env.ORDER_API_USER ?? process.env.API_USER;
+  const pass = process.env.ORDER_API_PASSWORD ?? process.env.API_PASSWORD;
+  return user && pass ? { user, pass } : null;
+}
+
+async function fetchLotImage(
+  orderId: string,
+  apiId: number,
+): Promise<string | null> {
   const base = process.env.ORDER_API_URL;
   if (!base) return null;
 
-  /*
-    Falls back to the listings credentials, because the two endpoints live on
-    the same service and are likely to share an account — but stays
-    overridable, because that is an assumption and the sample request carries
-    a different-looking value. If they turn out to differ, set ORDER_API_USER
-    / ORDER_API_PASSWORD and nothing else has to change.
-  */
-  const username = process.env.ORDER_API_USER ?? process.env.API_USER;
-  const password = process.env.ORDER_API_PASSWORD ?? process.env.API_PASSWORD;
-  if (!username || !password) return null;
+  const credentials = credentialsFor(apiId);
+  if (!credentials) return null;
+  const { user: username, pass: password } = credentials;
 
   try {
     const res = await fetch(base, {
@@ -101,9 +125,18 @@ async function fetchLotImage(orderId: string): Promise<string | null> {
         password,
         language: "uz",
       }),
-      // Shorter than the listings fetch: this one blocks a single image, and
-      // a slow response should degrade to the placeholder, not hold a card.
-      signal: AbortSignal.timeout(8_000),
+      /*
+        Shorter than the listings fetch: this one blocks a single image, and a
+        slow response should degrade to the placeholder rather than hold a
+        card open.
+
+        10s rather than the 8s first written here, because the service is
+        reached through a proxy hop that was measured taking >10s just to
+        FAIL from outside its network — so a real response on a cold cache is
+        plausibly several seconds, and a timeout tighter than the service is
+        slow would show placeholders for photographs that do exist.
+      */
+      signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return null;
 
@@ -122,6 +155,11 @@ async function fetchLotImage(orderId: string): Promise<string | null> {
 
 /**
  * The lot's primary photograph, or null.
+ *
+ * `apiId` is the lot's region — its account is what the service authenticates
+ * against, so it is part of the identity of the request, not a detail. It is
+ * also part of the cache key by virtue of being an argument, which is what
+ * keeps a miss under one region's account from being served for another's.
  *
  * Cached for a day: a published lot's photographs do not change, and the map
  * re-requests the same handful of orders as a reader pans around.

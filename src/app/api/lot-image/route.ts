@@ -1,3 +1,4 @@
+import { regions } from "@/content/regions";
 import { getLotImage } from "@/lib/data/lot-images";
 
 /*
@@ -15,7 +16,9 @@ import { getLotImage } from "@/lib/data/lot-images";
   `withBasePath()` rather than hardcoding a leading slash.
 */
 export async function GET(request: Request) {
-  const order = new URL(request.url).searchParams.get("order");
+  const params = new URL(request.url).searchParams;
+  const order = params.get("order");
+  const regionSlug = params.get("region");
 
   /*
     Digits only, and bounded.
@@ -30,7 +33,23 @@ export async function GET(request: Request) {
     return Response.json({ image: null }, { status: 400 });
   }
 
-  const image = await getLotImage(order);
+  /*
+    The region selects which territorial office's account the upstream call is
+    made with — see lib/data/lot-images.ts. It has to come from the caller
+    because the listings endpoint does not return a lot's `customer_inn`, so
+    the server cannot derive the owning office from the order id alone.
+
+    Resolved against the region TABLE rather than trusted: only the fourteen
+    known slugs map to anything, so the caller can pick among real regions and
+    nothing else. That bounds both the cache keyspace and the set of accounts
+    a request can reach.
+  */
+  const region = regions.find((r) => r.slug === regionSlug);
+  if (!region) {
+    return Response.json({ image: null }, { status: 400 });
+  }
+
+  const image = await getLotImage(order, region.apiId);
 
   return Response.json(
     { image },
