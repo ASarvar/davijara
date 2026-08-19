@@ -1,5 +1,5 @@
 import { AuctionCountdown } from "@/components/common/auction-countdown";
-import { ImagePlaceholder } from "@/components/common/placeholder/image-placeholder";
+import { LotImage } from "@/components/common/lot-image";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { formatArea, formatDate, formatDateTime, formatNumber } from "@/lib/format";
 import type { Listing } from "@/types/content";
@@ -65,12 +65,13 @@ export function LotCard({
             the placeholder. Never stock imagery: on a state portal a photo on
             a lot card reads as a photo OF that lot.
 
-            Plain <img>, not next/image: remote files on a host we do not
-            control, and optimising them would proxy every one through our own
-            server for no gain.
+            `listing.image` is used directly when the list endpoint happens to
+            carry one; otherwise LotImage resolves it from the order endpoint,
+            lazily, once the card is near the viewport. Sample records never
+            get a lookup — they have no real order behind them.
           */}
           {listing.image ? (
-            // eslint-disable-next-line @next/next/no-img-element -- remote lot photo on a host we do not control; see above.
+            // eslint-disable-next-line @next/next/no-img-element -- remote lot photo on a host we do not control; see the note in lot-image.tsx.
             <img
               src={listing.image}
               alt=""
@@ -79,7 +80,10 @@ export function LotCard({
               className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.05]"
             />
           ) : (
-            <ImagePlaceholder className="transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.05]" />
+            <LotImage
+              orderId={listing.isMock ? undefined : listing.orderId}
+              className="h-full w-full"
+            />
           )}
 
           {listing.isMock ? (

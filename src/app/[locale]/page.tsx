@@ -6,12 +6,9 @@ import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsSection } from "@/components/sections/objects-section";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { UpcomingAuctions } from "@/components/sections/upcoming-auctions";
-import { Services } from "@/components/sections/services";
 import { PrivilegesTeaser } from "@/components/sections/privileges-teaser";
-import { Impact } from "@/components/sections/impact";
 import { NewsAndDocs } from "@/components/sections/news-and-docs";
 import { Faq } from "@/components/sections/faq";
-import { Partners } from "@/components/sections/partners";
 
 export default async function HomePage({
   params,
@@ -43,8 +40,13 @@ export default async function HomePage({
     after it. Each section sets its own tone via `<Section tone=…>`;
     `data-tone` re-binds the colour tokens for that subtree.
 
-    RE-ENABLING A COMMENTED SECTION MEANS RE-ASSIGNING FROM THAT POINT DOWN,
-    since each one inserted shifts every tone after it.
+    THREE SECTIONS ARE BUILT BUT NOT ON THIS PAGE: `services` (light),
+    `impact` (deep) and `partners` (deep) all exist under components/sections
+    and render correctly. They are left out rather than commented in place,
+    because a commented-out `<Section>` is invisible to the type checker and
+    its import trips the linter. Adding any of them back means re-assigning
+    every tone AFTER its insertion point — each one inserted flips the
+    alternation for the rest of the page.
 
     On rendering: reading `searchParams` opts this route into dynamic
     rendering. That is the deliberate cost of letting the search panel filter
@@ -58,12 +60,9 @@ export default async function HomePage({
       <ObjectsSection searchParams={sp} />
       <HowItWorks />
       <UpcomingAuctions />
-      {/* <Services /> */}
       <PrivilegesTeaser />
-      {/* <Impact /> */}
       <NewsAndDocs />
       <Faq />
-      {/* <Partners /> */}
     </>
   );
 }

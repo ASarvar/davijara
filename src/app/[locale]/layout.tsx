@@ -111,9 +111,14 @@ export default async function LocaleLayout({
     Server Component that resolves its strings during render and ships plain
     text. Only three client components need messages at runtime:
 
-      nav-links     -> nav
-      mobile-nav    -> nav, common
-      lang-switcher -> topbar
+      nav-links            -> nav
+      mobile-nav           -> nav, common
+      accessibility-dialog -> topbar
+
+    `lang-switcher` also reads `topbar` and is still built, but the header
+    stopped rendering it while the site ships Uzbek-only — the namespace stays
+    for the accessibility dialog either way, so re-adding the switcher needs
+    no change here.
 
     Everything else (hero, listings, privileges, footer …) is server-rendered.
     Scoping this keeps the payload flat as the catalog grows — which matters

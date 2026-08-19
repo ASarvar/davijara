@@ -64,6 +64,16 @@ export interface Listing {
   lng: number;
   /** Lot number as shown on e-auksion.uz. */
   lotNumber?: string;
+  /**
+   * Upstream's `order_id`, and ONLY that — never the lot number.
+   *
+   * Distinct from `id`, which falls back to the lot number when upstream omits
+   * the order id. The order endpoint that supplies photographs keys on this
+   * field alone (see lib/data/lot-images.ts), so passing `id` there would send
+   * a lot number to a service expecting an order id and silently match
+   * nothing. A lot without one has no photo lookup available.
+   */
+  orderId?: string;
   image?: string;
   /** Deep link to the e-auksion lot, when one exists. */
   auctionUrl?: string;

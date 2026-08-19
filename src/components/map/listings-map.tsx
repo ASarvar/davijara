@@ -17,6 +17,7 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 
 import { AuctionCountdown } from "@/components/common/auction-countdown";
+import { LotImage } from "@/components/common/lot-image";
 import { formatArea, formatDateTime, formatNumber } from "@/lib/format";
 import type { Listing } from "@/types/content";
 
@@ -431,10 +432,36 @@ export function ListingsMap({
             icon={markerIcon}
           >
             <Popup>
+              {/*
+                Order: title, then photograph, then the figures.
+
+                The name is what identifies the lot, so it leads — a reader who
+                opened the wrong pin should know before the image has even
+                loaded. The photo then sits between the name and the numbers
+                rather than above everything, which keeps the popup anchored to
+                its pin instead of growing upward off the top of the map.
+              */}
               <span className="block text-sm leading-snug font-semibold text-[#07102b]">
                 {listing.title}
               </span>
-              <span className="mt-1 block text-xs text-[#3d4a6b]">
+
+              {/*
+                `eager` — no visibility check. A popup only exists once the
+                reader has clicked its pin, so the intersection callback would
+                only delay a photo that has already been asked for.
+
+                Sample records get no lookup: they have no real order behind
+                them, so they keep the placeholder.
+              */}
+              <span className="mt-2 block overflow-hidden rounded-[10px] bg-[#eef1f8]">
+                <LotImage
+                  orderId={listing.isMock ? undefined : listing.orderId}
+                  eager
+                  className="block aspect-[16/9] w-full"
+                />
+              </span>
+
+              <span className="mt-2 block text-xs text-[#3d4a6b]">
                 {regionName(listing.region)} · {formatArea(listing.area)}
               </span>
               {/*

@@ -973,9 +973,22 @@
   background: #ffffff;
   color: var(--color-navy);
 }
+/*
+  Widened from 11rem for the lot photograph.
+
+  `width` as well as `min-width`, and both matter: Leaflet writes an inline
+  `width` on this element after it measures the content, so a min-width alone
+  gets overridden on the narrow popups and the 16:9 image renders as a stamp.
+  `!important` is the only way to beat an inline style Leaflet sets itself.
+
+  17rem keeps the popup inside a 375px viewport with room for its own margins
+  — the map is full-bleed on a phone, so anything wider is clipped by the
+  screen rather than by the map.
+*/
 .leaflet-popup-content {
   margin: 0.75rem 0.9rem;
-  min-width: 11rem;
+  width: 17rem !important;
+  min-width: 17rem;
 }
 .leaflet-popup-tip {
   background: #ffffff;

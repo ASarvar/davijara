@@ -223,13 +223,14 @@ interface ApiLot {
   lat?: string;
   lng?: string;
   /**
-   * Not currently sent. e-auksion DOES hold photographs for these lots, at
-   * https://media.e-auksion.uz/i/<hash>_T.jpg — but `<hash>` is an opaque
-   * content digest with no relation to the lot number, so a URL cannot be
-   * derived; the reference has to come as data. Its own lot-info endpoint is
-   * behind a proof-of-work anti-bot challenge, so scraping it is not an
-   * option either. If the service starts sending a photo URL under either of
-   * these names it is picked up automatically — CSP already allows the host.
+   * Not sent by THIS endpoint, and that is now handled elsewhere rather than
+   * being a gap. Photographs come from the order endpoint, one lot at a time
+   * — see lib/data/lot-images.ts for why they cannot be derived from the lot
+   * number and why they are fetched lazily instead of with the list.
+   *
+   * These two names are kept because they cost nothing: if the list ever does
+   * start carrying a photo URL, it is picked up with no further change and
+   * saves the extra request.
    */
   image?: string;
   photo_url?: string;
@@ -267,6 +268,12 @@ function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
   return {
     id: String(id),
     lotNumber: lot.lot_number,
+    /*
+      Only ever `order_id` — deliberately NOT the `id` fallback above. The
+      photo endpoint keys on the order id, so a lot missing one must carry
+      nothing here rather than a lot number that would never match.
+    */
+    orderId: lot.order_id != null ? String(lot.order_id) : undefined,
     title: lot.name?.trim() || "Nomsiz lot",
     /*
       Region comes from the id we ASKED for, never from `region_title`. The

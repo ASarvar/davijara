@@ -108,16 +108,11 @@ API can replace their bodies without touching a single component.
 Derived values stay derived: privilege category counts are computed from the
 data, never typed into markup.
 
-### 5. The legacy site files are read-only
+### 5. `legacy/` is read-only
 
-`index.html`, `imtiyozlar.html`, `davijara-v2.html` and `styles.css` at the
-repo root are the original static site, kept as reference for porting
-decisions and cited throughout this codebase's comments. Read them, cite them,
-never edit them — and do not mistake root `index.html` for anything this app
-serves.
-
-They are loose at the root rather than under a `legacy/` folder, which is a
-wart worth fixing; until they move, that is where they are.
+`legacy/` holds the original static site — `index.html`, `imtiyozlar.html`,
+`davijara-v2.html`, `styles.css` — kept as reference for porting decisions and
+cited throughout this codebase's comments. Read it, cite it, never edit it.
 
 ## Shared primitives
 
@@ -269,9 +264,14 @@ mismatch waiting to happen. Keep it deterministic.
 
 ## Still to do
 
-- Remaining `davijara-v2.html` features: live auction countdowns and the
-  Chart.js charts (line/doughnut/bar). Both need real data first — see below.
+- Remaining `davijara-v2.html` features: the Chart.js charts
+  (line/doughnut/bar). Needs real data first — see below.
 - Replace the placeholder pages with real content.
+- **Three built sections are not on the homepage**: `services` (light),
+  `impact` (deep), `partners` (deep). They render correctly and are left out
+  of `app/[locale]/page.tsx` entirely rather than commented in place. Adding
+  one back means re-assigning every tone after its insertion point — see the
+  rhythm comment in that file.
 
 ### Deliberately not ported
 

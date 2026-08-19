@@ -1,4 +1,6 @@
-import { ExternalLink, Phone } from "lucide-react";
+// `Phone` is not imported: the hotline link below is commented out, and a
+// dead import is a lint error. Restore it together with that block.
+import { ExternalLink } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
