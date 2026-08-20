@@ -9,6 +9,7 @@ import {
   isEmptyQuery,
   parseListingQuery,
   parsePage,
+  parseView,
   summariseByRegion,
 } from "@/lib/data/listings";
 import { Section } from "@/components/layout/section";
@@ -88,8 +89,14 @@ export default async function ObjectsPage({
         </p>
       </Section>
 
-      {/* Submits to this page, so the results below update in place. */}
-      <SearchWidget action={`/${locale}/obyektlar`} values={sp} />
+      {/*
+        Submits to this page, so the results below update in place.
+
+        `auctionDay` adds the "Savdo kuni" calendar on a second row, which
+        the homepage panel does not carry — the catalogue is where a date is
+        worth combining with region, area and price. See search-widget.tsx.
+      */}
+      <SearchWidget action={`/${locale}/obyektlar`} values={sp} auctionDay />
 
       <Section tone="deep">
         <ObjectsExplorer
@@ -106,6 +113,7 @@ export default async function ObjectsPage({
           filterQuery={filterParams.toString()}
           basePath="/obyektlar"
           emptyLabel="Tanlangan shartlarga mos obyekt topilmadi. Filtrni kengaytirib ko'ring."
+          view={parseView(sp)}
         />
       </Section>
     </>

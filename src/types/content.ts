@@ -25,11 +25,7 @@ export interface Privilege {
   legalBasis: string;
 }
 
-export type ListingType =
-  | "noturar"
-  | "turar"
-  | "ishlab-chiqarish"
-  | "mamuriy";
+export type ListingType = "noturar" | "turar" | "ishlab-chiqarish" | "mamuriy";
 
 export interface Listing {
   id: string;
@@ -94,6 +90,30 @@ export interface ListingQuery {
   maxArea?: number;
   minPrice?: number;
   maxPrice?: number;
+  /**
+   * Exactly one auction day, as "YYYY-MM-DD" in Tashkent time.
+   *
+   * The catalogue's "Savdo kuni" field. A calendar DATE rather than a relative
+   * window because that is the question the auction schedule actually answers
+   * — "what is being sold on the 27th" — and because a date in a shared link
+   * keeps meaning the same thing next week.
+   */
+  auctionDate?: string;
+  /**
+   * How far ahead the auction opens, in days from now — exclusive lower
+   * bound, inclusive upper. `{ min: 3, max: 5 }` is "more than 3 days away
+   * and no more than 5", so the offered windows tile the calendar without
+   * overlapping: 0-3, 3-5, 5+.
+   *
+   * ROLLING HOURS, not calendar days, so the filter agrees with the countdown
+   * printed on the card: a lot reading "3 kun 04:12" is in the 3-5 bucket,
+   * which is what the reader can see and therefore what they expect.
+   *
+   * Lots with no `auctionDate`, and lots whose auction has already opened,
+   * match no window at all — there is no upcoming date to place.
+   */
+  minDaysToAuction?: number;
+  maxDaysToAuction?: number;
 }
 
 /**

@@ -58,5 +58,36 @@
     "title": "Upcoming auctions",
     "description": "Objects whose auction opens shortly. Applications close one hour before the auction begins.",
     "action": "All objects"
+  },
+  "auctionDay": {
+    "field": "Auction day",
+    "placeholder": "Pick a date",
+    "clear": "Clear",
+    "months": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "lots": "lots: {count}"
+  },
+  "auctionWindow": {
+    "field": "Auction day",
+    "any": "Any date",
+    "upTo3": "Up to 3 days",
+    "from3to5": "3–5 days",
+    "over5": "Over 5 days",
+    "nearestDay": "Nearest day",
+    "filterLabel": "Filter by auction day",
+    "empty": "No objects have an auction opening in the selected window. Try another one."
   }
 }

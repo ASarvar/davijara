@@ -89,6 +89,37 @@
     "description": "Savdosi ochilishiga sanoqli vaqt qolgan obyektlar. Ariza qabuli savdo boshlanishidan bir soat oldin yopiladi.",
     "action": "Barcha obyektlar"
   },
+  "auctionDay": {
+    "field": "Savdo kuni",
+    "placeholder": "Sanani tanlang",
+    "clear": "Tozalash",
+    "months": [
+      "Yanvar",
+      "Fevral",
+      "Mart",
+      "Aprel",
+      "May",
+      "Iyun",
+      "Iyul",
+      "Avgust",
+      "Sentabr",
+      "Oktabr",
+      "Noyabr",
+      "Dekabr"
+    ],
+    "weekdays": ["Du", "Se", "Cho", "Pay", "Ju", "Sha", "Yak"],
+    "lots": "{count} ta lot"
+  },
+  "auctionWindow": {
+    "field": "Savdo kuni",
+    "any": "Barcha sanalar",
+    "upTo3": "3 kungacha",
+    "from3to5": "3–5 kun",
+    "over5": "5+ kun",
+    "nearestDay": "Eng yaqin kun",
+    "filterLabel": "Savdo kuni bo'yicha saralash",
+    "empty": "Tanlangan muddatda savdosi ochiladigan obyekt yo'q. Boshqa muddatni tanlang."
+  },
   "services": {
     "eyebrow": "Onlayn xizmatlar",
     "title": "Interaktiv xizmatlar",

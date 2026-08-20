@@ -4,6 +4,7 @@ import {
   getListings,
   isEmptyQuery,
   parseListingQuery,
+  parseView,
   summariseByRegion,
   withFilters,
 } from "@/lib/data/listings";
@@ -65,6 +66,7 @@ export async function ObjectsSection({
         showLots={!isEmptyQuery(query)}
         perPage={9}
         moreHref={moreHref}
+        view={parseView(searchParams)}
       />
     </Section>
   );

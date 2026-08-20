@@ -62,6 +62,102 @@ function parseRange(
   return [lo ? Number(lo) : undefined, hi ? Number(hi) : undefined];
 }
 
+/* ── Savdo kuni ───────────────────────────────────────────────────────── */
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * URL key for the exact auction DATE — the catalogue's "Savdo kuni" field.
+ *
+ * `?savdo=2026-08-27`. ISO in the URL because it sorts, is unambiguous about
+ * day-vs-month, and is what the data already carries; the field displays it as
+ * 27.08.2026, which is what a citizen reads.
+ */
+export const AUCTION_DAY_KEY = "savdo";
+
+/**
+ * URL key for the day WINDOW — the homepage strip's chips.
+ *
+ * A separate key from `savdo` on purpose. The two answer different questions
+ * ("auctions on this date" vs "auctions in this stretch of days") and carry
+ * different grammars, and one key holding both would have to be disambiguated
+ * by inspecting the value. They are also scoped differently: `savdo` is a
+ * catalogue filter carried by `FILTER_KEYS`, while `muddat` belongs to the
+ * upcoming-auctions strip alone and is read nowhere else.
+ */
+export const AUCTION_WINDOW_KEY = "muddat";
+
+/**
+ * The windows offered in the UI.
+ *
+ * DISJOINT, not cumulative. They read as a partition of the calendar ahead —
+ * up to 3 days, 3 to 5 days, beyond 5 — so every lot falls in exactly one and
+ * the three counts add up. Nested windows ("within 1 / within 3 / within 5")
+ * were the first shape and were wrong for a filter: "3 kun" contained "1 kun",
+ * so the counts overlapped and picking a wider one could not answer "what is
+ * NOT imminent".
+ *
+ * `value` is the URL value and uses the same `lo-hi` range grammar as `maydon`
+ * and `narx` — `parseRange` below reads all three. `labelKey` is its message
+ * key under the `auctionWindow` namespace; it lives here so the dropdown and
+ * the chips cannot label the same URL value differently.
+ */
+export const AUCTION_WINDOWS = [
+  { value: "0-3", labelKey: "upTo3" },
+  { value: "3-5", labelKey: "from3to5" },
+  { value: "5-", labelKey: "over5" },
+] as const;
+
+/**
+ * The offered window the URL currently names, or null.
+ *
+ * Only for the CONTROLS — which chip is current, what the dropdown shows.
+ * Filtering goes through `parseListingQuery`, which accepts any range the
+ * grammar allows, so a hand-edited `?savdo=7-14` still narrows the results
+ * even though no control can represent it.
+ */
+export function activeAuctionWindow(
+  searchParams: Record<string, string | string[] | undefined>,
+): string | null {
+  const value = first(searchParams[AUCTION_WINDOW_KEY]);
+  if (!value || value === ALL) return null;
+  return AUCTION_WINDOWS.some((w) => w.value === value) ? value : null;
+}
+
+/**
+ * `?savdo=2026-08-27` → "2026-08-27". Anything else yields no filter.
+ *
+ * The round-trip check is what rejects 2026-02-31: it matches the pattern and
+ * `Date` silently rolls it forward to 3 March, which would filter the
+ * catalogue by a day the reader never asked for. Comparing the parsed date
+ * back to the string catches every such rollover.
+ */
+export function parseAuctionDay(
+  searchParams: Record<string, string | string[] | undefined>,
+): string | undefined {
+  const value = first(searchParams[AUCTION_DAY_KEY]);
+  if (!value || value === ALL) return undefined;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
+
+  const parsed = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return parsed.toISOString().slice(0, 10) === value ? value : undefined;
+}
+
+/**
+ * When a lot's auction opens, in epoch milliseconds, or null.
+ *
+ * Null covers all three of "no date", "an unparseable date" and — at the call
+ * sites below — is paired with a check that the moment is still ahead of us.
+ * Shared so the catalogue filter and the homepage strip cannot drift into
+ * disagreeing about which lots count as upcoming.
+ */
+function auctionAt(listing: Listing): number | null {
+  if (!listing.auctionDate) return null;
+  const t = new Date(listing.auctionDate).getTime();
+  return Number.isFinite(t) ? t : null;
+}
+
 /**
  * Raw `searchParams` → typed query.
  *
@@ -102,6 +198,13 @@ export function parseListingQuery(
     maxArea,
     minPrice: minPriceM != null ? minPriceM * 1_000_000 : undefined,
     maxPrice: maxPriceM != null ? maxPriceM * 1_000_000 : undefined,
+    auctionDate: parseAuctionDay(searchParams),
+    /*
+      Never read from the URL here. The day window is the upcoming-auctions
+      strip's own filter under its own key, and `getUpcomingAuctions` sets
+      these two directly — so `?muddat=` cannot narrow the catalogue behind a
+      panel that has no control for it.
+    */
   };
 }
 
@@ -117,13 +220,47 @@ export function parseListingQuery(
  *
  * Add a filter here and every link that forwards filters picks it up.
  */
-export const FILTER_KEYS = ["hudud", "tuman", "tur", "maydon", "narx"] as const;
+export const FILTER_KEYS = [
+  "hudud",
+  "tuman",
+  "tur",
+  "maydon",
+  "narx",
+  AUCTION_DAY_KEY,
+] as const;
+
+/*
+  `muddat` is deliberately NOT here. It belongs to the upcoming-auctions strip,
+  which exists on one page and reads it directly; carrying it into the
+  catalogue's links would put a parameter in every pager URL that nothing on
+  that page can see, change or explain. The two places that do own it — the
+  chips and the panel's hidden input — handle it explicitly.
+*/
+
+/*
+  Re-exported, not defined here: this module is `server-only`, and the explorer
+  is a client component that needs the key name. See lib/listings-view.ts.
+
+  `buildFilterQuery` below carries the view despite it not being a filter,
+  because the question that helper answers is "what must survive a
+  navigation", and a second mechanism for that is exactly the drift its own
+  comment warns about.
+*/
+export { VIEW_KEY, parseView, type ListingsView } from "@/lib/listings-view";
+
+// A re-export does not bring the names into this module's own scope, and
+// `buildFilterQuery` below uses both.
+import { VIEW_KEY, parseView } from "@/lib/listings-view";
 
 /**
  * The active filters, serialised for a link.
  *
  * `sahifa` is deliberately NOT carried: changing a filter should return the
  * reader to page 1, not to page 7 of a result set that no longer has one.
+ *
+ * The open tab IS carried — it is not a filter, but it has to survive the same
+ * navigations, and every link built from this helper is one the reader expects
+ * to leave them looking at the same thing.
  */
 export function buildFilterQuery(
   searchParams: Record<string, string | string[] | undefined>,
@@ -133,6 +270,9 @@ export function buildFilterQuery(
     const value = first(searchParams[key]);
     if (value && value !== ALL) params.set(key, value);
   }
+  // Only when it differs from the default, so a plain map view stays on a
+  // clean URL rather than carrying `?korinish=xarita` everywhere.
+  if (parseView(searchParams) === "royxat") params.set(VIEW_KEY, "royxat");
   return params;
 }
 
@@ -160,6 +300,25 @@ export function isEmptyQuery(q: ListingQuery): boolean {
 }
 
 function filterListings(listings: Listing[], q: ListingQuery): Listing[] {
+  /*
+    Both bounds resolved once, not per lot. `Date.now()` moving between
+    elements would be immaterial at this scale, but a filter whose predicate
+    is not constant across the array is the kind of thing that only misbehaves
+    under load. Nothing here is cached — the caches sit at `fetchRegion`, on
+    data with no clock in it — so reading the clock at request time is safe.
+  */
+  const now = Date.now();
+  /*
+    The bounds as instants rather than day counts, so the predicate is two
+    comparisons per lot instead of a division. The MINIMUM number of days is
+    the LATER instant — three days out is further away than one — which is why
+    these are named for the moment, not for the bound.
+  */
+  const notBefore =
+    q.minDaysToAuction != null ? now + q.minDaysToAuction * DAY_MS : undefined;
+  const notAfter =
+    q.maxDaysToAuction != null ? now + q.maxDaysToAuction * DAY_MS : undefined;
+
   return listings.filter((l) => {
     if (q.region && l.region !== q.region) return false;
     if (q.district && l.district !== q.district) return false;
@@ -168,6 +327,25 @@ function filterListings(listings: Listing[], q: ListingQuery): Listing[] {
     if (q.maxArea != null && l.area > q.maxArea) return false;
     if (q.minPrice != null && l.pricePerYear < q.minPrice) return false;
     if (q.maxPrice != null && l.pricePerYear > q.maxPrice) return false;
+    if (q.auctionDate) {
+      const at = auctionAt(l);
+      // Compared as a Tashkent calendar day, not as an instant: an auction at
+      // 10:00 local is 05:00Z, so a naive UTC comparison puts every early
+      // morning lot on the previous day.
+      if (at == null || auctionDay(at) !== q.auctionDate) return false;
+    }
+    if (notBefore != null || notAfter != null) {
+      const at = auctionAt(l);
+      // Past auctions are excluded as well as out-of-range ones: "savdosiga 3
+      // kun qoldi" is a claim about the future, and a lot that has already
+      // opened is not something a citizen can still prepare an application
+      // for.
+      if (at == null || at <= now) return false;
+      // Exclusive lower, inclusive upper — that pairing is what makes 0-3 and
+      // 3-5 meet exactly once, with no lot in both and none in neither.
+      if (notBefore != null && at <= notBefore) return false;
+      if (notAfter != null && at > notAfter) return false;
+    }
     return true;
   });
 }
@@ -487,16 +665,48 @@ export async function getListings(
   };
 }
 
+interface UpcomingLot {
+  listing: Listing;
+  /** When its auction opens, epoch ms. Parsed once and carried. */
+  at: number;
+}
+
+/** Lots whose auction is still ahead, with their timestamps resolved. */
+function upcomingLots(listings: Listing[], now: number): UpcomingLot[] {
+  const out: UpcomingLot[] = [];
+  for (const listing of listings) {
+    const at = auctionAt(listing);
+    if (at == null || at <= now) continue;
+    out.push({ listing, at });
+  }
+  return out;
+}
+
+/** The Tashkent calendar day an auction falls on, as "YYYY-MM-DD". */
+function auctionDay(at: number): string {
+  return new Date(at + TASHKENT_OFFSET_MS).toISOString().slice(0, 10);
+}
+
 /**
- * Tumans/shahars that currently have lots in a region.
+ * The subset sharing the soonest auction day in the set.
  *
- * Derived from the lots themselves rather than from a static list, so the
- * dropdown can never offer a district with nothing behind it. Region-scoped
- * because the country has ~200 districts — one flat list would be unusable,
- * and the per-region fetch it reads from is already cached.
+ * Grouped by calendar day rather than by "the next N lots", because the
+ * section's promise is a day: two auctions three hours apart on the same
+ * morning belong together, and one at 09:00 tomorrow does not.
  */
+function soonestDayLots(upcoming: UpcomingLot[]): UpcomingLot[] {
+  if (upcoming.length === 0) return [];
+  let day = auctionDay(upcoming[0].at);
+  for (const u of upcoming) {
+    const d = auctionDay(u.at);
+    if (d < day) day = d;
+  }
+  return upcoming.filter((u) => auctionDay(u.at) === day);
+}
+
 /**
- * Lots from the NEXT auction day, as a pool for the homepage rotator.
+ * Lots from the next auction day, or from an explicit window, as a pool for
+ * the homepage rotator.
  *
  * "Next" means the soonest day that still has an auction ahead of it —
  * including today. A day is only ever considered because a lot is actually
@@ -505,9 +715,9 @@ export async function getListings(
  * own rather than by a rule here that could drift out of step with the
  * calendar the auctions actually run on.
  *
- * Only that one day is returned. Mixing "in 1 day" with "in 12 days" made the
- * three cards look arbitrary — the point of the section is imminence, and a
- * card twelve days out is not imminent.
+ * By default only that one day is returned. Mixing "in 1 day" with "in 12
+ * days" made the three cards look arbitrary — the point of the section is
+ * imminence, and a card twelve days out is not imminent.
  *
  * WHY A POOL AND NOT THREE
  * The caller shows three at a time and rotates. Sending a pool lets that
@@ -522,31 +732,55 @@ export async function getListings(
  * upstream fetch is cached for — so the pool is stable for as long as the data
  * behind it is, every visitor in that window sees the same thing, and there is
  * no hydration risk.
+ *
+ * WHAT A WINDOW CHANGES
+ * "One day only" is the DEFAULT, not a rule — it exists because an unasked-for
+ * mix of "in 1 day" and "in 12 days" looked arbitrary. When the reader picks a
+ * window themselves, spanning days is precisely what they asked for, so the
+ * window is answered literally: every upcoming lot inside it, soonest first,
+ * capped at `poolSize`.
+ *
+ * The shuffle is dropped in that case, deliberately. Within a single day every
+ * lot is equally imminent and the order carries no information, which is why
+ * it is randomised; across a window the order IS the information, and burying
+ * tomorrow's auction below next week's would answer the question backwards.
+ *
+ * The window is applied by `getListings` rather than here, so the strip and
+ * the catalogue decide "is this lot in the 3-5 day bucket" with one predicate
+ * instead of two that can disagree at the boundary.
  */
-export async function getUpcomingAuctions(poolSize = 12): Promise<ListingsResult> {
-  const { listings, source } = await getListings();
+export async function getUpcomingAuctions(
+  poolSize = 12,
+  /**
+   * One of `AUCTION_WINDOWS`’ values, e.g. `"3-5"`. Omit (or pass null) for
+   * the soonest auction day only. Taken as the raw URL value rather than
+   * parsed bounds so the range grammar stays inside this module.
+   */
+  window?: string | null,
+): Promise<ListingsResult> {
+  const [minDays, maxDays] = window
+    ? parseRange(window)
+    : [undefined, undefined];
+  const windowed = minDays != null || maxDays != null;
+  const { listings, source } = await getListings(
+    windowed ? { minDaysToAuction: minDays, maxDaysToAuction: maxDays } : {},
+  );
 
   const now = Date.now();
-  const at = (l: Listing) => new Date(l.auctionDate!).getTime();
-
-  const upcoming = listings.filter((l) => {
-    if (!l.auctionDate) return false;
-    const t = new Date(l.auctionDate).getTime();
-    return Number.isFinite(t) && t > now;
-  });
+  const upcoming = upcomingLots(listings, now);
   if (upcoming.length === 0) {
     return { listings: [], hasMock: false, source };
   }
 
-  /* The Tashkent calendar day an auction falls on, as "YYYY-MM-DD". */
-  const dayOf = (l: Listing) =>
-    new Date(at(l) + TASHKENT_OFFSET_MS).toISOString().slice(0, 10);
+  if (windowed) {
+    const picked = [...upcoming]
+      .sort((a, b) => a.at - b.at)
+      .slice(0, poolSize)
+      .map((u) => u.listing);
+    return { listings: picked, hasMock: picked.some((l) => l.isMock), source };
+  }
 
-  const nextDay = upcoming.reduce(
-    (min, l) => (dayOf(l) < min ? dayOf(l) : min),
-    dayOf(upcoming[0]),
-  );
-  const sameDay = upcoming.filter((l) => dayOf(l) === nextDay);
+  const sameDay = soonestDayLots(upcoming).map((u) => u.listing);
 
   /* Mulberry32 — small, fast, and identical everywhere it runs. */
   let state = Math.floor(now / 300_000) >>> 0;
@@ -574,6 +808,75 @@ export async function getUpcomingAuctions(poolSize = 12): Promise<ListingsResult
 }
 
 /**
+ * How many lots each filter chip would show, keyed by window value.
+ *
+ * Printed ON the chips, and that is the point rather than decoration: the one
+ * real risk with a window filter is pressing a chip, landing on an empty
+ * section, and having no way to tell a broken filter from a quiet week. A
+ * visible `0` answers that before the click.
+ *
+ * Counted through `filterListings` rather than by a predicate of its own, so
+ * a chip can never advertise a number the results then disagree with.
+ *
+ * Reads the same cached listing set the section itself does, so this is a few
+ * extra passes over an array already in memory — no additional upstream
+ * request.
+ */
+export async function getUpcomingAuctionCounts(): Promise<{
+  nearestDay: number;
+  byWindow: Record<string, number>;
+}> {
+  const { listings } = await getListings();
+
+  const byWindow: Record<string, number> = {};
+  for (const window of AUCTION_WINDOWS) {
+    const [minDays, maxDays] = parseRange(window.value);
+    byWindow[window.value] = filterListings(listings, {
+      minDaysToAuction: minDays,
+      maxDaysToAuction: maxDays,
+    }).length;
+  }
+
+  const upcoming = upcomingLots(listings, Date.now());
+  return { nearestDay: soonestDayLots(upcoming).length, byWindow };
+}
+
+/**
+ * Every day that has at least one lot, with how many, ascending.
+ *
+ * What the "Savdo kuni" calendar renders. e-auksion lets a citizen pick any
+ * square on the calendar and most of them return nothing — auctions cluster on
+ * the working days the service schedules them for. Passing the real days lets
+ * the picker grey out the rest, so the control cannot produce an empty result
+ * at all.
+ *
+ * `query` is the REST of the active search, so the days offered are the days
+ * that have lots matching it. Its own `auctionDate` is dropped: a picker that
+ * only offered the day already chosen could never be changed.
+ *
+ * Reads through the same cached per-region fetches the results do.
+ */
+export async function getAuctionDays(
+  query: ListingQuery = {},
+): Promise<Array<{ date: string; count: number }>> {
+  const { listings } = await getListings({ ...query, auctionDate: undefined });
+
+  const counts = new Map<string, number>();
+  for (const listing of listings) {
+    const at = auctionAt(listing);
+    if (at == null) continue;
+    const day = auctionDay(at);
+    counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+
+  // ISO dates sort correctly as plain strings — that is most of why the URL
+  // carries them in this form rather than as 27.08.2026.
+  return [...counts.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/**
  * Districts for every region at once, keyed by region slug.
  *
  * The search panel needs this to narrow the tuman dropdown the instant a
@@ -581,15 +884,23 @@ export async function getUpcomingAuctions(poolSize = 12): Promise<ListingsResult
  * and comes from the same cached per-region fetches the results use, so the
  * fan-out costs nothing extra.
  */
-export async function getDistrictsByRegion(): Promise<Record<string, string[]>> {
+export async function getDistrictsByRegion(): Promise<
+  Record<string, string[]>
+> {
   const entries = await Promise.all(
-    regions.map(
-      async (r) => [r.slug, await getDistricts(r.slug)] as const,
-    ),
+    regions.map(async (r) => [r.slug, await getDistricts(r.slug)] as const),
   );
   return Object.fromEntries(entries.filter(([, list]) => list.length > 0));
 }
 
+/**
+ * Tumans/shahars that currently have lots in a region.
+ *
+ * Derived from the lots themselves rather than from a static list, so the
+ * dropdown can never offer a district with nothing behind it. Region-scoped
+ * because the country has ~200 districts — one flat list would be unusable,
+ * and the per-region fetch it reads from is already cached.
+ */
 export async function getDistricts(regionSlug: string): Promise<string[]> {
   const { listings } = await getListings({ region: regionSlug });
   const names = new Set(
@@ -639,7 +950,9 @@ export function summariseByRegion(listings: Listing[]): RegionSummary[] {
       if (!l.type) continue;
       typeCounts.set(l.type, (typeCounts.get(l.type) ?? 0) + 1);
     }
-    const topType = [...typeCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0];
+    const topType = [...typeCounts.entries()].sort(
+      (a, b) => b[1] - a[1],
+    )[0]?.[0];
 
     const districts = new Set(
       lots.map((l) => l.district).filter((d): d is string => Boolean(d)),

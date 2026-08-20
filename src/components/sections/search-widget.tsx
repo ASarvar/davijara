@@ -3,8 +3,16 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 import { withBasePath } from "@/lib/base-path";
 import { getRegionOptions } from "@/lib/data/catalog";
-import { getDistrictsByRegion } from "@/lib/data/listings";
+import {
+  AUCTION_DAY_KEY,
+  AUCTION_WINDOW_KEY,
+  getAuctionDays,
+  getDistrictsByRegion,
+  parseListingQuery,
+  VIEW_KEY,
+} from "@/lib/data/listings";
 import { RegionDistrictFields } from "./region-district-fields";
+import { AuctionDayField } from "@/components/common/auction-day-field";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { ALL_VALUE, SelectField } from "@/components/common/select-field";
 import { Container } from "@/components/layout/section";
@@ -16,7 +24,8 @@ import { Container } from "@/components/layout/section";
  * form — beside a button with no handler. Nothing was submittable.
  *
  * This is a real GET form targeting /obyektlar, so results stay addressable
- * as ?hudud=&tur=&maydon=&narx= and a search can be linked and indexed. The
+ * as ?hudud=&tuman=&maydon=&narx=&savdo= and a search can be linked and
+ * indexed. The
  * dropdowns are shadcn's `Select` (Radix, client JS) rather than native
  * `<select>` elements — a deliberate trade against the zero-JS approach, made
  * so the open dropdown panel can carry the site's rounded/gold-bordered
@@ -37,11 +46,23 @@ export async function SearchWidget({
    * change one field without re-entering the rest.
    */
   values,
+  /**
+   * Render "Savdo kuni" — the auction-date calendar — on a second row.
+   *
+   * OFF on the homepage, on purpose. That panel is the site's front door and
+   * four fields is what it has always been; a reader thinking about dates is
+   * offered the chips on "Yaqinlashayotgan savdolar" instead. The catalogue is
+   * where a date is worth combining with region, area and price, so
+   * /obyektlar turns it on.
+   */
+  auctionDay = false,
 }: {
   action?: string;
   values?: Record<string, string | string[] | undefined>;
+  auctionDay?: boolean;
 } = {}) {
   const t = await getTranslations("search");
+  const td = await getTranslations("auctionDay");
   const locale = await getLocale();
   const regions = await getRegionOptions();
 
@@ -56,6 +77,16 @@ export async function SearchWidget({
   // instant a region is picked rather than after a submit. Reads through the
   // same cached per-region fetches the results do.
   const districtsByRegion = await getDistrictsByRegion();
+
+  /*
+    The days the calendar may offer, scoped to the rest of the active search —
+    so filtering to one tuman greys out every day that tuman has no auction on.
+    Only fetched for the variant that renders the calendar; the homepage panel
+    pays nothing for a control it does not show.
+  */
+  const auctionDays = auctionDay
+    ? await getAuctionDays(parseListingQuery(values ?? {}))
+    : [];
 
   /*
     `bg-band` + `border-hairline`, not `bg-navy-mid` + `border-border`: raw
@@ -83,8 +114,38 @@ export async function SearchWidget({
         <form
           action={withBasePath(action ?? `/${locale}#obyektlar-xarita`)}
           method="get"
+          /*
+            ONE grid, four field columns wide, in both variants — so the
+            top row is byte-for-byte the layout it has always been and "Savdo
+            kuni" simply wraps onto a second row beneath Hudud.
+
+            That leaves columns 2-4 of the second row empty, and they are meant
+            to be: the next filters go there, at exactly the width of the ones
+            above them. A separate grid for the second row would have sized its
+            columns against a different total and left the two rows visibly out
+            of step.
+
+            Five fields in ONE row was tried and does not fit at any viewport
+            width: the container caps at 1200px, so five plus the button is
+            191px per field, and "Qoraqalpog'iston Respublikasi" needs 188px of
+            text in the 144px box that leaves — clipped mid-word, with
+            `text-overflow: clip` not even leaving an ellipsis to signal it.
+          */
           className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
         >
+          {/*
+            Carries the open tab through the submit.
+
+            A GET form sends only its own fields, so without this every search
+            dropped `korinish` and the explorer reopened on the map — a reader
+            who had switched to the list was thrown back on each search. Only
+            rendered for the non-default view, so a plain map search keeps a
+            clean URL.
+          */}
+          {current(VIEW_KEY) === "royxat" ? (
+            <input type="hidden" name={VIEW_KEY} value="royxat" />
+          ) : null}
+
           {/*
             Hudud + Tuman are one coupled control — picking a region has to
             narrow the district list immediately, so they live in a small
@@ -155,13 +216,78 @@ export async function SearchWidget({
             ]}
           />
 
-          <div className="flex items-end">
+          {/*
+            Savdo kuni — the calendar, on its own row.
+
+            Modelled on e-auksion's filter of the same name, so a citizen who
+            has used the auction site meets the control they already know. It
+            differs in one way that matters: days with no lots cannot be
+            picked. See auction-day-field.tsx for why, and for why a calendar
+            is a client component when nothing else in this panel is.
+          */}
+          {auctionDay ? (
+            <AuctionDayField
+              id="savdo"
+              name={AUCTION_DAY_KEY}
+              label={td("field")}
+              value={
+                current(AUCTION_DAY_KEY) === ALL_VALUE
+                  ? undefined
+                  : current(AUCTION_DAY_KEY)
+              }
+              days={auctionDays}
+              /* Placed, not auto-flowed: as the fifth child it would otherwise
+                 land in the button's column at the end of row one. Column 1 of
+                 row 2 puts it under Hudud, with the reserved columns to its
+                 right. */
+              className="lg:col-start-1 lg:row-start-2"
+              labels={{
+                placeholder: td("placeholder"),
+                clear: td("clear"),
+                months: td.raw("months") as string[],
+                weekdays: td.raw("weekdays") as string[],
+                // `raw`, not `td("lots")`: the {count} is substituted in the
+                // browser once a day is known, so ICU must not try to resolve
+                // it here — there is no value to give it yet.
+                lots: td.raw("lots") as string,
+              }}
+            />
+          ) : (
+            /*
+              Not shown here, but the strip's window is not dropped either.
+
+              A GET form submits only its own fields, so on the homepage —
+              where this panel carries no date control — pressing Qidirish
+              would silently clear the window a reader had just chosen from the
+              chips below. Same fix, and same reason, as the `korinish` input
+              above.
+            */
+            current(AUCTION_WINDOW_KEY) !== ALL_VALUE && (
+              <input
+                type="hidden"
+                name={AUCTION_WINDOW_KEY}
+                value={current(AUCTION_WINDOW_KEY)}
+              />
+            )
+          )}
+
+          {/* Pinned to the last column, and to the second ROW when the
+              calendar is there — otherwise it would follow "Savdo kuni"
+              straight into column 2 and sit in the middle of the space the
+              next filters are reserved for. */}
+          <div
+            className={
+              auctionDay
+                ? "flex items-end lg:col-start-5 lg:row-start-2"
+                : "flex items-end"
+            }
+          >
             <button
               type="submit"
               /* `active:scale` because the transition already declared
                  `transform` but nothing ever changed it — the button animated
                  opacity only and felt inert on press. */
-              className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-gold)] px-6 text-sm font-semibold text-[color:var(--color-navy)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 lg:w-auto"
+              className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-gold)] px-6 text-sm font-semibold text-[color:var(--color-navy)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
             >
               <Search
                 aria-hidden="true"

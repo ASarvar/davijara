@@ -198,15 +198,25 @@ async function fetchLotImage(
     }
 
     const images = json.orders?.[0]?.images;
+
+    /*
+      A lot with no photographs is NOT a failure and is not logged.
+
+      Roughly a fifth of live lots have none — the placeholder is the correct,
+      expected answer for them. Logging that would put a line in the journal
+      every time anyone scrolled past one, on a catalogue of ~1,150 lots, and
+      bury the lines that mean something. Only genuine faults are logged:
+      transport errors, a rejected account, or a response carrying images we
+      cannot use.
+    */
+    if (!json.orders?.length) {
+      warn(apiId, orderId, "no order in response");
+      return null;
+    }
+
     const picked = pickMainImage(images);
-    if (!picked) {
-      warn(
-        apiId,
-        orderId,
-        json.orders?.length
-          ? `${images?.length ?? 0} image(s), none usable`
-          : "no order in response",
-      );
+    if (!picked && images?.length) {
+      warn(apiId, orderId, `${images.length} image(s), none usable`);
     }
     return picked;
   } catch (error) {
@@ -225,20 +235,28 @@ async function fetchLotImage(
  * also part of the cache key by virtue of being an argument, which is what
  * keeps a miss under one region's account from being served for another's.
  *
- * AN HOUR, NOT A DAY, and the reason is failures rather than freshness.
- * A published lot's photographs never change, so a day would be right for a
- * hit — but `unstable_cache` stores whatever the function returns, and a
- * `null` from a missing credential or an unreachable service is a return
- * value like any other. At 24h one bad lookup pinned the placeholder for a
- * full day: after the credentials were corrected the route still answered
- * `{"image":null}` in ~12ms, never re-contacting the service, which reads
- * exactly like the fix not having worked. An hour bounds that.
+ * FIVE MINUTES, and the reason is failures rather than freshness.
  *
- * A config change should not be waited out. Restarting the service drops the
- * cache, and a deploy does it anyway — deploy.sh builds each release its own
- * `.next/cache`.
+ * A published lot's photographs never change, so caching for a day would be
+ * right for a hit. But `unstable_cache` stores whatever the function returns,
+ * and a `null` from a timeout or a rejected account is a return value like
+ * any other — there is no way to give hits and misses different lifetimes in
+ * one cache. So the miss sets the ceiling.
+ *
+ * Measured, not guessed: a 21-second network blip produced 18 timeouts, and
+ * every one of those lots then served `{"image":null}` in ~12ms without
+ * re-contacting the service — while the API returned 4-8 photographs for the
+ * same orders in ~50ms. At a day, one blip blanks those cards until tomorrow.
+ * At an hour, for the rest of the hour. Five minutes bounds a blip to a blip,
+ * and matches the listings cache next door.
+ *
+ * The long tail is handled a layer up instead: the route sends
+ * `max-age=3600` for a hit, so a reader who revisits does not reach the
+ * server at all. This cache only has to stop MANY readers converging on the
+ * same cold lot, and five minutes is ample for that — a hit costs ~50ms
+ * upstream and only lots someone actually looked at are ever fetched.
  */
 export const getLotImage = unstable_cache(fetchLotImage, ["lot-image"], {
-  revalidate: 3_600,
+  revalidate: 300,
   tags: ["lot-images"],
 });

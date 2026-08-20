@@ -59,7 +59,7 @@ export default async function HomePage({
       <SearchWidget values={sp} />
       <ObjectsSection searchParams={sp} />
       <HowItWorks />
-      <UpcomingAuctions />
+      <UpcomingAuctions searchParams={sp} />
       <PrivilegesTeaser />
       <NewsAndDocs />
       <Faq />

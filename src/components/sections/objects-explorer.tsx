@@ -12,10 +12,15 @@ import {
   TriangleAlert,
 } from "lucide-react";
 
-import { Link } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
+
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LotCard } from "@/components/common/lot-card";
 import { formatArea, formatNumber, formatSom } from "@/lib/format";
+// From lib/listings-view, NOT lib/data/listings — the latter is `server-only`
+// and importing it here pulls the API credentials into the browser bundle.
+import { VIEW_KEY, type ListingsView } from "@/lib/listings-view";
 import type { Listing, RegionSummary } from "@/types/content";
 
 /*
@@ -247,10 +252,17 @@ export function ObjectsExplorer({
   emptyLabel = "Tanlangan shartlarga mos obyekt topilmadi.",
   filterQuery,
   basePath,
+  view = "xarita",
 }: {
   listings: Listing[];
   summaries: RegionSummary[];
   hasMock: boolean;
+  /**
+   * Which tab is open, read from the URL by the page. Not internal state:
+   * a search is a full navigation, so a tab held in React would reset on
+   * every submit. See VIEW_KEY in lib/data/listings.ts.
+   */
+  view?: ListingsView;
   /**
    * What the Ro'yxat tab lists. The homepage shows region totals until a
    * search narrows things down; the full catalogue always lists lots.
@@ -274,6 +286,15 @@ export function ObjectsExplorer({
   basePath?: string;
 }) {
   const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  /*
+    `useSearchParams` from next/navigation, not from @/i18n/navigation — that
+    module wraps only the locale-aware pieces (Link, usePathname, useRouter)
+    and does not re-export this one. Query strings carry no locale prefix, so
+    there is nothing for it to wrap.
+  */
+  const searchParams = useSearchParams();
 
   const regionName = useCallback(
     (slug: string) => summaries.find((s) => s.slug === slug)?.name ?? slug,
@@ -339,7 +360,30 @@ export function ObjectsExplorer({
         </p>
       ) : null}
 
-      <Tabs defaultValue="xarita">
+      {/*
+        Controlled from the URL, not `defaultValue`.
+
+        The search panel is a real GET form, so every search is a full
+        navigation and an uncontrolled Tabs remounted at its default — a reader
+        who had switched to the list was thrown back to the map on each search,
+        and on each page of the pager. `router.replace` writes the tab back so
+        the next navigation carries it; `scroll: false` keeps the page from
+        jumping to the top on a tab click.
+      */}
+      <Tabs
+        value={view}
+        onValueChange={(next) => {
+          const params = new URLSearchParams(
+            searchParams?.toString() ?? "",
+          );
+          if (next === "royxat") params.set(VIEW_KEY, "royxat");
+          else params.delete(VIEW_KEY);
+          const qs = params.toString();
+          router.replace(qs ? `${pathname}?${qs}` : pathname, {
+            scroll: false,
+          });
+        }}
+      >
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <TabsList>
             <TabsTrigger value="xarita" className="gap-1.5">

@@ -90,13 +90,57 @@ Filtering and search state belong in the **URL**, not React state. The
 privileges filter is a set of links to real routes (`/imtiyozlar/it`), not a
 click handler — so each view is linkable, back-button-correct, statically
 prerendered, and crawlable. The homepage search is a real GET form targeting
-`/obyektlar`, so results stay addressable as `?hudud=&tur=&maydon=&narx=` and
-a search can be linked and indexed. Its dropdowns are shadcn's `Select`
-(Radix, client JS), not native `<select>` elements — a deliberate trade of the
-former zero-JS approach so the open dropdown panel can carry the site's
-rounded/gold-bordered styling, which Chromium won't apply to a native
-`<select>` popup. Radix's hidden bubble `<select>` still submits `name=value`
-on the form, so GET submission needs no `onSubmit` handler of our own.
+`/obyektlar`, so results stay addressable as
+`?hudud=&tuman=&maydon=&narx=&savdo=` and a search can be linked and indexed.
+`FILTER_KEYS` in `lib/data/listings.ts` is the single list of those keys —
+every link that has to survive a filter (the pager, "Barcha obyektlar", the
+auction chips) builds its query from it, because hand-listing them in three
+places is what once dropped `tuman` from every page link.
+
+The panel's dropdowns are shadcn's `Select` (Radix, client JS), not native
+`<select>` elements — a deliberate trade of the former zero-JS approach so the
+open dropdown panel can carry the site's rounded/gold-bordered styling, which
+Chromium won't apply to a native `<select>` popup. Radix's hidden bubble
+`<select>` still submits `name=value` on the form, so GET submission needs no
+`onSubmit` handler of our own.
+
+**Auction time is two separate parameters**, because they answer two questions
+and neither generalises to the other:
+
+- `savdo` — one exact day, `?savdo=2026-08-27`. This is the catalogue's
+  "Savdo kuni" field, modelled on e-auksion's filter of the same name so a
+  citizen meets the control they already know. ISO in the URL (it sorts, and
+  it is unambiguous about day-vs-month); displayed as 27.08.2026. Matched as a
+  **Tashkent** calendar day — an auction at 10:00 local is 05:00Z, so a UTC
+  comparison would file every morning lot under the previous day.
+- `muddat` — a day window, `?muddat=0-3`, `3-5`, `5-`, in the same `lo-hi`
+  grammar as `maydon` and `narx`. This is the chips on "Yaqinlashayotgan
+  savdolar". The three are **disjoint** — exclusive lower bound, inclusive
+  upper — so a lot falls in exactly one and the counts sum to the catalogue;
+  nested windows ("within 1 / 3 / 5") were the first shape and could not
+  answer "what is further out". Bounds are rolling hours, not calendar days,
+  so they agree with the countdown printed on the card.
+
+`savdo` is in `FILTER_KEYS`; `muddat` is deliberately not. It belongs to the
+homepage strip, which reads it directly — carrying it into the pager would put
+a parameter in every catalogue URL that nothing on that page can see or change.
+The two places that own it are the chips and the panel's hidden input, which
+exists so pressing Qidirish on the homepage does not silently clear a window
+the reader just chose.
+
+`SearchWidget` renders the calendar **only** when passed `auctionDay` —
+/obyektlar does, the homepage does not; that panel stays the four fields it has
+always been. The calendar is the one client component in the panel (a popover
+with a month cursor is the act of choosing, not the filter itself), and it
+greys out every day with no lots, from `getAuctionDays()` scoped to the rest of
+the active search. e-auksion lets you pick any square and most return nothing.
+
+Both variants share **one grid, four field columns wide**, so "Savdo kuni"
+wraps under Hudud at exactly the width of the fields above it and columns 2-4
+of that row stay free for the filters that come next. Five fields in one row
+does not fit at any viewport width — the container caps at 1200px, which
+leaves 144px of text box for "Qoraqalpog'iston Respublikasi" and clips it
+mid-word.
 
 ### 4. Content flows through the data layer
 
