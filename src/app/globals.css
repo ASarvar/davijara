@@ -3,6 +3,24 @@
 @import "shadcn/tailwind.css";
 
 /*
+  `dark:` follows THIS SITE'S theme, not the operating system's.
+
+  Tailwind's default binds the variant to `prefers-color-scheme`, and shadcn's
+  generated components in `ui/` use it 22 times — `dark:bg-input/30` on the
+  select trigger, `dark:border-input` on tabs, the destructive ring states.
+  Left on the default, a visitor whose OS is dark saw dark-variant inputs
+  while the site was in its LIGHT theme, and a visitor whose OS is light saw
+  none of them while the site was navy. Same page, two renderings, neither
+  chosen by us.
+
+  Rebinding the variant here rather than editing `ui/` keeps that directory
+  what it is meant to be — untouched CLI output.
+
+  Dark is the default (no attribute), so the condition is "not light".
+*/
+@custom-variant dark (&:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *));
+
+/*
   ─────────────────────────────────────────────────────────────────────────
   DAVIJARA.UZ DESIGN SYSTEM
   ─────────────────────────────────────────────────────────────────────────
@@ -90,6 +108,19 @@
       mist -> mist-edge  1.15  (bone -> bone-edge was 1.19)
       mist -> mist-deep  1.38  (bone -> #d8d3c8 was 1.40)
   */
+  /*
+    The page ground in the light theme, and the reason it is not #ffffff.
+
+    Pure white is the classic light-UI mistake: it glares, it flattens, and it
+    leaves a white card with nothing to sit on. A soft neutral one step down
+    gives the card somewhere to be, at the cost of nothing — navy on this is
+    17.81:1 against white's 18.65:1.
+
+    Same hue as the rest of the family (a tint of navy-mid), not a neutral
+    grey, so the ramp mist-pale -> mist -> mist-edge -> mist-deep stays one
+    material rather than turning grey at the top.
+  */
+  --color-mist-pale: #f7f9fc;
   --color-mist: #eef1f8;
   --color-mist-edge: #dce2ec;
   --color-mist-deep: #c7cfdf;
@@ -126,6 +157,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-heading: var(--heading);
+  --color-ornament: var(--ornament);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -196,6 +229,21 @@
   --background: #07102b;
   --foreground: rgba(255, 255, 255, 0.85);
 
+  /*
+    Headings, as their own token.
+
+    On navy it is just --foreground; the light THEME is where it earns its
+    keep, taking cobalt so headings carry the brand instead of being the same
+    near-black as the paragraph under them. Applied once in @layer base to
+    h1-h5, so a utility on any individual heading still wins.
+
+    It has to be redeclared in EVERY block that redeclares --foreground.
+    `--heading: var(--foreground)` computes where it is DECLARED and then
+    inherits as a finished value, so a lone :root declaration would freeze to
+    white and light-tone sections would get white headings on mist.
+  */
+  --heading: var(--foreground);
+
   --card: rgba(255, 255, 255, 0.04);
   --card-foreground: rgba(255, 255, 255, 0.85);
 
@@ -214,6 +262,27 @@
   --accent: rgba(200, 169, 110, 0.15);
   --accent-foreground: #e8d5a8;
 
+  /*
+    THE GOLD NOTE, on its own token and on a strict budget.
+
+    `--accent` used to be the only gold pair, which meant every eyebrow, icon
+    tile, action link, active chip and hero figure drew from it — around 90
+    elements on the homepage. On navy that is the brand. In the LIGHT theme it
+    buried cobalt, the colour that theme is supposed to be built on, so accent
+    turns cobalt there and this token keeps gold for the few places that are
+    ornament rather than interface.
+
+    Two places, both in the hero: the rotating word in the <h1> and the three
+    figures beneath it. Reach for it only when something is a deliberate warm
+    highlight, never for anything a reader clicks.
+
+    `--color-gold` rather than the `--color-gold-light` the figures used to
+    take from `--accent-foreground`. The hero carried both golds — the word
+    #c8a96e and the numbers #e8d5a8 — which was drift, not a decision. One
+    token, the brand's actual gold, 8.37:1 on navy.
+  */
+  --ornament: var(--color-gold);
+
   --destructive: #e5484d;
 
   --border: rgba(255, 255, 255, 0.08);
@@ -222,6 +291,20 @@
 
   --hairline: rgba(200, 169, 110, 0.12);
   --outline: rgba(200, 169, 110, 0.4);
+
+  /*
+    TWO depth levels, and deliberately only two: resting and lifted. A light
+    UI needs shadow to separate surfaces that are within a few percent of each
+    other in luminance, and it needs it in small doses — a ladder of five
+    elevations is what makes a light theme look like a pile of floating cards.
+
+    On navy there is nothing to separate: a card is already a lighter surface
+    than the page, so level 1 is none and only the hover lift casts anything.
+    The light theme overrides both with soft, navy-tinted shadows — see there.
+  */
+  --shadow-1: none;
+  --shadow-2:
+    0 20px 25px -5px rgba(0, 0, 0, 0.28), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
 
   /* Muted text on this composites to ~5.7:1 — above AA. Lightening it further
      would drop the utility strip's links below the threshold. */
@@ -286,6 +369,10 @@
   */
   --background: var(--color-mist);
   --foreground: #07102b;
+  /* Navy, not cobalt: mist sections exist in the DARK theme too, where the
+     identity is gold-on-navy and a third accent would not belong. The light
+     theme overrides this below. */
+  --heading: var(--foreground);
 
   --card: #ffffff;
   --card-foreground: #07102b;
@@ -308,6 +395,7 @@
      same role it plays on navy. */
   --accent: rgba(200, 169, 110, 0.18);
   --accent-foreground: #7d6229;
+  --ornament: #7d6229;
 
   --destructive: #c02730;
 
@@ -360,40 +448,125 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --background: #ffffff;
+  /*
+    NOT #ffffff. The page is a soft neutral and the CARD is the white layer —
+    the inverse of what this theme did at first, where the page was white and
+    the card was mist. White-on-white needs a shadow to exist at all, which is
+    exactly the arrangement that makes a light UI read as depth rather than as
+    a flat sheet, and it means a card looks the same on every section instead
+    of inverting with the tone underneath it.
+  */
+  --background: var(--color-mist-pale);
   --foreground: #07102b;
 
-  /* Mist, not white: on a white section a white card is invisible, and the
-     border alone is too weak to carry a whole card at this scale. */
-  --card: var(--color-mist);
+  /*
+    COBALT CARRIES THIS THEME.
+
+    On navy the brand speaks through gold; on white gold cannot — #c8a96e is
+    ~1.9:1 there — so the light theme needed a second voice, and cobalt is
+    already in the scale. Headings take it and the page gets an identity
+    colour instead of column after column of near-black.
+
+    Measured: cobalt #1a3a7c is 10.83:1 on white and 9.57:1 on mist, so it
+    clears AAA on both surfaces at any size, and white on cobalt is 10.83:1
+    for the button face.
+
+    The hierarchy this produces, top to bottom:
+      gold-ink  #7d6229  eyebrow labels, hero figures   (the warm note)
+      cobalt    #1a3a7c  headings, actions, focus       (the identity)
+      navy      #07102b  body copy
+      navy-mid  #0d1e45  small print
+  */
+  --heading: var(--color-cobalt);
+
+  /* White, on every section. It is only 1.06:1 against the ground, so the
+     separation is carried by --shadow-1 and the border rather than by
+     luminance — see SurfaceCard. */
+  --card: #ffffff;
   --card-foreground: #07102b;
 
   --popover: #ffffff;
   --popover-foreground: #07102b;
 
-  /* Navy carries actions on any light surface — gold cannot meet contrast. */
-  --primary: #0d1e45;
+  /* Cobalt, not navy-mid: an action should read as the identity colour, and
+     at 10.83:1 on white it is the more legible of the two anyway. */
+  --primary: var(--color-cobalt);
   --primary-foreground: #ffffff;
 
   --secondary: var(--color-mist);
   --secondary-foreground: #07102b;
 
   --muted: var(--color-mist);
-  --muted-foreground: #3d4a6b;
+  /*
+    Navy-mid rather than the slate #3d4a6b this used to be. Slate sits in the
+    navy hue but reads as grey next to a cobalt heading, which made the small
+    print look washed out rather than quiet. Navy-mid is unmistakably navy and
+    measures 14.41:1 on mist against the body copy's 16.61:1 — a smaller step
+    than before, but the hierarchy's top is now carried by hue (cobalt) rather
+    than by darkness alone, and small print on a state portal is the last
+    place to be spending contrast.
+  */
+  --muted-foreground: #0d1e45;
 
-  /* Same gold-ink substitution the light tone already makes: raw gold is
-     ~1.9:1 on a pale surface and fails AA outright. */
-  --accent: rgba(200, 169, 110, 0.18);
-  --accent-foreground: #7d6229;
+  /*
+    COBALT, not gold — the single biggest change in this theme.
+
+    `--accent` is what eyebrows, icon tiles, action links, the active nav
+    item and the active chips all draw from, roughly 90 elements on the
+    homepage. In gold they outnumbered the cobalt headings several times over
+    and the theme read as a gold site with blue titles, which is the opposite
+    of what it is meant to be.
+
+    Measured on the surfaces it lands on: cobalt is 10.83:1 on white, 9.57:1
+    on mist, 8.75:1 on its own tint over white and 7.80:1 over mist — AAA
+    everywhere, where gold-ink only ever cleared AA.
+
+    12% for the tint, not gold's 18%: cobalt is far darker, so the same alpha
+    would have produced a distinctly blue chip rather than a hint of one.
+
+    Gold is not gone. It keeps the Qidirish button, which is the page's one
+    primary action and the one place a warm mass belongs, and `--ornament`
+    for the hero figures.
+  */
+  --accent: rgba(26, 58, 124, 0.12);
+  --accent-foreground: var(--color-cobalt);
+  --ornament: #7d6229;
 
   --destructive: #c02730;
 
   --border: var(--color-mist-edge);
   --input: var(--color-mist-deep);
-  --ring: #7d6229;
+  /* Cobalt at 10.83:1 rather than gold-ink at 5.09:1. Focus has to be the
+     most visible thing on the page for the people who depend on it, and the
+     gold ornament layer below keeps its own colour. */
+  --ring: var(--color-cobalt);
 
-  --hairline: rgba(125, 98, 41, 0.18);
-  --outline: rgba(125, 98, 41, 0.45);
+  /* Gold stays the ornament: section rules, the active nav underline, card
+     edges. It is the brand's warm note and the one thing carried unchanged
+     from the navy theme. */
+  /*
+    Cobalt here too. These draw the section rules, the header's bottom edge,
+    the active nav underline, the Kirish button and every card hover — all
+    structure and interaction, which in this theme is cobalt's job.
+
+    Lower alphas than the gold they replace (0.14 / 0.38 against 0.18 / 0.45)
+    because cobalt is a much darker ink: at gold's alpha the same hairline
+    read as a drawn blue line rather than as a divider.
+  */
+  --hairline: rgba(26, 58, 124, 0.14);
+  --outline: rgba(26, 58, 124, 0.38);
+
+  /*
+    Tinted with navy-mid, not black. A neutral-black shadow over a blue-tinted
+    ground reads as dirt; the same shadow in the surface's own hue reads as
+    depth. Both levels are soft and low-alpha — a light UI wants the shadow to
+    be felt rather than seen, and a hard edge here would look like an outline
+    drawn under the card.
+  */
+  --shadow-1:
+    0 1px 2px rgba(13, 30, 69, 0.05), 0 1px 3px rgba(13, 30, 69, 0.04);
+  --shadow-2:
+    0 6px 16px rgba(13, 30, 69, 0.1), 0 2px 6px rgba(13, 30, 69, 0.06);
 
   /* The header strip and search panel. Mist rather than navy-mid, so they
      still read as one step off the page instead of as a dark slab. */
@@ -410,7 +583,10 @@
   --hero-wash: rgba(26, 58, 124, 0.1);
   --hero-wash-soft: rgba(26, 58, 124, 0.07);
   --hero-gold: rgba(200, 169, 110, 0.14);
-  --hero-grid-line: rgba(125, 98, 41, 1);
+  /* Cobalt: the hatching is structure, and it sits directly under a cobalt
+     headline. --hero-gold above stays warm — it is one soft glow, and the
+     hero is where the brand can afford exactly one. */
+  --hero-grid-line: rgba(26, 58, 124, 1);
   --hero-grid-opacity: 0.06;
 
   --chart-1: #7d6229;
@@ -426,6 +602,14 @@
 /*
   Light-tone sections inside the light theme: mist surface, white cards — the
   inverse of the block above, which is what keeps the alternation visible.
+
+  The four ink tokens are repeated here and that is NOT redundant. A section
+  carrying data-tone="light" matches the plain [data-tone="light"] block on
+  its own element, so every token that block declares wins inside its subtree
+  no matter what :root says — specificity does not come into it, because the
+  two rules match different elements. Without these lines a mist section in
+  the light theme would quietly fall back to navy headings and slate small
+  print while the white sections around it used cobalt and navy-mid.
 */
 :root[data-theme="light"] [data-tone="light"] {
   --background: var(--color-mist);
@@ -433,6 +617,19 @@
   --secondary: var(--color-mist-edge);
   --muted: var(--color-mist-edge);
   --band: var(--color-mist-edge);
+
+  --heading: var(--color-cobalt);
+  --primary: var(--color-cobalt);
+  --muted-foreground: #0d1e45;
+  --ring: var(--color-cobalt);
+
+  /* Same reason as the four above: the plain [data-tone="light"] block sets
+     these on the section itself, so without repeating them a mist section
+     would be the one place on the page still wearing gold accents. */
+  --accent: rgba(26, 58, 124, 0.12);
+  --accent-foreground: var(--color-cobalt);
+  --hairline: rgba(26, 58, 124, 0.14);
+  --outline: rgba(26, 58, 124, 0.38);
 }
 
 /*
@@ -470,12 +667,18 @@
   --secondary: #1a1a1a;
   --secondary-foreground: #ffffff;
 
+  /* Reclaimed from the light theme's cobalt, which is 1.94:1 on black. This
+     mode abandons the identity colour on purpose — legibility is the only
+     thing it optimises for. */
+  --heading: var(--foreground);
+
   --muted: #1a1a1a;
   /* Not dimmed — "muted" text must stay fully legible in this mode. */
   --muted-foreground: #ffffff;
 
   --accent: #1a1a1a;
   --accent-foreground: #ffff00;
+  --ornament: #ffff00;
 
   --destructive: #ff6b6b;
 
@@ -496,6 +699,12 @@
   /* Black like everything else; the white --hairline around them is what keeps
      these bands distinct without reintroducing a second background. */
   --band: #000000;
+
+  /* No depth at all. Every boundary in this mode is a solid white or yellow
+     line; a shadow on pure black is invisible and would only soften edges
+     that exist precisely to be hard. */
+  --shadow-1: none;
+  --shadow-2: none;
 
   color: var(--foreground);
   background-color: var(--background);
@@ -540,6 +749,13 @@
   h4,
   h5 {
     @apply font-heading;
+    /*
+      In @layer base on purpose: utilities sit in a later layer, so any
+      heading that sets its own colour — Eyebrow's `text-accent-foreground`,
+      for one — still wins without needing !important or a more specific
+      selector here.
+    */
+    color: var(--heading);
   }
 
   /*
@@ -598,7 +814,18 @@
 .word-rotator > em {
   grid-area: 1 / 1;
   font-style: normal;
-  color: var(--color-gold);
+  /*
+    `--ornament`, not the raw `--color-gold` this was. A raw brand value does
+    not flip with the theme, so in the light theme these three words sat at
+    #c8a96e on a #f7f9fc ground — 1.9:1, a hard AA failure, inside the site's
+    own <h1>. The token is that same gold on navy and gold-ink (5.45:1) on
+    light.
+
+    Warm on purpose, even now that the headline around it is cobalt: the whole
+    device depends on the rotating word reading as a separate thing from the
+    line it sits in, and in cobalt it would simply disappear into it.
+  */
+  color: var(--ornament);
   opacity: 0;
   animation: var(--animate-rotate-words);
 }
@@ -876,11 +1103,7 @@
       color-mix(in srgb, var(--color-gold) 14%, transparent) 0 1px,
       transparent 1px 16px
     ),
-    linear-gradient(
-      135deg,
-      var(--color-navy-mid) 0%,
-      var(--color-navy) 100%
-    );
+    linear-gradient(135deg, var(--color-navy-mid) 0%, var(--color-navy) 100%);
 }
 
 /*
@@ -1038,7 +1261,6 @@
   }
 }
 
-
 /*
   ── Leaflet map skin ─────────────────────────────────────────────────────
 
@@ -1051,7 +1273,14 @@
 */
 .leaflet-container {
   font-family: var(--font-sans);
-  background: var(--color-navy-mid);
+  /*
+    `--band` rather than the raw `--color-navy-mid` it used to be. This is
+    what shows through before the tiles arrive and in the gutters when the
+    world is zoomed out, and a raw brand value meant a navy slab sat in the
+    middle of the light theme's pale page. The token resolves to exactly the
+    same navy-mid on the dark theme, so nothing there changes.
+  */
+  background: var(--band);
 }
 
 /*

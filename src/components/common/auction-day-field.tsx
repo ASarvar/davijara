@@ -147,8 +147,17 @@ export function AuctionDayField({
             type="button"
             className="border-input bg-card text-foreground hover:border-ring/50 focus-visible:ring-ring flex h-11 w-full items-center justify-between gap-2 rounded-md border px-3 text-sm focus-visible:ring-2 focus-visible:outline-none"
           >
+            {/*
+              `opacity`, not a lighter colour. In the light theme
+              --muted-foreground is navy-mid — deliberately close to the body
+              colour — so a muted placeholder would read as a date the reader
+              had already chosen. Opacity says "nothing here yet" in every
+              palette, including high contrast where every ink is white. */}
             <span
-              className={cn("truncate", !selected && "text-muted-foreground")}
+              className={cn(
+                "truncate",
+                !selected && "text-muted-foreground opacity-70",
+              )}
             >
               {selected ? formatDate(selected) : labels.placeholder}
             </span>
@@ -230,9 +239,19 @@ export function AuctionDayField({
                     }}
                     className={cn(
                       "relative flex size-9 flex-col items-center justify-center rounded text-sm transition-colors",
+                      /*
+                        THREE cues separate a day that has lots from one that
+                        does not — weight, the dot below, and opacity — because
+                        no single one survives every palette. Colour is not
+                        among them: --muted-foreground is white in high
+                        contrast and navy-mid in the light theme, within a
+                        point of the body ink in both, so a dimmer number
+                        would have looked available on two of the four
+                        combinations.
+                      */
                       count == null
-                        ? "text-muted-foreground cursor-default"
-                        : "hover:bg-secondary font-medium",
+                        ? "text-muted-foreground cursor-default opacity-50"
+                        : "hover:bg-secondary font-semibold",
                       isSelected &&
                         "bg-accent text-accent-foreground border-outline border font-semibold",
                     )}
@@ -240,10 +259,11 @@ export function AuctionDayField({
                     {i + 1}
                     {/*
                       A dot, not a colour change, marks a day that has lots.
-                      In high-contrast mode --foreground and --muted-foreground
-                      are both white, so a dimmed number would be
-                      indistinguishable from an available one; a mark that is
-                      either there or not survives every palette.
+                      It is the cue that cannot be lost: --foreground and
+                      --muted-foreground are both white in high contrast and a
+                      shade apart in the light theme, so any colour-only
+                      signal would collapse. A mark that is either present or
+                      absent survives all four palettes.
                     */}
                     {count != null ? (
                       <span

@@ -401,7 +401,14 @@ export function ListingsMap({
       // Scroll-zoom off: the map sits mid-page, and hijacking the wheel traps
       // someone who is only trying to scroll past it.
       scrollWheelZoom={false}
-      style={{ height: "100%", width: "100%", background: "#0d1e45" }}
+      /*
+        `--band`, not the literal #0d1e45 this was. Leaflet writes the value
+        inline, so it beats any stylesheet rule — which meant a navy slab sat
+        in the middle of the light theme wherever tiles had not arrived yet or
+        the world was zoomed out past the edges. The token is that same
+        navy-mid on the dark theme, so nothing changes there.
+      */
+      style={{ height: "100%", width: "100%", background: "var(--band)" }}
     >
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"

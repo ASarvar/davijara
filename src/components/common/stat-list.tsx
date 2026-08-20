@@ -57,14 +57,17 @@ export function StatList({
             <>
               <div className="mb-3 flex items-center gap-3">
                 {stat.icon && <IconTile name={stat.icon} size="sm" />}
-                <dt className="text-muted-foreground text-sm">
-                  {stat.label}
-                </dt>
+                <dt className="text-muted-foreground text-sm">{stat.label}</dt>
               </div>
               <dd>
                 <AnimatedStatValue
                   value={stat.value}
-                  className="font-heading text-accent-foreground block text-center text-3xl font-extrabold sm:text-4xl pt-3"
+                  /* `--ornament`, not `--accent-foreground`: in the light
+                     theme accent is cobalt, and these three figures are the
+                     one place the brand still wants a warm highlight against
+                     it. Gold on deep, gold-ink on light, yellow in high
+                     contrast — see the token in globals.css. */
+                  className="font-heading text-ornament block pt-3 text-center text-3xl font-extrabold sm:text-4xl"
                 />
               </dd>
             </>
@@ -74,7 +77,7 @@ export function StatList({
               <dd>
                 <AnimatedStatValue
                   value={stat.value}
-                  className="font-heading text-accent-foreground block text-3xl font-extrabold sm:text-4xl"
+                  className="font-heading text-ornament block text-3xl font-extrabold sm:text-4xl"
                 />
                 <span
                   className={cn(

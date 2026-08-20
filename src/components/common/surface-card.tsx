@@ -11,9 +11,24 @@ import { cn } from "@/lib/utils";
   `how-it-works` did nothing at all. `featured-listings`, the most important
   card on the page, also did nothing.
 
-  Note the hover border uses `--color-gold` unqualified rather than a
-  tone-specific value: `--ring` already resolves per tone (gold on deep,
-  gold-ink on light), so we lean on the semantic token and the card adapts.
+  Written as `[box-shadow:var(--shadow-1)]`, an arbitrary PROPERTY, not as
+  `shadow-[var(--shadow-1)]`. Tailwind's shadow utility composes its value
+  with --tw-shadow-color and a ring slot, and handed a var it cannot inspect
+  it recolours the whole thing to transparent — the shadow was there in the
+  DOM and painted nothing. The arbitrary property emits the declaration
+  verbatim.
+
+  DEPTH IS A TOKEN, NOT A UTILITY. `--shadow-1` at rest and `--shadow-2` on
+  hover, both defined per theme in globals.css. That indirection is what lets
+  the light theme put a white card on a near-white ground — 1.06:1, invisible
+  without a shadow — while the navy theme keeps level 1 at `none`, where a
+  card is already the lighter surface and a resting shadow would be soot.
+  High contrast sets both to none: there, every boundary is a solid line.
+
+  The hover border is `--outline`, the gold ornament token, NOT `--ring`.
+  Ring is the focus colour and in the light theme it is now cobalt, which
+  would have quietly turned every card hover blue; gold is the brand's warm
+  note and hovering a card is exactly where it belongs.
 */
 const surfaceCard = cva(
   /*
@@ -21,7 +36,7 @@ const surfaceCard = cva(
     white-desert) all sit in the 300-400ms band for hover; 200ms reads as a
     state flip rather than as movement.
   */
-  "border-border bg-card border transition-[border-color,box-shadow,transform] duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]",
+  "border-border bg-card border [box-shadow:var(--shadow-1)] transition-[border-color,box-shadow,transform] duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)]",
   {
     variants: {
       radius: {
@@ -42,7 +57,7 @@ const surfaceCard = cva(
        * which costs nothing and keeps the class list uniform.
        */
       interactive: {
-        true: "hover:border-ring/45 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/10",
+        true: "hover:border-outline hover:-translate-y-1 hover:[box-shadow:var(--shadow-2)]",
         false: "",
       },
     },
@@ -56,8 +71,7 @@ const surfaceCard = cva(
   div-specific ref type will not assign to an <li>.
 */
 export interface SurfaceCardProps
-  extends React.HTMLAttributes<HTMLElement>,
-    VariantProps<typeof surfaceCard> {
+  extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof surfaceCard> {
   /** Render as a different element — `li` inside lists, `article`, etc. */
   as?: "div" | "li" | "article" | "section";
 }
@@ -73,10 +87,7 @@ export function SurfaceCard({
 }: SurfaceCardProps) {
   return (
     <Tag
-      className={cn(
-        surfaceCard({ radius, padding, interactive }),
-        className,
-      )}
+      className={cn(surfaceCard({ radius, padding, interactive }), className)}
       {...props}
     >
       {children}
