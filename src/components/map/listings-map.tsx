@@ -47,18 +47,56 @@ const COUNTRY_ZOOM = 5.6;
   404s under a bundler unless its image assets are re-pointed, and this needs
   no extra request. Navy body, gold core — high contrast on the light basemap.
 */
-const markerIcon = L.divIcon({
-  className: "listing-marker",
-  html: `
+const PIN_SVG = `
     <svg viewBox="0 0 24 32" width="26" height="34" aria-hidden="true">
       <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
             fill="#1a3a7c" stroke="#c8a96e" stroke-width="1.5"/>
       <circle cx="12" cy="12" r="4.5" fill="#c8a96e"/>
-    </svg>`,
-  iconSize: [26, 34],
-  iconAnchor: [13, 34],
-  popupAnchor: [0, -34],
-});
+    </svg>`;
+
+/*
+  The pin, with the lot's floor area on a tab above it.
+
+  THE PIN ITSELF IS UNTOUCHED, and so is every number Leaflet positions it by
+  — `iconSize`, `iconAnchor` and `popupAnchor` are the same values the plain
+  marker always had. The label is absolutely positioned OUT of that box by CSS
+  (`bottom: 100%` on `.listing-marker-label`), so it floats above the pin
+  without moving the pin's tip off its coordinate or shifting the popup. Sizing
+  the icon to include the label would have done both, and would have made the
+  box as wide as the widest number.
+
+  Area is the one figure worth reading before opening a lot: on this catalogue
+  it ranges from a 1 m² ATM bay to a 1 000 m² hall, and it is what decides
+  whether a lot is worth a click at all. Price would need a currency and four
+  more digits per tab.
+
+  ICONS ARE CACHED BY LABEL. A divIcon is plain HTML, so two lots of 60 m² can
+  share one instance; the catalogue has ~1 150 pins and only a few hundred
+  distinct areas, and rebuilding an icon per marker per render is wasted work
+  on the one component that already has the most to do.
+*/
+const markerIcons = new Map<string, L.DivIcon>();
+
+function markerIconFor(area: number): L.DivIcon {
+  // Upstream sends 0 for a lot with no area recorded; a "0 m²" tab would be
+  // noise on the map and a claim we cannot make.
+  const label = area > 0 ? formatArea(area) : "";
+
+  const cached = markerIcons.get(label);
+  if (cached) return cached;
+
+  const icon = L.divIcon({
+    className: "listing-marker",
+    html: label
+      ? `<span class="listing-marker-label">${label}</span>${PIN_SVG}`
+      : PIN_SVG,
+    iconSize: [26, 34],
+    iconAnchor: [13, 34],
+    popupAnchor: [0, -34],
+  });
+  markerIcons.set(label, icon);
+  return icon;
+}
 
 /** Cluster bubble, sized by how many lots it holds. */
 function clusterIcon(cluster: { getChildCount: () => number }) {
@@ -443,7 +481,7 @@ export function ListingsMap({
           <Marker
             key={listing.id}
             position={[listing.lat, listing.lng]}
-            icon={markerIcon}
+            icon={markerIconFor(listing.area)}
           >
             <Popup>
               {/*

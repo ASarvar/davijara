@@ -1402,9 +1402,54 @@
   `leaflet-marker-icon` is the wrapper Leaflet puts around our divIcon, so the
   transition has to live here rather than on the SVG inside it.
 */
+/*
+  The floor-area tab above a pin.
+
+  `bottom: 100%` lifts it clean out of the 26x34 icon box rather than being
+  laid out inside it, which is what lets the pin keep the exact anchor and
+  popup offsets it had before the label existed. `overflow: visible` on the
+  marker is what permits that; Leaflet's own panes do not clip.
+
+  Fixed brand colours, not tone tokens. The basemap is Carto Voyager in both
+  themes — the map does not go dark with the site — so a tab that flipped with
+  the theme would be white-on-white here half the time. Same reason the pin
+  SVG carries literals.
+
+  White on #1a3a7c is 10.83:1, and the ring keeps the tab off the beige
+  streets when two of them touch.
+*/
+.listing-marker-label {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 3px;
+
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: #1a3a7c;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.85);
+
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  /* The pin below is decorative; the tab is the only thing here worth
+     selecting, and pointer events on it would swallow clicks meant for the
+     marker underneath. */
+  pointer-events: none;
+}
+
 .listing-marker,
 .listing-cluster {
   transition: transform 0.2s var(--ease-out-soft);
+}
+
+/* The label is drawn outside the icon box — Leaflet sets no overflow, but
+   being explicit keeps it working if that ever changes. */
+.listing-marker {
+  overflow: visible;
 }
 .listing-marker:hover,
 .listing-cluster:hover {
