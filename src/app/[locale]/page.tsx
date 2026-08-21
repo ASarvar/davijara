@@ -55,7 +55,7 @@ export default async function HomePage({
   */
   return (
     <>
-      <Hero />
+      <Hero searchParams={sp} />
       <SearchWidget values={sp} />
       <ObjectsSection searchParams={sp} />
       <HowItWorks />

@@ -1,4 +1,4 @@
-import { LogIn, Mail, Phone } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
@@ -15,19 +15,28 @@ import { ThemeToggle } from "./theme-toggle";
  *
  *     ┌─ phone · email ───────────── a11y · lang ─┐   navy-mid
  *     ├───────────────────────────────────────────┤
- *     └─ LOGO ── nav links ─────────── Kirish ────┘   navy
+ *     └─ LOGO ───────────────────────── nav links ┘   navy
  *
  * Two full-bleed bars, each with its own `Container`, so the tinted strip runs
  * edge to edge while its contents still line up with the logo below. The two
  * tones are what separate the rows; there is no rule between them beyond the
  * strip's own bottom border.
  *
+ * NO LOGIN CONTROL HERE, and the nav sits hard against the right edge.
+ * Two other entry points to /kirish remain — "Kirish" in the sheet menu and
+ * "Kabinet" in the bottom nav — so this is a decluttering of the desktop bar,
+ * not the removal of the route.
+ *
  * WHY THE NAV APPEARS AT `xl` AND NOT `lg`
- * The seven nav labels are long in Uzbek and measure ~782px together. Added to
- * the logo, the Kirish button and the gaps, the row needs ~1150px inside a
- * 1200px container. At `lg` (1024px) that overflows the viewport — and a
- * `1fr` grid/flex track will not shrink below its content — so 1024–1279px
- * uses the sheet menu instead. If you add a nav item, re-measure at 1280.
+ * The six nav labels are long in Uzbek. Measured at 1280: 650px of links plus
+ * a 236px logo and the 16px gap is 902px inside a 1136px content box, so the
+ * row needs ~966px of viewport and does NOT fit at `lg` — 1024px leaves only
+ * 960px of content, six short.
+ *
+ * It cleared `lg` briefly, in the window between the Kirish button coming out
+ * (~110px back) and the nav type going from 13.5px to 14.5px (~55px spent).
+ * Re-measure here before moving the breakpoint, and after any change to that
+ * size or to the number of items.
  *
  * On a handset the utility strip has to stay on one line or the sticky header
  * eats ~130px of a 667px screen: hence the email hidden below `sm` and the
@@ -35,7 +44,6 @@ import { ThemeToggle } from "./theme-toggle";
  * unlabelled icon, least of all on the accessibility control).
  */
 export async function SiteHeader() {
-  const t = await getTranslations("nav");
   const tTopbar = await getTranslations("topbar");
 
   return (
@@ -147,7 +155,7 @@ export async function SiteHeader() {
               Uzbek at this stage. ru/en routes and messages stay in place
               underneath; this is a UI-visibility decision, not a locale
               removal, so re-adding the control is a one-line change. */}
-          <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+          <div className="flex shrink-0 items-center gap-3 px-3 sm:gap-4">
             {/* Theme first, then the accessibility dialog: this one is a
                 single-tap switch, the other opens a panel, and the lighter
                 control reads better closest to the content it changes. */}
@@ -159,11 +167,14 @@ export async function SiteHeader() {
 
       {/* ── Navigation row ─────────────────────────────────────────────── */}
       <div className="bg-background border-hairline border-b">
-        {/* gap-4, not gap-6: `justify-between` already spreads the three items
-            across the row, so the gap is only ever a MINIMUM — it changes
-            nothing visually here but costs 16px of the ~30px the nav has left
-            at 1280. Keep it small. */}
-        <Container className="flex items-center justify-between gap-4 py-3">
+        {/* `ml-auto` on the nav rather than `justify-between` on the row.
+            With the Kirish button gone the row's last item is the sheet
+            trigger, which hides itself from xl up — so `justify-between`
+            would have spread the links against a zero-width third item and
+            parked them mid-row. Pushing the nav right pins it to the edge at
+            every width, and below xl (where the nav renders nothing) the same
+            auto margin carries the sheet trigger there instead. */}
+        <Container className="flex items-center gap-4 py-3">
           <Link
             href="/"
             className="flex shrink-0 items-center"
@@ -174,22 +185,12 @@ export async function SiteHeader() {
 
           {/* NavLinks hides itself below xl; the wrapper stays so the landmark
               is not conditionally rendered. */}
-          <nav aria-label="Asosiy menyu" className="min-w-0">
+          <nav aria-label="Asosiy menyu" className="ml-auto min-w-0">
             <NavLinks />
           </nav>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <Link
-              href="/kirish"
-              className="text-accent-foreground hover:bg-accent focus-visible:ring-ring border-outline hidden shrink-0 items-center gap-1.5 rounded-sm border px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none xl:inline-flex"
-            >
-              <LogIn aria-hidden="true" className="size-3.5" />
-              {t("login")}
-            </Link>
-
-            {/* Sheet trigger; hides itself from xl up. */}
-            <MobileNav />
-          </div>
+          {/* Sheet trigger; hides itself from xl up. */}
+          <MobileNav />
         </Container>
       </div>
     </header>

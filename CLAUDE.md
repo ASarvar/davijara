@@ -184,13 +184,15 @@ and neither generalises to the other:
   it is unambiguous about day-vs-month); displayed as 27.08.2026. Matched as a
   **Tashkent** calendar day — an auction at 10:00 local is 05:00Z, so a UTC
   comparison would file every morning lot under the previous day.
-- `muddat` — a day window, `?muddat=0-3`, `3-5`, `5-`, in the same `lo-hi`
+- `muddat` — a day window, `?muddat=0-1`, `1-3`, `3-5`, in the same `lo-hi`
   grammar as `maydon` and `narx`. This is the chips on "Yaqinlashayotgan
-  savdolar". The three are **disjoint** — exclusive lower bound, inclusive
-  upper — so a lot falls in exactly one and the counts sum to the catalogue;
-  nested windows ("within 1 / 3 / 5") were the first shape and could not
-  answer "what is further out". Bounds are rolling hours, not calendar days,
-  so they agree with the countdown printed on the card.
+  savdolar": 1 kun, 3 kun, 5 kun, Hammasi. The three windows are **disjoint
+  and adjacent** — exclusive lower bound, inclusive upper — so a lot falls in
+  at most one; nested windows ("within 1 / 3 / 5") were the first shape and
+  could not answer "what is NOT imminent". They cover the first five days
+  only, and Hammasi (no parameter) is everything, so its count is larger than
+  the three combined rather than equal to them. Bounds are rolling hours, not
+  calendar days, so they agree with the countdown printed on the card.
 
 `savdo` is in `FILTER_KEYS`; `muddat` is deliberately not. It belongs to the
 homepage strip, which reads it directly — carrying it into the pager would put
@@ -315,7 +317,28 @@ Carried over from the legacy site and resolved as follows:
   `e-auksion.uz`.
 - **Regions** — the legacy map array had 13 entries while the hero claimed 14.
   Toshkent shahri was missing; added.
-- **Statistics** — confirmed by the operator as real figures, carried verbatim.
+- **Statistics** — all four hero cards are now LIVE and all four follow
+  `?hudud=` and `?tuman=`. Open lots and lots sold this year
+  (`sold_price > 0`) come from the listings feed; signed contracts and leased
+  area come from `RENT_CONTRACTS_API_URL`, a second service whose `region` is
+  optional (omit it for the republic). Each degrades on its own: the first two
+  fall back to the verified static figures, and the sold card is dropped rather
+  than shown empty because nobody has published that number.
+  **Do not derive a leased-AREA figure from the listings feed's `rent_area`.**
+  Summed over 2026 it gives 161 mln m², with one region alone contributing 150
+  mln from 266 lots (~564 000 m² each) — the field is not comparable across lot
+  types. The register's `total_rental_area` is the figure to use; it reports
+  148,8 mln m² nationally against the operator's static 145,9.
+
+- **District figures across the two services.** The register identifies
+  districts by a code (1718203) and a Cyrillic abbreviation ("Оқдарё т."); the
+  listings feed sends a Latin name and no code ("Oqdaryo tumani"). Until the
+  operator adds a district code to the listings feed, `rent-contracts.ts`
+  bridges them by name: transliterate, match exactly, then within two edits
+  when exactly one candidate is that close, and refuse anything ambiguous.
+  Measured over all fourteen regions — 196 districts carrying lots — 183 match
+  exactly, 13 near, none by guesswork. An unmatched district widens to the
+  region and the hero says so.
 - **Listing photos** — the legacy page showed one hotlinked image on all three
   cards. Cards render a branded placeholder until real self-hosted photography
   exists; `aspect-video` reserves the box so adding images causes no shift.

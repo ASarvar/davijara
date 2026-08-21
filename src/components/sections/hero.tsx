@@ -1,13 +1,40 @@
 import { getTranslations } from "next-intl/server";
 
-import { getHeroStats } from "@/lib/data/catalog";
+import { getHeroStats, getRegions } from "@/lib/data/catalog";
+import { parseListingQuery } from "@/lib/data/listings";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { StatList } from "@/components/common/stat-list";
 import { Container } from "@/components/layout/section";
 
-export async function Hero() {
+/**
+ * The masthead, and the four figures under it.
+ *
+ * THE FIGURES FOLLOW THE SEARCH PANEL. Picking a region or a tuman below and
+ * pressing Qidirish puts `?hudud=` / `?tuman=` in the URL, and all four cards
+ * recount for it. The hero reads the same `searchParams` the map and the
+ * catalogue do, so there is one filter state for the whole page rather than a
+ * second mechanism up here.
+ *
+ * The one case that cannot narrow is a district the contracts register does
+ * not list under a name we can match (see rent-contracts.ts). Cards 2 and 3
+ * then show the REGION's figures, and the row gains a line saying so — a
+ * regional total sitting unlabelled under a district's name would read as the
+ * district's own.
+ */
+export async function Hero({
+  searchParams = {},
+}: {
+  searchParams?: Record<string, string | string[] | undefined>;
+} = {}) {
   const t = await getTranslations("hero");
-  const stats = await getHeroStats();
+  const { region, district } = parseListingQuery(searchParams);
+  const [{ stats, contractsWidened }, regions] = await Promise.all([
+    getHeroStats(region, district),
+    region ? getRegions() : Promise.resolve([]),
+  ]);
+  const regionName = region
+    ? (regions.find((r) => r.slug === region)?.name ?? null)
+    : null;
 
   return (
     <section
@@ -98,8 +125,30 @@ export async function Hero() {
             stats={stats}
             reveal={false}
             variant="card"
-            className="mt-14 grid-cols-1 gap-4 sm:grid-cols-3"
+            /* Two columns from sm and four from lg — three no longer divides
+               the row now that there is a fourth card, and 2x2 on a tablet
+               beats 3+1 with a widow. */
+            className="mt-14 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
           />
+
+          {/*
+            Only when the register could not resolve the district — which is
+            the only state in which the row can be misread. Everywhere else all
+            four cards describe the same place and the line would be noise.
+          */}
+          {contractsWidened && district ? (
+            <p className="text-muted-foreground mt-4 text-xs">
+              {t.rich("statScope", {
+                district,
+                region: regionName ?? "",
+                strong: (chunks) => (
+                  <span className="text-foreground font-semibold">
+                    {chunks}
+                  </span>
+                ),
+              })}
+            </p>
+          ) : null}
         </div>
       </Container>
     </section>

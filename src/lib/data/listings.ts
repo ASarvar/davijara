@@ -90,12 +90,16 @@ export const AUCTION_WINDOW_KEY = "muddat";
 /**
  * The windows offered in the UI.
  *
- * DISJOINT, not cumulative. They read as a partition of the calendar ahead —
- * up to 3 days, 3 to 5 days, beyond 5 — so every lot falls in exactly one and
- * the three counts add up. Nested windows ("within 1 / within 3 / within 5")
- * were the first shape and were wrong for a filter: "3 kun" contained "1 kun",
- * so the counts overlapped and picking a wider one could not answer "what is
- * NOT imminent".
+ * DISJOINT and ADJACENT: 0-1, 1-3, 3-5 days. They do not overlap, so a lot
+ * falls in at most one of them and the counts never contain one another —
+ * nested windows ("within 1 / within 3 / within 5") were the first shape and
+ * were wrong for a filter, because "3 kun" then included everything "1 kun"
+ * already showed.
+ *
+ * They cover the first five days only, NOT the whole future. Anything further
+ * out is reachable through the "Hammasi" chip, which applies no window at all
+ * — so the three counts are a subset of that one and are not meant to sum to
+ * it.
  *
  * `value` is the URL value and uses the same `lo-hi` range grammar as `maydon`
  * and `narx` — `parseRange` below reads all three. `labelKey` is its message
@@ -103,9 +107,9 @@ export const AUCTION_WINDOW_KEY = "muddat";
  * the chips cannot label the same URL value differently.
  */
 export const AUCTION_WINDOWS = [
-  { value: "0-3", labelKey: "upTo3" },
+  { value: "0-1", labelKey: "upTo1" },
+  { value: "1-3", labelKey: "from1to3" },
   { value: "3-5", labelKey: "from3to5" },
-  { value: "5-", labelKey: "over5" },
 ] as const;
 
 /**
@@ -688,23 +692,6 @@ function auctionDay(at: number): string {
 }
 
 /**
- * The subset sharing the soonest auction day in the set.
- *
- * Grouped by calendar day rather than by "the next N lots", because the
- * section's promise is a day: two auctions three hours apart on the same
- * morning belong together, and one at 09:00 tomorrow does not.
- */
-function soonestDayLots(upcoming: UpcomingLot[]): UpcomingLot[] {
-  if (upcoming.length === 0) return [];
-  let day = auctionDay(upcoming[0].at);
-  for (const u of upcoming) {
-    const d = auctionDay(u.at);
-    if (d < day) day = d;
-  }
-  return upcoming.filter((u) => auctionDay(u.at) === day);
-}
-
-/**
  * Lots from the next auction day, or from an explicit window, as a pool for
  * the homepage rotator.
  *
@@ -733,28 +720,29 @@ function soonestDayLots(upcoming: UpcomingLot[]): UpcomingLot[] {
  * behind it is, every visitor in that window sees the same thing, and there is
  * no hydration risk.
  *
- * WHAT A WINDOW CHANGES
- * "One day only" is the DEFAULT, not a rule — it exists because an unasked-for
- * mix of "in 1 day" and "in 12 days" looked arbitrary. When the reader picks a
- * window themselves, spanning days is precisely what they asked for, so the
- * window is answered literally: every upcoming lot inside it, soonest first,
- * capped at `poolSize`.
+ * ORDER: SOONEST FIRST, TIES SHUFFLED — one path, whether a window is set or
+ * not. The two rules are doing different jobs and neither replaces the other:
  *
- * The shuffle is dropped in that case, deliberately. Within a single day every
- * lot is equally imminent and the order carries no information, which is why
- * it is randomised; across a window the order IS the information, and burying
- * tomorrow's auction below next week's would answer the question backwards.
+ * - Sorting by time is the information. Burying tomorrow's auction below next
+ *   week's would answer "what is coming up" backwards.
+ * - Shuffling the ties is the variety. Most lots on a given day carry the
+ *   SAME timestamp — upstream schedules them all at 10:00 — so without it the
+ *   rotator would cycle the same twelve rows of one morning forever, in
+ *   whatever order the service happened to return them.
+ *
+ * The shuffle runs first and the sort is stable (guaranteed since ES2019), so
+ * equal timestamps keep their shuffled order while unequal ones are put right.
  *
  * The window is applied by `getListings` rather than here, so the strip and
- * the catalogue decide "is this lot in the 3-5 day bucket" with one predicate
+ * the catalogue decide "is this lot in the 1-3 day bucket" with one predicate
  * instead of two that can disagree at the boundary.
  */
 export async function getUpcomingAuctions(
   poolSize = 12,
   /**
-   * One of `AUCTION_WINDOWS`’ values, e.g. `"3-5"`. Omit (or pass null) for
-   * the soonest auction day only. Taken as the raw URL value rather than
-   * parsed bounds so the range grammar stays inside this module.
+   * One of `AUCTION_WINDOWS`’ values, e.g. `"1-3"`. Omit (or pass null) for
+   * every upcoming lot — the "Hammasi" chip. Taken as the raw URL value
+   * rather than parsed bounds so the range grammar stays inside this module.
    */
   window?: string | null,
 ): Promise<ListingsResult> {
@@ -767,20 +755,10 @@ export async function getUpcomingAuctions(
   );
 
   const now = Date.now();
-  const upcoming = upcomingLots(listings, now);
-  if (upcoming.length === 0) {
+  const pool = upcomingLots(listings, now);
+  if (pool.length === 0) {
     return { listings: [], hasMock: false, source };
   }
-
-  if (windowed) {
-    const picked = [...upcoming]
-      .sort((a, b) => a.at - b.at)
-      .slice(0, poolSize)
-      .map((u) => u.listing);
-    return { listings: picked, hasMock: picked.some((l) => l.isMock), source };
-  }
-
-  const sameDay = soonestDayLots(upcoming).map((u) => u.listing);
 
   /* Mulberry32 — small, fast, and identical everywhere it runs. */
   let state = Math.floor(now / 300_000) >>> 0;
@@ -792,14 +770,17 @@ export async function getUpcomingAuctions(
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 
-  // Fisher-Yates over a copy; sorting by a random comparator is biased.
-  const pool = [...sameDay];
+  // Fisher-Yates in place; sorting by a random comparator is biased.
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  const picked = pool.slice(0, poolSize);
+  // Stable, so the shuffle above survives among equal timestamps — which is
+  // most of them, since a day's lots are all scheduled at the same hour.
+  pool.sort((a, b) => a.at - b.at);
+
+  const picked = pool.slice(0, poolSize).map((u) => u.listing);
   return {
     listings: picked,
     hasMock: picked.some((l) => l.isMock),
@@ -823,7 +804,8 @@ export async function getUpcomingAuctions(
  * request.
  */
 export async function getUpcomingAuctionCounts(): Promise<{
-  nearestDay: number;
+  /** Every upcoming lot — what the "Hammasi" chip shows. */
+  all: number;
   byWindow: Record<string, number>;
 }> {
   const { listings } = await getListings();
@@ -837,8 +819,157 @@ export async function getUpcomingAuctionCounts(): Promise<{
     }).length;
   }
 
-  const upcoming = upcomingLots(listings, Date.now());
-  return { nearestDay: soonestDayLots(upcoming).length, byWindow };
+  return { all: upcomingLots(listings, Date.now()).length, byWindow };
+}
+
+/* ── Sold lots ────────────────────────────────────────────────────────── */
+
+/*
+  How many lots actually went to a buyer in a calendar year.
+
+  A DIFFERENT QUERY from everything else in this file, in two ways:
+
+  1. No `lot_status`. The catalogue asks for "active" and then drops the
+     concluded ones; here the concluded ones ARE the answer.
+  2. A window that starts three months before the year. `adate`/`bdate` bound
+     the PUBLICATION date, not the auction, so a lot announced in December and
+     auctioned in January would fall outside a same-year window. Measured
+     against the live service, widening from 2026-01-01 to 2024-01-01 returned
+     the identical count (2 977) — so nothing is currently published that far
+     ahead — but the lead keeps that true across a new year for 512ms and
+     2.7MB instead of 352ms and 2.0MB.
+
+  A SALE is `sold_price > 0`, not a status string. Of 4 468 lots auctioned in
+  2026, 2 977 carry a price and the rest concluded without one — unsold,
+  withdrawn, or still being formalised. Reading the status instead would mean
+  matching nine different Uzbek phrases and re-matching them whenever upstream
+  rewords one; a price is unambiguous and it is the thing being claimed.
+*/
+const SOLD_LEAD_MONTHS = 3;
+
+const fetchSoldCount = unstable_cache(
+  async (
+    apiId: number,
+    year: number,
+  ): Promise<{ total: number; byDistrict: Record<string, number> }> => {
+    const base = process.env.LISTINGS_API_URL;
+    if (!base) return { total: 0, byDistrict: {} };
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    const user = process.env.API_USER;
+    const password = process.env.API_PASSWORD;
+    if (user && password) {
+      headers.Authorization = `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`;
+    }
+
+    const lead = new Date(Date.UTC(year, -SOLD_LEAD_MONTHS, 1));
+
+    const res = await fetch(base, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        region: apiId,
+        adate: isoDate(lead),
+        bdate: `${year}-12-31`,
+      }),
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!res.ok) throw new Error(`Listings API responded ${res.status}`);
+
+    const json = (await res.json()) as ApiResponse;
+    if (!json.success) {
+      throw new Error(json.message ?? `Region ${apiId} returned success:false`);
+    }
+
+    /*
+    Counted per district as well as in total, because the hero narrows to a
+    tuman and re-fetching the same 2.7MB once per district would be absurd.
+    The key is upstream's own `district_name`, used verbatim — the same
+    string `?tuman=` carries, so the two cannot disagree about spelling.
+  */
+    let sold = 0;
+    const byDistrict: Record<string, number> = {};
+    for (const lot of json.data ?? []) {
+      if (!lot.auction_date) continue;
+      const at = new Date(lot.auction_date).getTime();
+      if (!Number.isFinite(at)) continue;
+      // The Tashkent calendar year, for the same reason the day filter uses
+      // Tashkent: a 10:00 auction on 1 January is 05:00Z, still the 1st, but
+      // a 10:00 auction on 31 December is 05:00Z on the 31st either way —
+      // it is the January edge that a UTC year would file under the previous
+      // one.
+      if (auctionDay(at).slice(0, 4) !== String(year)) continue;
+      const price = Number(lot.sold_price);
+      if (!Number.isFinite(price) || price <= 0) continue;
+      sold++;
+      const district = lot.district_name?.trim();
+      if (district) byDistrict[district] = (byDistrict[district] ?? 0) + 1;
+    }
+    return { total: sold, byDistrict };
+  },
+  ["listings-sold"],
+  /*
+    A day, not the five minutes the catalogue uses. This is a year-to-date
+    total that moves by a few lots a day, and the query is the heaviest one
+    the app makes — 14 regions, ~2.7MB. Nothing on screen depends on it being
+    fresher than that.
+  */
+  { revalidate: 86_400, tags: ["listings"] },
+);
+
+/**
+ * Lots sold at auction in `year` — nationally, in one region, or in one
+ * district of one region.
+ *
+ * Null rather than a number when the service is not configured, or when ANY
+ * region's request fails. A partial sum would be a wrong figure presented as
+ * a fact on a state portal, which is worse than the card not being there —
+ * so the caller drops the card instead of showing a total it cannot stand
+ * behind.
+ *
+ * `districtName` is upstream's own string and needs no region to be given
+ * with it, but passing one avoids fanning out over fourteen.
+ */
+export async function getSoldCount(
+  year: number,
+  regionSlug?: string,
+  districtName?: string,
+): Promise<number | null> {
+  if (!process.env.LISTINGS_API_URL) return null;
+
+  const wanted = regionSlug
+    ? regions.filter((r) => r.slug === regionSlug)
+    : regions;
+  if (wanted.length === 0) return null;
+
+  const settled = await Promise.allSettled(
+    wanted.map((r) => fetchSoldCount(r.apiId, year)),
+  );
+
+  const failed = wanted
+    .filter((_, i) => settled[i].status === "rejected")
+    .map((r) => r.slug);
+  if (failed.length > 0) {
+    console.error(
+      "[listings] sold-count request(s) failed:",
+      failed.join(", "),
+    );
+    return null;
+  }
+
+  const results = settled.flatMap((r) =>
+    r.status === "fulfilled" ? [r.value] : [],
+  );
+
+  if (districtName) {
+    return results.reduce(
+      (sum, r) => sum + (r.byDistrict[districtName] ?? 0),
+      0,
+    );
+  }
+  return results.reduce((sum, r) => sum + r.total, 0);
 }
 
 /**

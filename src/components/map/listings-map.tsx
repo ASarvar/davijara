@@ -52,7 +52,7 @@ const markerIcon = L.divIcon({
   html: `
     <svg viewBox="0 0 24 32" width="26" height="34" aria-hidden="true">
       <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
-            fill="#07102b" stroke="#c8a96e" stroke-width="1.5"/>
+            fill="#1a3a7c" stroke="#c8a96e" stroke-width="1.5"/>
       <circle cx="12" cy="12" r="4.5" fill="#c8a96e"/>
     </svg>`,
   iconSize: [26, 34],
@@ -71,7 +71,7 @@ function clusterIcon(cluster: { getChildCount: () => number }) {
         width:${size}px;height:${size}px;
         display:flex;align-items:center;justify-content:center;
         border-radius:9999px;
-        background:#07102b;
+        background:#1a3a7c;
         border:2px solid #c8a96e;
         color:#e8d5a8;
         font-size:${count < 100 ? 13 : 12}px;
@@ -221,7 +221,7 @@ function FullscreenControl({
         Top-right is the one free corner: zoom sits top-left, attribution
         bottom-right.
       */
-      className="absolute top-3 right-3 z-[1000] flex size-9 items-center justify-center rounded-md border border-[color:var(--color-gold)]/30 bg-[color:var(--color-navy)] text-[color:var(--color-gold-light)] shadow-md transition-colors duration-200 hover:bg-[color:var(--color-navy-mid)] hover:text-[color:var(--color-gold)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:outline-none"
+      className="absolute top-3 right-3 z-[1000] flex size-9 items-center justify-center rounded-md border border-[color:var(--color-gold)]/30 bg-[color:var(--color-)] text-[color:var(--color-gold-light)] shadow-md transition-colors duration-200 hover:bg-[color:var(--color-navy-mid)] hover:text-[color:var(--color-gold)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:outline-none"
     >
       {isFullscreen ? (
         <Minimize2 aria-hidden="true" className="size-4" />

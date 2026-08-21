@@ -13,7 +13,12 @@ import {
 } from "@/content/homepage";
 import { faq, partners } from "@/content/faq";
 import { formatNumber } from "@/lib/format";
-import { getListings as getLiveListings } from "@/lib/data/listings";
+import {
+  getListings as getLiveListings,
+  getSoldCount,
+} from "@/lib/data/listings";
+import { getRentContracts } from "@/lib/data/rent-contracts";
+import { formatFixed, TASHKENT_OFFSET_MS } from "@/lib/format";
 import type {
   DocItem,
   FaqItem,
@@ -88,27 +93,115 @@ export async function getSteps(): Promise<Step[]> {
 }
 
 /*
-  The first card — "Ijaraga taklif etilayotgan obyektlar" — is the one figure
-  here that a live service can answer, so it is replaced with the count of
-  currently open lots from the real e-auksion feed. The other two (signed
-  contracts, leased area) are cumulative totals the operator reports
-  separately; `listings.ts` has no endpoint for those, so they stay the
-  verified static figures from `content/homepage.ts`.
+  All four hero cards are LIVE, and each narrows to whatever the search panel
+  has selected — republic, region, or district.
 
-  `getLiveListings` already falls back to `source: "mock"` when
-  `LISTINGS_API_URL` is unset or the service is unreachable, so the static
-  "1 390+" is kept in that case rather than showing a count from sample data.
+    1. open lots                    listings feed
+    2. signed contracts             rent-contracts register
+    3. leased area (mln m²)         rent-contracts register
+    4. lots sold this year          listings feed, `sold_price > 0`
+
+  EVERY ONE OF THEM DEGRADES SEPARATELY, and that is deliberate: three
+  different upstream calls back this row and one being unreachable must not
+  blank the other two.
+
+  - Cards 1 falls back to the verified static "1 390+" (`getLiveListings`
+    reports `source: "mock"` when the feed is unreachable, so a count from
+    sample data never reaches the page).
+  - Cards 2 and 3 fall back to the operator's static 28 075 / 145,9.
+  - Card 4 has no static twin — nobody has published that figure — so it is
+    dropped rather than shown empty.
+
+  The register cannot resolve every district: it identifies them by a code the
+  listings feed does not carry, so the two are matched by name (see
+  rent-contracts.ts). When that fails, cards 2 and 3 widen to the region and
+  say so instead of printing a regional total under a district's name.
 */
-export async function getHeroStats(): Promise<Stat[]> {
-  const [objectsStat, ...rest] = heroStats;
-  const { listings, source } = await getLiveListings();
+
+/** The year the live cards count. Tashkent's, not the server's. */
+function currentYear(): number {
+  return new Date(Date.now() + TASHKENT_OFFSET_MS).getUTCFullYear();
+}
+
+/** `{year}` / `{unit}` in a stat label. */
+function fill(label: string, values: Record<string, string | number>): string {
+  return label.replace(/\{(\w+)\}/g, (whole, key) =>
+    key in values ? String(values[key]) : whole,
+  );
+}
+
+/**
+ * Square metres → a figure and the unit that suits it.
+ *
+ * The same card carries the republic's 148 802 334 m² and Oqdaryo tumani's
+ * 30 032, and no single unit serves both: in millions the tuman is "0", in
+ * plain metres the republic is a fifteen-character number. So the unit moves
+ * with the magnitude and the label says which one it is.
+ *
+ * One decimal, and grouped by `formatFixed` — Uzbek writes 148,8 and 30 032,
+ * which is why this does not go near `Intl`. See lib/format.ts.
+ */
+function formatLeasedArea(m2: number): { value: string; unit: string } {
+  if (m2 >= 1_000_000) {
+    return { value: formatFixed(m2 / 1_000_000, 1), unit: "mln m²" };
+  }
+  if (m2 >= 1_000) {
+    return { value: formatFixed(m2 / 1_000, 1), unit: "ming m²" };
+  }
+  return { value: formatNumber(Math.round(m2)), unit: "m²" };
+}
+
+export interface HeroStatsResult {
+  stats: Stat[];
+  /** True when contracts/area are the REGION's because the district is
+      absent from the register. The hero prints a line saying so. */
+  contractsWidened: boolean;
+}
+
+export async function getHeroStats(
+  regionSlug?: string,
+  districtName?: string,
+): Promise<HeroStatsResult> {
+  const [objectsStat, contractsStat, areaStat, soldStat] = heroStats;
+  const year = currentYear();
+
+  const [{ listings, source }, sold, register] = await Promise.all([
+    getLiveListings({ region: regionSlug, district: districtName }),
+    getSoldCount(year, regionSlug, districtName),
+    getRentContracts(year, regionSlug, districtName),
+  ]);
 
   const live: Stat =
     source === "api"
       ? { ...objectsStat, value: formatNumber(listings.length) }
       : objectsStat;
 
-  return [live, ...rest];
+  const area = register ? formatLeasedArea(register.areaM2) : null;
+
+  const stats: Stat[] = [
+    live,
+    {
+      ...contractsStat,
+      value: register ? formatNumber(register.contracts) : contractsStat.value,
+      label: fill(contractsStat.label, { year }),
+    },
+    {
+      ...areaStat,
+      value: area ? area.value : areaStat.value,
+      // The static figure is the operator's, and it is in millions.
+      label: fill(areaStat.label, { year, unit: area ? area.unit : "mln m²" }),
+    },
+  ];
+
+  if (sold != null) {
+    stats.push({
+      ...soldStat,
+      value: formatNumber(sold),
+      label: fill(soldStat.label, { year }),
+    });
+  }
+
+  return { stats, contractsWidened: register?.widened ?? false };
 }
 
 export async function getImpactStats(): Promise<Stat[]> {

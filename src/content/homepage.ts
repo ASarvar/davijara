@@ -24,13 +24,36 @@ export const heroStats: Stat[] = [
   },
   {
     value: "28 075",
-    label: "2026-yil ijara shartnomalari",
+    label: "{year}-yil ijara shartnomalari",
     icon: "FileText",
   },
+  /*
+    `{unit}` as well as `{year}`, because the scale of this figure changes by
+    three orders of magnitude between the republic (148,8 mln m²) and a single
+    tuman (30,0 ming m²). Pinned to "mln m²" the card read "0" for most
+    districts. The static value below is the operator's, in millions; the live
+    path picks the unit to match the number — see `formatLeasedArea`.
+  */
   {
     value: "145,9",
-    label: "2026-yil ijaraga olingan maydon (mln m²)",
+    label: "{year}-yil ijaraga olingan maydon ({unit})",
     icon: "LandPlot",
+  },
+  /*
+    The only card here with no static figure: its value is computed from the
+    live service every time (see `getSoldCount`), so there is nothing verified
+    to fall back to and `getHeroStats` drops the card entirely when the
+    service cannot answer.
+
+    `{year}` is interpolated, unlike the two above. Those are operator-reported
+    totals for 2026 specifically and will be replaced by hand when 2027's
+    arrive; this one recounts itself, so hard-coding a year would make it lie
+    on the 1st of January.
+  */
+  {
+    value: "",
+    label: "{year}-yilda ijaraga sotilgan obyektlar",
+    icon: "Handshake",
   },
 ];
 

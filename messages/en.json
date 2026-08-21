@@ -29,6 +29,9 @@
     "login": "Sign in",
     "cabinet": "Account"
   },
+  "hero": {
+    "statScope": "The register has no contracts or area for <strong>{district}</strong> — showing <strong>{region}</strong> instead."
+  },
   "search": {
     "label": "Search for a rental object",
     "region": "Region",
@@ -81,13 +84,11 @@
     "lots": "lots: {count}"
   },
   "auctionWindow": {
-    "field": "Auction day",
-    "any": "Any date",
-    "upTo3": "Up to 3 days",
-    "from3to5": "3–5 days",
-    "over5": "Over 5 days",
-    "nearestDay": "Nearest day",
-    "filterLabel": "Filter by auction day",
+    "upTo1": "1 day",
+    "from1to3": "3 days",
+    "from3to5": "5 days",
+    "allWindows": "All",
+    "filterLabel": "Filter by time until auction",
     "empty": "No objects have an auction opening in the selected window. Try another one."
   }
 }

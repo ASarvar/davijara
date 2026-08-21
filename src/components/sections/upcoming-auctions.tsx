@@ -30,20 +30,19 @@ const ANCHOR = "yaqinlashayotgan-savdolar";
  * "Yaqinlashayotgan savdolar" — lots whose auction opens soon, each with a
  * live countdown, rotating three at a time.
  *
- * By default: the NEXT auction day, and it can be today. Showing "in 1 day"
- * beside "in 12 days" made the selection look arbitrary; the section is about
- * imminence, so it takes the soonest day that still has an auction ahead of it
- * and stays there.
+ * Four chips: 1 kun (0-1 days out), 3 kun (1-3), 5 kun (3-5) and Hammasi.
+ * They are real links writing `?muddat=` into the URL, not click handlers —
+ * the same choice the privileges filter makes, and for the same reasons: each
+ * view is linkable, the back button behaves, and the section stays a Server
+ * Component.
  *
- * The chips widen that to a chosen slice of the calendar ahead. They are real
- * links writing `?savdo=` into the URL, not click handlers — the same choice
- * the privileges filter makes, and for the same reasons: each view is linkable,
- * the back button behaves, and the section stays a Server Component.
+ * The three windows are DISJOINT and ADJACENT, so a lot sits in at most one
+ * and no count contains another. They cover the first five days only; Hammasi
+ * is the default and applies no window at all, which is why its count is
+ * larger than the three put together rather than equal to them.
  *
- * The windows are DISJOINT — up to 3 days, 3 to 5, beyond 5 — so each lot sits
- * in exactly one chip and the counts do not contain one another. Nested
- * windows were the first shape and read badly: "3 kun" included everything
- * "1 kun" already showed, and no chip could answer "what is further out".
+ * Whatever is showing, it is ordered soonest first with same-time lots
+ * shuffled — see `getUpcomingAuctions` for why both halves of that matter.
  *
  * SCOPE. This strip is the only thing `?savdo=` narrows on the homepage. The
  * map above ignores it (see objects-section.tsx) because the panel there has
@@ -105,13 +104,22 @@ export async function UpcomingAuctions({
     return `/${qs ? `?${qs}` : ""}#${ANCHOR}`;
   };
 
+  /*
+    Windows first, "Hammasi" last — the order the row was specified in, and it
+    reads as a scale: the tightest slice on the left, everything on the right.
+
+    Note that it is the LAST chip that is the default, not the first. That is
+    fine because the active one is filled and bold rather than merely first,
+    but it is the reason the row is not built with the reset at the head like
+    the privileges filter's "Barchasi".
+  */
   const chips: Array<{ value: string | null; label: string; count: number }> = [
-    { value: null, label: tw("nearestDay"), count: counts.nearestDay },
     ...AUCTION_WINDOWS.map((w) => ({
       value: w.value,
       label: tw(w.labelKey),
       count: counts.byWindow[w.value] ?? 0,
     })),
+    { value: null, label: tw("allWindows"), count: counts.all },
   ];
 
   return (

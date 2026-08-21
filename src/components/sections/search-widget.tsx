@@ -287,7 +287,7 @@ export async function SearchWidget({
               /* `active:scale` because the transition already declared
                  `transform` but nothing ever changed it — the button animated
                  opacity only and felt inert on press. */
-              className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-gold)] px-6 text-sm font-semibold text-[color:var(--color-navy)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
+              className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-cobalt)] px-6 text-sm font-semibold text-[color:var(--color-mist-pale)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
             >
               <Search
                 aria-hidden="true"

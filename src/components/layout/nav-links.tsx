@@ -35,7 +35,7 @@ export function NavLinks() {
                 // rem-based, so it actually scales with the "Matn o'lchami"
                 // accessibility setting. A fixed px value silently opted the
                 // whole nav out of that control.
-                "relative rounded-md px-2.5 py-2 text-[0.84375rem] whitespace-nowrap transition-colors",
+                "relative rounded-md px-2.5 py-2 text-[0.905rem] whitespace-nowrap transition-colors",
                 isActive
                   ? "text-accent-foreground font-semibold"
                   : "text-foreground/80 hover:text-accent-foreground",

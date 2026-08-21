@@ -33,6 +33,7 @@
     "cabinet": "Kabinet"
   },
   "hero": {
+    "statScope": "<strong>{district}</strong> boʻyicha shartnomalar va maydon maʼlumoti registrda yoʻq — <strong>{region}</strong> boʻyicha koʻrsatilmoqda.",
     "eyebrow": "Raqamli O'zbekiston — 2030",
     "titleLead": "Davlat mulkini ijaraga olish —",
     "rotator": {
@@ -111,13 +112,11 @@
     "lots": "{count} ta lot"
   },
   "auctionWindow": {
-    "field": "Savdo kuni",
-    "any": "Barcha sanalar",
-    "upTo3": "3 kungacha",
-    "from3to5": "3–5 kun",
-    "over5": "5+ kun",
-    "nearestDay": "Eng yaqin kun",
-    "filterLabel": "Savdo kuni bo'yicha saralash",
+    "upTo1": "1 kun",
+    "from1to3": "3 kun",
+    "from3to5": "5 kun",
+    "allWindows": "Hammasi",
+    "filterLabel": "Savdo muddati bo'yicha saralash",
     "empty": "Tanlangan muddatda savdosi ochiladigan obyekt yo'q. Boshqa muddatni tanlang."
   },
   "services": {
