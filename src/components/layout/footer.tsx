@@ -20,8 +20,17 @@ export async function Footer() {
   const year = new Date().getFullYear();
 
   return (
+    /*
+      `floor`, not `deep`. On the dark theme the two are the same thing —
+      plain navy — and this tone declares nothing there. It exists for the
+      light theme, where `deep` resolves to the near-white page ground and the
+      footer came out the same colour as whatever section sat above it; as
+      `floor` it takes the darker mist step instead. Which section is above
+      depends on the parity of the zebra, which the footer cannot know and
+      should not have to. See globals.css.
+    */
     <footer
-      data-tone="deep"
+      data-tone="floor"
       className="bg-background text-foreground border-hairline mt-auto border-t"
     >
       <Container className="pt-12 pb-4">
@@ -52,7 +61,9 @@ export async function Footer() {
               down the page.
             */}
             <Logo variant="footer" />
-            <p className="text-muted-foreground mt-6 text-sm">{t("operator")}</p>
+            <p className="text-muted-foreground mt-6 text-sm">
+              {t("operator")}
+            </p>
             {/* <a
               href={contacts.hotlineHref}
               className="text-accent-foreground mt-10 inline-flex items-center gap-2 text-2xl font-semibold"
@@ -113,7 +124,9 @@ export async function Footer() {
                   index.html and imtiyozlar.html gave different street
                   addresses. Reconciled to a single value in content/site.ts.
                 */}
-                <address className="not-italic">{contacts.address.full}</address>
+                <address className="not-italic">
+                  {contacts.address.full}
+                </address>
               </li>
               <li>
                 <a

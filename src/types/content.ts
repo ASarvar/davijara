@@ -80,6 +80,36 @@ export interface Listing {
   isMock?: boolean;
 }
 
+/**
+ * A lot that concluded with a buyer.
+ *
+ * Separate from `Listing` because the two answer different questions and share
+ * almost no fields on screen: a listing has an asking price and a countdown, a
+ * sale has a start price, a final price and no future.
+ *
+ * NOTE what is deliberately absent. The order endpoint returns the winner's
+ * full name, passport number, PINFL, phone and home address; none of it is on
+ * this type and none of it may be published. See lib/data/listings.ts.
+ */
+export interface SoldLot {
+  id: string;
+  title: string;
+  /** Region slug, matches Region.slug. */
+  region: string;
+  district?: string;
+  /** Square metres. */
+  area: number;
+  /** Opening price in so'm. */
+  startPrice: number;
+  /** What it actually went for, in so'm. Always greater than zero. */
+  soldPrice: number;
+  /** ISO 8601, server-provided. */
+  auctionDate: string;
+  lotNumber?: string;
+  orderId?: string;
+  auctionUrl?: string;
+}
+
 /** Filters shared by the search form, the map and the region list. */
 export interface ListingQuery {
   region?: string;

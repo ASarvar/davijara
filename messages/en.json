@@ -90,5 +90,24 @@
     "allWindows": "All",
     "filterLabel": "Filter by time until auction",
     "empty": "No objects have an auction opening in the selected window. Try another one."
+  },
+  "sold": {
+    "eyebrow": "RESULTS",
+    "title": "Sold on the last auction day",
+    "description": "Objects sold at the {date} auction, with the opening and final price side by side.",
+    "action": "All results",
+    "startPrice": "Opening price",
+    "soldPrice": "Sold for",
+    "noRise": "At the opening price",
+    "prev": "Previous",
+    "next": "Next",
+    "pageTitle": "Sold objects",
+    "pageLede": "{count} objects sold at auction so far this year, each with its opening and final price.",
+    "pageEmpty": "No sold objects match the selected filters.",
+    "pagination": "Pages",
+    "filterLabel": "Filter sold objects",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "pageLedeRange": "{count} objects sold at auction between {from} and {to}."
   }
 }

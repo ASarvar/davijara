@@ -7,6 +7,7 @@ import { site } from "@/content/site";
 const staticPaths = [
   "",
   "/obyektlar",
+  "/sotilgan-obyektlar",
   "/e-auksion",
   "/imtiyozlar",
   "/xizmatlar",

@@ -168,5 +168,24 @@
     "title": "Bo'lim tayyorlanmoqda",
     "description": "Bu bo'lim ustida ish olib borilmoqda va tez orada ishga tushiriladi.",
     "action": "Bosh sahifaga qaytish"
+  },
+  "sold": {
+    "eyebrow": "NATIJALAR",
+    "title": "Soʻnggi savdo kunida sotilgan obyektlar",
+    "description": "{date} kungi savdolarda sotilgan obyektlar. Boshlangʻich narx va yakuniy narx solishtirilgan.",
+    "action": "Barcha natijalar",
+    "startPrice": "Boshlangʻich narx",
+    "soldPrice": "Sotilgan narx",
+    "noRise": "Boshlangʻich narxda",
+    "prev": "Oldingi",
+    "next": "Keyingi",
+    "pageTitle": "Sotilgan obyektlar",
+    "pageLede": "Joriy yilda savdolarda sotilgan {count} ta obyekt. Har biri uchun boshlangʻich va yakuniy narx koʻrsatilgan.",
+    "pageEmpty": "Tanlangan shartlar boʻyicha sotilgan obyekt topilmadi.",
+    "pagination": "Sahifalar",
+    "filterLabel": "Sotilgan obyektlarni saralash",
+    "dateFrom": "Sanadan",
+    "dateTo": "Sanagacha",
+    "pageLedeRange": "{from} — {to} oraligʻidagi savdolarda sotilgan {count} ta obyekt."
   }
 }

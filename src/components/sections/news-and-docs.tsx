@@ -17,7 +17,7 @@ export async function NewsAndDocs() {
   const [news, documents] = await Promise.all([getNews(4), getDocuments(4)]);
 
   return (
-    <Section tone="deep">
+    <Section tone="light">
       <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
         {/* News */}
         <div>
@@ -36,10 +36,7 @@ export async function NewsAndDocs() {
 
           <ul className="divide-border divide-y">
             {news.map((item) => (
-              <li
-                key={item.slug}
-                data-reveal="left"
-              >
+              <li key={item.slug} data-reveal="left">
                 <Link
                   href={`/yangiliklar/${item.slug}`}
                   className="group hover:bg-card block rounded-lg px-3 py-5 transition-colors duration-200"

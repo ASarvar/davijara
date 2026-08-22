@@ -330,6 +330,29 @@
 }
 
 /*
+  `data-tone="floor"` — THE FOOTER, and nothing else.
+
+  There is deliberately NO RULE FOR IT HERE. On the dark theme the footer is
+  plain navy, which is what `:root` already gives anything that declares
+  nothing — so the tone exists purely to be named by the two blocks that DO
+  need to catch it: the light theme, where it takes the darker mist step
+  instead of the near-white page ground, and high contrast, where it goes
+  black with everything else.
+
+  That is the whole point of it being a tone of its own rather than `deep`.
+  `deep` resolves to the PALE ground under the light theme, so the footer came
+  out the same colour as whatever section sat above it — and which section that
+  is depends on the parity of the zebra, something the footer cannot know.
+
+  On the dark theme the section above may well be navy too. The gold hairline
+  along the top edge is what separates them, and that is by choice: navy-mid
+  and a navy-to-navy-mid gradient were both tried here and read as the footer
+  being lit from somewhere, rather than as the page simply ending.
+
+  Do not put it on a content section.
+*/
+
+/*
   ── Raised surface ───────────────────────────────────────────────────────
 
   Overrides `--background` ONLY. Everything else — cards, borders, muted
@@ -611,7 +634,8 @@
   the light theme would quietly fall back to navy headings and slate small
   print while the white sections around it used cobalt and navy-mid.
 */
-:root[data-theme="light"] [data-tone="light"] {
+:root[data-theme="light"] [data-tone="light"],
+:root[data-theme="light"] [data-tone="floor"] {
   --background: var(--color-mist);
   --card: #ffffff;
   --secondary: var(--color-mist-edge);
@@ -650,7 +674,8 @@
 */
 :root[data-contrast="high"],
 :root[data-contrast="high"] [data-tone="deep"],
-:root[data-contrast="high"] [data-tone="light"] {
+:root[data-contrast="high"] [data-tone="light"],
+:root[data-contrast="high"] [data-tone="floor"] {
   --background: #000000;
   --foreground: #ffffff;
 
@@ -1439,6 +1464,21 @@
      selecting, and pointer events on it would swallow clicks meant for the
      marker underneath. */
   pointer-events: none;
+}
+
+/*
+  Horizontal card rows — see components/common/card-carousel.tsx.
+
+  The row scrolls natively; this only takes the bar out of the layout. On
+  Windows it is a permanent 15px band that sits under the cards and changes the
+  row's height, and the carousel already gives pointer users arrows and
+  keyboard users tab-to-scroll, so the bar is affordance nothing else supplies.
+*/
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }
 
 .listing-marker,

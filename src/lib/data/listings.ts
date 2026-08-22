@@ -12,6 +12,7 @@ import type {
   ListingQuery,
   ListingType,
   RegionSummary,
+  SoldLot,
 } from "@/types/content";
 
 /*
@@ -435,6 +436,29 @@ const WINDOW_DAYS = 180;
 
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
+/*
+  e-auksion has TWO pages per lot and they are not interchangeable.
+
+    /lot-view?lot_id=…        the offer — terms, documents, "Ariza berish"
+    /auction-result?lots_id=… the outcome — what it went for
+
+  Note the parameter is `lot_id` on one and `lots_id` on the other; that is
+  their spelling, not a typo here. Both were checked against the live site
+  (HTTP 200 for lot 24823145).
+
+  Which one a card links to follows what the card is claiming. An open lot
+  sends a citizen to the page where they can still bid; a concluded one sends
+  them to the result, because /lot-view for a finished lot shows an offer they
+  can no longer take up.
+*/
+const lotOfferUrl = (lotNumber: string | undefined) =>
+  lotNumber ? `https://e-auksion.uz/lot-view?lot_id=${lotNumber}` : undefined;
+
+const lotResultUrl = (lotNumber: string | undefined) =>
+  lotNumber
+    ? `https://e-auksion.uz/auction-result?lots_id=${lotNumber}`
+    : undefined;
+
 function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
   const lat = Number(lot.lat);
   const lng = Number(lot.lng);
@@ -481,9 +505,7 @@ function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
     image: lot.image ?? lot.photo_url,
     lat,
     lng,
-    auctionUrl: lot.lot_number
-      ? `https://e-auksion.uz/lot-view?lot_id=${lot.lot_number}`
-      : undefined,
+    auctionUrl: lotOfferUrl(lot.lot_number),
   };
 }
 
@@ -847,13 +869,31 @@ export async function getUpcomingAuctionCounts(): Promise<{
 */
 const SOLD_LEAD_MONTHS = 3;
 
+/**
+ * How far back the sold-lot DETAIL is kept from the same response.
+ *
+ * The hero only needs counts, but "So'nggi savdo kunida sotilgan obyektlar"
+ * needs the lots themselves — and it would be absurd to fetch the same 2.7MB
+ * twice for that. So one request feeds both.
+ *
+ * THE WHOLE YEAR, not a rolling window. A six-week cut was tried and was the
+ * wrong shape: the hero counts the year, so a results page that quietly
+ * covered the last six weeks of it disagreed with the figure directly above
+ * it. The cost is small because these entries are PER REGION — a region sells
+ * on the order of 200 lots a year, so an entry holds ~50KB rather than the
+ * megabyte the national total suggests.
+ */
 const fetchSoldCount = unstable_cache(
   async (
     apiId: number,
     year: number,
-  ): Promise<{ total: number; byDistrict: Record<string, number> }> => {
+  ): Promise<{
+    total: number;
+    byDistrict: Record<string, number>;
+    sales: SoldLot[];
+  }> => {
     const base = process.env.LISTINGS_API_URL;
-    if (!base) return { total: 0, byDistrict: {} };
+    if (!base) return { total: 0, byDistrict: {}, sales: [] };
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -889,8 +929,11 @@ const fetchSoldCount = unstable_cache(
     The key is upstream's own `district_name`, used verbatim — the same
     string `?tuman=` carries, so the two cannot disagree about spelling.
   */
+    const slug = regions.find((r) => r.apiId === apiId)?.slug ?? String(apiId);
+
     let sold = 0;
     const byDistrict: Record<string, number> = {};
+    const sales: SoldLot[] = [];
     for (const lot of json.data ?? []) {
       if (!lot.auction_date) continue;
       const at = new Date(lot.auction_date).getTime();
@@ -906,10 +949,31 @@ const fetchSoldCount = unstable_cache(
       sold++;
       const district = lot.district_name?.trim();
       if (district) byDistrict[district] = (byDistrict[district] ?? 0) + 1;
+
+      const id = lot.order_id ?? lot.lot_number;
+      const start = Number(lot.start_price);
+      if (!id) continue;
+      sales.push({
+        id: String(id),
+        title: lot.name?.trim() || "Nomsiz lot",
+        // The region we ASKED for, never `region_title` — upstream spells
+        // those its own way. Same rule as `mapApiLot`.
+        region: slug,
+        district,
+        area: Number(lot.rent_area) || 0,
+        startPrice: Number.isFinite(start) ? start : 0,
+        soldPrice: price,
+        auctionDate: lot.auction_date,
+        lotNumber: lot.lot_number,
+        orderId: lot.order_id != null ? String(lot.order_id) : undefined,
+        // The RESULT page, not the offer: this lot is already sold.
+        auctionUrl: lotResultUrl(lot.lot_number),
+      });
     }
-    return { total: sold, byDistrict };
+    return { total: sold, byDistrict, sales };
   },
-  ["listings-sold"],
+  // v3: `recent` (six weeks) became `sales` (the whole year).
+  ["listings-sold-v3"],
   /*
     A day, not the five minutes the catalogue uses. This is a year-to-date
     total that moves by a few lots a day, and the query is the heaviest one
@@ -970,6 +1034,213 @@ export async function getSoldCount(
     );
   }
   return results.reduce((sum, r) => sum + r.total, 0);
+}
+
+/**
+ * URL keys for the sold-lot date RANGE.
+ *
+ * A range, not the catalogue's single `savdo` day, because the two pages are
+ * asked different questions. "What is being sold on the 27th" is a plan; "what
+ * went in July" is a record, and a record is read across a stretch of days.
+ * Same ISO grammar either way, so a date means the same thing on both pages.
+ */
+export const SOLD_FROM_KEY = "dan";
+export const SOLD_TO_KEY = "gacha";
+
+export interface SoldQuery {
+  region?: string;
+  district?: string;
+  /** Inclusive, "YYYY-MM-DD" in Tashkent time. */
+  from?: string;
+  to?: string;
+}
+
+/** Reads the sold page's filters, dropping anything unparseable. */
+export function parseSoldQuery(
+  searchParams: Record<string, string | string[] | undefined>,
+): SoldQuery {
+  const hudud = first(searchParams.hudud);
+  const tuman = first(searchParams.tuman);
+  const from = parseAuctionDay({
+    [AUCTION_DAY_KEY]: searchParams[SOLD_FROM_KEY],
+  });
+  const to = parseAuctionDay({ [AUCTION_DAY_KEY]: searchParams[SOLD_TO_KEY] });
+
+  return {
+    region: hudud && hudud !== ALL ? hudud : undefined,
+    district: tuman && tuman !== ALL ? tuman : undefined,
+    /*
+      Swapped rather than rejected when the reader picks them the wrong way
+      round. Two calendars invite exactly that, and a page that answers "no
+      results" to a range it could obviously have read is worse than one that
+      simply reads it.
+    */
+    from: from && to && from > to ? to : from,
+    to: from && to && from > to ? from : to,
+  };
+}
+
+/**
+ * Every sale of the current year, newest auction first.
+ *
+ * The list page's source. `getRecentlySold` below picks one day out of the
+ * same data for the homepage strip — one upstream fetch serves both, and the
+ * two can never disagree about what sold for how much, nor about how many.
+ *
+ * Date bounds are matched on the TASHKENT calendar day, the same way the
+ * catalogue's `savdo` filter is: a 10:00 auction is 05:00Z, so a UTC
+ * comparison would file every morning sitting under the previous date.
+ */
+export async function getSoldLots(query: SoldQuery = {}): Promise<SoldLot[]> {
+  if (!process.env.LISTINGS_API_URL) return [];
+
+  const year = new Date(Date.now() + TASHKENT_OFFSET_MS).getUTCFullYear();
+  const wanted = query.region
+    ? regions.filter((r) => r.slug === query.region)
+    : regions;
+  if (wanted.length === 0) return [];
+
+  const settled = await Promise.allSettled(
+    wanted.map((r) => fetchSoldCount(r.apiId, year)),
+  );
+
+  const failed = wanted
+    .filter((_, i) => settled[i].status === "rejected")
+    .map((r) => r.slug);
+  if (failed.length > 0) {
+    console.error("[listings] sold-lot request(s) failed:", failed.join(", "));
+  }
+
+  return settled
+    .flatMap((r) => (r.status === "fulfilled" ? r.value.sales : []))
+    .filter((lot) => {
+      if (query.district && lot.district !== query.district) return false;
+      if (!query.from && !query.to) return true;
+      const day = auctionDay(new Date(lot.auctionDate).getTime());
+      if (query.from && day < query.from) return false;
+      if (query.to && day > query.to) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const byDate =
+        new Date(b.auctionDate).getTime() - new Date(a.auctionDate).getTime();
+      // Same sitting: the biggest sale leads, as on the homepage strip.
+      return byDate !== 0 ? byDate : b.soldPrice - a.soldPrice;
+    });
+}
+
+/**
+ * Every day that produced a sale, with how many, ascending.
+ *
+ * What the two calendars on the sold page grey out against. Its own function
+ * rather than `getAuctionDays`, which answers the opposite question — the days
+ * that have lots still FOR sale.
+ *
+ * Scoped by region and district but NOT by the dates themselves: a picker that
+ * only offered the days already inside the chosen range could never widen it.
+ */
+export async function getSoldDays(
+  query: SoldQuery = {},
+): Promise<Array<{ date: string; count: number }>> {
+  const lots = await getSoldLots({
+    region: query.region,
+    district: query.district,
+  });
+
+  const counts = new Map<string, number>();
+  for (const lot of lots) {
+    const day = auctionDay(new Date(lot.auctionDate).getTime());
+    counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+/** Districts that have produced a sale this year, keyed by region slug. */
+export async function getSoldDistrictsByRegion(): Promise<
+  Record<string, string[]>
+> {
+  const lots = await getSoldLots();
+  const byRegion = new Map<string, Set<string>>();
+  for (const lot of lots) {
+    if (!lot.district) continue;
+    const set = byRegion.get(lot.region) ?? new Set<string>();
+    set.add(lot.district);
+    byRegion.set(lot.region, set);
+  }
+  return Object.fromEntries(
+    [...byRegion.entries()].map(([slug, set]) => [
+      slug,
+      // Uzbek collation, same as getDistricts — "sh" and "ch" sort after "t".
+      [...set].sort((a, b) => a.localeCompare(b, "uz")),
+    ]),
+  );
+}
+
+/**
+ * The most recent auction day that produced sales, and what went on it.
+ *
+ * WHY A WHOLE DAY rather than "the last N sales": the auction calendar runs in
+ * sittings, not continuously — 55 lots went on 21 August, none on the 20th,
+ * five on the 19th. "The last 12 sales" would silently splice two or three
+ * different sittings together and the section's heading would stop being true.
+ *
+ * WHAT IS NOT HERE, and must not be added: the order endpoint returns the
+ * winner's full name, passport number, PINFL, phone and home address for every
+ * one of these lots. None of it is on `SoldLot`, and publishing any of it on a
+ * public portal would be a personal-data breach. The sale is public; the buyer
+ * is not.
+ *
+ * NO BID COUNT EITHER. Neither service reports how many raises a lot took —
+ * there is no bid history, participant count or step field anywhere in either
+ * response. The card shows the rise from the start price instead, which is
+ * arithmetic on two published numbers rather than an inference about how the
+ * auction ran. (The raises do land on a 10%-of-start grid in 906 of 997 sales,
+ * so a step count could be reverse-engineered — but 91 sales do not fit it,
+ * and a derived number printed as fact is not something this portal does.)
+ *
+ * Reads the same cached per-region fetch the hero's sold counter does, so this
+ * section costs no additional upstream request.
+ */
+export async function getRecentlySold(
+  limit = 12,
+): Promise<{ day: string; lots: SoldLot[] } | null> {
+  if (!process.env.LISTINGS_API_URL) return null;
+
+  const year = new Date(Date.now() + TASHKENT_OFFSET_MS).getUTCFullYear();
+  const settled = await Promise.allSettled(
+    regions.map((r) => fetchSoldCount(r.apiId, year)),
+  );
+
+  const sales = settled.flatMap((r) =>
+    r.status === "fulfilled" ? r.value.sales : [],
+  );
+  if (sales.length === 0) return null;
+
+  /*
+    Grouped by the TASHKENT calendar day. A 10:00 auction is 05:00Z, so a UTC
+    day would file every morning sitting under the previous date — and the
+    heading names that date.
+  */
+  const withDay = sales.map((lot) => ({
+    lot,
+    at: new Date(lot.auctionDate).getTime(),
+  }));
+  const latest = withDay.reduce(
+    (max, s) => (auctionDay(s.at) > max ? auctionDay(s.at) : max),
+    auctionDay(withDay[0].at),
+  );
+
+  const lots = withDay
+    .filter((s) => auctionDay(s.at) === latest)
+    // Biggest sale first: on a day of 55 lots the ones worth showing are the
+    // ones that actually went somewhere.
+    .sort((a, b) => b.lot.soldPrice - a.lot.soldPrice)
+    .slice(0, limit)
+    .map((s) => s.lot);
+
+  return { day: latest, lots };
 }
 
 /**

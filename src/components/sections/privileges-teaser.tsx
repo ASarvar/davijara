@@ -16,7 +16,7 @@ export async function PrivilegesTeaser() {
   ]);
 
   return (
-    <Section tone="light">
+    <Section tone="deep">
       <SectionHeader
         eyebrow={t("eyebrow")}
         title={t("title")}

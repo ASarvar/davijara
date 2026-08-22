@@ -339,6 +339,20 @@ Carried over from the legacy site and resolved as follows:
   Measured over all fourteen regions — 196 districts carrying lots — 183 match
   exactly, 13 near, none by guesswork. An unmatched district widens to the
   region and the hero says so.
+- **The order endpoint returns PERSONAL DATA.** `winner_name`,
+  `winner_passport`, `winner_pinfl`, `winner_phone` and `winner_address` come
+  back for every concluded lot. None of it is on any type in `types/content.ts`
+  and none of it may reach a page. The sale is public; the buyer is not.
+  `lib/data/lot-images.ts` reads only `images[]` from that response, and
+  `SoldLot` carries only prices, area and place.
+
+- **No bid count exists.** Neither service reports how many raises a lot took —
+  there is no bid history, participant count or step field anywhere in either
+  response. The sold-lot card shows the rise from the start price instead,
+  which is arithmetic on two published figures. The raises DO land on a
+  10%-of-start grid in 906 of 997 sales, so a step count could be
+  reverse-engineered; 91 sales do not fit it, so it is not printed.
+
 - **Listing photos** — the legacy page showed one hotlinked image on all three
   cards. Cards render a branded placeholder until real self-hosted photography
   exists; `aspect-video` reserves the box so adding images causes no shift.

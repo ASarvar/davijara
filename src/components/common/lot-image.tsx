@@ -26,6 +26,50 @@ import { withBasePath } from "@/lib/base-path";
   never substituted, because a photo on a state lot card reads as a photo OF
   that lot.
 */
+/*
+  One request per lot per page, however many cards ask for it.
+
+  The recently-sold carousel renders its children TWICE — the second copy is
+  what makes the wrap seamless — so without this every photograph in that row
+  was fetched twice, both in flight at once, while the row was trying to
+  animate. The map and the catalogue can also show the same lot in two places.
+
+  Keyed on the pair, because the region decides which account the server
+  authenticates with; the same order id under a different region is a different
+  request. The entry is the PROMISE, so callers that arrive while one is in
+  flight join it rather than starting another, and it is dropped on failure so
+  a transient error does not stick for the life of the page.
+
+  Deliberately not an LRU or a TTL: this lives for one page view, and the
+  server already owns freshness — see the route's `max-age` and the
+  `unstable_cache` behind it.
+*/
+const inFlight = new Map<string, Promise<string | null>>();
+
+function lookup(orderId: string, region: string): Promise<string | null> {
+  const key = `${orderId}|${region}`;
+  const existing = inFlight.get(key);
+  if (existing) return existing;
+
+  const request = fetch(
+    withBasePath(
+      `/api/lot-image?order=${encodeURIComponent(orderId)}&region=${encodeURIComponent(region)}`,
+    ),
+  )
+    .then(async (res) => {
+      if (!res.ok) throw new Error(String(res.status));
+      const json = (await res.json()) as { image?: string | null };
+      return json.image ?? null;
+    })
+    .catch((error) => {
+      inFlight.delete(key);
+      throw error;
+    });
+
+  inFlight.set(key, request);
+  return request;
+}
+
 export function LotImage({
   orderId,
   region,
@@ -64,23 +108,21 @@ export function LotImage({
     // authenticate with, so the request could only ever come back empty.
     if (!orderId || !region) return;
 
+    /*
+      A flag, not an `AbortController`. The request is shared with every other
+      card asking for the same lot (see `lookup`), so aborting it here would
+      cancel it for them too. Unmounting stops us USING the answer; it does not
+      get to take it away from anyone else.
+    */
     let cancelled = false;
-    const controller = new AbortController();
 
     const load = async () => {
       try {
-        const res = await fetch(
-          withBasePath(
-            `/api/lot-image?order=${encodeURIComponent(orderId)}&region=${encodeURIComponent(region)}`,
-          ),
-          { signal: controller.signal },
-        );
-        if (!res.ok) throw new Error(String(res.status));
-        const json = (await res.json()) as { image?: string | null };
-        if (!cancelled && json.image) setSrc(json.image);
+        const image = await lookup(orderId, region);
+        if (!cancelled && image) setSrc(image);
       } catch {
-        // Aborted, offline, upstream down — the placeholder is already what
-        // is on screen, so there is nothing to do but stop trying.
+        // Offline, upstream down — the placeholder is already what is on
+        // screen, so there is nothing to do but stop trying.
       }
     };
 
@@ -88,7 +130,6 @@ export function LotImage({
       void load();
       return () => {
         cancelled = true;
-        controller.abort();
       };
     }
 
@@ -114,7 +155,6 @@ export function LotImage({
 
     return () => {
       cancelled = true;
-      controller.abort();
       observer.disconnect();
     };
   }, [orderId, region, eager]);
