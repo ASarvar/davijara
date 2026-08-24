@@ -1481,6 +1481,98 @@
   display: none;
 }
 
+/*
+  Charts: the figures are in the DOM, the canvas is drawn over them.
+
+  Every chart on /statistika ships its numbers as a real `<table>` and its
+  canvas beside it. A canvas is a bitmap — no text for a screen reader, no
+  glyphs for `data-text-size` to scale, nothing for a printer, and an empty
+  box with JavaScript off — so on a state portal the table is the primary
+  representation and must always be present.
+
+  The table is hidden from SIGHT only once the canvas has actually drawn,
+  which the client component signals with `data-drawn`. So the order of
+  precedence is: no JavaScript → table; JavaScript but the chart failed →
+  table; chart drew → chart. It is never both, and it is never neither.
+
+  `:has()` is what lets a sibling's state hide the table with no wrapper
+  class and no JavaScript of its own. Chrome, Safari and Firefox have all
+  shipped it; where it is missing the table simply stays visible under the
+  chart, which is redundant rather than broken.
+
+  Print always gets the table and never the canvas — a chart printed from a
+  dark theme is a black rectangle.
+*/
+:root[data-js] figure:has(canvas) [data-chart-table],
+figure:has(canvas[data-drawn]) [data-chart-table] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+  A chart that reported it could not draw puts its table back.
+
+  `data-js` hides the tables the instant the page knows JavaScript is running
+  — which has to happen before the charts draw, because they only draw once
+  scrolled to, and otherwise every table below the fold sat on screen at full
+  height until its chart caught up. Scrolling then walked through a page of
+  tables collapsing into charts.
+
+  The cost of hiding early is that a chart which never draws would take its
+  figures with it, so `ChartCanvas` sets this attribute when construction
+  throws and the numbers come straight back.
+*/
+:root[data-js] figure[data-chart-failed] [data-chart-table] {
+  position: static;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}
+
+@media print {
+  figure canvas {
+    display: none;
+  }
+  figure:has(canvas[data-drawn]) [data-chart-table] {
+    position: static;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+/*
+  High contrast keeps the table VISIBLE alongside the chart.
+
+  This mode exists for readers who need every boundary to be a solid line at
+  21:1. A canvas can be repainted in yellow-on-black — the charts do that —
+  but it still cannot be scaled by `data-text-size`, and its labels are baked
+  in at whatever size Chart.js drew them. The table is the accessible answer,
+  so here it is simply not hidden.
+*/
+:root[data-contrast="high"] figure:has(canvas[data-drawn]) [data-chart-table] {
+  position: static;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+}
+
 .listing-marker,
 .listing-cluster {
   transition: transform 0.2s var(--ease-out-soft);

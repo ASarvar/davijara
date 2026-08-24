@@ -50,6 +50,15 @@ export const contacts = {
 export interface NavItem {
   key: string;
   href: string;
+  /**
+   * Pages that live UNDER this one in the menu.
+   *
+   * One level only, and deliberately: a second level of nesting on a portal
+   * this size is a menu the reader has to explore rather than read. The
+   * parent stays a real link — it is a page in its own right, not a folder —
+   * so the submenu adds a way in without taking one away.
+   */
+  children?: NavItem[];
 }
 
 /** External links keep a literal label; domain names are not translated. */
@@ -65,7 +74,22 @@ export const mainNav: NavItem[] = [
   // { key: "services", href: "/xizmatlar" },
   { key: "documents", href: "/hujjatlar" },
   { key: "news", href: "/yangiliklar" },
-  { key: "about", href: "/markaz" },
+  {
+    /*
+      "Markaz" is the SECTION; "Markaz haqida" is a page inside it.
+
+      Statistics is about the Centre's own work, so it belongs here rather
+      than as an eighth top-level item — the row already wraps at 125% text.
+      The parent keeps its own href because a section header that cannot be
+      clicked is a dead end for anyone who reaches it by keyboard.
+    */
+    key: "centre",
+    href: "/markaz",
+    children: [
+      { key: "about", href: "/markaz" },
+      { key: "statistics", href: "/statistika" },
+    ],
+  },
 ];
 
 /**
@@ -95,7 +119,7 @@ export const footerNav: Array<{ heading: string; items: NavItem[] }> = [
 ];
 
 export const externalLinks: { heading: string; items: ExternalNavItem[] } = {
-    /*
+  /*
       Reconciled from the two legacy footers, which listed different sets.
       Kept: the domains that resolve to real Uzbek state platforms.
       Dropped: "online-yanki.uz" (appears in imtiyozlar.html only, does not
@@ -103,13 +127,13 @@ export const externalLinks: { heading: string; items: ExternalNavItem[] } = {
       Normalised: "e-auktsion.uz" -> "e-auksion.uz" (the spelling used in the
       live lot links elsewhere in the legacy markup).
     */
-    heading: "Foydali havolalar",
-    items: [
-      { label: "my.gov.uz", href: "https://my.gov.uz" },
-      { label: "davaktiv.uz", href: "https://davaktiv.uz" },
-      { label: "e-auksion.uz", href: "https://e-auksion.uz" },
-      { label: "lex.uz", href: "https://lex.uz" },
-      { label: "online-ijara.uz", href: "https://online-ijara.uz" },
+  heading: "Foydali havolalar",
+  items: [
+    { label: "my.gov.uz", href: "https://my.gov.uz" },
+    { label: "davaktiv.uz", href: "https://davaktiv.uz" },
+    { label: "e-auksion.uz", href: "https://e-auksion.uz" },
+    { label: "lex.uz", href: "https://lex.uz" },
+    { label: "online-ijara.uz", href: "https://online-ijara.uz" },
   ],
 };
 

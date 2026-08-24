@@ -883,17 +883,22 @@ const SOLD_LEAD_MONTHS = 3;
  * on the order of 200 lots a year, so an entry holds ~50KB rather than the
  * megabyte the national total suggests.
  */
-const fetchSoldCount = unstable_cache(
+export const fetchSoldYear = unstable_cache(
   async (
     apiId: number,
     year: number,
   ): Promise<{
     total: number;
+    /** Lots whose auction has not been held yet. */
+    pending: number;
+    /** Lots whose auction concluded without a buyer. */
+    unsold: number;
     byDistrict: Record<string, number>;
     sales: SoldLot[];
   }> => {
     const base = process.env.LISTINGS_API_URL;
-    if (!base) return { total: 0, byDistrict: {}, sales: [] };
+    if (!base)
+      return { total: 0, pending: 0, unsold: 0, byDistrict: {}, sales: [] };
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -932,6 +937,8 @@ const fetchSoldCount = unstable_cache(
     const slug = regions.find((r) => r.apiId === apiId)?.slug ?? String(apiId);
 
     let sold = 0;
+    let pending = 0;
+    let unsold = 0;
     const byDistrict: Record<string, number> = {};
     const sales: SoldLot[] = [];
     for (const lot of json.data ?? []) {
@@ -945,7 +952,32 @@ const fetchSoldCount = unstable_cache(
       // one.
       if (auctionDay(at).slice(0, 4) !== String(year)) continue;
       const price = Number(lot.sold_price);
-      if (!Number.isFinite(price) || price <= 0) continue;
+
+      /*
+        THREE OUTCOMES, and conflating any two of them produces a wrong
+        headline. Measured over the 4 518 lots the 2026 window returns:
+
+          3 034  sold                 `sold_price > 0`
+          1 454  still taking bids    lot_status "…elektron arizalarni qabul
+                                      qilish", auction date in the future
+             30  ended with no buyer  concluded, no price
+
+        The obvious shortcut — "not sold" — makes the other 1 484 one bucket
+        and yields a 67% sale rate, which is simply the wrong number: it
+        counts auctions that HAVE NOT HAPPENED YET as failures. Among lots
+        that actually concluded the rate is 3 034 of 3 064, or 99.0%.
+
+        Pending is identified by `lot_status` rather than by comparing the
+        auction date to now, because a cached entry outlives the moment it
+        was computed — a date comparison inside a day-long cache would keep
+        answering as though it were still yesterday.
+      */
+      if (!Number.isFinite(price) || price <= 0) {
+        if (lot.lot_status?.includes("arizalarni qabul qilish")) pending++;
+        else unsold++;
+        continue;
+      }
+
       sold++;
       const district = lot.district_name?.trim();
       if (district) byDistrict[district] = (byDistrict[district] ?? 0) + 1;
@@ -970,10 +1002,11 @@ const fetchSoldCount = unstable_cache(
         auctionUrl: lotResultUrl(lot.lot_number),
       });
     }
-    return { total: sold, byDistrict, sales };
+    return { total: sold, pending, unsold, byDistrict, sales };
   },
   // v3: `recent` (six weeks) became `sales` (the whole year).
-  ["listings-sold-v3"],
+  // v4: added `pending` / `unsold` for the statistics page.
+  ["listings-sold-v4"],
   /*
     A day, not the five minutes the catalogue uses. This is a year-to-date
     total that moves by a few lots a day, and the query is the heaviest one
@@ -1009,7 +1042,7 @@ export async function getSoldCount(
   if (wanted.length === 0) return null;
 
   const settled = await Promise.allSettled(
-    wanted.map((r) => fetchSoldCount(r.apiId, year)),
+    wanted.map((r) => fetchSoldYear(r.apiId, year)),
   );
 
   const failed = wanted
@@ -1101,7 +1134,7 @@ export async function getSoldLots(query: SoldQuery = {}): Promise<SoldLot[]> {
   if (wanted.length === 0) return [];
 
   const settled = await Promise.allSettled(
-    wanted.map((r) => fetchSoldCount(r.apiId, year)),
+    wanted.map((r) => fetchSoldYear(r.apiId, year)),
   );
 
   const failed = wanted
@@ -1210,7 +1243,7 @@ export async function getRecentlySold(
 
   const year = new Date(Date.now() + TASHKENT_OFFSET_MS).getUTCFullYear();
   const settled = await Promise.allSettled(
-    regions.map((r) => fetchSoldCount(r.apiId, year)),
+    regions.map((r) => fetchSoldYear(r.apiId, year)),
   );
 
   const sales = settled.flatMap((r) =>

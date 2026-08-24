@@ -23,6 +23,15 @@ try {
   var c = localStorage.getItem('davijara-contrast');
   var s = localStorage.getItem('davijara-text-size');
   var t = localStorage.getItem('davijara-theme');
+  /*
+    A marker that JavaScript ran at all. /statistika ships every chart's
+    numbers as a visible <table> so a no-JS visitor gets the figures — but the
+    charts only draw once scrolled to, so without this every table below the
+    fold was on screen, at full height, until its chart caught up. The
+    stylesheet hides them the moment this attribute exists and shows them
+    again if a chart reports that it could not draw.
+  */
+  document.documentElement.setAttribute('data-js', '');
   if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
   if (c === 'high') document.documentElement.setAttribute('data-contrast', 'high');
   if (s === 'large' || s === 'xlarge') document.documentElement.setAttribute('data-text-size', s);

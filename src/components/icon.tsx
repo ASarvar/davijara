@@ -4,8 +4,10 @@ import {
   Calculator,
   CircleCheck,
   Cpu,
+  Equal,
   FileSearch,
   FileText,
+  Flame,
   Gavel,
   GraduationCap,
   Heart,
@@ -19,8 +21,11 @@ import {
   Scale,
   Send,
   Star,
+  Tag,
   TrendingDown,
+  TrendingUp,
   User,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -41,8 +46,10 @@ const registry = {
   Calculator,
   CircleCheck,
   Cpu,
+  Equal,
   FileSearch,
   FileText,
+  Flame,
   Gavel,
   GraduationCap,
   Heart,
@@ -56,8 +63,11 @@ const registry = {
   Scale,
   Send,
   Star,
+  Tag,
   TrendingDown,
+  TrendingUp,
   User,
+  Wallet,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof registry;

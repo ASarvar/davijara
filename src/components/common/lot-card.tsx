@@ -1,7 +1,12 @@
 import { AuctionCountdown } from "@/components/common/auction-countdown";
 import { LotImage } from "@/components/common/lot-image";
 import { SurfaceCard } from "@/components/common/surface-card";
-import { formatArea, formatDate, formatDateTime, formatNumber } from "@/lib/format";
+import {
+  formatArea,
+  formatDate,
+  formatDateTime,
+  formatNumber,
+} from "@/lib/format";
 import type { Listing } from "@/types/content";
 
 /*
@@ -65,30 +70,27 @@ export function LotCard({
             the placeholder. Never stock imagery: on a state portal a photo on
             a lot card reads as a photo OF that lot.
 
-            `listing.image` is used directly when the list endpoint happens to
+            `listing.image` is passed through when the list endpoint happens to
             carry one; otherwise LotImage resolves it from the order endpoint,
             lazily, once the card is near the viewport. Sample records never
             get a lookup — they have no real order behind them.
+
+            ONE element for both cases, not two. `listing.image` used to render
+            its own `<img>` beside this, and being a separate element it kept
+            every behaviour LotImage was rewritten to fix: `loading="lazy"`
+            fighting our own visibility gate, no retry when the browser
+            abandons the load, and no placeholder underneath when a URL fails
+            to decode.
           */}
-          {listing.image ? (
-            // eslint-disable-next-line @next/next/no-img-element -- remote lot photo on a host we do not control; see the note in lot-image.tsx.
-            <img
-              src={listing.image}
-              alt=""
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-cover transition-transform duration-[600ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.05]"
-            />
-          ) : (
-            <LotImage
-              orderId={listing.isMock ? undefined : listing.orderId}
-              region={listing.region}
-              className="h-full w-full"
-            />
-          )}
+          <LotImage
+            photo={listing.image}
+            orderId={listing.isMock ? undefined : listing.orderId}
+            region={listing.region}
+            className="h-full w-full"
+          />
 
           {listing.isMock ? (
-            <span className="bg-[color:var(--color-navy)]/85 text-[color:var(--color-gold-light)] absolute top-2.5 right-2.5 rounded-full px-2.5 py-0.5 text-xs backdrop-blur-sm">
+            <span className="absolute top-2.5 right-2.5 rounded-full bg-[color:var(--color-navy)]/85 px-2.5 py-0.5 text-xs text-[color:var(--color-gold-light)] backdrop-blur-sm">
               Namunaviy
             </span>
           ) : null}

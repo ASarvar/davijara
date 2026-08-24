@@ -73,21 +73,48 @@ export function MobileNav() {
                 : pathname.startsWith(item.href);
 
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                // Close on navigate — Radix does not know a route changed.
-                onClick={() => setOpen(false)}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "rounded-md px-3 py-2.5 text-sm transition-colors",
-                  isActive
-                    ? "bg-accent text-accent-foreground font-semibold"
-                    : "hover:bg-secondary",
-                )}
-              >
-                {t(item.key)}
-              </Link>
+              /*
+                No disclosure toggle on mobile. A sheet already has room to
+                show every item, and hiding one child behind a tap costs a
+                gesture to save two lines. The child is simply indented
+                under its parent, which is also what a screen reader will
+                read from the nesting.
+              */
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  // Close on navigate — Radix does not know a route changed.
+                  onClick={() => setOpen(false)}
+                  aria-current={isActive ? "page" : undefined}
+                  className={cn(
+                    "block rounded-md px-3 py-2.5 text-sm transition-colors",
+                    isActive
+                      ? "bg-accent text-accent-foreground font-semibold"
+                      : "hover:bg-secondary",
+                  )}
+                >
+                  {t(item.key)}
+                </Link>
+                {item.children?.map((child) => {
+                  const childActive = pathname.startsWith(child.href);
+                  return (
+                    <Link
+                      key={child.href}
+                      href={child.href}
+                      onClick={() => setOpen(false)}
+                      aria-current={childActive ? "page" : undefined}
+                      className={cn(
+                        "border-hairline ml-3 block border-l py-2.5 pr-3 pl-4 text-sm transition-colors",
+                        childActive
+                          ? "text-accent-foreground font-semibold"
+                          : "text-muted-foreground hover:text-accent-foreground",
+                      )}
+                    >
+                      {t(child.key)}
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </nav>

@@ -49,7 +49,29 @@ export async function GET(request: Request) {
     return Response.json({ image: null }, { status: 400 });
   }
 
-  const image = await getLotImage(order, region.apiId);
+  /*
+    A fault is reported AS a fault, and this is the whole point of the split.
+
+    This used to answer 200 with `{"image":null}` whatever had gone wrong, and
+    cache it — so a timeout, a rejected account and a lot that simply has no
+    photographs were one indistinguishable response. The browser had no way to
+    tell "there is nothing to show you" from "ask me again", so it never asked
+    again, and one blip left a placeholder on a card whose photograph the
+    service serves in 50ms.
+
+    503 with `no-store`: nothing between here and the reader keeps it, and
+    `LotImage` retries. `image: null` still rides along so a client that
+    ignores the status renders the placeholder rather than breaking.
+  */
+  let image: string | null;
+  try {
+    image = await getLotImage(order, region.apiId);
+  } catch {
+    return Response.json(
+      { image: null },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
 
   return Response.json(
     { image },
@@ -60,13 +82,12 @@ export async function GET(request: Request) {
           the map reopens the same popups repeatedly, and the answer for a
           published lot does not change within an hour.
 
-          A miss (`null`) is cached for a much shorter time on purpose: it is
-          usually a transient upstream failure, and pinning that for an hour
-          would keep showing the placeholder long after the service recovered.
+          `null` gets the SAME lifetime as a photograph now. It used to be cut
+          to a minute because it doubled as the failure response; a `null` that
+          reaches this line means the service answered and this lot has no
+          usable picture, which is as durable a fact as the picture itself.
         */
-        "Cache-Control": image
-          ? "public, max-age=3600, stale-while-revalidate=86400"
-          : "public, max-age=60",
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       },
     },
   );

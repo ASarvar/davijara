@@ -78,10 +78,19 @@ export function SoldLotCard({
           <LotImage
             orderId={lot.orderId}
             region={lot.region}
-            /* 350ms, matching the card's own lift. At LotCard's 600ms the
-               photograph was still easing after the card had settled, which
-               reads as two hovers rather than one. */
-            className="h-full w-full object-cover transition-transform duration-[350ms] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-[1.05]"
+            /*
+              350ms, matching the card's own lift. At LotCard's 600ms the
+              photograph was still easing after the card had settled, which
+              reads as two hovers rather than one.
+
+              A prop, because the transform belongs to the `<img>` and
+              LotImage already puts one there. Setting the duration by
+              repeating the whole transform on this wrapper — which is what
+              this was — left both scaling on hover, so the photograph grew
+              by 1.05 twice.
+            */
+            zoom="fast"
+            className="h-full w-full"
           />
 
           {/*

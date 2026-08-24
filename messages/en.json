@@ -27,7 +27,9 @@
     "news": "News",
     "about": "About the Centre",
     "login": "Sign in",
-    "cabinet": "Account"
+    "cabinet": "Account",
+    "statistics": "Statistics",
+    "centre": "Centre"
   },
   "hero": {
     "statScope": "The register has no contracts or area for <strong>{district}</strong> — showing <strong>{region}</strong> instead."
@@ -80,7 +82,15 @@
       "November",
       "December"
     ],
-    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    "weekdays": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat",
+      "Sun"
+    ],
     "lots": "lots: {count}"
   },
   "auctionWindow": {

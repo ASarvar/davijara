@@ -70,6 +70,11 @@ export function StatList({
                   className="font-heading text-ornament block pt-3 text-center text-3xl font-extrabold sm:text-4xl"
                 />
               </dd>
+              {stat.note ? (
+                <dd className="text-muted-foreground mt-3 text-xs text-pretty">
+                  {stat.note}
+                </dd>
+              ) : null}
             </>
           ) : (
             <>

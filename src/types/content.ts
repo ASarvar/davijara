@@ -224,6 +224,15 @@ export interface Stat {
   label: string;
   /** Name from the icon registry — only rendered by `StatList`'s `card` variant. */
   icon?: string;
+  /**
+   * A line of explanation under the figure, for a statistic whose label is not
+   * self-explanatory — "Bitta qadamda · 69,7%" says nothing without it.
+   *
+   * Only the `card` variant renders it. The hero's four figures do not use it:
+   * there the label IS the explanation, and a second line under each would
+   * turn a row of numbers into a row of paragraphs.
+   */
+  note?: string;
 }
 
 export interface Auction {

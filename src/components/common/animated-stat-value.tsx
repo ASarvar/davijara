@@ -65,22 +65,51 @@ export function AnimatedStatValue({
   const isInView = useInView(ref, { once: true, amount: 0.6 });
   const prefersReducedMotion = useReducedMotion();
 
-  const count = useMotionValue(roundTrips ? parsed!.target : 0);
+  /*
+    Pulled out as primitives so the effect below can depend on them. `parsed`
+    is a fresh object every render and would re-run the animation on any
+    re-render at all; the number and its shape are what actually decide
+    whether there is something new to count to.
+  */
+  const target = parsed?.target ?? 0;
+  const decimals = parsed?.decimals ?? 0;
+  const suffix = parsed?.suffix ?? "";
+
+  const count = useMotionValue(roundTrips ? target : 0);
   const display = useTransform(count, (latest) =>
-    roundTrips ? `${formatFixed(latest, parsed!.decimals)}${parsed!.suffix}` : value,
+    roundTrips ? `${formatFixed(latest, decimals)}${suffix}` : value,
   );
 
+  /*
+    THE TARGET IS A DEPENDENCY, and leaving it out was a real bug rather than
+    a tidy-up.
+
+    The deps were `[isInView, prefersReducedMotion, roundTrips]`, so when the
+    `value` prop CHANGED the effect never re-ran and the motion value kept its
+    old target — the span went on displaying the previous figure. It never
+    showed on the homepage, where these numbers only change on a full
+    navigation and the component remounts. /statistika changes them in place:
+    choosing a region re-renders the same four cards with new values, and the
+    first one to try it read 3 034 for a region that sold 541.
+  */
   useEffect(() => {
-    if (!roundTrips || !isInView || prefersReducedMotion) return;
+    if (!roundTrips) return;
+
+    // No animation is going to run, so land on the real figure at once
+    // rather than leaving whatever the previous value counted up to.
+    if (!isInView || prefersReducedMotion) {
+      count.set(target);
+      return;
+    }
+
     count.set(0);
-    const controls = animate(count, parsed!.target, {
+    const controls = animate(count, target, {
       duration: 1.6,
       // Same "settling" curve as --ease-out-soft in globals.css.
       ease: [0.22, 1, 0.36, 1],
     });
     return () => controls.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isInView, prefersReducedMotion, roundTrips]);
+  }, [isInView, prefersReducedMotion, roundTrips, target, count]);
 
   if (!roundTrips) {
     return (

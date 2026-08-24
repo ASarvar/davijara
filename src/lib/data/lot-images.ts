@@ -150,10 +150,38 @@ function warn(apiId: number, orderId: string, reason: string): void {
   );
 }
 
+/**
+ * A fault, as opposed to an answer.
+ *
+ * "This lot has no photograph" and "we could not find out" were the same value
+ * — `null` — and that single conflation is what pinned placeholders onto cards
+ * whose photographs exist. `null` was returned for a timeout, a rejected
+ * account and a malformed body alike, `unstable_cache` stored it like any other
+ * result, the route served it as a 200, and every layer above treated a
+ * momentary failure as the settled fact that this lot has no picture.
+ *
+ * So a fault throws instead. `unstable_cache` does not store a rejection, the
+ * route turns it into a 503 that no cache keeps, and the browser retries. A
+ * lot that genuinely has no photographs still returns `null`, which is a real
+ * answer and is cached as one.
+ */
+export class LotImageUnavailable extends Error {
+  constructor(reason: string) {
+    super(reason);
+    this.name = "LotImageUnavailable";
+  }
+}
+
 async function fetchLotImage(
   orderId: string,
   apiId: number,
 ): Promise<string | null> {
+  /*
+    Not faults, and deliberately not thrown: an unconfigured service and a
+    region with no account are settled states, not blips. Retrying them would
+    spend three requests to be told the same thing, so they answer `null` —
+    "no photograph to show" — and are cached like any other answer.
+  */
   const base = process.env.ORDER_API_URL;
   if (!base) return null;
 
@@ -186,15 +214,45 @@ async function fetchLotImage(
     });
     if (!res.ok) {
       warn(apiId, orderId, `HTTP ${res.status}`);
-      return null;
+      throw new LotImageUnavailable(`HTTP ${res.status}`);
     }
 
     const json = (await res.json()) as OrderApiResponse;
-    // 200 with a non-zero result_code is this service's failure shape — the
-    // listings endpoint behaves the same way with `success: false`.
+
+    /*
+      200 with a non-zero `result_code` is this service's failure shape — the
+      listings endpoint behaves the same way with `success: false`. But not
+      every non-zero code is a FAULT, and the difference decides whether the
+      browser is told to ask again.
+
+      Probed directly against the service:
+
+        0   Muvaffaqiyatli                            the order, with images
+        25  Foydalanuvchi aniqlanmadi                 the ACCOUNT was rejected
+        27  Foydalanuvchinig buyurtmasi aniqlanmadi   no such order here
+
+      27 came back for a made-up order id (1, 999999999) and — the case that
+      matters — for a REAL Qoraqalpog'iston order requested under Farg'ona's
+      account. So it is the service answering "not one of mine", which is a
+      settled fact about this pair and is cached like any other answer.
+      Throwing on it would have put three retries and a 503 behind every
+      crawler probing `?order=1`.
+
+      25 is a fault: the credentials for this region are wrong. Retrying will
+      not fix it, but it must not be cached as "this lot has no photograph"
+      either — that would hide a configuration error behind a plausible-looking
+      placeholder for an hour, and would keep doing so after it was corrected.
+    */
+    const NO_SUCH_ORDER = 27;
+    if (json.result_code === NO_SUCH_ORDER) return null;
+
     if (json.result_code !== 0) {
-      warn(apiId, orderId, `result_code ${json.result_code}: ${json.result_msg}`);
-      return null;
+      warn(
+        apiId,
+        orderId,
+        `result_code ${json.result_code}: ${json.result_msg}`,
+      );
+      throw new LotImageUnavailable(`result_code ${json.result_code}`);
     }
 
     const images = json.orders?.[0]?.images;
@@ -211,52 +269,60 @@ async function fetchLotImage(
     */
     if (!json.orders?.length) {
       warn(apiId, orderId, "no order in response");
-      return null;
+      throw new LotImageUnavailable("no order in response");
     }
 
+    /*
+      From here down every outcome is an ANSWER. The service was reached, it
+      recognised the account and it described the order — so "no usable
+      photograph" is a fact about this lot and is cached as one, rather than
+      something worth asking again.
+    */
     const picked = pickMainImage(images);
     if (!picked && images?.length) {
       warn(apiId, orderId, `${images.length} image(s), none usable`);
     }
     return picked;
   } catch (error) {
-    // Network unreachable, timeout, malformed JSON — all the same to a caller
-    // that just wants "a photo, or the placeholder".
+    if (error instanceof LotImageUnavailable) throw error;
+    // Network unreachable, timeout, malformed JSON — we never got an answer,
+    // so we must not manufacture one.
     warn(apiId, orderId, error instanceof Error ? error.name : "unknown error");
-    return null;
+    throw new LotImageUnavailable(
+      error instanceof Error ? error.name : "unknown error",
+    );
   }
 }
 
 /**
- * The lot's primary photograph, or null.
+ * The lot's primary photograph, or null when it has none.
+ *
+ * Throws `LotImageUnavailable` when the service could not answer. The caller
+ * must let that through as a failure rather than turning it into "no photo" —
+ * see the route handler.
  *
  * `apiId` is the lot's region — its account is what the service authenticates
  * against, so it is part of the identity of the request, not a detail. It is
  * also part of the cache key by virtue of being an argument, which is what
  * keeps a miss under one region's account from being served for another's.
  *
- * FIVE MINUTES, and the reason is failures rather than freshness.
+ * AN HOUR, now that only answers get here.
  *
- * A published lot's photographs never change, so caching for a day would be
- * right for a hit. But `unstable_cache` stores whatever the function returns,
- * and a `null` from a timeout or a rejected account is a return value like
- * any other — there is no way to give hits and misses different lifetimes in
- * one cache. So the miss sets the ceiling.
+ * The previous five minutes was never about freshness — a published lot's
+ * photographs never change. It was the ceiling a swallowed failure imposed:
+ * `unstable_cache` stores whatever the function RETURNS, and a `null` from a
+ * timeout looked exactly like a `null` from a lot with no pictures, so the
+ * lifetime had to be short enough to bound a blip. Measured at the time: a
+ * 21-second network blip produced 18 timeouts, and every one of those lots
+ * then served `{"image":null}` in ~12ms without re-contacting the service,
+ * while the API returned 4-8 photographs for the same orders in ~50ms.
  *
- * Measured, not guessed: a 21-second network blip produced 18 timeouts, and
- * every one of those lots then served `{"image":null}` in ~12ms without
- * re-contacting the service — while the API returned 4-8 photographs for the
- * same orders in ~50ms. At a day, one blip blanks those cards until tomorrow.
- * At an hour, for the rest of the hour. Five minutes bounds a blip to a blip,
- * and matches the listings cache next door.
- *
- * The long tail is handled a layer up instead: the route sends
- * `max-age=3600` for a hit, so a reader who revisits does not reach the
- * server at all. This cache only has to stop MANY readers converging on the
- * same cold lot, and five minutes is ample for that — a hit costs ~50ms
- * upstream and only lots someone actually looked at are ever fetched.
+ * A fault now throws, and `unstable_cache` does not store a rejection — so a
+ * blip is not persisted at all and the lifetime can follow the data instead of
+ * the failure mode. An hour rather than a day only because a lot's
+ * photographs can still be edited upstream on the day it is published.
  */
 export const getLotImage = unstable_cache(fetchLotImage, ["lot-image"], {
-  revalidate: 300,
+  revalidate: 3600,
   tags: ["lot-images"],
 });

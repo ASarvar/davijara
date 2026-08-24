@@ -8,6 +8,7 @@ const staticPaths = [
   "",
   "/obyektlar",
   "/sotilgan-obyektlar",
+  "/statistika",
   "/e-auksion",
   "/imtiyozlar",
   "/xizmatlar",
