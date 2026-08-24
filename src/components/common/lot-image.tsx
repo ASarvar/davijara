@@ -414,6 +414,52 @@ export function LotImage({
   );
 
   /*
+    RE-ARM ON RETURN, once painting has genuinely failed.
+
+    A card that exhausted IMAGE_TRIES during a congested page load is not
+    evidence its photograph cannot be shown — every one traced back to this
+    was confirmed, moments later, to load in under a second on its own. What
+    actually happened is the browser abandoning a decode while a dozen other
+    requests were competing for the connection, and the old behaviour treated
+    that one bad window as permanent: `failed` latched true for the life of
+    the mounted card, so a lot the API had already resolved correctly sat on
+    the placeholder until the reader reloaded the page.
+
+    This watches for the card LEAVING the viewport and then coming back —
+    `wasOut` requires an actual departure before a re-entry counts, which is
+    what stops a card that failed while already on screen (and never moves)
+    from retrying in a tight loop against a URL that may simply be broken.
+    Scrolling away and back — or the carousel drifting the card off and back
+    around — is a real signal that whatever was congested a moment ago may
+    not be now, and costs nothing when it is not: one more request, same as
+    the reader opening the page fresh.
+  */
+  useEffect(() => {
+    if (!failed) return;
+    const node = boxRef.current;
+    if (!node) return;
+
+    let wasOut = false;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const inView = entries.some((e) => e.isIntersecting);
+        if (!inView) {
+          wasOut = true;
+          return;
+        }
+        if (wasOut) {
+          io.disconnect();
+          setFailed(false);
+          setAttempt(0);
+        }
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(node);
+    return () => io.disconnect();
+  }, [failed]);
+
+  /*
     One string, used by both layers. It was written out twice — once for the
     photo and once for the placeholder — and the two had already drifted apart
     once, which is the bug that put a second `scale-1.05` on the sold card's

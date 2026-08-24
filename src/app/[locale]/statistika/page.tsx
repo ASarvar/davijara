@@ -228,16 +228,16 @@ export default async function StatisticsPage({
           not pedantry — these lots are leased, not sold, and a reader who
           takes 117 mlrd for a disposal has been misinformed by us.
         */}
-        <p className="text-muted-foreground mt-6 max-w-2xl text-xs">
+        {/* <p className="text-muted-foreground mt-6 max-w-2xl text-xs">
           {t("valueNote")}
-        </p>
+        </p> */}
       </Section>
 
       <Section tone="light">
         <SectionHeader
           eyebrow={t("rhythmEyebrow")}
           title={t("monthlyTitle")}
-          description={t("monthlyBody")}
+          // description={t("monthlyBody")}
         />
         <ChartFigure
           legend={[
@@ -276,7 +276,7 @@ export default async function StatisticsPage({
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
             <Eyebrow as="h2" className="mb-4">
-              Lotlar boʻyicha maʻlumot
+              {t("outcomeTitle")}
             </Eyebrow>
             <p className="text-muted-foreground mb-7 max-w-md text-sm text-pretty">
               {t("outcomeBody")}

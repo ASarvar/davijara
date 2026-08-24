@@ -299,30 +299,36 @@ async function fetchLotImage(
  *
  * Throws `LotImageUnavailable` when the service could not answer. The caller
  * must let that through as a failure rather than turning it into "no photo" —
- * see the route handler.
+ * see the route handler. `unstable_cache` never stores a rejection, so a
+ * fault is never what gets cached here — only an ANSWER is, whether that
+ * answer is a photo or a confirmed "this lot has none". That is the literal
+ * shape of "cache it only once it has arrived successfully".
  *
  * `apiId` is the lot's region — its account is what the service authenticates
  * against, so it is part of the identity of the request, not a detail. It is
  * also part of the cache key by virtue of being an argument, which is what
  * keeps a miss under one region's account from being served for another's.
  *
- * AN HOUR, now that only answers get here.
+ * A DAY, now that only answers get here.
  *
- * The previous five minutes was never about freshness — a published lot's
- * photographs never change. It was the ceiling a swallowed failure imposed:
- * `unstable_cache` stores whatever the function RETURNS, and a `null` from a
- * timeout looked exactly like a `null` from a lot with no pictures, so the
- * lifetime had to be short enough to bound a blip. Measured at the time: a
- * 21-second network blip produced 18 timeouts, and every one of those lots
- * then served `{"image":null}` in ~12ms without re-contacting the service,
- * while the API returned 4-8 photographs for the same orders in ~50ms.
+ * It used to be an hour, and before that five minutes — both numbers were
+ * never about freshness, they were the ceiling a SWALLOWED failure imposed.
+ * `unstable_cache` stores whatever the function RETURNS, and when a timeout
+ * still returned `null`, that `null` was indistinguishable from a lot with no
+ * pictures, so the lifetime had to be short enough to bound a blip. Measured
+ * at the time: a 21-second network blip produced 18 timeouts, and every one
+ * of those lots then served `{"image":null}` in ~12ms without re-contacting
+ * the service, while the API answered 4-8 photographs for the same orders in
+ * ~50ms.
  *
- * A fault now throws, and `unstable_cache` does not store a rejection — so a
- * blip is not persisted at all and the lifetime can follow the data instead of
- * the failure mode. An hour rather than a day only because a lot's
- * photographs can still be edited upstream on the day it is published.
+ * A fault now throws instead of returning `null`, and a throw is never
+ * cached — so a blip is no longer persisted at all, and the lifetime can
+ * follow the DATA rather than the failure mode. A published lot's
+ * photographs do not change, so a day is not even generous; it is bounded
+ * only by the possibility that an office edits a listing shortly after
+ * publishing it, which is a same-day event if it happens at all.
  */
 export const getLotImage = unstable_cache(fetchLotImage, ["lot-image"], {
-  revalidate: 3600,
+  revalidate: 86_400,
   tags: ["lot-images"],
 });

@@ -78,16 +78,22 @@ export async function GET(request: Request) {
     {
       headers: {
         /*
-          Cached at the edge as well as in `unstable_cache`. A reader panning
-          the map reopens the same popups repeatedly, and the answer for a
-          published lot does not change within an hour.
+          A DAY at the edge, matching `getLotImage`'s own lifetime — a reader
+          panning the map reopens the same popups repeatedly, and a published
+          lot's photograph does not change hour to hour, or usually day to
+          day. `stale-while-revalidate` adds a further week: past the first
+          day a cached response keeps being served immediately while a fresh
+          one is fetched in the background, so a returning reader never waits
+          on a revalidation even after the day has passed.
 
-          `null` gets the SAME lifetime as a photograph now. It used to be cut
-          to a minute because it doubled as the failure response; a `null` that
+          `null` gets the SAME lifetime as a photograph. It used to be cut
+          short because it doubled as the failure response; a `null` that
           reaches this line means the service answered and this lot has no
-          usable picture, which is as durable a fact as the picture itself.
+          usable picture, which is as durable a fact as the picture itself —
+          see `getLotImage`'s doc comment for why only answers, never faults,
+          get this far.
         */
-        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
       },
     },
   );

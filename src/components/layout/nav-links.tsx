@@ -83,7 +83,7 @@ export function NavLinks() {
                   shadow. A heavier panel for two links reads as a menu system
                   the reader has to navigate rather than as two more pages.
                 */}
-                <div className="border-hairline bg-card rounded-xl border p-1 [box-shadow:var(--shadow-1)]">
+                <div className="border-hairline bg-card rounded-sm border p-1 [box-shadow:var(--shadow-1)]">
                   {item.children.map((child) => {
                     const childActive = pathname.startsWith(child.href);
                     return (
@@ -92,7 +92,7 @@ export function NavLinks() {
                           href={child.href}
                           aria-current={childActive ? "page" : undefined}
                           className={cn(
-                            "block rounded-lg px-3 py-2 text-[0.905rem] whitespace-nowrap transition-colors",
+                            "block px-3 py-2 text-[0.905rem] whitespace-nowrap transition-colors",
                             childActive
                               ? "text-accent-foreground font-semibold"
                               : "text-foreground/75 hover:text-accent-foreground hover:bg-secondary/60",
