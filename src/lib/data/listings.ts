@@ -941,6 +941,12 @@ export const fetchSoldYear = unstable_cache(
     let unsold = 0;
     const byDistrict: Record<string, number> = {};
     const sales: SoldLot[] = [];
+    // Upstream has been observed repeating the same order_id verbatim within
+    // one response (same lot, same price, same row) — reproduced live for a
+    // Qashqadaryo lot that then rendered twice, back to back, in the carousel.
+    // `id` is what `key={lot.id}` in RecentlySold keys on, so this is not
+    // cosmetic: a repeated id is a repeated card.
+    const seenIds = new Set<string>();
     for (const lot of json.data ?? []) {
       if (!lot.auction_date) continue;
       const at = new Date(lot.auction_date).getTime();
@@ -978,13 +984,18 @@ export const fetchSoldYear = unstable_cache(
         continue;
       }
 
+      const id = lot.order_id ?? lot.lot_number;
+      if (!id) continue;
+      // A repeated id would otherwise double the sold count, the district
+      // tally, and the card — see the note on `seenIds` above.
+      if (seenIds.has(String(id))) continue;
+      seenIds.add(String(id));
+
       sold++;
       const district = lot.district_name?.trim();
       if (district) byDistrict[district] = (byDistrict[district] ?? 0) + 1;
 
-      const id = lot.order_id ?? lot.lot_number;
       const start = Number(lot.start_price);
-      if (!id) continue;
       sales.push({
         id: String(id),
         title: lot.name?.trim() || "Nomsiz lot",
@@ -1008,12 +1019,20 @@ export const fetchSoldYear = unstable_cache(
   // v4: added `pending` / `unsold` for the statistics page.
   ["listings-sold-v4"],
   /*
-    A day, not the five minutes the catalogue uses. This is a year-to-date
-    total that moves by a few lots a day, and the query is the heaviest one
-    the app makes — 14 regions, ~2.7MB. Nothing on screen depends on it being
-    fresher than that.
+    THE SAME FIVE MINUTES the catalogue uses, not a day.
+
+    It used to be a day, on the theory that a year-to-date total moves by only
+    a few lots a day — true looking backward, false about TODAY: a sitting
+    that opens at 10:00 produces lots at 10:15, 11:00, and on through the
+    afternoon, and "So'nggi savdo kunida sotilgan obyektlar" is exactly the
+    section promising to show what just happened. A day-long cache held the
+    first lot or two of a sitting and hid the rest until the following day.
+
+    Still the heaviest query the app makes — 14 regions, ~2.7MB — but that cost
+    is paid once per five minutes across every reader, the same trade the
+    catalogue already makes for listings that move far less.
   */
-  { revalidate: 86_400, tags: ["listings"] },
+  { revalidate: 600, tags: ["listings"] },
 );
 
 /**
