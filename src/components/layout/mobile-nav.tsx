@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { Link, usePathname } from "@/i18n/navigation";
 import { mainNav, contacts } from "@/content/site";
+import { activeHref, isSectionActive } from "@/lib/nav-active";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -65,38 +66,46 @@ export function MobileNav() {
           </SheetTitle>
         </SheetHeader>
 
-        <nav className="flex flex-col p-2">
+        {/*
+          SCROLLABLE, now that the menu is six sections and thirty pages deep.
+          The sheet is a fixed-height column: without `overflow-y-auto` here
+          the list simply ran past the bottom edge and the last sections —
+          Yangiliklar and Aloqa — were unreachable on a handset.
+        */}
+        <nav className="flex flex-1 flex-col overflow-y-auto p-2">
           {mainNav.map((item) => {
-            const isActive =
-              item.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(item.href);
+            const sectionActive = isSectionActive(pathname, item);
+            const children = item.children ?? [];
+            const currentChild = activeHref(
+              pathname,
+              children.map((c) => c.href),
+            );
 
             return (
               /*
                 No disclosure toggle on mobile. A sheet already has room to
-                show every item, and hiding one child behind a tap costs a
-                gesture to save two lines. The child is simply indented
-                under its parent, which is also what a screen reader will
-                read from the nesting.
+                show every item, and hiding a section behind a tap costs a
+                gesture on the way to every page inside it. The children are
+                simply indented under their parent, which is also what a
+                screen reader will read from the nesting.
               */
-              <div key={item.href}>
+              <div key={item.href} className="mb-1">
                 <Link
                   href={item.href}
                   // Close on navigate — Radix does not know a route changed.
                   onClick={() => setOpen(false)}
-                  aria-current={isActive ? "page" : undefined}
+                  aria-current={sectionActive ? "page" : undefined}
                   className={cn(
-                    "block rounded-md px-3 py-2.5 text-sm transition-colors",
-                    isActive
-                      ? "bg-accent text-accent-foreground font-semibold"
+                    "block rounded-md px-3 py-2.5 text-sm font-semibold transition-colors",
+                    sectionActive
+                      ? "bg-accent text-accent-foreground"
                       : "hover:bg-secondary",
                   )}
                 >
                   {t(item.key)}
                 </Link>
-                {item.children?.map((child) => {
-                  const childActive = pathname.startsWith(child.href);
+                {children.map((child) => {
+                  const childActive = currentChild === child.href;
                   return (
                     <Link
                       key={child.href}
@@ -104,7 +113,10 @@ export function MobileNav() {
                       onClick={() => setOpen(false)}
                       aria-current={childActive ? "page" : undefined}
                       className={cn(
-                        "border-hairline ml-3 block border-l py-2.5 pr-3 pl-4 text-sm transition-colors",
+                        // No `truncate`: these labels are full sentences and
+                        // a clipped "PQ-447-son qarori 5-ilovasidagi…" tells
+                        // the reader less than the two lines it costs.
+                        "border-hairline ml-3 block border-l py-2 pr-3 pl-4 text-sm leading-snug text-pretty transition-colors",
                         childActive
                           ? "text-accent-foreground font-semibold"
                           : "text-muted-foreground hover:text-accent-foreground",

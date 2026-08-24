@@ -11,70 +11,73 @@ import { AccessibilityDialog } from "./accessibility-dialog";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
- * Site header — a thin utility strip stacked above the navigation row.
+ * Site header — a tall brand band above a centred navigation bar.
  *
- *     ┌─ phone · email ───────────── a11y · lang ─┐   navy-mid
- *     ├───────────────────────────────────────────┤
- *     └─ LOGO ───────────────────────── nav links ┘   navy
+ *     ┌─ LOGO ──────────────── a11y · theme ─┐  brand band, --background
+ *     │                        phone         │
+ *     │                        email         │
+ *     ├──────────────────────────────────────┤
+ *     └──── Markaz · Faoliyat · Hujjatlar ───┘  nav bar, --band, STICKY
  *
- * Two full-bleed bars, each with its own `Container`, so the tinted strip runs
- * edge to edge while its contents still line up with the logo below. The two
- * tones are what separate the rows; there is no rule between them beyond the
- * strip's own bottom border.
+ * THE TWO BANDS: brand band on `--band`, nav bar on `--background`. The
+ * tinted step is the one carrying the contact details and the logo, and the
+ * bar the reader actually navigates from sits on the page's own ground — so
+ * the persistent rail reads as continuous with the content beneath it rather
+ * than as a second tinted slab stacked on the first.
  *
- * NO LOGIN CONTROL HERE, and the nav sits hard against the right edge.
- * Two other entry points to /kirish remain — "Kirish" in the sheet menu and
- * "Kabinet" in the bottom nav — so this is a decluttering of the desktop bar,
- * not the removal of the route.
+ * WHY ONLY THE NAV BAR STICKS
  *
- * WHY THE NAV APPEARS AT `xl` AND NOT `lg`
- * The six nav labels are long in Uzbek. Measured at 1280: 650px of links plus
- * a 236px logo and the 16px gap is 902px inside a 1136px content box, so the
- * row needs ~966px of viewport and does NOT fit at `lg` — 1024px leaves only
- * 960px of content, six short.
+ * The brand band is ~110px at `xl` and the contact stack inside it is three
+ * lines. Sticking the whole header would hold ~166px — a fifth of an 800px
+ * viewport — on every page, to keep showing a phone number the reader has
+ * already seen. So the band scrolls away and the nav bar alone pins to the
+ * top, which is the only part with a job to do while reading.
  *
- * It cleared `lg` briefly, in the window between the Kirish button coming out
- * (~110px back) and the nav type going from 13.5px to 14.5px (~55px spent).
- * Re-measure here before moving the breakpoint, and after any change to that
- * size or to the number of items.
+ * Below `xl` that inverts: the nav bar renders nothing (the sheet takes over)
+ * so there would be nothing left to stick, and the header itself becomes the
+ * sticky element instead — at that width it is one compact row of logo +
+ * controls, ~64px, which is affordable. Hence `sticky xl:static` on the
+ * header against `xl:sticky` on the bar.
  *
- * On a handset the utility strip has to stay on one line or the sticky header
- * eats ~130px of a 667px screen: hence the email hidden below `sm` and the
- * accessibility trigger going icon-only (with `sr-only` text — never an
- * unlabelled icon, least of all on the accessibility control).
+ * THE BANNER IS NOT HERE. It belongs to the homepage only (see
+ * `components/sections/banner.tsx`), so it must not be part of the chrome
+ * every route renders.
  */
 export async function SiteHeader() {
   const tTopbar = await getTranslations("topbar");
 
   return (
-    <header data-tone="deep" className="sticky top-0 z-40">
-      {/* ── Utility strip ──────────────────────────────────────────────── */}
-      {/* `bg-band`, not `bg-navy-mid`: the token collapses to black in high
-          contrast, so the strip does not stay navy while the rest of the page
-          goes black. See --band in globals.css. */}
-      <div className="bg-band border-hairline border-b">
-        {/* 0.78125rem === 12.5px at the default root size — same rendering as
-            a `text-[12.5px]`, but rem-based, so the strip scales with the
-            "Matn o'lchami" accessibility setting instead of ignoring it. */}
-        <Container className="text-muted-foreground relative flex items-center justify-between gap-x-5 py-2 text-[0.78125rem]">
+    <>
+      {/* ── Brand band ─────────────────────────────────────────────────── */}
+      <header data-tone="deep" className="bg-band sticky top-0 z-40 xl:static">
+        <Container className="relative flex items-center justify-between gap-4 py-3 xl:py-6">
+          <Link
+            href="/"
+            className="flex shrink-0 items-center"
+            aria-label={site.name}
+          >
+            <Logo variant="header" priority />
+          </Link>
+
           {/* Not a decorative chip — this deploy is a real test rollout of a
               government portal, and CLAUDE.md's accuracy-first rule extends
               to not letting it read as final. Styled as an official tag
-              (gold accent + status dot), the same visual language as the
-              active language chip below, rather than an alarm-red error
-              badge — a state portal disclosing its own status is routine,
-              not a fault condition. Centred over the strip via absolute
-              positioning rather than a real flex slot: with `justify-between`
-              already spreading the contact links and the a11y/lang controls
-              to the two edges, a middle flex child would land wherever their
-              widths happen to leave off, not at the true centre. Hidden below
-              `sm`, same threshold as the email link, because centring it on a
-              375px row would sit it on top of the phone number. */}
+              (accent + status dot), the same visual language as the active
+              nav item below, rather than an alarm-red error badge — a state
+              portal disclosing its own status is routine, not a fault
+              condition.
+
+              Centred by absolute positioning rather than as a real flex
+              child: with `justify-between` already spreading the logo and the
+              contact stack to the two edges, a middle flex item would land
+              wherever their widths happen to leave off, not at the true
+              centre. Hidden below `sm`, where centring it on a 375px row
+              would sit it on top of the logo. */}
           <div className="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
-            {/* pointer-events restored here, on the badge alone — the
-                wrapper above spans the full strip so it can centre this,
-                but must stay click-through or it would sit on top of the
-                phone/email/lang controls and swallow their clicks. */}
+            {/* pointer-events restored here, on the badge alone — the wrapper
+                above spans the full band so it can centre this, but must stay
+                click-through or it would sit on top of the logo and the
+                controls and swallow their clicks. */}
             <span
               title={tTopbar("testModeDescription")}
               className="border-outline bg-accent text-accent-foreground pointer-events-auto flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-xs font-medium"
@@ -88,16 +91,11 @@ export async function SiteHeader() {
                 Per-letter shimmer. The letters are split for the animation
                 ONLY, so they are hidden from assistive tech and the real
                 label is carried by the sr-only span below — a screen reader
-                must hear "Sinov rejimi", not a string of separate letters.
+                must hear the sentence, not a string of separate letters.
 
                 The letters live in their own wrapper rather than as direct
                 children of the badge: the badge is `gap-1.5`, which would
                 otherwise open a 6px gap between every character.
-
-                Not a flex row and not inline-block per letter — plain inline
-                spans animating only colour and opacity. That keeps the text
-                in normal inline flow, so the space between the two words
-                behaves like a space and nothing has to re-create kerning.
               */}
               <span aria-hidden="true" className="test-mode-text">
                 {(() => {
@@ -113,11 +111,7 @@ export async function SiteHeader() {
                           A 0–1 position through the label, not a raw index.
                           CSS multiplies it by one fixed sweep duration, so the
                           wave takes the same time to cross however long the
-                          label is. A per-letter delay in ms cannot do that:
-                          tuned for "Sinov rejimi" it was 80ms, and this label
-                          — nearly three times longer — pushed the last letter
-                          to a 2.3s delay inside a 2.6s cycle, leaving the
-                          wave restarting before it had finished crossing.
+                          label is.
                         */
                         style={
                           { "--pos": i / chars.length } as React.CSSProperties
@@ -133,7 +127,28 @@ export async function SiteHeader() {
             </span>
           </div>
 
-          <div className="flex min-w-0 items-center gap-x-5">
+          {/*
+            THE CONTACT STACK, right-aligned and three rows deep.
+
+            Controls on top, then phone, then email — the order the operator's
+            reference layout uses. It is a column rather than the old single
+            strip because the brand band is now tall enough to carry one, and
+            because a phone number the reader has to scan a wide row for is a
+            phone number they do not find.
+
+            0.78125rem === 12.5px at the default root size: the same rendering
+            as a `text-[12.5px]`, but rem-based, so it scales with the "Matn
+            o'lchami" accessibility setting instead of ignoring it.
+          */}
+          <div className="text-muted-foreground hidden flex-col items-end gap-2 text-[0.78125rem] xl:flex">
+            <div className="flex items-center gap-4">
+              {/* Theme first, then the accessibility dialog: this one is a
+                  single-tap switch, the other opens a panel, and the lighter
+                  control reads better closest to the content it changes. */}
+              <ThemeToggle />
+              <AccessibilityDialog />
+            </div>
+
             <a
               href={contacts.phoneHref}
               className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
@@ -144,55 +159,65 @@ export async function SiteHeader() {
 
             <a
               href={contacts.emailHref}
-              className="hover:text-accent-foreground hidden items-center gap-1.5 transition-colors sm:flex"
+              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
             >
               <Mail aria-hidden="true" className="size-3.5 shrink-0" />
               {contacts.email}
             </a>
           </div>
 
-          {/* LangSwitcher hidden for now — the site is only being shown in
-              Uzbek at this stage. ru/en routes and messages stay in place
-              underneath; this is a UI-visibility decision, not a locale
-              removal, so re-adding the control is a one-line change. */}
-          <div className="flex shrink-0 items-center gap-3 px-3 sm:gap-4">
-            {/* Theme first, then the accessibility dialog: this one is a
-                single-tap switch, the other opens a panel, and the lighter
-                control reads better closest to the content it changes. */}
+          {/*
+            Below `xl` the same controls collapse onto the logo's own row and
+            the sheet trigger joins them — the brand band IS the whole header
+            at that width, so everything the reader can act on has to be in
+            it.
+          */}
+          <div className="flex shrink-0 items-center gap-3 xl:hidden">
             <ThemeToggle />
             <AccessibilityDialog />
+            <MobileNav />
           </div>
         </Container>
-      </div>
+      </header>
 
-      {/* ── Navigation row ─────────────────────────────────────────────── */}
-      <div className="bg-background border-hairline border-b">
-        {/* `ml-auto` on the nav rather than `justify-between` on the row.
-            With the Kirish button gone the row's last item is the sheet
-            trigger, which hides itself from xl up — so `justify-between`
-            would have spread the links against a zero-width third item and
-            parked them mid-row. Pushing the nav right pins it to the edge at
-            every width, and below xl (where the nav renders nothing) the same
-            auto margin carries the sheet trigger there instead. */}
-        <Container className="flex items-center gap-4 py-3">
-          <Link
-            href="/"
-            className="flex shrink-0 items-center"
-            aria-label={site.name}
-          >
-            <Logo variant="header" priority />
-          </Link>
+      {/* ── Navigation bar ─────────────────────────────────────────────── */}
+      {/*
+        A SIBLING OF THE HEADER, not a child of it, and that is what makes the
+        sticky work rather than a styling preference.
 
-          {/* NavLinks hides itself below xl; the wrapper stays so the landmark
-              is not conditionally rendered. */}
-          <nav aria-label="Asosiy menyu" className="ml-auto min-w-0">
-            <NavLinks />
-          </nav>
+        `position: sticky` travels only within its own parent's box. Nested
+        inside `<header>`, this bar's parent ended exactly where the bar did —
+        zero room to travel — so it scrolled away with the brand band and the
+        sticky did nothing at all. Measured: at scrollY 900 its top was at
+        -581px. Lifted to a body-level sibling, its containing block is the
+        page and it pins for the whole document.
 
-          {/* Sheet trigger; hides itself from xl up. */}
-          <MobileNav />
+        The alternative — keeping it nested and giving `<header>` a negative
+        `top` equal to the brand band's height — would hardcode a pixel value
+        that the "Matn o'lchami" control changes at runtime, so the bar would
+        detach from the top edge for exactly the readers who enlarged the
+        text.
+
+        `hidden xl:block`, so this bar does not exist at all below the
+        breakpoint — the sheet trigger in the band above is the navigation
+        there, and the header itself carries the sticky at that width.
+
+        `border-y` on the bar rather than a bottom border on the band above:
+        the bar is what survives scrolling, so it carries its own edges.
+      */}
+      <nav
+        aria-label="Asosiy menyu"
+        data-tone="deep"
+        className="bg-background border-hairline hidden border-y xl:sticky xl:top-0 xl:z-40 xl:block"
+      >
+        {/* CENTRED, matching the operator's reference layout. The six section
+            labels are short enough in Uzbek to sit as one centred group;
+            `flex-wrap` in NavLinks still lets the row break onto a second line
+            at 125/150% text rather than running off the edge. */}
+        <Container className="flex justify-center">
+          <NavLinks />
         </Container>
-      </div>
-    </header>
+      </nav>
+    </>
   );
 }

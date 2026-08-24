@@ -103,21 +103,21 @@
   },
   "sold": {
     "eyebrow": "RESULTS",
-    "title": "Sold on the last auction day",
-    "description": "Objects sold at the {date} auction, with the opening and final price side by side.",
+    "title": "Leased on the last auction day",
+    "description": "Objects leased at the {date} auction, with the opening and final price side by side.",
     "action": "All results",
     "startPrice": "Opening price",
-    "soldPrice": "Sold for",
+    "soldPrice": "Final price",
     "noRise": "At the opening price",
     "prev": "Previous",
     "next": "Next",
-    "pageTitle": "Sold objects",
-    "pageLede": "{count} objects sold at auction so far this year, each with its opening and final price.",
-    "pageEmpty": "No sold objects match the selected filters.",
+    "pageTitle": "Leased objects",
+    "pageLede": "{count} objects leased at auction so far this year, each with its opening and final price.",
+    "pageEmpty": "No leased objects match the selected filters.",
     "pagination": "Pages",
-    "filterLabel": "Filter sold objects",
+    "filterLabel": "Filter leased objects",
     "dateFrom": "From",
     "dateTo": "To",
-    "pageLedeRange": "{count} objects sold at auction between {from} and {to}."
+    "pageLedeRange": "{count} objects leased at auction between {from} and {to}."
   }
 }

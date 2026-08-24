@@ -67,29 +67,92 @@ export interface ExternalNavItem {
   href: string;
 }
 
+/**
+ * The six institutional sections, in the operator's own order.
+ *
+ * SHAPED BY THE OPERATOR, not by traffic. This is the standard Uzbek state
+ * portal information architecture — the organisation first, its activity
+ * second, then documents, open data, news and contact — and a citizen who has
+ * used any other ministry site meets the structure they already know.
+ *
+ * WHAT THAT COSTS, recorded here so it is a decision rather than an accident:
+ * the catalogue (`/obyektlar`) is the portal's primary service and it now sits
+ * one level down, under "Faoliyat". The homepage search panel is therefore the
+ * main way in and must stay above the fold; if that panel ever moves, this
+ * trade needs revisiting.
+ *
+ * EVERY href IS A REAL ROUTE. The legacy site pointed six of eight nav items
+ * at `href="#"`; nothing here may do that. Pages with no content yet render
+ * `PlaceholderPage`, so the structure is honest and each one is replaced
+ * independently as content arrives.
+ *
+ * Parents are real pages too, never bare folders — `/faoliyat` and
+ * `/ochiq-malumotlar` render a section index listing their own children, so a
+ * reader who clicks the section header lands somewhere useful instead of on a
+ * dead end. The other four parents already had a natural own-page.
+ */
 export const mainNav: NavItem[] = [
-  { key: "home", href: "/" },
-  { key: "objects", href: "/obyektlar" },
-  { key: "privileges", href: "/imtiyozlar" },
-  // { key: "services", href: "/xizmatlar" },
-  { key: "documents", href: "/hujjatlar" },
-  { key: "news", href: "/yangiliklar" },
   {
-    /*
-      "Markaz" is the SECTION; "Markaz haqida" is a page inside it.
-
-      Statistics is about the Centre's own work, so it belongs here rather
-      than as an eighth top-level item — the row already wraps at 125% text.
-      The parent keeps its own href because a section header that cannot be
-      clicked is a dead end for anyone who reaches it by keyboard.
-    */
     key: "centre",
     href: "/markaz",
     children: [
       { key: "about", href: "/markaz" },
-      { key: "statistics", href: "/statistika" },
+      { key: "duties", href: "/markaz/vazifalar" },
+      { key: "structure", href: "/markaz/tuzilma" },
+      { key: "reception", href: "/markaz/qabul-kunlari" },
+      { key: "anticorruption", href: "/markaz/korrupsiyaga-qarshi" },
+      { key: "territorial", href: "/markaz/hududiy-boshqarmalar" },
+      { key: "apparatus", href: "/markaz/markaziy-apparat" },
+      { key: "vacancies", href: "/markaz/bosh-ish-orinlari" },
     ],
   },
+  {
+    key: "activity",
+    href: "/faoliyat",
+    children: [
+      { key: "inventory", href: "/faoliyat/xatlov" },
+      // The catalogue and the results list, under the names this menu gives
+      // them. Both are long-standing routes; only the label is new.
+      { key: "vacantObjects", href: "/obyektlar" },
+      { key: "leasing", href: "/faoliyat/ijaraga-berish" },
+      { key: "leasedObjects", href: "/sotilgan-obyektlar" },
+      { key: "leasePrivileges", href: "/imtiyozlar" },
+      { key: "faq", href: "/faoliyat/savollar" },
+    ],
+  },
+  {
+    key: "documentsSection",
+    href: "/hujjatlar",
+    children: [
+      { key: "documentsMain", href: "/hujjatlar" },
+      { key: "documentsInternal", href: "/hujjatlar/idoraviy" },
+      { key: "documentsRepealed", href: "/hujjatlar/kuchini-yoqotgan" },
+      { key: "documentsPrograms", href: "/hujjatlar/dasturlar" },
+      { key: "documentsDrafts", href: "/hujjatlar/loyihalar" },
+    ],
+  },
+  {
+    key: "openData",
+    href: "/ochiq-malumotlar",
+    children: [
+      { key: "report3299", href: "/ochiq-malumotlar/qaror-3299" },
+      { key: "decreePf154", href: "/ochiq-malumotlar/farmon-pf-154" },
+      { key: "resolutionPq447", href: "/ochiq-malumotlar/qaror-pq-447" },
+      { key: "statistics", href: "/statistika" },
+      { key: "appeals", href: "/ochiq-malumotlar/murojaatlar" },
+    ],
+  },
+  {
+    key: "news",
+    href: "/yangiliklar",
+    children: [
+      { key: "newsCentre", href: "/yangiliklar" },
+      { key: "newsUzbekistan", href: "/yangiliklar/ozbekiston" },
+      { key: "newsStatements", href: "/yangiliklar/bayonotlar" },
+      { key: "newsMedia", href: "/yangiliklar/media" },
+    ],
+  },
+  { key: "contact", href: "/aloqa" },
 ];
 
 /**

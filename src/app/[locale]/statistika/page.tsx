@@ -517,7 +517,6 @@ export default async function StatisticsPage({
             }
           />
         </div>
-        <p className="text-muted-foreground mt-8 text-xs">{t("riseFloor")}</p>
       </Section>
     </>
   );

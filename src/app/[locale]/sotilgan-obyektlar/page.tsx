@@ -17,16 +17,25 @@ import { Section } from "@/components/layout/section";
 import { SoldFilter } from "@/components/sections/sold-filter";
 
 export const metadata: Metadata = {
-  title: "Sotilgan obyektlar",
+  title: "Ijaraga berilgan obyektlar",
   description:
-    "Joriy yilda savdolarda sotilgan davlat mulki obyektlari — boshlang'ich va yakuniy narx bilan.",
+    "Joriy yilda savdolarda ijaraga berilgan davlat mulki obyektlari — boshlang'ich va yakuniy narx bilan.",
 };
 
 /** Four rows of three at the widest grid, as on /obyektlar. */
 const PER_PAGE = 12;
 
 /**
- * "Sotilgan obyektlar" — the results the homepage strip is a window onto.
+ * "Ijaraga berilgan obyektlar" — the results the homepage strip is a window
+ * onto.
+ *
+ * THE ROUTE IS STILL `/sotilgan-obyektlar` while the page is titled "Ijaraga
+ * berilgan obyektlar", and that gap is deliberate. The wording was corrected
+ * because state property is LEASED, not sold — the statistics copy already
+ * said so ("davlat mulki ijaraga beriladi, sotilmaydi") while this page's
+ * heading contradicted it. The URL was not, because it is the address the
+ * homepage strip, the sitemap and any link already made to this page all use;
+ * renaming it would break them for a string no reader has to type.
  *
  * Built to the same shape as /obyektlar, deliberately: a deep header block, the
  * filter band with its gold hairlines, then a deep results section. The first

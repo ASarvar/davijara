@@ -1,6 +1,7 @@
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 
+import { HomeBanner } from "@/components/sections/home-banner";
 import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsSection } from "@/components/sections/objects-section";
@@ -70,6 +71,10 @@ export default async function HomePage({
   */
   return (
     <>
+      {/* Renders nothing until content/banner.ts names the artwork — see the
+          note there. Above the Hero, so it reads as the masthead's own strip
+          rather than as an interruption partway down the page. */}
+      <HomeBanner />
       <Hero searchParams={sp} />
       <SearchWidget values={sp} />
       <ObjectsSection searchParams={sp} />
