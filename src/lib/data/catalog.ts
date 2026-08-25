@@ -123,12 +123,13 @@ function currentYear(): number {
   return new Date(Date.now() + TASHKENT_OFFSET_MS).getUTCFullYear();
 }
 
-/** `{year}` / `{unit}` in a stat label. */
-function fill(label: string, values: Record<string, string | number>): string {
-  return label.replace(/\{(\w+)\}/g, (whole, key) =>
-    key in values ? String(values[key]) : whole,
-  );
-}
+/*
+  A `fill()` helper used to live here, substituting `{year}` and `{unit}` into
+  stat labels. Both placeholders are gone: the year moved out of the labels
+  entirely (it is printed once beside the heading) and the unit became a field
+  on `Stat`. No label carries a placeholder any more, so the substitution step
+  went with them.
+*/
 
 /**
  * Square metres → a figure and the unit that suits it.
@@ -153,6 +154,14 @@ function formatLeasedArea(m2: number): { value: string; unit: string } {
 
 export interface HeroStatsResult {
   stats: Stat[];
+  /**
+   * The year all four cards count.
+   *
+   * Returned rather than left in each label: every card covers the same
+   * period, so the hero prints it ONCE beside the section heading. It is
+   * Tashkent's year, not the server's — see `currentYear`.
+   */
+  year: number;
   /** True when contracts/area are the REGION's because the district is
       absent from the register. The hero prints a line saying so. */
   contractsWidened: boolean;
@@ -183,25 +192,21 @@ export async function getHeroStats(
     {
       ...contractsStat,
       value: register ? formatNumber(register.contracts) : contractsStat.value,
-      label: fill(contractsStat.label, { year }),
     },
     {
       ...areaStat,
       value: area ? area.value : areaStat.value,
-      // The static figure is the operator's, and it is in millions.
-      label: fill(areaStat.label, { year, unit: area ? area.unit : "mln m²" }),
+      // The unit rides alongside the figure now rather than inside the label.
+      // The static fallback is the operator's, and it is in millions.
+      unit: area ? area.unit : areaStat.unit,
     },
   ];
 
   if (sold != null) {
-    stats.push({
-      ...soldStat,
-      value: formatNumber(sold),
-      label: fill(soldStat.label, { year }),
-    });
+    stats.push({ ...soldStat, value: formatNumber(sold) });
   }
 
-  return { stats, contractsWidened: register?.widened ?? false };
+  return { stats, year, contractsWidened: register?.widened ?? false };
 }
 
 export async function getImpactStats(): Promise<Stat[]> {

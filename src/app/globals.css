@@ -783,25 +783,6 @@
   filter: none;
 }
 
-/*
-  Brand marks lose their brand colours here, and that is the point of the
-  mode rather than a compromise with it.
-
-  The social icons are drawn in Telegram blue, Instagram's gradient and
-  Facebook blue — correct everywhere else, and wrong in a palette whose whole
-  premise is one uniform ink at 21:1. #1877F2 on black is 3.6:1; the
-  Instagram gradient has stops that fall below 3:1. Both are re-inked to
-  `currentColor`, which this mode has already resolved to white.
-
-  `fill` is set as an ATTRIBUTE on those SVGs, and an attribute loses to any
-  CSS declaration — so this needs no `!important`. The gradient is overridden
-  on the <path> itself, since `url(#…)` is set there rather than on the root.
-*/
-:root[data-contrast="high"] .brand-mark,
-:root[data-contrast="high"] .brand-mark path {
-  fill: currentColor;
-}
-
 :root[data-contrast="high"] [aria-hidden="true"][class*="blur"] {
   display: none;
 }

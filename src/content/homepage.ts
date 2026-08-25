@@ -16,27 +16,35 @@ import type {
   in this project — see src/content/privileges.ts.
 */
 
+/*
+  THE YEAR IS NOT IN THESE LABELS ANY MORE. It is printed once, beside the
+  section heading, because all four cards count the same year and repeating
+  it four times said nothing the heading could not say once. `getHeroStats`
+  returns that year for the heading to use.
+*/
 export const heroStats: Stat[] = [
   {
     value: "1 390+",
-    label: "Ijaraga taklif etilayotgan obyektlar",
+    label: "Ijaraga berilayotgan obyektlar",
     icon: "Building2",
   },
   {
     value: "28 075",
-    label: "{year}-yil ijara shartnomalari",
+    label: "Ijara shartnomalari",
     icon: "FileText",
   },
   /*
-    `{unit}` as well as `{year}`, because the scale of this figure changes by
-    three orders of magnitude between the republic (148,8 mln m²) and a single
-    tuman (30,0 ming m²). Pinned to "mln m²" the card read "0" for most
-    districts. The static value below is the operator's, in millions; the live
-    path picks the unit to match the number — see `formatLeasedArea`.
+    The unit is a FIELD, not part of the label, because the scale of this
+    figure changes by three orders of magnitude between the republic (148,8
+    mln m²) and a single tuman (30,0 ming m²). Pinned to "mln m²" the card read
+    "0" for most districts. The static value below is the operator's, in
+    millions; the live path picks the unit to match the number — see
+    `formatLeasedArea`.
   */
   {
     value: "145,9",
-    label: "{year}-yil ijaraga olingan maydon ({unit})",
+    label: "Ijaraga berilgan maydon",
+    unit: "mln m²",
     icon: "LandPlot",
   },
   /*
@@ -45,14 +53,13 @@ export const heroStats: Stat[] = [
     to fall back to and `getHeroStats` drops the card entirely when the
     service cannot answer.
 
-    `{year}` is interpolated, unlike the two above. Those are operator-reported
-    totals for 2026 specifically and will be replaced by hand when 2027's
-    arrive; this one recounts itself, so hard-coding a year would make it lie
-    on the 1st of January.
+    Unlike the two above — operator-reported totals for 2026 specifically,
+    replaced by hand when 2027's arrive — this one recounts itself from the
+    live service every year.
   */
   {
     value: "",
-    label: "{year}-yilda ijaraga berilgan obyektlar",
+    label: "Ijaraga berilgan obyektlar",
     icon: "Handshake",
   },
 ];

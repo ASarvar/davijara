@@ -222,6 +222,17 @@ export interface Step {
 export interface Stat {
   value: string;
   label: string;
+  /**
+   * A unit printed small beside the figure — "mln m²" next to "156,8".
+   *
+   * Its own field rather than part of `label`, because it belongs to the
+   * NUMBER and not to the description of it: "Ijaraga berilgan maydon (mln
+   * m²)" pushed a three-word parenthetical onto a second line of the label
+   * while the figure sat alone. It also has to vary at runtime — the same
+   * card carries the republic's millions and a tuman's thousands, so the unit
+   * moves with the magnitude (see `formatLeasedArea`).
+   */
+  unit?: string;
   /** Name from the icon registry — only rendered by `StatList`'s `card` variant. */
   icon?: string;
   /**

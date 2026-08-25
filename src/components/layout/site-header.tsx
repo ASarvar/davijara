@@ -160,27 +160,23 @@ export async function SiteHeader() {
               <AccessibilityDialog />
             </div>
 
-            {/* Phone and email share a row: they are both "how to reach the
-                Centre", and stacking them made the band a row taller to say
-                the same thing twice over. The gap is wide enough that the two
-                do not read as one string. */}
-            <div className="flex items-center gap-5">
-              <a
-                href={contacts.phoneHref}
-                className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
-              >
-                <Phone aria-hidden="true" className="size-4 shrink-0" />
-                {contacts.phone}
-              </a>
+            {/* Phone and email each keep their own row — the operator asked
+                for this back after a shared-row version. */}
+            <a
+              href={contacts.phoneHref}
+              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
+            >
+              <Phone aria-hidden="true" className="size-3.5 shrink-0" />
+              {contacts.phone}
+            </a>
 
-              <a
-                href={contacts.emailHref}
-                className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
-              >
-                <Mail aria-hidden="true" className="size-4 shrink-0" />
-                {contacts.email}
-              </a>
-            </div>
+            <a
+              href={contacts.emailHref}
+              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
+            >
+              <Mail aria-hidden="true" className="size-3.5 shrink-0" />
+              {contacts.email}
+            </a>
 
             <SocialLinks className="flex items-center gap-3" />
           </div>

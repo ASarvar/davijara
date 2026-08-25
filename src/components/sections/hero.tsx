@@ -38,7 +38,7 @@ export async function Hero({
 } = {}) {
   const t = await getTranslations("hero");
   const { region, district } = parseListingQuery(searchParams);
-  const [{ stats, contractsWidened }, regions] = await Promise.all([
+  const [{ stats, year, contractsWidened }, regions] = await Promise.all([
     getHeroStats(region, district),
     region ? getRegions() : Promise.resolve([]),
   ]);
@@ -127,19 +127,45 @@ export async function Hero({
           {t("titleLead")} {t("rotator.third")}
         </h1>
 
-        <div data-enter style={{ "--enter-delay": 2 } as React.CSSProperties}>
+        <div>
           {/*
-            h2, not h1. The page's own <h1> is the sr-only line above — this
-            names the figures beneath it, which is a section of the page
-            rather than its subject. Two h1s, or an h1 here and none above,
-            would both misdescribe the document to a screen reader.
+            `data-enter` moved off this wrapper and onto the heading row and
+            each card separately. Nested on the wrapper it composed with the
+            cards' own transforms, so every card travelled twice as far as
+            intended; separate elements let the row and the four cards
+            cascade instead.
           */}
-          <h2 className="font-heading mb-5 text-xl font-semibold sm:text-2xl">
-            {t("statsTitle")}
-          </h2>
+          <div
+            data-enter
+            style={{ "--enter-delay": 2 } as React.CSSProperties}
+            className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"
+          >
+            {/*
+              h2, not h1. The page's own <h1> is the sr-only line above — this
+              names the figures beneath it, which is a section of the page
+              rather than its subject. Two h1s, or an h1 here and none above,
+              would both misdescribe the document to a screen reader.
+            */}
+            <h2 className="font-heading text-xl font-semibold sm:text-2xl">
+              {t("statsTitle")}
+            </h2>
 
-          {/* One divided panel rather than four cards — see stat-panel.tsx
-              for why the shape changed and how it flips at `lg`. */}
+            {/*
+              THE PERIOD, ONCE. All four cards count the same year, and it
+              used to be repeated inside three of the four labels. Printed
+              here it says the same thing in one place and leaves the labels
+              describing what they actually count.
+
+              Plain text for now. This is where the year SELECT goes when
+              other years become available — the value already comes from
+              `getHeroStats` rather than being hardcoded, so that swap is a
+              control, not a data change.
+            */}
+            <p className="text-muted-foreground text-sm font-medium tabular-nums">
+              {year}-yil
+            </p>
+          </div>
+
           <StatPanel stats={stats} />
 
           {/*

@@ -80,9 +80,9 @@ export const socialLinks: Array<{
   href: string;
   label: string;
 }> = [
-  { platform: "telegram", href: "https://t.me/davijaruz", label: "Telegram" },
+  { platform: "telegram", href: "https://t.me/davijara_uz", label: "Telegram" },
   { platform: "instagram", href: "https://instagram.com/davijarauz", label: "Instagram" },
-  { platform: "facebook", href: "https://facebook.com/davijarauz", label: "Facebook" },
+  { platform: "facebook", href: "https://www.facebook.com/davijarauz/", label: "Facebook" },
 ];
 /**
  * The six institutional sections, in the operator's own order.
