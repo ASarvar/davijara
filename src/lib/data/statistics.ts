@@ -25,21 +25,28 @@ import type { SoldLot } from "@/types/content";
   series and three years of blanks presented as though they were comparable.
   The month is the time axis instead.
 
-  ── EVERY FIGURE HERE IS A MEDIAN, NOT A MEAN ──────────────────────────────
-  Not a stylistic preference; measured. One lot — Toshkent's transport lot —
-  was 76% of December 2024's total, and in January 2026 a single lot was 74%
-  of the month. Across 2026 the mean lot price is 38,6 mln so'm and the median
-  is 8,9 mln: the mean describes a lot that does not exist. Totals are still
-  shown, because "how much state property was let" is a real question, but
-  they never carry a trend on their own.
+  ── MEANS, EXCEPT FOR AREA ─────────────────────────────────────────────────
+  Money and rise multiples are arithmetic MEANS, at the operator's request:
+  "median" is a word a citizen should not have to look up, and the headline
+  card already said "O'rtacha lot narxi" over a median, so the label and the
+  number disagreed.
 
-  ── AND WHY NO SUM OF `rent_area` ──────────────────────────────────────────
-  343 of the 3 034 sales are natural water bodies — one is 48 250 000 m² at
-  4,53 so'm/m²/year. They are 11,3% of sales, 98,7% of all `rent_area`, and
-  2,8% of value. Summing that field produces 161 mln m² and means nothing.
-  The register's own `total_rental_area` is the area figure (CLAUDE.md says
-  the same), and everything else here uses a median, which those 343 lots
-  cannot move.
+  The skew this accepts is real and is measured. One lot — Toshkent's
+  transport lot — was 76% of December 2024's total, and in January 2026 a
+  single lot was 74% of the month. Across 2026 the mean lot price is 38,6 mln
+  so'm against a median of 8,9 mln. Both are true; the mean answers "how much
+  changed hands per lot", not "what would I pay".
+
+  AREA IS THE ONE EXCEPTION and it is not a matter of taste. 343 of the 3 034
+  sales are natural water bodies — one is 48 250 000 m² at 4,53 so'm/m²/year.
+  They are 11,3% of sales, 98,7% of all `rent_area`, and 2,8% of value. A mean
+  over that describes a five-hectare lot as typical. So area keeps the middle
+  value, and `rent_area` is still never summed — the register's own
+  `total_rental_area` is the area figure (CLAUDE.md says the same).
+
+  The per-m² rate is a mean but is safe from the same lots by a different
+  mechanism: PER_M2_MAX_AREA drops everything over 100 m² before the rate is
+  computed at all.
 */
 
 /** The only year with area data and with unsold lots. See above. */
@@ -102,8 +109,8 @@ export interface MonthPoint {
   sold: number;
   /** Total annual rent contracted that month, in so'm. */
   total: number;
-  /** Median lot price that month, in so'm. */
-  median: number;
+  /** Mean lot price that month, in so'm. */
+  avg: number;
 }
 
 export interface RegionStat {
@@ -111,7 +118,7 @@ export interface RegionStat {
   name: string;
   sold: number;
   total: number;
-  /** Median so'm per m² per year. Null when too few lots carry an area. */
+  /** Mean so'm per m² per year. Null when too few lots carry an area. */
   perM2: number | null;
 }
 
@@ -126,14 +133,14 @@ export interface Statistics {
   sellRate: number;
   /** Total annual rent across every sale, in so'm. */
   total: number;
-  /** Median sale price, in so'm. */
-  medianPrice: number;
-  /** Median floor area, in m². */
-  medianArea: number;
-  /** Median so'm per m² per year. */
-  medianPerM2: number;
-  /** Median rise over the opening price, as a multiple. */
-  medianRise: number;
+  /** Mean sale price, in so'm. */
+  avgPrice: number;
+  /** TYPICAL floor area, in m² — a median. See `middle` for why. */
+  typicalArea: number;
+  /** Mean so'm per m² per year. */
+  avgPerM2: number;
+  /** Mean rise over the opening price, as a multiple. */
+  avgRise: number;
   months: MonthPoint[];
   byRegion: RegionStat[];
   rise: StatsBucket[];
@@ -148,7 +155,43 @@ export interface Statistics {
   topByRise: SoldLot[];
 }
 
-const median = (values: number[]): number => {
+/**
+ * The arithmetic mean.
+ *
+ * THIS PAGE USED TO PUBLISH MEDIANS, and the switch was the operator's call:
+ * "median" is a term a citizen reading a state portal should not have to look
+ * up, and the headline card was already LABELLED "O'rtacha lot narxi" while
+ * computing a median underneath — so the words and the number disagreed.
+ *
+ * What it costs is written down here rather than discovered later. The sales
+ * are heavily skewed: one lot was 76% of December 2024's total and another was
+ * 74% of January 2026's. Across 2026 the mean lot price is ~38,6 mln so'm
+ * against a median of ~8,9 mln, so the figure now printed is several times
+ * what a typical lot actually goes for. It is a true arithmetic mean and it is
+ * labelled as one; it is simply a different question from "what does an
+ * ordinary lot cost".
+ *
+ * ONE FIGURE DID NOT FOLLOW: floor area — see `typicalArea` below.
+ */
+const mean = (values: number[]): number =>
+  values.length === 0
+    ? 0
+    : values.reduce((a, b) => a + b, 0) / values.length;
+
+/**
+ * The middle value, kept for ONE figure: floor area.
+ *
+ * Not an inconsistency, a measurement. 343 of the 3 034 sales are natural
+ * water bodies — one of them is 48 250 000 m² — and they carry 98,7% of all
+ * `rent_area` while being 11,3% of sales. A mean over that gives a "typical"
+ * lot of roughly 53 000 m², five hectares, presented under a sentence that
+ * calls it one or two rooms.
+ *
+ * A mean price is skewed; a mean AREA is not a number about lots at all. So
+ * area stays a median and the UI says so in plain words rather than by naming
+ * the statistic.
+ */
+const middle = (values: number[]): number => {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
@@ -269,7 +312,7 @@ export async function getStatistics(
       month,
       sold: values.length,
       total: values.reduce((a, b) => a + b, 0),
-      median: median(values),
+      avg: mean(values),
     }));
 
   /* ── Regions ─────────────────────────────────────────────────────────── */
@@ -285,7 +328,7 @@ export async function getStatistics(
         sold: lots.length,
         total: lots.reduce((a, l) => a + l.soldPrice, 0),
         /*
-          Twenty lots before a per-m² median is published. Below that it is
+          Twenty lots before a per-m² rate is published. Below that it is
           not a market rate, it is whatever the handful of lots happened to
           be — and printing it beside Toshkent's figure would invite exactly
           the comparison it cannot support. Nationally every region clears
@@ -294,7 +337,7 @@ export async function getStatistics(
         */
         perM2:
           withArea.length >= 20
-            ? median(withArea.map((l) => l.soldPrice / l.area))
+            ? mean(withArea.map((l) => l.soldPrice / l.area))
             : null,
       };
     })
@@ -352,10 +395,11 @@ export async function getStatistics(
     unsold,
     sellRate: concluded > 0 ? sales.length / concluded : 0,
     total: prices.reduce((a, b) => a + b, 0),
-    medianPrice: median(prices),
-    medianArea: median(areas),
-    medianPerM2: median(perM2),
-    medianRise: median(rises),
+    avgPrice: mean(prices),
+    // The one median left, and deliberately — see `middle`.
+    typicalArea: middle(areas),
+    avgPerM2: mean(perM2),
+    avgRise: mean(rises),
     months,
     byRegion,
     rise: tally(rises, RISE_BANDS),

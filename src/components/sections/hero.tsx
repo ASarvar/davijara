@@ -2,7 +2,6 @@ import { getTranslations } from "next-intl/server";
 
 import { getHeroStats, getRegions } from "@/lib/data/catalog";
 import { parseListingQuery } from "@/lib/data/listings";
-import { Eyebrow } from "@/components/common/eyebrow";
 import { StatList } from "@/components/common/stat-list";
 import { Container } from "@/components/layout/section";
 
@@ -23,8 +22,19 @@ import { Container } from "@/components/layout/section";
  */
 export async function Hero({
   searchParams = {},
+  /**
+   * Rendered inside the hero's own section, under the stat cards.
+   *
+   * This is where the homepage puts `<SearchWidget nested>`. A prop rather
+   * than an import, so the PAGE still decides what the masthead contains and
+   * in what order — the hero does not reach out and compose the search panel
+   * on its own — while the panel still lands inside this section's background
+   * and gradient instead of starting a new band below it.
+   */
+  children,
 }: {
   searchParams?: Record<string, string | string[] | undefined>;
+  children?: React.ReactNode;
 } = {}) {
   const t = await getTranslations("hero");
   const { region, district } = parseListingQuery(searchParams);
@@ -92,33 +102,30 @@ export async function Hero({
         />
       </div>
 
-      <Container className="py-20 sm:py-28">
-        <div className="lg:max-w-[58%]">
-          <Eyebrow dot data-enter className="mb-4">
-            {t("eyebrow")}
-          </Eyebrow>
+      {/* Shorter than the 20/28 this ran at: the headline block that used to
+          fill the top of the hero is gone (see the h1 below), so the same
+          padding would have left a tall empty band above the stat cards. */}
+      <Container className="py-10 sm:py-14">
+        {/*
+          THE VISIBLE HEADLINE AND EYEBROW WERE REMOVED at the operator's
+          request — the banner strip above now carries the masthead message,
+          and two competing statements stacked on one screen read as a
+          duplicate.
 
-          <h1
-            data-enter
-            style={{ "--enter-delay": 1 } as React.CSSProperties}
-            className="font-heading max-w-6xl text-4xl leading-[1.1] font-black text-balance sm:text-5xl lg:text-6xl"
-          >
-            {t("titleLead")}{" "}
-            <span className="word-rotator">
-              {/*
-                Invisible sizer reserving the width of the longest word. The
-                legacy rotator let the h1 resize on every swap, nudging CLS
-                three times per cycle, forever.
-              */}
-              <span className="word-rotator-sizer" aria-hidden="true">
-                {t("rotator.second")}
-              </span>
-              <em>{t("rotator.first")}</em>
-              <em>{t("rotator.second")}</em>
-              <em>{t("rotator.third")}</em>
-            </span>
-          </h1>
-        </div>
+          The <h1> ITSELF STAYS, as `sr-only`. A page with no h1 is not a
+          styling choice: it is what a screen reader announces as the
+          document's subject, what a search engine indexes as the page title,
+          and what "skip to content" lands a keyboard reader on. Deleting the
+          element rather than hiding it would have cost all three to remove
+          something no sighted visitor sees either way.
+
+          The word rotator went with the visible text. It was an animation of
+          three synonyms and has no meaning to read aloud, so the sr-only
+          heading states the page's subject plainly instead.
+        */}
+        <h1 className="sr-only">
+          {t("titleLead")} {t("rotator.third")}
+        </h1>
 
         <div data-enter style={{ "--enter-delay": 2 } as React.CSSProperties}>
           <StatList
@@ -128,7 +135,7 @@ export async function Hero({
             /* Two columns from sm and four from lg — three no longer divides
                the row now that there is a fourth card, and 2x2 on a tablet
                beats 3+1 with a widow. */
-            className="mt-14 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
           />
 
           {/*
@@ -150,6 +157,8 @@ export async function Hero({
             </p>
           ) : null}
         </div>
+
+        {children}
       </Container>
     </section>
   );

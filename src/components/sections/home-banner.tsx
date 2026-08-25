@@ -1,50 +1,69 @@
 import { Link } from "@/i18n/navigation";
-import { homeBanner } from "@/content/banner";
+import { BANNER_SIZE, homeBanner } from "@/content/banner";
 import { withBasePath } from "@/lib/base-path";
+import { Container } from "@/components/layout/section";
 
 /**
- * The full-bleed banner strip under the header, on the homepage only.
+ * The banner strip under the header, on the homepage only.
+ *
+ * CONTAINED AND ROUNDED, not full-bleed — the same treatment e-auksion gives
+ * its own banner, which is the site a citizen most often arrives here from.
+ * It sits inside the page's 1200px measure with the section gutters, so its
+ * edges line up with the search panel and the cards below rather than running
+ * out to the window. Full bleed was the first version and read as a second
+ * header rather than as content: pinned edge to edge under an edge-to-edge nav
+ * bar, there was nothing to say where the chrome stopped.
  *
  * NOT PART OF THE HEADER. It renders once, here, rather than in `SiteHeader`
  * — a decorative strip repeated above every article, document list and search
  * result would cost ~200px of reading room on thirty pages to say something
  * the reader has already seen on the way in.
  *
- * Renders NOTHING until `content/banner.ts` names both files. See that file
- * for the crops, the safe zone and why `alt` is mandatory.
+ * Renders NOTHING until `content/banner.ts` names a file. See that file for
+ * the crops and why `alt` is mandatory.
  *
- * A `<picture>` with a media-qualified `<source>`, not `next/image`, for the
- * same two reasons `logo.tsx` gives: the browser then fetches ONLY the
- * matching crop — rendering both and hiding one with CSS would still pull the
- * 2560px file onto every phone — and the art direction here is a genuine crop
- * change, which `next/image`'s `sizes` cannot express.
+ * A `<picture>` with a media-qualified `<source>` rather than `next/image`,
+ * for the same two reasons `logo.tsx` gives: with two crops the browser then
+ * fetches ONLY the matching one — rendering both and hiding one with CSS would
+ * still pull the 2460px file onto every phone — and the art direction is a
+ * genuine crop change, which `next/image`'s `sizes` cannot express.
  *
- * The aspect ratio is set in CSS at BOTH breakpoints, so the box is reserved
- * before the file arrives and adding the banner causes no layout shift.
+ * WITH ONE FILE the `<source>` is simply omitted and the same image serves
+ * every width at its own aspect ratio. That is the honest default for a strip
+ * this wide: `object-cover` into a taller mobile box would have to guess which
+ * part of the artwork matters, and here it would guess wrong — the slogan sits
+ * right of centre, so a centre crop would cut it in half.
  */
 export function HomeBanner() {
   const { desktop, mobile, alt, href } = homeBanner;
-  if (!desktop || !mobile) return null;
+  if (!desktop) return null;
 
   const image = (
     <picture>
-      <source
-        media="(min-width: 768px)"
-        srcSet={withBasePath(desktop)}
-        width={2560}
-        height={340}
-      />
+      {/*
+        Only when a narrow crop exists. `<source>` with no `srcSet` would be
+        an empty candidate and the browser would render nothing at all.
+      */}
+      {mobile ? (
+        <source media="(min-width: 768px)" srcSet={withBasePath(desktop)} />
+      ) : null}
       {/*
         `withBasePath` because these are raw <picture>/<img> attributes:
         Next's basePath rewriting covers <Link> and its own chunk URLs, not
-        plain HTML. Under the /site mount an unprefixed "/banner…" would
+        plain HTML. Under the /site mount an unprefixed "/banner.jpg" would
         resolve against the domain root, a different project entirely.
       */}
       <img
-        src={withBasePath(mobile)}
+        src={withBasePath(mobile ?? desktop)}
         alt={alt}
-        width={1080}
-        height={480}
+        /*
+          The DESKTOP file's intrinsic size either way. With one file that is
+          simply its size; with two, the `<img>` is the mobile candidate but
+          these attributes only have to establish an aspect ratio for the box,
+          and the CSS below overrides it per breakpoint anyway.
+        */
+        width={BANNER_SIZE.width}
+        height={BANNER_SIZE.height}
         /*
           Eager and high priority: this sits directly under the header, above
           the fold on every viewport, so lazy-loading it would guarantee a
@@ -53,25 +72,41 @@ export function HomeBanner() {
         loading="eager"
         fetchPriority="high"
         decoding="async"
-        className="aspect-[1080/480] w-full object-cover object-center md:aspect-[2560/340]"
+        className={
+          mobile
+            ? "aspect-[1080/480] w-full object-cover object-center md:aspect-[2460/340]"
+            : // One file: full width, true aspect ratio, no crop.
+              "block h-auto w-full"
+        }
       />
     </picture>
   );
 
   return (
     /*
-      `data-tone="deep"` so the strip's own surround follows the theme rather
-      than sitting on whatever tone happens to precede it, and `bg-band` shows
-      through in the sliver above and below the image while it decodes.
+      `bg-background` and `data-tone="deep"`, matching the nav bar above and
+      the hero below — so this reads as a band of the page rather than as its
+      own surface. The strip's only edges are the image's own rounded corners.
     */
-    <div data-tone="deep" className="bg-band w-full overflow-hidden">
-      {href ? (
-        <Link href={href} className="block">
-          {image}
-        </Link>
-      ) : (
-        image
-      )}
-    </div>
+    <section data-tone="deep" className="bg-background">
+      <Container className="py-6">
+        {/*
+          The radius lives on this wrapper with `overflow-hidden`, not on the
+          <img>. A rounded <img> is clipped by the browser at paint time and
+          the corners fringe against the page; clipping the box instead is
+          what the card primitives do, and it also keeps the corners correct
+          if a `mobile` crop with a different aspect ratio is added later.
+        */}
+        <div className="overflow-hidden rounded-xl">
+          {href ? (
+            <Link href={href} className="block">
+              {image}
+            </Link>
+          ) : (
+            image
+          )}
+        </div>
+      </Container>
+    </section>
   );
 }

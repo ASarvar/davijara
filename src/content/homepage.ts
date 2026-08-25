@@ -52,7 +52,7 @@ export const heroStats: Stat[] = [
   */
   {
     value: "",
-    label: "{year}-yilda ijaraga sotilgan obyektlar",
+    label: "{year}-yilda ijaraga berilgan obyektlar",
     icon: "Handshake",
   },
 ];

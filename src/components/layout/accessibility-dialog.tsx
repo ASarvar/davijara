@@ -32,16 +32,21 @@ export function AccessibilityDialog() {
       <DialogTrigger asChild>
         <button
           type="button"
-          className="text-muted-foreground hover:text-accent-foreground focus-visible:ring-ring flex items-center gap-1.5 rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          // Hover tooltip, since the label no longer prints. Paired with the
+          // sr-only span below, not a substitute for it: `title` is not
+          // reliably announced by screen readers and is unreachable by touch.
+          title={t("accessibility")}
+          className="text-muted-foreground hover:text-accent-foreground focus-visible:ring-ring flex items-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           <Eye aria-hidden="true" className="size-3.5" />
           {/*
-            Icon-only below sm so the header's utility strip stays on one line
-            on a handset. `sr-only` keeps the accessible name intact — an
-            unlabelled icon button would be exactly the wrong thing to ship on
-            the control that opens the accessibility settings.
+            ICON ONLY at every width now, so the header's contact stack stays
+            narrow. `sr-only` rather than deleting the text: an unlabelled icon
+            button would be exactly the wrong thing to ship on the control that
+            opens the accessibility settings — it is what gives the button its
+            accessible name.
           */}
-          <span className="sr-only sm:not-sr-only">{t("accessibility")}</span>
+          <span className="sr-only">{t("accessibility")}</span>
         </button>
       </DialogTrigger>
 

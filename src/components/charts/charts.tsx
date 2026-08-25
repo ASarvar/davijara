@@ -110,18 +110,18 @@ function tooltip(palette: ChartPalette) {
 export function MonthlyChart({
   labels,
   counts,
-  medians,
-  medianLabel,
+  averages,
+  averageLabel,
   countLabel,
-  formatMedian,
+  formatAverage,
 }: {
   labels: string[];
   counts: number[];
-  medians: number[];
+  averages: number[];
   countLabel: string;
-  medianLabel: string;
+  averageLabel: string;
   /** Serialised so the client component takes no function prop. */
-  formatMedian: { unit: string; divisor: number; decimals: number };
+  formatAverage: { unit: string; divisor: number; decimals: number };
 }) {
   const build = useCallback(
     (palette: ChartPalette, duration: number): ChartConfiguration => ({
@@ -160,8 +160,8 @@ export function MonthlyChart({
           },
           {
             type: "line" as const,
-            label: medianLabel,
-            data: medians,
+            label: averageLabel,
+            data: averages,
             borderColor: palette.foreground,
             borderDash: [6, 5],
             borderWidth: 2,
@@ -189,10 +189,10 @@ export function MonthlyChart({
               label: (item) => {
                 const v = item.parsed.y ?? 0;
                 if (item.datasetIndex === 0) return `${countLabel}: ${v}`;
-                const scaled = v / formatMedian.divisor;
-                return `${medianLabel}: ${scaled
-                  .toFixed(formatMedian.decimals)
-                  .replace(".", ",")} ${formatMedian.unit}`;
+                const scaled = v / formatAverage.divisor;
+                return `${averageLabel}: ${scaled
+                  .toFixed(formatAverage.decimals)
+                  .replace(".", ",")} ${formatAverage.unit}`;
               },
             },
           },
@@ -211,14 +211,14 @@ export function MonthlyChart({
             display: false,
             beginAtZero: true,
             // Headroom so the line never collides with the tallest bar.
-            suggestedMax: Math.max(...medians, 1) * 1.45,
+            suggestedMax: Math.max(...averages, 1) * 1.45,
           },
         },
         crosshairColor: alpha(palette.muted, 0.45),
       } as ChartConfiguration["options"],
       plugins: [crosshair],
     }),
-    [labels, counts, medians, countLabel, medianLabel, formatMedian],
+    [labels, counts, averages, countLabel, averageLabel, formatAverage],
   );
 
   return <ChartCanvas build={build} height={320} ariaLabel={countLabel} />;

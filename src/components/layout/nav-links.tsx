@@ -103,7 +103,11 @@ export function NavLinks() {
                   for one row — it has a bar of its own and can be read at a
                   glance rather than squinted at.
                 */
-                "relative flex items-center gap-1.5 px-4 py-3.5 text-[1.0625rem] whitespace-nowrap transition-colors",
+                // py-2.5, down from py-3.5: the bar is the part that stays on
+                // screen, so every pixel of its height is taken off every page
+                // the reader scrolls. Still a 40px target at the default text
+                // size, so it does not cost tap accuracy.
+                "relative flex items-center gap-1.5 px-4 py-2.5 text-[1.0625rem] whitespace-nowrap transition-colors",
                 sectionActive
                   ? "text-accent-foreground font-semibold"
                   : "text-foreground/85 hover:text-accent-foreground",

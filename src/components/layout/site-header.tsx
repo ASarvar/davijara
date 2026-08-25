@@ -25,19 +25,20 @@ import { ThemeToggle } from "./theme-toggle";
  * the persistent rail reads as continuous with the content beneath it rather
  * than as a second tinted slab stacked on the first.
  *
- * WHY ONLY THE NAV BAR STICKS
+ * THE WHOLE HEADER STICKS, both bands together.
  *
- * The brand band is ~110px at `xl` and the contact stack inside it is three
- * lines. Sticking the whole header would hold ~166px — a fifth of an 800px
- * viewport — on every page, to keep showing a phone number the reader has
- * already seen. So the band scrolls away and the nav bar alone pins to the
- * top, which is the only part with a job to do while reading.
+ * An earlier version pinned only the nav bar and let the brand band scroll
+ * away, on the grounds that ~166px of permanent chrome was too much of an
+ * 800px viewport. That reasoning was sound for the header it was written
+ * against and no longer applies to this one: trimming the band's padding from
+ * `py-6` to `py-1` took it from 124px to 76px, so both bands together now
+ * hold 125px — less than the nav bar plus the old band, and the logo stays a
+ * way home from anywhere on the page.
  *
- * Below `xl` that inverts: the nav bar renders nothing (the sheet takes over)
- * so there would be nothing left to stick, and the header itself becomes the
- * sticky element instead — at that width it is one compact row of logo +
- * controls, ~64px, which is affordable. Hence `sticky xl:static` on the
- * header against `xl:sticky` on the bar.
+ * One `sticky` on the <header> rather than one per band, which also removes
+ * the breakpoint dance the split needed: below `xl` the nav bar renders
+ * nothing at all (the sheet takes over), so a bar-only sticky had to hand the
+ * job back to the header at exactly that width.
  *
  * THE BANNER IS NOT HERE. It belongs to the homepage only (see
  * `components/sections/banner.tsx`), so it must not be part of the chrome
@@ -47,10 +48,15 @@ export async function SiteHeader() {
   const tTopbar = await getTranslations("topbar");
 
   return (
-    <>
+    <header data-tone="deep" className="sticky top-0 z-40">
       {/* ── Brand band ─────────────────────────────────────────────────── */}
-      <header data-tone="deep" className="bg-band sticky top-0 z-40 xl:static">
-        <Container className="relative flex items-center justify-between gap-4 py-3 xl:py-6">
+      <div className="bg-band">
+        {/* As tight as the contents allow. The band's height is set by the
+            three-row contact stack (~68px), NOT by the padding, so this is
+            the last of what trimming here can return — py-6 → py-2.5 → py-1
+            has taken the band from 124px to the high 70s and the next step
+            has to come off the stack itself. */}
+        <Container className="relative flex items-center justify-between gap-4 py-1 xl:py-1">
           <Link
             href="/"
             className="flex shrink-0 items-center"
@@ -140,7 +146,10 @@ export async function SiteHeader() {
             as a `text-[12.5px]`, but rem-based, so it scales with the "Matn
             o'lchami" accessibility setting instead of ignoring it.
           */}
-          <div className="text-muted-foreground hidden flex-col items-end gap-2 text-[0.78125rem] xl:flex">
+          {/* `gap-1`, not `gap-2`: this stack of three rows — not the 52px
+              logo — is what sets the band's height, so it is the only place
+              trimming the header actually pays. */}
+          <div className="text-muted-foreground hidden flex-col items-end gap-1 text-[0.78125rem] xl:flex">
             <div className="flex items-center gap-4">
               {/* Theme first, then the accessibility dialog: this one is a
                   single-tap switch, the other opens a panel, and the lighter
@@ -178,37 +187,33 @@ export async function SiteHeader() {
             <MobileNav />
           </div>
         </Container>
-      </header>
+      </div>
 
       {/* ── Navigation bar ─────────────────────────────────────────────── */}
       {/*
-        A SIBLING OF THE HEADER, not a child of it, and that is what makes the
-        sticky work rather than a styling preference.
+        BACK INSIDE `<header>`, and the history is worth keeping because both
+        arrangements were correct for the design they were written against.
 
-        `position: sticky` travels only within its own parent's box. Nested
-        inside `<header>`, this bar's parent ended exactly where the bar did —
-        zero room to travel — so it scrolled away with the brand band and the
-        sticky did nothing at all. Measured: at scrollY 900 its top was at
-        -581px. Lifted to a body-level sibling, its containing block is the
-        page and it pins for the whole document.
+        While only the bar was meant to stick, it had to be a SIBLING of the
+        header: `position: sticky` travels only within its own parent's box,
+        and nested under a header that ended exactly where the bar did there
+        was zero room to travel — it scrolled away with the brand band and the
+        sticky did nothing (measured: at scrollY 900 its top sat at -581px).
 
-        The alternative — keeping it nested and giving `<header>` a negative
-        `top` equal to the brand band's height — would hardcode a pixel value
-        that the "Matn o'lchami" control changes at runtime, so the bar would
-        detach from the top edge for exactly the readers who enlarged the
-        text.
+        Now the whole header pins, so the sticky is on the PARENT and both
+        bands ride with it. A sticky child inside a sticky parent would be the
+        broken case again; one sticky ancestor containing both is not.
 
         `hidden xl:block`, so this bar does not exist at all below the
         breakpoint — the sheet trigger in the band above is the navigation
-        there, and the header itself carries the sticky at that width.
+        there.
 
         `border-y` on the bar rather than a bottom border on the band above:
-        the bar is what survives scrolling, so it carries its own edges.
+        the bar is the header's bottom edge, so it carries it.
       */}
       <nav
         aria-label="Asosiy menyu"
-        data-tone="deep"
-        className="bg-background border-hairline hidden border-y xl:sticky xl:top-0 xl:z-40 xl:block"
+        className="bg-background border-hairline hidden border-y xl:block"
       >
         {/* CENTRED, matching the operator's reference layout. The six section
             labels are short enough in Uzbek to sit as one centred group;
@@ -218,6 +223,6 @@ export async function SiteHeader() {
           <NavLinks />
         </Container>
       </nav>
-    </>
+    </header>
   );
 }

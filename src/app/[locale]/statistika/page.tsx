@@ -61,12 +61,12 @@ const share = (value: number, total: number) =>
  * SCOPED BY `?hudud=`, and by nothing else. The catalogue's filters ask "what
  * could I rent"; this page asks "what happened", and the only cut that changes
  * the answer without also destroying the sample is the region. A district
- * holds a few dozen sales in a year — every median on this page would be
- * noise, and a median of nine lots printed beside Toshkent's 354 invites a
+ * holds a few dozen sales in a year — every average on this page would be
+ * noise, and an average of nine lots printed beside Toshkent's 354 invites a
  * comparison the data cannot carry.
  *
- * See lib/data/statistics.ts for why this is one year and why every headline
- * figure is a median.
+ * See lib/data/statistics.ts for why this is one year, why the headline
+ * figures are arithmetic means, and why floor area alone is not.
  */
 export default async function StatisticsPage({
   params,
@@ -117,9 +117,9 @@ export default async function StatisticsPage({
   const tenPlus = stats.rise[stats.rise.length - 1]?.count ?? 0;
   const riseCallouts = [
     {
-      label: t("medianRise"),
-      value: `${stats.medianRise.toFixed(2).replace(".", ",")}×`,
-      note: t("medianRiseNote"),
+      label: t("avgRise"),
+      value: `${stats.avgRise.toFixed(2).replace(".", ",")}×`,
+      note: t("avgRiseNote"),
       icon: "Equal",
     },
     {
@@ -149,8 +149,8 @@ export default async function StatisticsPage({
     },
     { value: formatSom(stats.total), label: t("totalValue"), icon: "Wallet" },
     {
-      value: formatSom(stats.medianPrice),
-      label: t("medianPrice"),
+      value: formatSom(stats.avgPrice),
+      label: t("avgPrice"),
       icon: "Tag",
     },
     {
@@ -242,26 +242,26 @@ export default async function StatisticsPage({
         <ChartFigure
           legend={[
             { label: t("soldLots"), color: "accent" },
-            { label: t("medianPrice"), color: "muted", line: true },
+            { label: t("avgPrice"), color: "muted", line: true },
           ]}
-          columns={[t("month"), t("soldLots"), t("medianPrice")]}
+          columns={[t("month"), t("soldLots"), t("avgPrice")]}
           rows={stats.months.map((m) => [
             MONTHS[m.month - 1],
             formatNumber(m.sold),
-            formatSom(m.median),
+            formatSom(m.avg),
           ])}
         >
           <MonthlyChart
             labels={stats.months.map((m) => MONTHS[m.month - 1])}
             counts={stats.months.map((m) => m.sold)}
-            medians={stats.months.map((m) => m.median)}
+            averages={stats.months.map((m) => m.avg)}
             countLabel={t("soldLots")}
-            medianLabel={t("medianPrice")}
+            averageLabel={t("avgPrice")}
             /* Serialised: a Server Component cannot hand a client one a
                function, so the tooltip is told the unit rather than given
-               `formatSom`. Millions, because every monthly median is in
+               `formatSom`. Millions, because every monthly average is in
                single-digit millions. */
-            formatMedian={{ unit: "mln", divisor: 1_000_000, decimals: 1 }}
+            formatAverage={{ unit: "mln", divisor: 1_000_000, decimals: 1 }}
           />
         </ChartFigure>
       </Section>
@@ -321,7 +321,7 @@ export default async function StatisticsPage({
               {t("sizeTitle")}
             </Eyebrow>
             <p className="text-muted-foreground mb-7 max-w-md text-sm text-pretty">
-              {t("sizeBody", { median: formatArea(stats.medianArea) })}
+              {t("sizeBody", { typical: formatArea(stats.typicalArea) })}
             </p>
             {/*
               ONE bar, divided — not six.
@@ -414,7 +414,7 @@ export default async function StatisticsPage({
           eyebrow={t("riseEyebrow")}
           title={t("riseTitle")}
           description={t("riseBody", {
-            median: stats.medianRise.toFixed(2).replace(".", ","),
+            average: stats.avgRise.toFixed(2).replace(".", ","),
           })}
         />
 

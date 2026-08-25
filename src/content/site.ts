@@ -24,9 +24,9 @@ export const site = {
 } as const;
 
 export const contacts = {
-  phone: "(71) 259-20-64",
+  phone: "+998(71)259-20-64",
   phoneHref: "tel:+998712592064",
-  corporatePhone: "(71) 259-20-64",
+  corporatePhone: "+998(71)259-20-64",
   corporatePhoneHref: "tel:+998712592064",
   hotline: "1082",
   hotlineHref: "tel:1082",

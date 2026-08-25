@@ -75,8 +75,15 @@ export default async function HomePage({
           note there. Above the Hero, so it reads as the masthead's own strip
           rather than as an interruption partway down the page. */}
       <HomeBanner />
-      <Hero searchParams={sp} />
-      <SearchWidget values={sp} />
+      {/*
+        The search panel lives INSIDE the hero, under the stat cards, so the
+        masthead is one surface rather than a hero band followed by a tinted
+        search band. It is still composed here rather than imported by the
+        hero — this page decides what the masthead holds.
+      */}
+      <Hero searchParams={sp}>
+        <SearchWidget values={sp} nested />
+      </Hero>
       <ObjectsSection searchParams={sp} />
       <HowItWorks />
       <UpcomingAuctions searchParams={sp} />

@@ -56,10 +56,25 @@ export async function SearchWidget({
    * /obyektlar turns it on.
    */
   auctionDay = false,
+  /**
+   * Render WITHOUT the band — no section, no background, no rules.
+   *
+   * The homepage sets this and places the panel inside `<Hero>`, so the four
+   * fields sit on the hero's own gradient directly beneath the stat cards and
+   * the masthead reads as one block. As its own `bg-band` section it drew a
+   * horizontal seam across the top of the page and split a single idea —
+   * "here is the state of things, now search it" — into two slabs.
+   *
+   * /obyektlar keeps the band: there the panel IS a distinct control strip
+   * between the page heading and the results, and it needs its own surface to
+   * say so.
+   */
+  nested = false,
 }: {
   action?: string;
   values?: Record<string, string | string[] | undefined>;
   auctionDay?: boolean;
+  nested?: boolean;
 } = {}) {
   const t = await getTranslations("search");
   const td = await getTranslations("auctionDay");
@@ -94,12 +109,17 @@ export async function SearchWidget({
     navy — with a near-invisible edge — while the rest of the page went black.
     Same fix as the header's utility strip.
   */
-  return (
-    <section data-tone="deep" className="bg-band border-hairline border-y">
-      <Container className="py-16">
-        <Eyebrow as="h2" className="mb-4">
-          {t("label")}
-        </Eyebrow>
+  /*
+    The panel itself, identical in both variants — only what wraps it changes.
+    Extracted so the band and the nested placement cannot drift apart; they
+    were two copies of this markup for about ten minutes and that is exactly
+    how the two rows of a form start disagreeing about their gap.
+  */
+  const panel = (
+    <>
+      <Eyebrow as="h2" className="mb-4">
+        {t("label")}
+      </Eyebrow>
 
         {/*
           Still a plain GET form. Submitting reloads with the filters in the
@@ -297,7 +317,20 @@ export async function SearchWidget({
             </button>
           </div>
         </form>
-      </Container>
+    </>
+  );
+
+  /*
+    Nested: no section, no surface of its own — just spacing off the stat
+    cards above it. The `<Hero>` supplies the `<section>`, the tone and the
+    background, so adding any here would put a second surface back on top of
+    the one this variant exists to avoid.
+  */
+  if (nested) return <div className="mt-12">{panel}</div>;
+
+  return (
+    <section data-tone="deep" className="bg-band border-hairline border-y">
+      <Container className="py-16">{panel}</Container>
     </section>
   );
 }

@@ -1,41 +1,51 @@
 /**
  * The homepage banner strip, directly under the header.
  *
- * ARTWORK IS SUPPLIED BY THE OPERATOR, so both fields start `null` and
- * `<HomeBanner>` renders nothing at all until they are filled. That is
- * deliberate: pointing this at a file that has not arrived yet would put a
- * broken-image icon across the top of a state portal's homepage, and a
- * hardcoded stand-in would put invented artwork there — worse.
+ * ARTWORK IS SUPPLIED BY THE OPERATOR. `<HomeBanner>` renders nothing at all
+ * while `desktop` is null, so a file that has not arrived yet cannot put a
+ * broken-image icon across the top of a state portal's homepage.
  *
- * TO ENABLE: drop the two files into `public/` and name them here.
+ * `mobile` IS OPTIONAL, and when it is absent the strip simply shows the whole
+ * desktop file at its own aspect ratio on every width. Nothing is cropped and
+ * nothing is stretched — but a 7,2:1 image is ~52px tall on a 375px phone, so
+ * the slogan inside it becomes decorative rather than readable. A second crop
+ * composed for roughly 2,25:1 (e.g. 1080 × 480) is what makes it legible
+ * there; drop it in `public/` and name it here.
  *
- *   desktop   2560 × 340 px   (7.5:1)   shown from 768px up
- *   mobile    1080 × 480 px   (2.25:1)  shown below 768px
+ * SAFE ZONE, if a cropped `mobile` file is ever added: everything that has to
+ * be READ must sit inside the middle of the frame, because the strip is
+ * full-bleed and `object-cover` trims from the sides.
  *
- * WHY TWO FILES. The strip is full-bleed and `object-cover`, so on a 375px
- * phone a 7.5:1 desktop image would either crop away everything but its
- * middle sixth or scale to 50px tall. The two crops are the same artwork
- * composed for two shapes — the same reason `logo.tsx` ships two lockups.
- *
- * SAFE ZONE. Because the strip is full-bleed and centred, everything that has
- * to be READ — text, emblems, the flag — must sit inside the middle 1200px of
- * the desktop file. The 680px on either side is bleed and is cropped off at
- * common laptop widths.
- *
- * TEXT IN THE IMAGE. If the artwork carries a slogan, `alt` must repeat it
+ * TEXT IN THE IMAGE. The artwork carries a slogan, so `alt` repeats it
  * verbatim: a screen reader, a text-only browser and a print render see
  * nothing else, and on a government portal a message only sighted visitors
- * receive is not published. `alt` is required for that reason.
+ * receive is not published.
  */
 export const homeBanner: {
   desktop: string | null;
-  mobile: string | null;
+  /** Optional narrow crop. Falls back to `desktop` when absent — see above. */
+  mobile?: string | null;
   /** Verbatim transcription of any text in the artwork. Never decorative. */
   alt: string;
   /** Optional destination if the banner is also a link. */
   href?: string;
 } = {
-  desktop: null,
+  /*
+    2460 × 340 (7,24:1). Named without a `-desktop` suffix because it is
+    currently the only file; adding `mobile` later does not require renaming
+    it.
+  */
+  desktop: "/banner.jpg",
   mobile: null,
-  alt: "",
+  alt: "Oʻzbekiston Respublikasi Davlat bayrogʻi va «35 YIL» yozuvi. Shior: «Yagona Vatan, yagona xalq boʻlib, birgalikda yangi hayot va porloq kelajak yaratamiz!»",
 };
+
+/**
+ * The intrinsic size of `desktop`, in pixels.
+ *
+ * Given rather than measured because the strip is a plain `<img>`: without a
+ * width and height the browser reserves no box for it, and the whole page
+ * jumps down by the banner's height the moment it decodes. Update both
+ * numbers together whenever the artwork is replaced.
+ */
+export const BANNER_SIZE = { width: 2460, height: 340 } as const;
