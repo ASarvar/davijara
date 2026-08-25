@@ -119,7 +119,7 @@ function credentialsFor(apiId: number): { user: string; pass: string } | null {
 
   if (inn && !INN_PATTERN.test(inn)) {
     console.warn(
-      `[lot-images] ORDER_API_INN_${apiId} is not a 9-digit INN — check for a ` +
+      `[lot-images] ORDER_API_INN_${apiId} is not a 9-digit INN - check for a ` +
         `trailing "#" comment on that line, which systemd folds into the value.`,
     );
     return null;
@@ -140,13 +140,35 @@ function credentialsFor(apiId: number): { user: string; pass: string } | null {
   apart is to reproduce the call by hand.
 
   Never logs the credentials, only which region's account was used.
+
+  ── ASCII ONLY IN EVERY console.* IN THIS FILE ─────────────────────────────
+
+  Not a style rule. These lines are read through `journalctl` over SSH, and
+  the locale of that terminal is not ours to choose — a service's log output
+  has no say in how it will be displayed. An em dash in the breaker's message
+  came back from a real server as
+
+      [lot-images] 4to the order service for 30s.
+
+  against a source string of "4 consecutive faults - pausing calls to the
+  order service for 30s." — thirty-five characters silently gone, taking the
+  part that said what had happened with them. The one line written to make an
+  outage visible was the one line that could not be read during it.
+
+  Same family as the CRLF-in-.env and the `#`-comment-in-EnvironmentFile
+  traps already recorded in this repo: the failure is in the transport, not in
+  the value, so nothing errors and the damage is invisible until someone needs
+  the output.
+
+  Use "-" for a dash and plain quotes. Uzbek user-facing copy is unaffected —
+  that goes through messages/*.json and is rendered by a browser.
 */
 function warn(apiId: number, orderId: string, reason: string): void {
   console.warn(
     `[lot-images] region ${apiId}, order ${orderId}: ${reason}` +
       (process.env[`ORDER_API_INN_${apiId}`]
         ? ""
-        : " (no ORDER_API_INN_" + apiId + " — used the fallback account)"),
+        : " (no ORDER_API_INN_" + apiId + " - used the fallback account)"),
   );
 }
 
@@ -236,7 +258,7 @@ function recordFault(): void {
   if (consecutiveFaults === BREAKER_THRESHOLD) {
     openedAt = Date.now();
     console.warn(
-      `[lot-images] ${BREAKER_THRESHOLD} consecutive faults — pausing calls ` +
+      `[lot-images] ${BREAKER_THRESHOLD} consecutive faults - pausing calls ` +
         `to the order service for ${BREAKER_COOLDOWN_MS / 1000}s.`,
     );
   }
@@ -245,7 +267,7 @@ function recordFault(): void {
 /** Any answer at all means the service is up; the count resets on success. */
 function recordSuccess(): void {
   if (consecutiveFaults >= BREAKER_THRESHOLD) {
-    console.warn("[lot-images] order service answered again — resuming.");
+    console.warn("[lot-images] order service answered again - resuming.");
   }
   consecutiveFaults = 0;
 }

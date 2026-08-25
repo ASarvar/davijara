@@ -57,7 +57,7 @@ export function SelectField({
     <div className={cn("min-w-0", className)}>
       <label
         htmlFor={id}
-        className="text-muted-foreground mb-1.5 block text-xs"
+        className="text-muted-foreground mb-1.5 block text-sm"
       >
         {label}
       </label>

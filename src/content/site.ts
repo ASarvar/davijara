@@ -1,3 +1,5 @@
+import type { SocialPlatform } from "@/components/layout/social-links";
+
 /**
  * Single source of truth for organisation identity, navigation and footer.
  *
@@ -24,10 +26,10 @@ export const site = {
 } as const;
 
 export const contacts = {
-  phone: "+998(71)259-20-64",
-  phoneHref: "tel:+998712592064",
-  corporatePhone: "+998(71)259-20-64",
-  corporatePhoneHref: "tel:+998712592064",
+  phone: "1082",
+  phoneHref: "tel:1082",
+  corporatePhone: "1082",
+  corporatePhoneHref: "1082",
   hotline: "1082",
   hotlineHref: "tel:1082",
   email: "info@davijara.uz",
@@ -67,6 +69,21 @@ export interface ExternalNavItem {
   href: string;
 }
 
+/**
+ * The Centre's social accounts, shown in the header's contact stack.
+ *
+ * `label` is the link's accessible name and its hover tooltip. Platform names
+ * are proper nouns, so they are literals here rather than translation keys.
+ */
+export const socialLinks: Array<{
+  platform: SocialPlatform;
+  href: string;
+  label: string;
+}> = [
+  { platform: "telegram", href: "https://t.me/davijaruz", label: "Telegram" },
+  { platform: "instagram", href: "https://instagram.com/davijarauz", label: "Instagram" },
+  { platform: "facebook", href: "https://facebook.com/davijarauz", label: "Facebook" },
+];
 /**
  * The six institutional sections, in the operator's own order.
  *

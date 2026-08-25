@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getHeroStats, getRegions } from "@/lib/data/catalog";
 import { parseListingQuery } from "@/lib/data/listings";
-import { StatList } from "@/components/common/stat-list";
+import { StatPanel } from "@/components/common/stat-panel";
 import { Container } from "@/components/layout/section";
 
 /**
@@ -128,15 +128,19 @@ export async function Hero({
         </h1>
 
         <div data-enter style={{ "--enter-delay": 2 } as React.CSSProperties}>
-          <StatList
-            stats={stats}
-            reveal={false}
-            variant="card"
-            /* Two columns from sm and four from lg — three no longer divides
-               the row now that there is a fourth card, and 2x2 on a tablet
-               beats 3+1 with a widow. */
-            className="grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-          />
+          {/*
+            h2, not h1. The page's own <h1> is the sr-only line above — this
+            names the figures beneath it, which is a section of the page
+            rather than its subject. Two h1s, or an h1 here and none above,
+            would both misdescribe the document to a screen reader.
+          */}
+          <h2 className="font-heading mb-5 text-xl font-semibold sm:text-2xl">
+            {t("statsTitle")}
+          </h2>
+
+          {/* One divided panel rather than four cards — see stat-panel.tsx
+              for why the shape changed and how it flips at `lg`. */}
+          <StatPanel stats={stats} />
 
           {/*
             Only when the register could not resolve the district — which is

@@ -55,7 +55,21 @@ const VARIANTS = {
   */
   header: {
     media: 640,
-    className: "h-10 w-[33px] sm:w-[181px] xl:h-13 xl:w-[236px]",
+    /*
+      The `xl` step grew from h-13/236px to h-16/290px once the contact stack
+      gained a fourth row for the social links. Those two heights are paired
+      on purpose: the brand band is as tall as the taller of its two columns,
+      and while the stack was three rows the logo was the shorter one, so a
+      bigger logo would simply have made the header taller. With four rows
+      the stack sets the height and the logo had spare room above and below
+      it — this spends that room rather than adding any.
+
+      Width tracks the wordmark's own 313:69 ratio (h-16 = 64px -> 290px). It
+      is pinned rather than `w-auto` so the box is correct before the SVG
+      arrives; the two lockups have different aspect ratios, so `w-auto`
+      would shift the header as the file loads.
+    */
+    className: "h-10 w-[33px] sm:w-[181px] xl:h-16 xl:w-[290px]",
   },
   /*
     Footer. There is room for the wordmark from sm up, and no nav competing

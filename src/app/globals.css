@@ -144,6 +144,39 @@
   --radius-xl: 28px;
   --radius-2xl: 36px;
 
+  /*
+    ── TYPE SCALE, one step up at the small end ────────────────────────────
+
+    MEASURED BEFORE CHANGING. Of 657 text-bearing elements on the homepage,
+    377 rendered below 16px — the single most common size on the whole page
+    was 12px (164 elements) and 14px was next (146). The root is 16px and
+    everything is rem-based, so the MECHANISM was already right; what was
+    wrong was where the scale sat.
+
+    12px is where it mattered most, because of what was wearing it: the
+    search panel's field labels ("Hudud", "Tuman / shahar"), every section
+    eyebrow, and the count chips. Those are not fine print — a citizen has to
+    read a form label to use the form. Government accessibility guidance puts
+    the floor for body-adjacent text at 16px and treats 12px as unusable for
+    anything a reader must act on.
+
+    Raised at the small end only. Headings (`text-xl` and up) are already
+    large and are left at Tailwind's defaults, so the scale tightens rather
+    than inflating uniformly — the gap between body and heading narrows,
+    which is what stops a page of 17px body from looking shouty.
+
+    Tailwind pairs each size with a UNITLESS line-height ratio
+    (`--text-xs--line-height: calc(1 / 0.75)`), so overriding the size alone
+    keeps leading proportional. That is why there is no line-height here.
+
+    The header nav is deliberately untouched: it sets `text-[1.0625rem]`
+    explicitly, so it does not ride this scale.
+  */
+  --text-xs: 0.8125rem; /* 13px, was 12 */
+  --text-sm: 0.9375rem; /* 15px, was 14 */
+  --text-base: 1.0625rem; /* 17px, was 16 */
+  --text-lg: 1.1875rem; /* 19px, was 18 */
+
   --animate-rotate-words: rotateWords 9s infinite;
 
   /* Shared easing. Slightly overshooting ease-out reads as "settling" rather
@@ -748,6 +781,25 @@
 :root[data-contrast="high"] svg {
   /* Decorative gradients and blurs become noise at this contrast level. */
   filter: none;
+}
+
+/*
+  Brand marks lose their brand colours here, and that is the point of the
+  mode rather than a compromise with it.
+
+  The social icons are drawn in Telegram blue, Instagram's gradient and
+  Facebook blue — correct everywhere else, and wrong in a palette whose whole
+  premise is one uniform ink at 21:1. #1877F2 on black is 3.6:1; the
+  Instagram gradient has stops that fall below 3:1. Both are re-inked to
+  `currentColor`, which this mode has already resolved to white.
+
+  `fill` is set as an ATTRIBUTE on those SVGs, and an attribute loses to any
+  CSS declaration — so this needs no `!important`. The gradient is overridden
+  on the <path> itself, since `url(#…)` is set there rather than on the root.
+*/
+:root[data-contrast="high"] .brand-mark,
+:root[data-contrast="high"] .brand-mark path {
+  fill: currentColor;
 }
 
 :root[data-contrast="high"] [aria-hidden="true"][class*="blur"] {
@@ -1427,7 +1479,11 @@
 
 .leaflet-control-attribution {
   background: rgb(255 255 255 / 0.82);
-  font-size: 10px;
+  /* rem, not the 10px this was. A px value silently opts the map's
+     attribution out of the "Matn o'lchami" control entirely, and 10px is
+     below what anyone can read unaided. Attribution is required to be
+     VISIBLE, so it may be small but not unreadable. */
+  font-size: 0.75rem;
 }
 
 /*

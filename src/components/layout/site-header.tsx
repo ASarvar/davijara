@@ -8,14 +8,15 @@ import { Logo } from "./logo";
 import { NavLinks } from "./nav-links";
 import { MobileNav } from "./mobile-nav";
 import { AccessibilityDialog } from "./accessibility-dialog";
+import { SocialLinks } from "./social-links";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
  * Site header — a tall brand band above a centred navigation bar.
  *
- *     ┌─ LOGO ──────────────── a11y · theme ─┐  brand band, --background
- *     │                        phone         │
- *     │                        email         │
+ *     ┌─ LOGO ──────────────── a11y · theme ─┐  brand band, --band
+ *     │                  phone · email       │
+ *     │                  telegram ig fb      │
  *     ├──────────────────────────────────────┤
  *     └──── Markaz · Faoliyat · Hujjatlar ───┘  nav bar, --band, STICKY
  *
@@ -51,12 +52,12 @@ export async function SiteHeader() {
     <header data-tone="deep" className="sticky top-0 z-40">
       {/* ── Brand band ─────────────────────────────────────────────────── */}
       <div className="bg-band">
-        {/* As tight as the contents allow. The band's height is set by the
-            three-row contact stack (~68px), NOT by the padding, so this is
-            the last of what trimming here can return — py-6 → py-2.5 → py-1
-            has taken the band from 124px to the high 70s and the next step
-            has to come off the stack itself. */}
-        <Container className="relative flex items-center justify-between gap-4 py-1 xl:py-1">
+        {/* The band's height is set by the three-row contact stack, not by
+            this padding, so the padding is only what keeps that stack off the
+            band's edges. It went py-6 → py-1 while the header was being cut
+            down, which left the rows touching the boundary; py-2/3 is the
+            breathing room put back. */}
+        <Container className="relative flex items-center justify-between gap-4 py-2 xl:py-3">
           <Link
             href="/"
             className="flex shrink-0 items-center"
@@ -134,22 +135,23 @@ export async function SiteHeader() {
           </div>
 
           {/*
-            THE CONTACT STACK, right-aligned and three rows deep.
+            THE CONTACT STACK, right-aligned, three rows.
 
-            Controls on top, then phone, then email — the order the operator's
-            reference layout uses. It is a column rather than the old single
-            strip because the brand band is now tall enough to carry one, and
-            because a phone number the reader has to scan a wide row for is a
-            phone number they do not find.
+              1  theme + accessibility controls
+              2  phone and email, side by side
+              3  the social marks
 
-            0.78125rem === 12.5px at the default root size: the same rendering
-            as a `text-[12.5px]`, but rem-based, so it scales with the "Matn
-            o'lchami" accessibility setting instead of ignoring it.
+            Phone and email share row 2 because they answer one question —
+            "how do I reach the Centre" — and stacking them made the band a
+            row taller to say it twice.
+
+            `text-sm` (15px on this project's scale) rather than the 12.5px it
+            ran at. That figure came from the old single-line utility strip,
+            where every pixel of height was spent on the sticky header; in a
+            column with room around it, 12.5px was simply small — and it is
+            the phone number a citizen is squinting at.
           */}
-          {/* `gap-1`, not `gap-2`: this stack of three rows — not the 52px
-              logo — is what sets the band's height, so it is the only place
-              trimming the header actually pays. */}
-          <div className="text-muted-foreground hidden flex-col items-end gap-1 text-[0.78125rem] xl:flex">
+          <div className="text-muted-foreground hidden flex-col items-end gap-2 text-sm xl:flex">
             <div className="flex items-center gap-4">
               {/* Theme first, then the accessibility dialog: this one is a
                   single-tap switch, the other opens a panel, and the lighter
@@ -158,21 +160,29 @@ export async function SiteHeader() {
               <AccessibilityDialog />
             </div>
 
-            <a
-              href={contacts.phoneHref}
-              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
-            >
-              <Phone aria-hidden="true" className="size-3.5 shrink-0" />
-              {contacts.phone}
-            </a>
+            {/* Phone and email share a row: they are both "how to reach the
+                Centre", and stacking them made the band a row taller to say
+                the same thing twice over. The gap is wide enough that the two
+                do not read as one string. */}
+            <div className="flex items-center gap-5">
+              <a
+                href={contacts.phoneHref}
+                className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
+              >
+                <Phone aria-hidden="true" className="size-4 shrink-0" />
+                {contacts.phone}
+              </a>
 
-            <a
-              href={contacts.emailHref}
-              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
-            >
-              <Mail aria-hidden="true" className="size-3.5 shrink-0" />
-              {contacts.email}
-            </a>
+              <a
+                href={contacts.emailHref}
+                className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
+              >
+                <Mail aria-hidden="true" className="size-4 shrink-0" />
+                {contacts.email}
+              </a>
+            </div>
+
+            <SocialLinks className="flex items-center gap-3" />
           </div>
 
           {/*

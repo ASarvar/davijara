@@ -576,7 +576,7 @@ export function ListingsMap({
                   */}
                   {listing.auctionDate ? (
                     <span className="mt-2 block">
-                      <span className="block text-[11px] text-[#3d4a6b]">
+                      <span className="block text-xs text-[#3d4a6b]">
                         {labels.auctionCountdown}
                       </span>
                       <AuctionCountdown

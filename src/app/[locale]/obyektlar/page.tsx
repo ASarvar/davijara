@@ -84,8 +84,8 @@ export default async function ObjectsPage({
           className="text-muted-foreground mt-4 max-w-2xl text-pretty"
         >
           {isEmptyQuery(query)
-            ? "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida. Quyidagi paneldan saralang."
-            : "Tanlangan shartlar bo'yicha natijalar. Filtrni o'zgartirish uchun quyidagi paneldan foydalaning."}
+            ? "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida."
+            : "Tanlangan shartlar bo'yicha natijalar."}
         </p>
       </Section>
 

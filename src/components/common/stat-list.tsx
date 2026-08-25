@@ -50,28 +50,43 @@ export function StatList({
           className={cn(
             bordered && "border-border border-t pt-4",
             variant === "card" &&
-              "border-hairline bg-card rounded-xl border p-5 sm:p-6",
+              "border-hairline bg-card rounded-xl border p-4 sm:p-5",
           )}
         >
           {variant === "card" ? (
             <>
-              <div className="mb-3 flex items-center gap-3">
+              {/*
+                ONE LEFT EDGE for the whole card. The figure used to be
+                centred under a left-aligned label, which put the two halves
+                on different axes and made a card that is only three lines
+                tall read as two stacked blocks. Aligning both to the same
+                edge is most of what "compact" means here — the rest is
+                padding.
+              */}
+              <div className="flex items-start gap-2.5">
                 {stat.icon && <IconTile name={stat.icon} size="sm" />}
-                <dt className="text-muted-foreground text-sm">{stat.label}</dt>
+                <dt className="text-muted-foreground text-sm leading-snug text-pretty">
+                  {stat.label}
+                </dt>
               </div>
               <dd>
                 <AnimatedStatValue
                   value={stat.value}
                   /* `--ornament`, not `--accent-foreground`: in the light
-                     theme accent is cobalt, and these three figures are the
-                     one place the brand still wants a warm highlight against
+                     theme accent is cobalt, and these figures are the one
+                     place the brand still wants a warm highlight against
                      it. Gold on deep, gold-ink on light, yellow in high
-                     contrast — see the token in globals.css. */
-                  className="font-heading text-ornament block pt-3 text-center text-3xl font-extrabold sm:text-4xl"
+                     contrast — see the token in globals.css.
+
+                     A step down from the old text-3xl/4xl. At that size the
+                     number dominated a card whose label is the part that
+                     says what it counts; 2xl/3xl still leads the card
+                     without swamping it, and takes ~12px off the height. */
+                  className="font-heading text-ornament mt-3 block text-2xl font-extrabold sm:text-3xl"
                 />
               </dd>
               {stat.note ? (
-                <dd className="text-muted-foreground mt-3 text-xs text-pretty">
+                <dd className="text-muted-foreground mt-2 text-xs text-pretty">
                   {stat.note}
                 </dd>
               ) : null}

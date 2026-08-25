@@ -73,7 +73,15 @@ export function Section({
         the DOM shows at a glance which sections carry the rhythm.
       */
       data-surface={surface === "raised" ? "raised" : undefined}
-      className={cn("bg-background text-foreground py-16 sm:py-24", className)}
+      /*
+        Halved, at the operator's request: py-16/24 (64/96px) -> py-8/12
+        (32/48px). Every section on the site reads this, so the page gets
+        roughly 400px shorter overall and the rhythm tightens.
+
+        The tone alternation is what still separates sections — it was never
+        the whitespace doing that work — so the boundaries survive the cut.
+      */
+      className={cn("bg-background text-foreground py-8 sm:py-12", className)}
       {...props}
     >
       {contained ? (

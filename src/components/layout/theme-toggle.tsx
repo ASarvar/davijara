@@ -123,11 +123,11 @@ export function ThemeToggle({ className }: { className?: string }) {
       */}
       <Sun
         aria-hidden="true"
-        className="size-3.5 shrink-0 [:root[data-theme='light']_&]:hidden"
+        className="size-4 shrink-0 [:root[data-theme='light']_&]:hidden"
       />
       <Moon
         aria-hidden="true"
-        className="hidden size-3.5 shrink-0 [:root[data-theme='light']_&]:block"
+        className="hidden size-4 shrink-0 [:root[data-theme='light']_&]:block"
       />
     </button>
   );

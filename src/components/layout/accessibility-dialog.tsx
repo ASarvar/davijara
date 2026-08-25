@@ -38,7 +38,7 @@ export function AccessibilityDialog() {
           title={t("accessibility")}
           className="text-muted-foreground hover:text-accent-foreground focus-visible:ring-ring flex items-center rounded transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
-          <Eye aria-hidden="true" className="size-3.5" />
+          <Eye aria-hidden="true" className="size-4" />
           {/*
             ICON ONLY at every width now, so the header's contact stack stays
             narrow. `sr-only` rather than deleting the text: an unlabelled icon
