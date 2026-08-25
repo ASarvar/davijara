@@ -155,7 +155,22 @@ export default async function LocaleLayout({
       of the wrong palette and a flash of un-hidden content on every
       navigation.
     */
-    <html lang={locale} className={fontVariables} suppressHydrationWarning>
+    /*
+      `data-theme="light"` printed here, on the server, is what makes light
+      the DEFAULT theme — see AccessibilityScript for why the flip lives in
+      the markup rather than in globals.css. The script below removes this
+      attribute before paint for a reader who chose dark.
+
+      It must be a literal on the server response, not something the script
+      adds: a reader with no stored preference would otherwise get one frame
+      of the navy palette on every single page load.
+    */
+    <html
+      lang={locale}
+      data-theme="light"
+      className={fontVariables}
+      suppressHydrationWarning
+    >
       <head>
         {/* Both must run before paint — see each component for why. */}
         <AccessibilityScript />

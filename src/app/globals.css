@@ -442,14 +442,23 @@
 /*
   ══ LIGHT THEME ══════════════════════════════════════════════════════════
 
-  `data-theme="light"` on <html>, opt-in, written by the header toggle and
-  re-applied before first paint by AccessibilityScript. Dark stays the default
-  — it is the brand.
+  `data-theme="light"` on <html> — and THIS IS NOW THE DEFAULT, even though it
+  is still written as the conditional block.
+
+  Nothing in this file decides that. The layout prints `data-theme="light"` on
+  the server response and AccessibilityScript REMOVES it before paint for a
+  reader who chose dark; `:root` alone, above, is the dark palette and is what
+  a reader sees once the attribute is gone. Keeping the flip in those two
+  files rather than inverting ~400 lines of tokens here is deliberate — see
+  the note in accessibility-script.tsx.
+
+  So read the table below as "attribute absent / attribute present", not as
+  "default / opt-in":
 
   This introduces NO new colours. Every value below is already in the brand
   scale; the theme only changes which surface each tone resolves to:
 
-                    dark (default)      light
+                    dark (opt-in)       light (default)
       tone="deep"   navy   #07102b      white  #ffffff
       tone="light"  mist   #eef1f8      mist   #eef1f8
 

@@ -52,8 +52,13 @@ const getSnapshot = () =>
   and is applied by an inline script AFTER the HTML is generated. Returning
   the default here is what useSyncExternalStore is for — React renders the
   server snapshot, then swaps to the client one, with no hydration mismatch.
+
+  "light", matching the `data-theme="light"` the layout prints. It must track
+  that default: returning the wrong one makes the server send the wrong icon
+  and the wrong `aria-pressed` for every visitor who has no stored preference,
+  which is most of them.
 */
-const getServerSnapshot = () => "dark" as const;
+const getServerSnapshot = () => "light" as const;
 
 export function ThemeToggle({ className }: { className?: string }) {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
