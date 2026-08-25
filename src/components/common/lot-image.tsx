@@ -85,13 +85,35 @@ function lookup(orderId: string, region: string): Promise<string | null> {
     ),
   )
     .then(async (res) => {
+      /*
+        The body is read BEFORE the status is judged, because the route uses
+        it to say which kind of failure this is. `catch(() => ({}))` so a
+        genuinely empty or non-JSON error response still falls through to the
+        status check instead of throwing a parse error over it.
+      */
+      const json = (await res.json().catch(() => ({}))) as {
+        image?: string | null;
+        retry?: boolean;
+      };
+
       if (!res.ok) {
         const message = `HTTP ${res.status}`;
-        throw res.status >= 400 && res.status < 500
+        /*
+          `retry: false` means the order service is down and the route is
+          skipping it — see the breaker in lib/data/lot-images. Retrying then
+          is not just futile, it is harmful: on HTTP/1.1 these requests hold
+          the six connections a browser gives an origin, and the reader's next
+          page load queues behind them. Treated as Permanent so this card takes
+          its placeholder now and frees the connection.
+
+          A 4xx is settled for the other reason — our own route rejected the
+          arguments, and the second request would carry the same ones.
+        */
+        throw json.retry === false ||
+          (res.status >= 400 && res.status < 500)
           ? new Permanent(message)
           : new Error(message);
       }
-      const json = (await res.json()) as { image?: string | null };
       return json.image ?? null;
     })
     .catch((error: unknown) => {
@@ -307,7 +329,13 @@ export function LotImage({
           if (!cancelled && image) setSrc(image);
           return;
         } catch (error) {
-          // Bad arguments — the next request would carry the same ones.
+          /*
+            Settled either way: bad arguments (the next request would carry
+            the same ones), or the route reporting that the order service is
+            down and being skipped. The second is the one that matters under
+            load — see `lookup` for why retrying an outage is what makes the
+            reader's next page load slow.
+          */
           if (error instanceof Permanent) return;
           const backoff = BACKOFF_MS[tries];
           if (cancelled || backoff === undefined) return;

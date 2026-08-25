@@ -1,5 +1,5 @@
 import { regions } from "@/content/regions";
-import { getLotImage } from "@/lib/data/lot-images";
+import { getLotImage, LotImageUnavailable } from "@/lib/data/lot-images";
 
 /*
   One lot's photograph, for the browser.
@@ -66,10 +66,34 @@ export async function GET(request: Request) {
   let image: string | null;
   try {
     image = await getLotImage(order, region.apiId);
-  } catch {
+  } catch (error) {
+    /*
+      TWO KINDS OF 503, and the difference is what keeps the site navigable
+      while the order service is down.
+
+      An ordinary fault means "we tried and it did not work" — worth another
+      go, and `LotImage` retries. But when the breaker in lib/data/lot-images
+      is open, every retry is guaranteed to fail the same way, and the site is
+      served over HTTP/1.1: six connections per origin, a card holding one for
+      ~33 seconds across its three attempts, twelve cards per page. Those
+      retries do not just waste time, they queue the reader's next PAGE behind
+      them.
+
+      So `retry: false` tells the client to take the placeholder and stop.
+      `Retry-After` says the same thing to anything else in the chain. Still
+      `no-store`, because none of this is an answer about the lot.
+    */
+    const paused =
+      error instanceof LotImageUnavailable && error.serviceDown;
+
     return Response.json(
-      { image: null },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
+      paused ? { image: null, retry: false } : { image: null },
+      {
+        status: 503,
+        headers: paused
+          ? { "Cache-Control": "no-store", "Retry-After": "30" }
+          : { "Cache-Control": "no-store" },
+      },
     );
   }
 

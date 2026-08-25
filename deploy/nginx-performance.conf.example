@@ -1,0 +1,149 @@
+# OPTIONAL nginx improvements. NOT INSTALLED, and nothing here is required.
+#
+# Everything in this file is `.example` on purpose: the two live-mirroring
+# files in this directory — nginx-site-location.conf and
+# nginx-edge-site-location.conf — match what is actually running on the
+# servers, byte for byte, and must keep matching. Read them to know what is
+# deployed; read this one to know what could be improved.
+#
+# ── WHAT THIS IS AND IS NOT WORTH ─────────────────────────────────────────
+#
+# This was written during an outage in which every lot photograph stopped
+# loading and the site's links became unusable. It is NOT the fix for that.
+# The outage had two causes, in this order of importance:
+#
+#   1. A firewall dropped TCP 8390 from 192.168.1.248 to 10.190.4.122, so the
+#      order service was unreachable and every image lookup timed out at 10s.
+#      Only opening that port brings photographs back.
+#   2. Those 10-second requests then held the browser's six per-origin HTTP/1.1
+#      connections, and page navigation queued behind them. That is fixed IN
+#      THE APPLICATION, by the circuit breaker in lib/data/lot-images.ts: after
+#      four consecutive faults the service is skipped entirely and the route
+#      answers in ~6ms instead of 10s. Measured.
+#
+# What is below is worth a few milliseconds per request and some resilience
+# headroom. Do it on a quiet afternoon, not during an incident.
+
+# ══ 1. Connection header + upstream keepalive ═══════════════════════════════
+#
+# Both live location blocks contain:
+#
+#     proxy_set_header Connection 'upgrade';
+#
+# That is a LITERAL, so it goes out on every request rather than only on a
+# websocket handshake. When `$http_upgrade` is empty nginx omits the `Upgrade`
+# header (it skips a proxy_set_header whose value is empty) but still sends
+# `Connection: upgrade`, so the backend sees an upgrade signal with nothing to
+# upgrade to, treats the connection as non-persistent, and closes it after the
+# response. Every request therefore opens a fresh TCP connection to Node.
+#
+# On loopback that costs a fraction of a millisecond, which is why this is an
+# improvement rather than a fix. It is still wrong, and it is cheap to correct.
+#
+# Goes in the `http { }` block — both directives are only valid there. Easiest:
+#     cp this section to /etc/nginx/conf.d/davijara-keepalive.conf
+# which the stock nginx.conf already includes from inside `http { }`.
+#
+# Needed on BOTH hops if you apply the location changes below to both.
+
+# `''` maps to the EMPTY string, not to `close`.
+#
+# `close` is the variant that circulates most widely and it silently defeats
+# the point: it tells the backend to hang up, so the keepalive pool never gets
+# a connection to reuse. An empty value makes nginx omit the header entirely,
+# which is what leaves the pooled connection open.
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      "";
+}
+
+# markaz (192.168.1.248) — the Next.js service itself.
+# [::1] and not 127.0.0.1 is load-bearing; see nginx-site-location.conf for the
+# `ss -ltnp` evidence.
+upstream davijara_app {
+    server [::1]:3001;
+    # Idle connections held open per worker. Without this directive nginx
+    # re-connects per request no matter what the Connection header says — the
+    # header fix alone does nothing.
+    keepalive 32;
+    keepalive_timeout 60s;
+}
+
+# markazsrv (the TLS edge) — port 80 on markaz, deliberately: markaz's own
+# nginx owns the /site -> :3001 step, and :3001 is loopback-only there.
+upstream davijara_markaz {
+    server 192.168.1.248:80;
+    keepalive 32;
+    keepalive_timeout 60s;
+}
+
+# ══ 2. The two location blocks, with those applied ══════════════════════════
+#
+# Copy the CHANGED LINES ONLY into the live blocks — do not replace them
+# wholesale, or you will lose the comments in nginx-site-location.conf and
+# nginx-edge-site-location.conf that record why [::1] and the missing trailing
+# slash are what they are.
+#
+# ── markaz, inside `location /site { … }` ──
+#
+#     proxy_pass http://davijara_app;              (was http://[::1]:3001)
+#     proxy_set_header Connection $connection_upgrade;   (was 'upgrade')
+#
+#     # Explicit, and shorter than the 60s default. /api/lot-image calls the
+#     # order service with its own 10s timeout, so a request still open at 20s
+#     # is one nothing is waiting on. The default let a stalled backend hold an
+#     # nginx worker connection for a full minute; during the outage that was
+#     # observed filling the worker pool until nginx answered 502 to ordinary
+#     # page requests.
+#     proxy_read_timeout 20s;
+#     proxy_connect_timeout 5s;
+#
+# ── markazsrv, inside `location /site { … }` ──
+#
+#     proxy_pass http://davijara_markaz;           (was http://192.168.1.248)
+#     proxy_set_header Connection $connection_upgrade;   (was 'upgrade')
+#
+# ── the other app's block on markaz, `location / { … }` ──
+#
+# It has the same literal header. Changing just that one line is safe for any
+# HTTP backend; leave its proxy_pass alone, since that application is not ours.
+#
+#     proxy_set_header Connection $connection_upgrade;   (was 'upgrade')
+#
+# ORDER MATTERS: install section 1 first. A location block referencing
+# `davijara_app` or `$connection_upgrade` before they are defined fails
+# `nginx -t` with "upstream not found" — which is the good failure mode, since
+# nginx then refuses to reload rather than serving a half-applied config.
+
+# ══ 3. HTTP/2 on the edge ═══════════════════════════════════════════════════
+#
+# The single highest-value item here, and one line. On markazsrv, in the
+# davijara.uz server block that carries the TLS certificate:
+#
+#     listen 443 ssl http2;        (was: listen 443 ssl)
+#
+# HTTP/1.1 is what gives a browser only six connections per origin, and that
+# cap is what turned "the photographs are slow" into "the links do not work".
+# HTTP/2 multiplexes every request over one connection, so the cap disappears.
+# The circuit breaker already keeps requests short enough that the cap does not
+# bite today; this is what keeps it from biting again for some other reason.
+#
+# Verify afterwards:
+#     curl -s -o /dev/null -w "http/%{http_version}\n" https://davijara.uz/site/uz
+
+# ══ 4. NOT a performance item — /api/search on markaz ═══════════════════════
+#
+# Unrelated to this file's subject and to our application, but visible in the
+# same vhost and worth a decision by whoever owns that endpoint:
+#
+#   · The upstream API token is in plain text in the vhost, so it travels
+#     wherever that config is copied or pasted. If it is live, rotate it and
+#     move it out of the file.
+#   · `$arg_cad_num` is interpolated straight into the upstream URL's query
+#     string. nginx does not re-escape a variable in that position, so a
+#     crafted `cad_num` can append parameters of its own to the upstream
+#     request — and with `Access-Control-Allow-Origin *` on the response, any
+#     site can drive the proxy using that token.
+#
+# Fixing the second needs the cadastre number's real format to validate
+# against, which is not something to guess at on a state portal.

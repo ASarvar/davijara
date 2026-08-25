@@ -166,10 +166,88 @@ function warn(apiId: number, orderId: string, reason: string): void {
  * answer and is cached as one.
  */
 export class LotImageUnavailable extends Error {
-  constructor(reason: string) {
+  /**
+   * True when the service is being SKIPPED, not tried and failed.
+   *
+   * The route turns this into "do not ask again for now" rather than the
+   * ordinary "ask again" — see the breaker below for why that distinction is
+   * what keeps the rest of the site usable during an outage.
+   */
+  readonly serviceDown: boolean;
+
+  constructor(reason: string, serviceDown = false) {
     super(reason);
     this.name = "LotImageUnavailable";
+    this.serviceDown = serviceDown;
   }
+}
+
+/*
+  ── CIRCUIT BREAKER ────────────────────────────────────────────────────────
+
+  WHAT IT IS FOR, and it is not this feature: when the order service stops
+  answering, it takes THE WHOLE SITE down with it, and that was measured
+  rather than feared.
+
+  The site is served over HTTP/1.1, so a browser opens at most six connections
+  per origin. A card whose lookup hangs holds one of those for the full 10s
+  timeout, then retries — `LOOKUP_TRIES` is 3, with 0,6s and 2,4s backoffs —
+  so one card occupies a connection for ~33 seconds. Twelve cards on a
+  catalogue page is 36 such requests against six connections. Every navigation
+  the reader attempts queues behind them, which is why "the images are broken"
+  arrived together with "the links are slow or do not work at all". Confirmed
+  against production while the service was down: /api/lot-image answered 503
+  after exactly 10,09s, every time, for every region.
+
+  So after a few consecutive faults we stop calling the service at all and
+  answer immediately. The cards show the placeholder — which is what they were
+  going to show anyway — and the connections stay free for pages.
+
+  HALF-OPEN, not a plain timer: once the cooldown elapses, exactly ONE request
+  is let through as a probe (it re-stamps `openedAt`, so the next one is
+  blocked until it reports back). A success closes the breaker instantly, so a
+  service that comes back is picked up within one cooldown rather than after a
+  fixed penalty.
+
+  Module scope, so it is per server instance and resets on deploy. Deliberately
+  not in `unstable_cache`: this is about the health of a dependency right now,
+  not about a value worth persisting.
+*/
+const BREAKER_THRESHOLD = 4;
+const BREAKER_COOLDOWN_MS = 30_000;
+
+let consecutiveFaults = 0;
+let openedAt = 0;
+
+/** True when the call should be skipped entirely. */
+function breakerIsOpen(): boolean {
+  if (consecutiveFaults < BREAKER_THRESHOLD) return false;
+  if (Date.now() - openedAt >= BREAKER_COOLDOWN_MS) {
+    // Half-open: this caller becomes the probe. Re-stamping the clock is what
+    // keeps the other callers blocked while it is in flight.
+    openedAt = Date.now();
+    return false;
+  }
+  return true;
+}
+
+function recordFault(): void {
+  consecutiveFaults++;
+  if (consecutiveFaults === BREAKER_THRESHOLD) {
+    openedAt = Date.now();
+    console.warn(
+      `[lot-images] ${BREAKER_THRESHOLD} consecutive faults — pausing calls ` +
+        `to the order service for ${BREAKER_COOLDOWN_MS / 1000}s.`,
+    );
+  }
+}
+
+/** Any answer at all means the service is up; the count resets on success. */
+function recordSuccess(): void {
+  if (consecutiveFaults >= BREAKER_THRESHOLD) {
+    console.warn("[lot-images] order service answered again — resuming.");
+  }
+  consecutiveFaults = 0;
 }
 
 async function fetchLotImage(
@@ -188,6 +266,16 @@ async function fetchLotImage(
   const credentials = credentialsFor(apiId);
   if (!credentials) return null;
   const { user: username, pass: password } = credentials;
+
+  /*
+    Skipped, not attempted — and it throws rather than returning `null` so
+    this is never cached as "this lot has no photograph". An outage must not
+    write a day's worth of empty answers over every lot the readers happened
+    to scroll past while it lasted.
+  */
+  if (breakerIsOpen()) {
+    throw new LotImageUnavailable("order service paused", true);
+  }
 
   try {
     const res = await fetch(base, {
@@ -214,6 +302,7 @@ async function fetchLotImage(
     });
     if (!res.ok) {
       warn(apiId, orderId, `HTTP ${res.status}`);
+      recordFault();
       throw new LotImageUnavailable(`HTTP ${res.status}`);
     }
 
@@ -244,7 +333,10 @@ async function fetchLotImage(
       placeholder for an hour, and would keep doing so after it was corrected.
     */
     const NO_SUCH_ORDER = 27;
-    if (json.result_code === NO_SUCH_ORDER) return null;
+    if (json.result_code === NO_SUCH_ORDER) {
+      recordSuccess();
+      return null;
+    }
 
     if (json.result_code !== 0) {
       warn(
@@ -252,6 +344,7 @@ async function fetchLotImage(
         orderId,
         `result_code ${json.result_code}: ${json.result_msg}`,
       );
+      recordFault();
       throw new LotImageUnavailable(`result_code ${json.result_code}`);
     }
 
@@ -269,6 +362,7 @@ async function fetchLotImage(
     */
     if (!json.orders?.length) {
       warn(apiId, orderId, "no order in response");
+      recordFault();
       throw new LotImageUnavailable("no order in response");
     }
 
@@ -278,6 +372,7 @@ async function fetchLotImage(
       photograph" is a fact about this lot and is cached as one, rather than
       something worth asking again.
     */
+    recordSuccess();
     const picked = pickMainImage(images);
     if (!picked && images?.length) {
       warn(apiId, orderId, `${images.length} image(s), none usable`);
@@ -288,6 +383,7 @@ async function fetchLotImage(
     // Network unreachable, timeout, malformed JSON — we never got an answer,
     // so we must not manufacture one.
     warn(apiId, orderId, error instanceof Error ? error.name : "unknown error");
+    recordFault();
     throw new LotImageUnavailable(
       error instanceof Error ? error.name : "unknown error",
     );

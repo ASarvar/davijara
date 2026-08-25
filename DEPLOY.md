@@ -86,7 +86,14 @@ dagi blokni qo'shing, xuddi shunday `nginx -t && systemctl reload nginx`.
 
 **Bu ikkala nginx bloki [deploy.sh](deploy/deploy.sh) tomonidan hech qachon
 avtomatik qayta nusxalanmaydi.** Ularni repo'da o'zgartirsangiz, serverlarga
-qo'lda ko'chirishingiz kerak.
+qo'lda ko'chirishingiz kerak. Shu sababli ikkala fayl serverdagi jonli
+konfiguratsiyaning **aynan nusxasi** bo'lib turishi kerak — nima ishlab
+turganini bilish uchun o'sha ikkitasini o'qing.
+
+Ixtiyoriy yaxshilashlar (keepalive, HTTP/2, timeout'lar) alohida —
+[nginx-performance.conf.example](deploy/nginx-performance.conf.example) da.
+U **o'rnatilmagan** va hech narsa uni talab qilmaydi; nima uchun kerakligi va
+nima uchun shoshilinch emasligi o'sha faylning boshida yozilgan.
 
 ## Har safar yangilash
 
