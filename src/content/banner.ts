@@ -35,7 +35,7 @@ export const homeBanner: {
     currently the only file; adding `mobile` later does not require renaming
     it.
   */
-  desktop: null,
+  desktop: "/banner.jpg",
   mobile: null,
   alt: "Oʻzbekiston Respublikasi Davlat bayrogʻi va «35 YIL» yozuvi. Shior: «Yagona Vatan, yagona xalq boʻlib, birgalikda yangi hayot va porloq kelajak yaratamiz!»",
 };

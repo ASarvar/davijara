@@ -170,13 +170,13 @@ export async function SiteHeader() {
               {contacts.phone}
             </a>
 
-            <a
+            {/* <a
               href={contacts.emailHref}
               className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
             >
               <Mail aria-hidden="true" className="size-3.5 shrink-0" />
               {contacts.email}
-            </a>
+            </a> */}
 
             <SocialLinks className="flex items-center gap-3" />
           </div>

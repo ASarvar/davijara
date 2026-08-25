@@ -89,7 +89,7 @@ export function HomeBanner() {
       own surface. The strip's only edges are the image's own rounded corners.
     */
     <section data-tone="deep" className="bg-background">
-      <Container className="py-6">
+      <Container className="">
         {/*
           The radius lives on this wrapper with `overflow-hidden`, not on the
           <img>. A rounded <img> is clipped by the browser at paint time and
@@ -97,7 +97,7 @@ export function HomeBanner() {
           what the card primitives do, and it also keeps the corners correct
           if a `mobile` crop with a different aspect ratio is added later.
         */}
-        <div className="overflow-hidden rounded-xl">
+        <div className="overflow-hidden">
           {href ? (
             <Link href={href} className="block">
               {image}
