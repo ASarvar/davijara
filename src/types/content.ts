@@ -195,11 +195,7 @@ export interface Region {
  * `news.categories`.
  */
 export type NewsCategory =
-  | "obyektlar"
-  | "xizmatlar"
-  | "imtiyozlar"
-  | "tadbirlar"
-  | "portal";
+  "obyektlar" | "xizmatlar" | "imtiyozlar" | "tadbirlar" | "portal";
 
 export interface NewsItem {
   slug: string;
@@ -336,4 +332,20 @@ export interface Auction {
 export interface FaqItem {
   question: string;
   answer: string;
+}
+
+/** One language's official name for the Centre — see content/about.ts. */
+export interface OfficialName {
+  /** How the language is named on the page — "Davlat tilida", "Rus tilida", "Ingliz tilida". */
+  language: string;
+  full: string;
+  short: string;
+}
+
+/** One lettered "soha" (domain) of functions — see content/duties.ts. */
+export interface FunctionGroup {
+  /** The statute's own letter for this group; not a Latin a-b-c sequence. */
+  letter: string;
+  heading: string;
+  items: string[];
 }

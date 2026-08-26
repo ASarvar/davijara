@@ -190,6 +190,17 @@
     "metaDescription": "Davlat mulki obyektlaridan samarali foydalanish markazi markaziy apparatining tuzilmasi: boʻlinmalar va boʻysunish tartibi.",
     "externalNote": "Markaziy apparat tarkibiga kirmaydi"
   },
+  "about": {
+    "metaDescription": "Davlat mulki obyektlaridan samarali foydalanish markazining tashkil etilishi va rasmiy nomlanishi.",
+    "establishedBy": "Asos",
+    "fullName": "Toʻliq nomi",
+    "shortName": "Qisqartirilgan nomi"
+  },
+  "duties": {
+    "metaDescription": "Davlat mulki obyektlaridan samarali foydalanish markazining vazifalari va funksiyalari — nizomga koʻra.",
+    "approvedBy": "Tasdiqlangan",
+    "contents": "Mundarija"
+  },
   "news": {
     "eyebrow": "Matbuot markazi",
     "title": "Yangiliklar",

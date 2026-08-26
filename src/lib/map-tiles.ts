@@ -76,7 +76,7 @@ export const MAP_TILE_URL: string | null =
 
 export const MAP_TILE_ATTRIBUTION: string | null =
   process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION ??
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  '&copy; <a href="https://www.davijara.uz/site">davijara</a>';
 
 /** Matches essentially every tile provider; raise only if a configured one supports more. */
 export const MAP_TILE_MAX_ZOOM = 19;
