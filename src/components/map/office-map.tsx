@@ -5,6 +5,12 @@ import { MapContainer, Marker, TileLayer } from "react-leaflet";
 
 import "leaflet/dist/leaflet.css";
 
+import {
+  MAP_TILE_ATTRIBUTION,
+  MAP_TILE_MAX_ZOOM,
+  MAP_TILE_URL,
+} from "@/lib/map-tiles";
+
 /**
  * The Centre's own address, as one pin.
  *
@@ -50,6 +56,15 @@ export function OfficeMap({
       center={[lat, lng]}
       zoom={17}
       /*
+        Set here too, not only on the conditional <TileLayer> below. Leaflet
+        normally infers maxZoom from a tile layer at mount time, and with none
+        configured there is nothing to infer it from — the map throws "Map
+        has no maxZoom specified" and never mounts at all. Found live: the pin
+        disappeared along with the tiles the moment the fallback in
+        lib/map-tiles.ts went from "wrong URL" to "no URL".
+      */
+      maxZoom={MAP_TILE_MAX_ZOOM}
+      /*
         Off, deliberately. A map that swallows the wheel traps a reader who is
         only trying to scroll past it — and unlike the catalogue's map, there
         is nothing here to explore by zooming: one building, already centred.
@@ -64,16 +79,18 @@ export function OfficeMap({
       style={{ height: "100%", width: "100%", background: "var(--band)" }}
     >
       {/*
-        CARTO Voyager over OpenStreetMap data — the same basemap the catalogue
-        uses, so the two maps on the site do not look like two different
-        products. Attribution is required by both licences and is rendered by
-        Leaflet's own control.
+        NO DEFAULT TILE SOURCE — see lib/map-tiles.ts for why. Rendered only
+        once an operator supplies a real, licensed provider; until then the
+        pin sits on the plain `--band` surface above, which is an honest
+        degraded state rather than a broken-looking one.
       */}
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        maxZoom={19}
-      />
+      {MAP_TILE_URL && MAP_TILE_ATTRIBUTION ? (
+        <TileLayer
+          url={MAP_TILE_URL}
+          attribution={MAP_TILE_ATTRIBUTION}
+          maxZoom={MAP_TILE_MAX_ZOOM}
+        />
+      ) : null}
       <Marker position={[lat, lng]} icon={PIN} title={label} alt={label} />
     </MapContainer>
   );

@@ -41,10 +41,10 @@ export default async function CalculatorPage({
     <Section tone="deep">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
         <div>
-          <h1 className="font-heading text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
+          <h1 className="font-heading text-xl font-semibold text-balance sm:text-2xl lg:text-3xl">
             {t("pageLead")}
           </h1>
-          <p className="text-muted-foreground mt-4 text-pretty">
+          <p className="text-muted-foreground mt-4 text-sm text-pretty">
             {t("pageLede")}
           </p>
 

@@ -19,6 +19,11 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import { AuctionCountdown } from "@/components/common/auction-countdown";
 import { LotImage } from "@/components/common/lot-image";
 import { formatArea, formatDateTime, formatNumber } from "@/lib/format";
+import {
+  MAP_TILE_ATTRIBUTION,
+  MAP_TILE_MAX_ZOOM,
+  MAP_TILE_URL,
+} from "@/lib/map-tiles";
 import type { Listing } from "@/types/content";
 
 /*
@@ -436,6 +441,14 @@ export function ListingsMap({
     <MapContainer
       center={COUNTRY_CENTER}
       zoom={COUNTRY_ZOOM}
+      /*
+        Set here too, not only on the conditional <TileLayer> below. Leaflet
+        normally infers maxZoom from a tile layer at mount time; with none
+        configured there is nothing to infer it from and the map throws "Map
+        has no maxZoom specified" instead of mounting — found live, the
+        moment lib/map-tiles.ts's fallback went from "wrong URL" to "no URL".
+      */
+      maxZoom={MAP_TILE_MAX_ZOOM}
       // Scroll-zoom off: the map sits mid-page, and hijacking the wheel traps
       // someone who is only trying to scroll past it.
       scrollWheelZoom={false}
@@ -448,11 +461,18 @@ export function ListingsMap({
       */
       style={{ height: "100%", width: "100%", background: "var(--band)" }}
     >
-      <TileLayer
-        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        maxZoom={19}
-      />
+      {/*
+        Shared with the office map — see lib/map-tiles.ts for why there is no
+        default source. Without one, the clusters render on the plain
+        `--band` surface, which stays honest rather than looking broken.
+      */}
+      {MAP_TILE_URL && MAP_TILE_ATTRIBUTION ? (
+        <TileLayer
+          url={MAP_TILE_URL}
+          attribution={MAP_TILE_ATTRIBUTION}
+          maxZoom={MAP_TILE_MAX_ZOOM}
+        />
+      ) : null}
 
       <KeepSizeInSync />
       <ModifierWheelZoom hint={labels.zoomHint} />

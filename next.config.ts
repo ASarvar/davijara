@@ -30,14 +30,19 @@ const csp = [
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   /*
-    Carto's basemap CDN serves the Leaflet map tiles. They are plain raster
-    <img> requests made by Leaflet, so the tile hosts must be allowed here or
-    the map renders as an empty grid — Next's image config has no say in it.
-    Scoped to the specific CDN rather than a wildcard.
+    tile.openstreetmap.org serves the Leaflet map tiles. Plain raster <img>
+    requests made by Leaflet, so the tile host must be allowed here or the
+    map renders as an empty grid — Next's image config has no say in it.
 
-    Carto basemaps are free for this use with attribution, which the map
-    renders. The legacy site scraped Google's tiles instead, against their
-    terms; that is not restored.
+    CARTO's basemap CDN was here before this and is gone: it now stamps every
+    tile "API KEY REQUIRED" for unauthenticated requests. See the full account
+    of why OSM's own server is the current choice, and its "no SLA, may block
+    without notice" caveat, in src/lib/map-tiles.ts. The legacy site scraped
+    Google's tiles instead, against their terms; that is not restored either.
+
+    If MAP_TILE_URL is ever pointed at a keyed provider (see that file), this
+    host list has to widen to match, or the browser blocks the new tiles even
+    though Next and the env var both allow them.
   */
   /*
     `media.e-auksion.uz` is where the auction service stores lot photographs.
@@ -46,7 +51,7 @@ const csp = [
     opaque content hashes, so they can only ever arrive as data, never be
     constructed from a lot number.
   */
-  "img-src 'self' data: blob: https://*.basemaps.cartocdn.com https://media.e-auksion.uz",
+  "img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz",
   "font-src 'self' data:",
   // Dev needs the HMR websocket.
   `connect-src 'self'${isDev ? " ws: wss:" : ""}`,

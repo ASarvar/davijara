@@ -78,9 +78,15 @@ export default async function StructurePage({
           </ol>
         </nav>
 
+        {/*
+          Centred, unlike its siblings on the other five pages — the operator
+          asked for it on this one specifically, so `mx-auto text-center` is
+          set here rather than folded into the shared size the six pages
+          otherwise share.
+        */}
         <h1
           data-split
-          className="font-heading max-w-3xl text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl"
+          className="font-heading mx-auto max-w-3xl text-center text-xl font-semibold text-balance sm:text-2xl lg:text-3xl"
         >
           {tNav(NAV_KEY)}
         </h1>
@@ -93,7 +99,7 @@ export default async function StructurePage({
         */}
         <p
           data-reveal="fade"
-          className="text-muted-foreground mt-4 max-w-2xl text-pretty"
+          className="text-muted-foreground mx-auto mt-4 max-w-2xl text-center text-sm text-pretty"
         >
           {structure.order.organisation}
         </p>
