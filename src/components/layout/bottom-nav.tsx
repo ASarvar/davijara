@@ -17,11 +17,12 @@ import { cn } from "@/lib/utils";
 export function BottomNav() {
   const pathname = usePathname();
   const t = useTranslations("nav");
+  const tc = useTranslations("common");
 
   return (
     <nav
       data-tone="deep"
-      aria-label="Mobil menyu"
+      aria-label={tc("mobileMenu")}
       className="bg-background border-border fixed inset-x-0 bottom-0 z-30 border-t lg:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >

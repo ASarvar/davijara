@@ -13,6 +13,7 @@ import { AccessibilityScript } from "@/components/layout/accessibility-script";
 import { MotionArmScript } from "@/components/motion/motion-arm-script";
 import { MotionProvider } from "@/components/motion/motion-provider";
 import { SkipLink } from "@/components/layout/skip-link";
+import { HomeBanner } from "@/components/sections/home-banner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -109,11 +110,17 @@ export default async function LocaleLayout({
     Left to itself, NextIntlClientProvider serialises the entire message
     catalog into the HTML of every page — but almost everything here is a
     Server Component that resolves its strings during render and ships plain
-    text. Only three client components need messages at runtime:
+    text. Only these client components need messages at runtime:
 
       nav-links            -> nav
       mobile-nav           -> nav, common
+      bottom-nav           -> nav, common
       accessibility-dialog -> topbar
+      home-banner          -> (none; route check only)
+      office-map-panel     -> common
+      objects-explorer     -> objects
+      lot-card             -> listings   (rendered inside objects-explorer)
+      rent-calculator      -> calculator
 
     `lang-switcher` also reads `topbar` and is still built, but the header
     stopped rendering it while the site ships Uzbek-only — the namespace stays
@@ -130,6 +137,9 @@ export default async function LocaleLayout({
     nav: messages.nav,
     common: messages.common,
     topbar: messages.topbar,
+    objects: messages.objects,
+    listings: messages.listings,
+    calculator: messages.calculator,
   };
 
   return (
@@ -190,6 +200,22 @@ export default async function LocaleLayout({
           */}
           <MotionProvider />
           <SkipLink />
+          {/*
+            ABOVE the header, at the operator's request — so the national
+            banner is the first thing on the page rather than a strip under
+            the chrome.
+
+            It renders itself only on the homepage (see home-banner.tsx). It
+            has to be here rather than in `page.tsx` because nothing a page
+            renders can appear above the layout's own header, and it must come
+            before <SiteHeader> in the DOM for the same reason a screen reader
+            and a print render read it first.
+
+            The sticky header is unaffected: the banner scrolls away and the
+            header pins once it reaches the top, which is what `position:
+            sticky` does with a preceding sibling.
+          */}
+          <HomeBanner />
           <SiteHeader />
           {/*
             Skip-link target. Wrapped in <ViewTransition> so route navigations

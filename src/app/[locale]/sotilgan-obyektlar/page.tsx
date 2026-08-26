@@ -16,11 +16,15 @@ import { SoldLotCard } from "@/components/common/sold-lot-card";
 import { Section } from "@/components/layout/section";
 import { SoldFilter } from "@/components/sections/sold-filter";
 
-export const metadata: Metadata = {
-  title: "Ijaraga berilgan obyektlar",
-  description:
-    "Joriy yilda savdolarda ijaraga berilgan davlat mulki obyektlari — boshlang'ich va yakuniy narx bilan.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "sold" });
+  return { title: t("pageTitle"), description: t("metaDescription") };
+}
 
 /** Four rows of three at the widest grid, as on /obyektlar. */
 const PER_PAGE = 12;
@@ -59,6 +63,7 @@ export default async function SoldObjectsPage({
 
   const sp = await searchParams;
   const t = await getTranslations("sold");
+  const tCommon = await getTranslations("common");
 
   const query = parseSoldQuery(sp);
   const [lots, regions] = await Promise.all([getSoldLots(query), getRegions()]);
@@ -101,7 +106,7 @@ export default async function SoldObjectsPage({
                 href="/"
                 className="hover:text-accent-foreground transition-colors"
               >
-                Bosh sahifa
+                {tCommon("breadcrumbHome")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>

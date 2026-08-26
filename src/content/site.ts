@@ -41,6 +41,29 @@ export const contacts = {
     country: "O'zbekiston",
     /** Rendered form used in the footer and JSON-LD. */
     full: "100006, Toshkent sh., Buxoro ko'chasi 6",
+    /**
+     * Where the map on /aloqa drops its pin. NULL UNTIL VERIFIED.
+     *
+     * Not guessed, and the reason is specific: OpenStreetMap has the street
+     * — Buxoro ko'chasi runs through Mirobod tumani around 41.3100, 69.2713 —
+     * but house number 6 is not mapped on it. Every result came back as a
+     * street segment with no `house_number`, so the building is undetermined.
+     *
+     * A pin placed "somewhere along the right street" is worse than no pin:
+     * it is a state portal telling a citizen which door to walk to, and being
+     * wrong by a block. `<OfficeMap>` renders nothing while this is null, and
+     * the address text beside it is correct either way.
+     *
+     * To enable: read the exact point off a map and paste it as
+     * `{ lat: 41.xxxxxx, lng: 69.xxxxxx }`.
+     */
+    coords: { lat: 41.308820, lng: 69.2787344 } as { lat: number; lng: number } | null,
+  },
+  /** Reception hours, shown on /aloqa. */
+  hours: {
+    weekdays: "Dushanba — Juma, 9:00 — 18:00",
+    lunch: "Tushlik: 13:00 — 14:00",
+    weekend: "Shanba, Yakshanba — dam olish kunlari",
   },
 } as const;
 

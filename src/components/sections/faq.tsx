@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server";
+
 import { getFaq } from "@/lib/data/catalog";
 import { SurfaceCard } from "@/components/common/surface-card";
 import {
@@ -17,12 +19,13 @@ import { Section, SectionHeader } from "@/components/layout/section";
  */
 export async function Faq() {
   const items = await getFaq();
+  const t = await getTranslations("faq");
 
   return (
     <Section tone="deep">
       <SectionHeader
-        eyebrow="Ko'p so'raladigan savollar"
-        title="Savollar va javoblar"
+        eyebrow={t("eyebrow")}
+        title={t("title")}
       />
 
       <Accordion

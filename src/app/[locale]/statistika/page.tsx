@@ -20,11 +20,15 @@ import { StatList } from "@/components/common/stat-list";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 
-export const metadata: Metadata = {
-  title: "Statistika",
-  description:
-    "Davlat mulki obyektlarini ijaraga berish bo'yicha savdo statistikasi — hududlar, oylar, narx dinamikasi.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "stats" });
+  return { title: t("title"), description: t("metaDescription") };
+}
 
 const MONTHS = [
   "Yan",
@@ -77,6 +81,7 @@ export default async function StatisticsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
+  const tCommon = await getTranslations("common");
 
   const sp = await searchParams;
   const t = await getTranslations("stats");
@@ -170,7 +175,7 @@ export default async function StatisticsPage({
                 href="/"
                 className="hover:text-accent-foreground transition-colors"
               >
-                Bosh sahifa
+                {tCommon("breadcrumbHome")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>

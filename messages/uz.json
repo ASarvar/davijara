@@ -10,7 +10,11 @@
     "readMore": "Batafsil",
     "all": "Barchasi",
     "loading": "Yuklanmoqda…",
-    "backToTop": "Yuqoriga"
+    "backToTop": "Yuqoriga",
+    "breadcrumbHome": "Bosh sahifa",
+    "mainMenu": "Asosiy menyu",
+    "mobileMenu": "Mobil menyu",
+    "mapLoading": "Xarita yuklanmoqda…"
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",
@@ -62,7 +66,11 @@
     "newsUzbekistan": "Oʻzbekiston yangiliklari",
     "newsStatements": "Rahbariyat bayonotlari va maʼruzalari",
     "newsMedia": "Foto va video materiallar",
-    "contact": "Aloqa"
+    "contact": "Aloqa",
+    "privacy": "Maxfiylik siyosati",
+    "terms": "Foydalanish shartlari",
+    "sitemap": "Sayt xaritasi",
+    "loginFull": "Shaxsiy kabinetga kirish"
   },
   "hero": {
     "statScope": "<strong>{district}</strong> boʻyicha shartnomalar va maydon maʼlumoti registrda yoʻq — <strong>{region}</strong> boʻyicha koʻrsatilmoqda.",
@@ -115,7 +123,8 @@
     "perYear": "so'm / yil boshiga",
     "badgeAuction": "Auksionda",
     "badgeNew": "Yangi lot",
-    "empty": "Tanlangan shartlarga mos obyekt topilmadi."
+    "empty": "Tanlangan shartlarga mos obyekt topilmadi.",
+    "startPrice": "Boshlangʻich narx"
   },
   "auctions": {
     "eyebrow": "SAVDOLAR",
@@ -208,7 +217,16 @@
   "placeholder": {
     "title": "Bo'lim tayyorlanmoqda",
     "description": "Bu bo'lim ustida ish olib borilmoqda va tez orada ishga tushiriladi.",
-    "action": "Bosh sahifaga qaytish"
+    "action": "Bosh sahifaga qaytish",
+    "centre": "Davlat mulki obyektlaridan foydalanish markazi haqida maʼlumot tayyorlanmoqda.",
+    "documents": "Normativ-huquqiy hujjatlar bazasi tayyorlanmoqda.",
+    "news": "Matbuot markazi boʻlimi tayyorlanmoqda.",
+    "services": "Onlayn xizmatlar boʻlimi tayyorlanmoqda.",
+    "privacy": "Maxfiylik siyosati matni tayyorlanmoqda.",
+    "terms": "Foydalanish shartlari matni tayyorlanmoqda.",
+    "sitemap": "Sayt xaritasi tayyorlanmoqda.",
+    "auction": "Elektron savdo platformasi bilan integratsiya ustida ish olib borilmoqda.",
+    "login": "Avtorizatsiya tizimi (OneID) bilan integratsiya ustida ish olib borilmoqda."
   },
   "sold": {
     "eyebrow": "NATIJALAR",
@@ -227,7 +245,8 @@
     "filterLabel": "Ijaraga berilgan obyektlarni saralash",
     "dateFrom": "Sanadan",
     "dateTo": "Sanagacha",
-    "pageLedeRange": "{from} — {to} oraligʻidagi savdolarda ijaraga berilgan {count} ta obyekt."
+    "pageLedeRange": "{from} — {to} oraligʻidagi savdolarda ijaraga berilgan {count} ta obyekt.",
+    "metaDescription": "Joriy yilda savdolarda ijaraga berilgan davlat mulki obyektlari — boshlangʻich va yakuniy narx bilan."
   },
   "stats": {
     "title": "Statistika",
@@ -288,6 +307,51 @@
     "cumulativeNote": "Har bir nuqta — boshlangʻich narxdan kamida shuncha barobar qimmatga ijaraga berilgan lotlar ulushi. Chiziq faqat pasayadi: 1,5× dan yuqorisi 26,4 %, 5× dan yuqorisi 13,1 %.",
     "avgPrice": "Oʻrtacha lot narxi",
     "avgRise": "Oʻrtacha oshish",
-    "avgRiseNote": "Yakuniy narxning boshlangʻich narxga nisbati boʻyicha oʻrtacha qiymat."
+    "avgRiseNote": "Yakuniy narxning boshlangʻich narxga nisbati boʻyicha oʻrtacha qiymat.",
+    "metaDescription": "Davlat mulki obyektlarini ijaraga berish boʻyicha savdo statistikasi — hududlar, oylar, narx dinamikasi."
+  },
+  "contact": {
+    "title": "Aloqa",
+    "metaDescription": "Davlat mulki obyektlaridan foydalanish markazi — manzil, telefon va elektron pochta.",
+    "address": "Manzil",
+    "hotline": "Ishonch telefoni",
+    "email": "Elektron pochta",
+    "hours": "Ish vaqti",
+    "mapPending": "Xarita tayyorlanmoqda — obyektning aniq joylashuvi tasdiqlangach qoʻshiladi."
+  },
+  "objects": {
+    "metaDescription": "Boʻsh davlat mulki obyektlarini hudud, tur, maydon va narx boʻyicha qidiring — xarita va hududlar kesimida.",
+    "count": "Obyektlar",
+    "totalArea": "Umumiy maydon",
+    "averagePrice": "Oʻrtacha narx",
+    "mapTab": "Xarita",
+    "listTab": "Roʻyxat",
+    "mapLoading": "Xarita yuklanmoqda…",
+    "pagination": "Sahifalar",
+    "prevPage": "Oldingi sahifa",
+    "nextPage": "Keyingi sahifa",
+    "regionsTab": "Hududlar",
+    "title": "Ijara obyektlari",
+    "emptyFiltered": "Tanlangan shartlarga mos obyekt topilmadi. Filtrni kengaytirib koʻring."
+  },
+  "calculator": {
+    "title": "Ijara kalkulatori",
+    "metaDescription": "Obyekt maydoni, turi va joylashuviga koʻra taxminiy yillik ijara toʻlovini hisoblang.",
+    "lead": "Taxminiy yillik ijara toʻlovini hisoblang",
+    "pageLead": "Obyekt narxini oldindan biling",
+    "area": "Maydon (m²)",
+    "objectType": "Obyekt turi",
+    "result": "Taxminiy yillik ijara toʻlovi",
+    "regionFactor": "Hudud koeffitsienti",
+    "typeFactor": "Obyekt turiga qarab",
+    "pageLede": "Kalkulyator amaldagi eng kam ijara stavkalari va hudud koeffitsientlari asosida taxminiy yillik toʻlovni hisoblaydi. Yakuniy narx auksion natijasida belgilanadi.",
+    "regionFactorText": "Narx viloyat va shaharga qarab oʻzgaradi.",
+    "typeFactorText": "Ofis, ombor, savdo va maʼmuriy binolar uchun alohida tariflar.",
+    "yearly": "Har yili yangilanadi",
+    "yearlyText": "Eng kam stavkalar Vazirlar Mahkamasi qarori asosida belgilanadi."
+  },
+  "faq": {
+    "title": "Savollar va javoblar",
+    "eyebrow": "Koʻp soʻraladigan savollar"
   }
 }

@@ -28,6 +28,7 @@ export async function ObjectsSection({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const t = await getTranslations("map");
+  const tListings = await getTranslations("listings");
   const query = parseListingQuery(searchParams);
 
   const { listings, hasMock } = await getListings(query);
@@ -49,7 +50,7 @@ export async function ObjectsSection({
         eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
-        action={<ActionLink href={moreHref}>Barcha obyektlar</ActionLink>}
+        action={<ActionLink href={moreHref}>{tListings("action")}</ActionLink>}
       />
 
       {/*

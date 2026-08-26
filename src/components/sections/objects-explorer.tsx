@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Building2,
   ChevronLeft,
@@ -48,6 +48,8 @@ const ListingsMap = dynamic(
     ssr: false,
     loading: () => (
       <div className="bg-secondary text-muted-foreground flex h-full w-full items-center justify-center text-sm">
+        {/* Literal: this runs before the component that owns the
+            translations mounts. See MAP_LOADING below. */}
         Xarita yuklanmoqda…
       </div>
     ),
@@ -74,6 +76,8 @@ const TYPE_LABELS: Record<string, string> = {
   numbers up, which is what makes the set scannable.
 */
 function RegionRow({ summary }: { summary: RegionSummary }) {
+  const t = useTranslations("objects");
+
   return (
     <li data-reveal="left">
       <Link
@@ -107,20 +111,20 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
         {/* Indented to the heading below sm, where the row stacks. */}
         <dl className="flex shrink-0 items-baseline gap-5 pl-[1.625rem] sm:gap-8 sm:pl-0">
           <div className="sm:w-20 sm:text-right">
-            <dt className="text-muted-foreground text-xs">Obyektlar</dt>
+            <dt className="text-muted-foreground text-xs">{t("count")}</dt>
             <dd className="mt-0.5 text-sm font-medium">
               {formatNumber(summary.count)} ta
             </dd>
           </div>
           <div className="sm:w-28 sm:text-right">
-            <dt className="text-muted-foreground text-xs">Umumiy maydon</dt>
+            <dt className="text-muted-foreground text-xs">{t("totalArea")}</dt>
             <dd className="mt-0.5 text-sm font-medium">
               {formatArea(summary.totalArea)}
             </dd>
           </div>
           <div className="sm:w-36 sm:text-right">
             <dt className="text-muted-foreground text-xs">
-              O&apos;rtacha narx
+              {t("averagePrice")}
             </dt>
             <dd className="text-accent-foreground mt-0.5 text-sm font-semibold">
               {formatSom(summary.avgPrice)}
@@ -149,6 +153,8 @@ function Pagination({
   totalPages: number;
   hrefFor: (page: number) => string;
 }) {
+  const t = useTranslations("objects");
+
   // A compact window around the current page — a 60-page catalogue must not
   // render 60 links.
   const pages: (number | "gap")[] = [];
@@ -166,14 +172,14 @@ function Pagination({
     "border-border hover:border-ring/50 hover:text-accent-foreground inline-flex h-9 min-w-9 items-center justify-center rounded-md border px-2.5 text-sm transition-colors duration-200";
 
   return (
-    <nav aria-label="Sahifalar" className="mt-8 flex justify-center">
+    <nav aria-label={t("pagination")} className="mt-8 flex justify-center">
       <ul className="flex flex-wrap items-center gap-1.5">
         <li>
           {page > 1 ? (
             <Link
               href={hrefFor(page - 1)}
               rel="prev"
-              aria-label="Oldingi sahifa"
+              aria-label={t("prevPage")}
               className={linkClass}
             >
               <ChevronLeft aria-hidden="true" className="size-4" />
@@ -220,7 +226,7 @@ function Pagination({
             <Link
               href={hrefFor(page + 1)}
               rel="next"
-              aria-label="Keyingi sahifa"
+              aria-label={t("nextPage")}
               className={linkClass}
             >
               <ChevronRight aria-hidden="true" className="size-4" />
@@ -285,6 +291,7 @@ export function ObjectsExplorer({
   /** Route the pager links at, e.g. "/obyektlar". */
   basePath?: string;
 }) {
+  const t = useTranslations("objects");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -388,11 +395,11 @@ export function ObjectsExplorer({
           <TabsList>
             <TabsTrigger value="xarita" className="gap-1.5">
               <MapPin aria-hidden="true" className="size-4" />
-              Xarita
+              {t("mapTab")}
             </TabsTrigger>
             <TabsTrigger value="royxat" className="gap-1.5">
               <LayoutList aria-hidden="true" className="size-4" />
-              {showLots ? "Obyektlar" : "Hududlar"}
+              {showLots ? t("count") : t("regionsTab")}
             </TabsTrigger>
           </TabsList>
 

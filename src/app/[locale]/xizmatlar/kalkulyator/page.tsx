@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Building2, MapPin, RefreshCw } from "lucide-react";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
@@ -8,29 +8,26 @@ import { Eyebrow } from "@/components/common/eyebrow";
 import { IconTile } from "@/components/common/icon-tile";
 import { RentCalculator } from "@/components/sections/rent-calculator";
 
-export const metadata: Metadata = {
-  title: "Ijara kalkulatori",
-  description:
-    "Obyekt maydoni, turi va joylashuviga ko'ra taxminiy yillik ijara to'lovini hisoblang.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "calculator" });
+  return { title: t("title"), description: t("metaDescription") };
+}
 
-const features = [
-  {
-    icon: MapPin,
-    title: "Hudud koeffitsienti",
-    text: "Narx viloyat va shaharga qarab o'zgaradi.",
-  },
-  {
-    icon: Building2,
-    title: "Obyekt turiga qarab",
-    text: "Ofis, ombor, savdo va ma'muriy binolar uchun alohida tariflar.",
-  },
-  {
-    icon: RefreshCw,
-    title: "Har yili yangilanadi",
-    text: "Eng kam stavkalar Vazirlar Mahkamasi qarori asosida belgilanadi.",
-  },
-];
+/*
+  Icon + two message KEYS, not the copy itself. The list is a fixed set of
+  three, so the keys are the structure and `messages/*.json` holds every word
+  of it.
+*/
+const FEATURES = [
+  { icon: MapPin, key: "regionFactor" },
+  { icon: Building2, key: "typeFactor" },
+  { icon: RefreshCw, key: "yearly" },
+] as const;
 
 export default async function CalculatorPage({
   params,
@@ -39,25 +36,25 @@ export default async function CalculatorPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
+  const t = await getTranslations("calculator");
+  const tServices = await getTranslations("services");
 
   return (
     <Section tone="deep">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
         <div>
-          <Eyebrow className="mb-3">Interaktiv xizmatlar</Eyebrow>
+          <Eyebrow className="mb-3">{tServices("title")}</Eyebrow>
           <h1 className="font-heading text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl">
-            Obyekt narxini oldindan biling
+            {t("pageLead")}
           </h1>
           <p className="text-muted-foreground mt-4 text-pretty">
-            Kalkulyator amaldagi eng kam ijara stavkalari va hudud
-            koeffitsientlari asosida taxminiy yillik to&apos;lovni hisoblaydi.
-            Yakuniy narx auksion natijasida belgilanadi.
+            {t("pageLede")}
           </p>
 
           <ul className="mt-9 space-y-6">
-            {features.map((f) => (
+            {FEATURES.map((f) => (
               <li
-                key={f.title}
+                key={f.key}
                 data-reveal="left"
                 className="flex gap-4"
               >
@@ -65,9 +62,9 @@ export default async function CalculatorPage({
                   <f.icon aria-hidden="true" className="size-5" />
                 </IconTile>
                 <span>
-                  <span className="block text-sm font-semibold">{f.title}</span>
+                  <span className="block text-sm font-semibold">{t(f.key)}</span>
                   <span className="text-muted-foreground mt-1 block text-sm">
-                    {f.text}
+                    {t(`${f.key}Text`)}
                   </span>
                 </span>
               </li>

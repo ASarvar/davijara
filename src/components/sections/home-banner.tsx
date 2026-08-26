@@ -1,10 +1,27 @@
-import { Link } from "@/i18n/navigation";
+"use client";
+
+import { Link, usePathname } from "@/i18n/navigation";
 import { BANNER_SIZE, homeBanner } from "@/content/banner";
 import { withBasePath } from "@/lib/base-path";
 import { Container } from "@/components/layout/section";
 
 /**
- * The banner strip under the header, on the homepage only.
+ * The banner strip ABOVE the header, on the homepage only.
+ *
+ * ── WHY THIS IS A CLIENT COMPONENT ────────────────────────────────────────
+ *
+ * It has to sit above `<SiteHeader>`, which lives in the locale layout — so
+ * the banner has to live there too. But the layout wraps every route, and the
+ * banner belongs to the homepage alone: a decorative strip repeated above
+ * every document list and search result costs ~200px of reading room on
+ * thirty pages to say something the reader already saw on the way in.
+ *
+ * A layout is a Server Component and cannot ask which route it is wrapping,
+ * so the route check happens here, on `usePathname` from @/i18n/navigation
+ * (which returns the path WITHOUT the locale prefix, hence a bare "/").
+ *
+ * Being a client component costs nothing that matters: Next still renders it
+ * on the server, so the image is in the initial HTML and there is no pop-in.
  *
  * CONTAINED AND ROUNDED, not full-bleed — the same treatment e-auksion gives
  * its own banner, which is the site a citizen most often arrives here from.
@@ -35,7 +52,12 @@ import { Container } from "@/components/layout/section";
  * right of centre, so a centre crop would cut it in half.
  */
 export function HomeBanner() {
+  const pathname = usePathname();
   const { desktop, mobile, alt, href } = homeBanner;
+
+  // Homepage only. `usePathname` here is locale-stripped, so "/" covers
+  // /uz, /ru and /en alike.
+  if (pathname !== "/") return null;
   if (!desktop) return null;
 
   const image = (

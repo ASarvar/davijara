@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Calculator, Info } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   calculateAnnualRent,
@@ -25,6 +26,7 @@ import { formatNumber } from "@/lib/format";
  * presenting this as a firm price on a state portal would be misleading.
  */
 export function RentCalculator() {
+  const t = useTranslations("calculator");
   const [area, setArea] = useState<number>(calculatorBounds.defaultArea);
   const [typeValue, setTypeValue] = useState(objectRates[0].value);
   const [regionValue, setRegionValue] = useState(regionCoefficients[0].value);
@@ -43,17 +45,17 @@ export function RentCalculator() {
           to a different page. */}
       <h3 className="flex items-center gap-2.5 text-base font-semibold">
         <Calculator aria-hidden="true" className="text-accent-foreground size-5" />
-        Ijara kalkulatori
+        {t("title")}
       </h3>
       <p className="text-muted-foreground mt-1.5 text-sm">
-        Taxminiy yillik ijara to&apos;lovini hisoblang
+        {t("lead")}
       </p>
 
       <div className="mt-7 space-y-6">
         <div>
           <div className="mb-2 flex items-baseline justify-between">
             <label htmlFor="calc-area" className="text-sm font-medium">
-              Maydon (m²)
+              {t("area")}
             </label>
             <output
               htmlFor="calc-area"
@@ -80,7 +82,7 @@ export function RentCalculator() {
 
         <SelectField
           id="calc-type"
-          label="Obyekt turi"
+          label={t("objectType")}
           value={typeValue}
           onValueChange={setTypeValue}
           options={objectRates.map((o) => ({
@@ -103,7 +105,7 @@ export function RentCalculator() {
 
       <div className="border-border mt-7 rounded-xl border border-dashed p-5">
         <p className="text-muted-foreground text-xs tracking-wide uppercase">
-          Taxminiy yillik ijara to&apos;lovi
+          {t("result")}
         </p>
         {/* aria-live so screen readers hear the recalculated figure. */}
         <p

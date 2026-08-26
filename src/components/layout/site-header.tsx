@@ -1,4 +1,4 @@
-import { Mail, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
@@ -47,6 +47,7 @@ import { ThemeToggle } from "./theme-toggle";
  */
 export async function SiteHeader() {
   const tTopbar = await getTranslations("topbar");
+  const tCommon = await getTranslations("common");
 
   return (
     <header data-tone="deep" className="sticky top-0 z-40">
@@ -160,8 +161,17 @@ export async function SiteHeader() {
               <AccessibilityDialog />
             </div>
 
-            {/* Phone and email each keep their own row — the operator asked
-                for this back after a shared-row version. */}
+            {/*
+              PHONE ONLY. The email was removed from this band — it lives on
+              /aloqa now, alongside the address, the hours and the map, which
+              is where a reader looking for a way to write to the Centre goes.
+
+              Deleted rather than commented out, which is this project's own
+              rule: a commented-out block is invisible to the type checker and
+              leaves its import tripping the linter (see the note on the three
+              unused sections in CLAUDE.md). Re-adding it is four lines and a
+              `Mail` import.
+            */}
             <a
               href={contacts.phoneHref}
               className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
@@ -169,14 +179,6 @@ export async function SiteHeader() {
               <Phone aria-hidden="true" className="size-3.5 shrink-0" />
               {contacts.phone}
             </a>
-
-            {/* <a
-              href={contacts.emailHref}
-              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
-            >
-              <Mail aria-hidden="true" className="size-3.5 shrink-0" />
-              {contacts.email}
-            </a> */}
 
             <SocialLinks className="flex items-center gap-3" />
           </div>
@@ -218,7 +220,7 @@ export async function SiteHeader() {
         the bar is the header's bottom edge, so it carries it.
       */}
       <nav
-        aria-label="Asosiy menyu"
+        aria-label={tCommon("mainMenu")}
         className="bg-background border-hairline hidden border-y xl:block"
       >
         {/* CENTRED, matching the operator's reference layout. The six section

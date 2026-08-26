@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { AuctionCountdown } from "@/components/common/auction-countdown";
 import { LotImage } from "@/components/common/lot-image";
 import { SurfaceCard } from "@/components/common/surface-card";
@@ -40,6 +42,8 @@ export function LotCard({
   countdown?: boolean;
   className?: string;
 }) {
+  const t = useTranslations("listings");
+
   return (
     <SurfaceCard
       as="li"
@@ -161,7 +165,7 @@ export function LotCard({
           <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-4">
             <span>
               <span className="text-muted-foreground block text-xs">
-                Boshlang&apos;ich narx
+                {t("startPrice")}
               </span>
               <span className="font-heading text-accent-foreground block text-xl font-semibold">
                 {`${formatNumber(listing.pricePerYear)} so'm`}

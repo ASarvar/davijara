@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
@@ -16,11 +16,15 @@ import { Section } from "@/components/layout/section";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsExplorer } from "@/components/sections/objects-explorer";
 
-export const metadata: Metadata = {
-  title: "Ijara obyektlari",
-  description:
-    "Bo'sh davlat mulki obyektlarini hudud, tur, maydon va narx bo'yicha qidiring — xarita va hududlar kesimida.",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "objects" });
+  return { title: t("title"), description: t("metaDescription") };
+}
 
 /**
  * Full catalogue: the same explorer as the homepage, with the search panel
@@ -35,6 +39,8 @@ export default async function ObjectsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
+  const t = await getTranslations("objects");
+  const tCommon = await getTranslations("common");
 
   const sp = await searchParams;
   const query = parseListingQuery(sp);
@@ -64,11 +70,11 @@ export default async function ObjectsPage({
                 href="/"
                 className="hover:text-accent-foreground transition-colors"
               >
-                Bosh sahifa
+                {tCommon("breadcrumbHome")}
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="text-foreground">Ijara obyektlari</li>
+            <li className="text-foreground">{t("title")}</li>
           </ol>
         </nav>
 
@@ -76,7 +82,7 @@ export default async function ObjectsPage({
           data-enter
           className="font-heading max-w-3xl text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl"
         >
-          Ijara obyektlari
+          {t("title")}
         </h1>
         <p
           data-enter
@@ -112,7 +118,7 @@ export default async function ObjectsPage({
           perPage={12}
           filterQuery={filterParams.toString()}
           basePath="/obyektlar"
-          emptyLabel="Tanlangan shartlarga mos obyekt topilmadi. Filtrni kengaytirib ko'ring."
+          emptyLabel={t("emptyFiltered")}
           view={parseView(sp)}
         />
       </Section>
