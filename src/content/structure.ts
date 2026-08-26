@@ -52,11 +52,10 @@ export const orgOrder = {
    * for the operator, not something to settle by editing one of them.
    */
   organisation:
-    "Oʻzbekiston Respublikasi Davlat aktivlarini boshqarish agentligi huzuridagi Davlat mulki obyektlaridan samarali foydalanish markazining markaziy apparati",
+    "Oʻzbekiston Respublikasi Davlat aktivlarini boshqarish agentligi huzuridagi Davlat mulki obyektlaridan samarali foydalanish markazining markaziy apparati tuzilmasi",
 } as const;
 
 export const orgHead = "Markaz direktori";
-export const orgHeadIcon = "Landmark";
 
 /** The two deputies, left to right as the chart draws them. */
 export const orgBranches: OrgBranch[] = [
@@ -134,11 +133,4 @@ export const orgDirectUnits: OrgUnit[] = [
     external: true,
     href: "/markaz/hududiy-boshqarmalar",
   },
-];
-
-/** The three notes printed under the chart, verbatim and in order. */
-export const orgNotes: string[] = [
-  "Markaz direktori tomonidan belgilangan shtat birliklari doirasida Markaz tuzilmasiga oʻzgartirish kiritilishi mumkin.",
-  "Fuqarolik-huquqiy xususiyatga ega shartnomalar asosida jismoniy shaxslarni ishga olish mumkin.",
-  "Texnik va xizmat koʻrsatuvchi xodimlar soni tasdiqlangan normativlarga muvofiq belgilanadi.",
 ];

@@ -259,7 +259,6 @@
 
   --radius: 20px;
 
-
   --background: #07102b;
   --foreground: rgba(255, 255, 255, 0.85);
 
@@ -1304,20 +1303,158 @@
 }
 
 /*
-  ── Structure rail ───────────────────────────────────────────────────────
+  ── Org chart connectors ─────────────────────────────────────────────────
 
-  The spine down /markaz/tuzilma, drawn as the reader scrolls. Same contract
-  as `.step-rail-fill` above, including the default of 1: with no JavaScript,
-  or if GSAP never initialises, the line is simply drawn in full. An org chart
-  whose connecting line is missing is a chart that says nothing.
+  /markaz/tuzilma, drawn as the box-and-line diagram the source order itself
+  uses. The topology is the ORDER'S, read off the PDF's vector paths (see
+  content/structure.ts): a bar drops from the director into the two deputies
+  and into a single VERTICAL RAIL, and nine short stubs leave that rail —
+  four to the left, five to the right.
+
+  That rail is the part worth getting right. An earlier pass drew the four
+  left-hand units as a chain, each box connected to the one below it; that is
+  not what the order says. Those four do not report to each other, they each
+  report to the director, and the rail between the two columns is what says
+  so. The chain has been removed and the stubs put back.
+
+  All of it is `--hairline`, never a raw colour: solid white in high contrast,
+  where a 12%-alpha gold line would be nothing at all. And all of it is real
+  geometry — the bar's ends and the rail's position are computed from the same
+  column count and gap the grid itself uses, so they land on centres rather
+  than near them.
+
+  Hidden below `lg`: four columns collapse to one, and a bar or a rail drawn
+  down a single stacked column says nothing a line has to say.
 */
-.org-rail-fill {
-  transform-origin: center top;
-  transform: scaleY(var(--p, 1));
+.org-bar {
+  position: relative;
 }
 
-.motion-armed .org-rail-fill {
-  --p: 0;
+/*
+  Asymmetric ends, and deliberately so. The bar has to stop on the CENTRE of
+  what it feeds at each end: on the left that is the middle of column 1, on
+  the right it is the rail, which sits in the gap inside a two-column span.
+  Those are not the same distance from their edge, so one symmetric inset
+  would leave the bar short at one end and past its target at the other.
+*/
+.org-bar::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: var(--org-inset-left, 0px);
+  right: var(--org-inset-right, 0px);
+  height: 1px;
+  background: var(--hairline);
+}
+
+.org-branch {
+  position: relative;
+  padding-top: 1.75rem;
+}
+
+.org-branch::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 1.75rem;
+  background: var(--hairline);
+}
+
+/*
+  ── The rail and its stubs ───────────────────────────────────────────────
+
+  Two columns flanking one line. `--org-half-gap` is half the grid gap, which
+  is exactly the distance from either column's inner edge to the rail.
+
+  THE RAIL IS DRAWN PER ITEM, not once on the container, because no container
+  knows where the last box's stub is: a single line from top to bottom
+  overshoots past the last box, and one stopping at 50% is only right when
+  every box is the same height. Items are contiguous — the spacing is padding
+  INSIDE each item — so the per-item segments join into one unbroken line, and
+  the last item on each side stops at its own stub. The two sides overlap on
+  the same x, so together they reach whichever side ends lower.
+
+  The stubs hang off the BOX rather than the list item, so `top: 50%` is the
+  middle of the box and not the middle of the box plus its spacing. That
+  matters for the six-line contracts box, where the two differ by 12px.
+*/
+.org-bus-left,
+.org-bus-right {
+  --org-half-gap: 0.75rem;
+}
+
+.org-bus-left > li,
+.org-bus-right > li {
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.org-bus-left > li:last-child,
+.org-bus-right > li:last-child {
+  padding-bottom: 0;
+}
+
+.org-bus-left > li::after,
+.org-bus-right > li::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--hairline);
+}
+
+.org-bus-left > li::after {
+  left: calc(100% + var(--org-half-gap));
+}
+
+.org-bus-right > li::after {
+  left: calc(var(--org-half-gap) * -1);
+}
+
+.org-bus-left > li:last-child::after,
+.org-bus-right > li:last-child::after {
+  bottom: 50%;
+}
+
+.org-bus-left .org-node::after,
+.org-bus-right .org-node::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: var(--org-half-gap);
+  height: 1px;
+  background: var(--hairline);
+}
+
+.org-bus-left .org-node::after {
+  left: 100%;
+}
+
+.org-bus-right .org-node::after {
+  right: 100%;
+}
+
+@media (max-width: 63.999rem) {
+  .org-bar::before,
+  .org-branch::before,
+  .org-bus-left > li::after,
+  .org-bus-right > li::after,
+  .org-bus-left .org-node::after,
+  .org-bus-right .org-node::after {
+    content: none;
+  }
+
+  .org-branch {
+    padding-top: 0;
+  }
+
+  .org-bus-left > li,
+  .org-bus-right > li {
+    padding-bottom: 0;
+  }
 }
 
 /*

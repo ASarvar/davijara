@@ -31,205 +31,89 @@ Read `node_modules/next/dist/docs/` before writing Next-specific code.
 NEXT_DIST_DIR=.next-prod npm run build
 ```
 
+## Session hygiene
+
+This project runs in long single sessions, and the context window is the
+budget that runs out first. Standing instructions, so they do not have to be
+repeated:
+
+- **Compact at the seams, not on a timer.** `/compact` costs a full read of
+  the conversation, so run it when a phase ENDS — a page shipped, a bug closed,
+  a switch from one section of the site to another — rather than every few
+  messages. Compacting mid-task throws away the detail the task still needs.
+- **When compacting, keep**: the file paths touched and why, decisions that
+  are not visible in the code (rejected options and the reason), measured
+  numbers (contrast ratios, lot counts, API field names), and anything still
+  unverified or awaiting the operator. **Drop**: tool output already acted on,
+  superseded drafts, and narration.
+- **Delegate wide reads.** A sweep over many files, a log or migration to
+  audit, a large document to summarise — hand it to a subagent, which burns
+  its own window and returns a summary. Do this only when asked, or when the
+  read is genuinely broad; a two-file lookup is cheaper done directly.
+- **Read narrowly.** `sed -n` a range, `grep` with context, `Read` with an
+  offset. Whole-file reads of `globals.css` (1 800 lines) or
+  `lib/data/listings.ts` (1 400) are almost never what the question needs.
+- **Ask a narrow question.** "Fix the 8-step inventory logic in
+  `worker/inventory.ts`" reads two files; "improve the code" reads the repo.
+
+## Deep guidance lives in skills, not here
+
+This file is the always-loaded brief and is kept SHORT on purpose. The
+long-form rules — with the measurements and the bugs that produced them — sit
+in `.claude/skills/`, which load only when the work needs them:
+
+| Skill | Load before |
+|---|---|
+| `davijara-theming` | any colour, contrast, border, shadow, `globals.css`, or accessibility mode |
+| `davijara-ui` | building a page or section, `"use client"`, filters, or motion |
+| `davijara-data` | `lib/data/*`, hero statistics, or anything reading an upstream API |
+
+The rules below are binding on their own; the skills explain WHY and carry the
+numbers. If a change touches one of those areas, load the skill first — the
+reasoning there is the record of what already went wrong once.
+
 ## Non-negotiables
 
-### 1. Statutory content is verbatim
+**1. Statutory content is verbatim.** `src/content/privileges.ts` (24 rent
+privileges citing PQ-239, PF-93, VM-626, PQ-3782 …) and `src/content/structure.ts` (the
+org chart from the director's order) were transcribed from binding documents.
+Never reword, reformat, summarise, "improve" or machine-translate any field —
+`legalBasis` above all. Corrections come from the source document, not from
+editing prose here. The same applies to `messages/ru.json` and `en.json`: UI
+chrome may be translated, legal text may not.
 
-`src/content/privileges.ts` holds 24 rent privileges, each citing binding Uzbek
-legal acts (PQ-239, PF-93, VM-626, PQ-3782 …). It was extracted mechanically
-from the legacy markup and verified byte-for-byte against the source.
+**2. Components consume semantic tokens, never raw brand colours.** Two
+independent axes — `data-theme` on `<html>`, `data-tone` on each section —
+re-bind every colour token for a subtree. Style with `bg-card`,
+`text-muted-foreground`, `border-border`, `border-hairline`, `border-outline`,
+`--accent`, `--ornament`; reaching for `bg-navy` or `text-gold` breaks at
+least one of the four combinations. Gold is not a text colour on light
+surfaces (1.9:1). Depth is `--shadow-1` / `--shadow-2` and nothing else.
+**A block that redeclares one half of a contrast pair owes an answer for the
+other half in every theme** — see `davijara-theming`, which is where the
+measured ladder, the `--heading` trap and the black-on-black bug are recorded.
 
-**Never** reword, reformat, summarise, "improve", or machine-translate any
-field — `legalBasis` above all. Corrections come from the source legislation,
-not from editing prose here. The same applies to `messages/ru.json` and
-`messages/en.json`: UI chrome may be translated, legal text may not.
+**3. Server Components by default.** The homepage ships no page-level
+JavaScript. `"use client"` only when the browser is genuinely needed; the
+current list is in `davijara-ui`. Filter and search state belongs in the
+**URL**, not React state — that is what makes a view linkable, back-button
+correct, crawlable and free of JavaScript.
 
-### 2. Components consume semantic tokens, never raw brand colours
+**4. Content flows through the data layer.** Components must not import from
+`src/content/` directly; read through `src/lib/data/` (`getPrivileges()`,
+`getListings()`, `getOrgStructure()` …). Those functions are `async` even
+though they read local modules today, so a real API can replace their bodies
+without touching a component. Derived values stay derived — counts and totals
+are computed from the data, never typed into markup.
 
-Two independent axes, and neither is a second palette — every value comes from
-the one brand scale:
+**5. `legacy/` is read-only.** It holds the original static site, kept as
+reference for porting decisions and cited throughout this codebase's comments.
+Read it, cite it, never edit it.
 
-- **theme** — `data-theme` on `<html>`. Dark (unset) is the default and the
-  brand; `"light"` is opt-in from the header toggle.
-- **tone** — `data-tone` on each section, alternating down the page.
-
-```tsx
-<Section tone="deep">   {/* navy #07102b in dark, white in light */}
-<Section tone="light">  {/* mist #eef1f8 in both */}
-```
-
-Both re-bind every semantic colour token for the whole subtree (see
-`src/app/globals.css`). Descendants adapt with no props of their own —
-*provided* they style with `bg-card`, `text-muted-foreground`,
-`border-border` and friends.
-
-Reaching for `bg-navy` or `text-gold` directly breaks the flip and will look
-wrong in at least one of the four combinations.
-
-**Gold is not a text colour on light surfaces.** `#c8a96e` on mist is 1.9:1 —
-a hard WCAG AA failure. Use `--color-gold-ink` (`#7d6229`, 5.09:1) for
-gold-toned text on light, or just `text-accent-foreground`, which already
-resolves to the correct one per tone.
-
-**Cobalt is the light theme's identity colour**, precisely because gold cannot
-be. `--heading` takes `--color-cobalt` (#1a3a7c — 10.83:1 on white, 9.57:1 on
-mist) and `@layer base` applies it to `h1`-`h5`, so headings carry the brand
-while body copy stays navy.
-
-**`--accent` is cobalt in the light theme, gold on navy.** It is what eyebrows,
-icon tiles, action links, the active nav item and the active chips draw from —
-around 90 elements on the homepage — so leaving it gold made the light theme
-read as a gold site with blue titles. Same for `--hairline` and `--outline`,
-which draw the section rules, the header edge and every card hover. Cobalt's
-tint uses a lower alpha than gold's (0.12 / 0.14 / 0.38 against 0.18 / 0.18 /
-0.45) because it is a far darker ink at the same opacity.
-
-**Gold survives on a budget, and it is spelled `--ornament`.** Three places,
-none of them clickable: the rotating word in the hero `<h1>`, the three hero
-figures, and the Qidirish button (which keeps `--color-gold` as a background —
-the page's one primary action is where a warm mass belongs). Never reach for
-`--ornament` for anything a reader clicks; that is `--accent`'s job.
-
-The measured ladder:
-
-| | dark | light |
-|---|---|---|
-| eyebrow, hero figures | gold `#c8a96e` | gold-ink `#7d6229` |
-| heading | white | **cobalt `#1a3a7c`** |
-| body | white 85% | navy `#07102b` |
-| small print | white 55% | navy-mid `#0d1e45` |
-
-`--heading` must be redeclared in **every** block that redeclares
-`--foreground`. It defaults to `var(--foreground)`, and a custom property
-resolves where it is DECLARED and then inherits as a finished value — so a
-lone `:root` declaration would freeze to white and light-tone sections would
-render white headings on mist. High contrast reclaims it too: cobalt is 1.94:1
-on black.
-
-**The light theme has no pure white surface.** The ground is
-`--color-mist-pale` (#f7f9fc) and the CARD is the white layer — the inverse of
-the first version, where the page was white and the card was mist. White on
-white is 1.06:1, so separation comes from depth instead:
-
-```
-mist-pale #f7f9fc   page ground
-mist      #eef1f8   light-tone sections, the search band, the map backdrop
-#ffffff             cards, inputs, popovers  + --shadow-1
-```
-
-**Depth is two tokens, `--shadow-1` (resting) and `--shadow-2` (hover), and
-only two.** A ladder of five elevations is what makes a light theme look like
-a pile of floating cards. They are tinted with navy-mid rather than black — a
-neutral shadow over a blue-tinted ground reads as dirt. On the dark theme
-level 1 is `none` (a card is already the lighter surface); high contrast sets
-both to `none` (every boundary there is a solid line). Write them as the
-arbitrary property `[box-shadow:var(--shadow-1)]`, never `shadow-[…]` —
-Tailwind's shadow utility recolours a value it cannot inspect to transparent.
-
-**`dark:` is rebound to `data-theme`** by an `@custom-variant` at the top of
-`globals.css`. Tailwind's default keys it to `prefers-color-scheme`, and
-shadcn's `ui/` output uses it 22 times — so a visitor with a dark OS saw
-dark-variant inputs while the site was in its light theme. Rebinding beats
-editing `ui/`, which stays untouched CLI output.
-
-**Interaction states must survive greyscale.** Card hover is a shadow step
-plus a 4px lift, the active chip is a filled background plus weight, an
-unavailable calendar day is weight + opacity + a dot. Nothing anywhere depends
-on hue alone — in high contrast every ink is white, and in the light theme
-`--foreground` and `--muted-foreground` are two points apart.
-
-### 3. Server Components by default
-
-The homepage ships **no page-level JavaScript**. Only add `"use client"` when
-something genuinely needs the browser:
-
-| Component | Why it's a client component |
-|---|---|
-| `nav-links` | reads pathname for the active item |
-| `mobile-nav` | Sheet open/close state |
-| `lang-switcher` | reads pathname to preserve position across locales |
-| `privilege-list` | Accordion expand/collapse (one boundary over 24 items, not 24 islands) |
-| `rent-calculator` | recomputes as the range input is dragged |
-| `bottom-nav` | reads pathname for the active item |
-| `scroll-to-top` | scroll position listener |
-| `accessibility-controls` | reads/writes `data-contrast` + `data-text-size` on `<html>` |
-| `accessibility-dialog` | Dialog open/close state for the topbar trigger |
-
-Scroll reveals are **not** a reason to add `"use client"` — they are pure CSS.
-
-Filtering and search state belong in the **URL**, not React state. The
-privileges filter is a set of links to real routes (`/imtiyozlar/it`), not a
-click handler — so each view is linkable, back-button-correct, statically
-prerendered, and crawlable. The homepage search is a real GET form targeting
-`/obyektlar`, so results stay addressable as
-`?hudud=&tuman=&maydon=&narx=&savdo=` and a search can be linked and indexed.
-`FILTER_KEYS` in `lib/data/listings.ts` is the single list of those keys —
-every link that has to survive a filter (the pager, "Barcha obyektlar", the
-auction chips) builds its query from it, because hand-listing them in three
-places is what once dropped `tuman` from every page link.
-
-The panel's dropdowns are shadcn's `Select` (Radix, client JS), not native
-`<select>` elements — a deliberate trade of the former zero-JS approach so the
-open dropdown panel can carry the site's rounded/gold-bordered styling, which
-Chromium won't apply to a native `<select>` popup. Radix's hidden bubble
-`<select>` still submits `name=value` on the form, so GET submission needs no
-`onSubmit` handler of our own.
-
-**Auction time is two separate parameters**, because they answer two questions
-and neither generalises to the other:
-
-- `savdo` — one exact day, `?savdo=2026-08-27`. This is the catalogue's
-  "Savdo kuni" field, modelled on e-auksion's filter of the same name so a
-  citizen meets the control they already know. ISO in the URL (it sorts, and
-  it is unambiguous about day-vs-month); displayed as 27.08.2026. Matched as a
-  **Tashkent** calendar day — an auction at 10:00 local is 05:00Z, so a UTC
-  comparison would file every morning lot under the previous day.
-- `muddat` — a day window, `?muddat=0-1`, `1-3`, `3-5`, in the same `lo-hi`
-  grammar as `maydon` and `narx`. This is the chips on "Yaqinlashayotgan
-  savdolar": 1 kun, 3 kun, 5 kun, Hammasi. The three windows are **disjoint
-  and adjacent** — exclusive lower bound, inclusive upper — so a lot falls in
-  at most one; nested windows ("within 1 / 3 / 5") were the first shape and
-  could not answer "what is NOT imminent". They cover the first five days
-  only, and Hammasi (no parameter) is everything, so its count is larger than
-  the three combined rather than equal to them. Bounds are rolling hours, not
-  calendar days, so they agree with the countdown printed on the card.
-
-`savdo` is in `FILTER_KEYS`; `muddat` is deliberately not. It belongs to the
-homepage strip, which reads it directly — carrying it into the pager would put
-a parameter in every catalogue URL that nothing on that page can see or change.
-The two places that own it are the chips and the panel's hidden input, which
-exists so pressing Qidirish on the homepage does not silently clear a window
-the reader just chose.
-
-`SearchWidget` renders the calendar **only** when passed `auctionDay` —
-/obyektlar does, the homepage does not; that panel stays the four fields it has
-always been. The calendar is the one client component in the panel (a popover
-with a month cursor is the act of choosing, not the filter itself), and it
-greys out every day with no lots, from `getAuctionDays()` scoped to the rest of
-the active search. e-auksion lets you pick any square and most return nothing.
-
-Both variants share **one grid, four field columns wide**, so "Savdo kuni"
-wraps under Hudud at exactly the width of the fields above it and columns 2-4
-of that row stay free for the filters that come next. Five fields in one row
-does not fit at any viewport width — the container caps at 1200px, which
-leaves 144px of text box for "Qoraqalpog'iston Respublikasi" and clips it
-mid-word.
-
-### 4. Content flows through the data layer
-
-Components must not import from `src/content/` directly. Read through
-`src/lib/data/` (`getPrivileges()`, `getListings()`, `getRegions()` …). Those
-functions are `async` even though they currently read local modules, so a real
-API can replace their bodies without touching a single component.
-
-Derived values stay derived: privilege category counts are computed from the
-data, never typed into markup.
-
-### 5. `legacy/` is read-only
-
-`legacy/` holds the original static site — `index.html`, `imtiyozlar.html`,
-`davijara-v2.html`, `styles.css` — kept as reference for porting decisions and
-cited throughout this codebase's comments. Read it, cite it, never edit it.
+**6. Never invent facts.** This is a government portal: no invented figures,
+addresses, legal references, testimonials or news items. If a value cannot be
+verified, leave it out and say so. Upstream quirks and the figures that must
+NOT be derived are in `davijara-data`.
 
 ## Shared primitives
 
@@ -264,90 +148,6 @@ and need no `next/image` config.
 Note `ui/` is still shadcn CLI output — do not hand-edit it, and do not put
 project primitives there.
 
-## Designing a new page or component
-
-**Every new page ships with a considered visual design and motion. A stack of
-identical bordered cards with text in them is not a design** — it is what you
-get when the step is skipped, and it is the one review note that has come back
-more than once. Before writing markup, decide what this particular page *is*:
-a chart, a register, a timeline, a comparison, a form. Then build that shape.
-
-Work from what already exists, in this order:
-
-1. **Reach for the primitives** in `src/components/common/` — `SurfaceCard`,
-   `IconTile`, `StatList`, `Eyebrow`, `ActionLink`. New shapes join them there
-   rather than being written inline in a page.
-2. **Give the page a spine.** Numbered levels, a drawn rail, a grid with a
-   deliberate rhythm, a lead element that is genuinely larger than the rest —
-   something that says how the content is organised before a word is read.
-   `/markaz/tuzilma` and `/yangiliklar` are the current references.
-3. **Lead with figures where the data has any.** Counts, sums and dates that
-   are DERIVED from the data layer, never typed into markup.
-4. **Use icons and tiles to give long Uzbek names a shape.** Register the icon
-   in `components/icon.tsx`; content refers to it by name.
-5. **Every interactive surface needs a hover state and an entrance.** See the
-   motion vocabulary below.
-
-Depth is `--shadow-1` / `--shadow-2` and nothing else; colour comes from the
-semantic tokens, never the raw brand scale. Check the result in all four
-combinations (dark/light theme × deep/light tone) plus high contrast before
-calling it done — the light theme's `deep` tone is a PALE surface, and code
-that assumes `deep` means navy has shipped a black-on-black section here
-before.
-
-## Motion
-
-**GSAP + ScrollTrigger + SplitText, driven from one client island** —
-`components/motion/motion-provider.tsx` — with Lenis for smooth scrolling.
-Sections stay Server Components: the provider reads plain attributes off the
-markup the server already rendered, so nothing animated has to cross the
-server/client boundary. `motion/react` is used in exactly one place
-(`animated-stat-value`), where a value has to be interpolated rather than an
-element transformed.
-
-The vocabulary, all of it attribute-driven:
-
-| Attribute | Effect |
-|---|---|
-| `data-reveal="up\|down\|left\|right\|fade\|scale"` | arrives once on entry, batched into a cascade with its neighbours |
-| `data-split` | heading revealed line by line out of a mask |
-| `data-clip` | wipes up from its own bottom edge |
-| `data-draw` | scrubs a `--p` custom property 0→1 against scroll |
-| `data-parallax="0.12"` | drifts against the scroll |
-| `data-enter` + `--enter-delay` | time-based entrance for above-the-fold content |
-
-Direction carries meaning and is chosen per section, not varied at random:
-`up` for card grids, `left` for list rows and ordered steps, `down` for things
-that belong to what is above them, `scale` for logos and marks, `fade` for
-blocks whose children do the moving.
-
-**Rules that are load-bearing, not stylistic:**
-
-1. **A hidden start state may only be applied under `.motion-armed`.** That
-   class is added by the inline script in `motion-arm-script.tsx` and is the
-   guarantee that content which starts hidden is content something is going to
-   reveal. Four independent guards each end with the content simply visible:
-   no JavaScript, `prefers-reduced-motion: reduce`, GSAP failing to
-   initialise (a deadman timer strips the class), and the `[data-revealed]`
-   stamp the provider writes when it is finished with an element. Never write
-   a static `opacity: 0` outside that class — on a public-service portal,
-   content nobody can read is worse than content that does not move.
-2. **A scrubbed value defaults to its FINISHED state.** `--p` is `1` unless
-   `.motion-armed` sets it to `0` (see `.step-rail-fill`, `.org-rail-fill`).
-   A progress rail that fails to initialise must be drawn, not missing.
-3. **`data-enter` animates transform only, never opacity.** Its document
-   timeline is active but frozen at 0 in a background tab, and a frozen active
-   timeline still applies the `from` keyframe. Fading here would hide the hero
-   headline from anyone opening the page in a background tab, and from
-   search-engine and print renderers.
-4. **Nothing may depend on hue alone.** A hover is a lift plus a shadow step;
-   an active chip is a fill plus weight. In high contrast every ink is white,
-   and decorative blurred layers are stripped — so a state carried only by
-   colour or glow disappears for exactly the readers who need it most.
-
-The word-rotator's delays are negative for the same reason as rule 3 — see the
-comment in `globals.css`.
-
 ## i18n
 
 Locales `uz` (default) / `ru` / `en`, always prefixed (`/uz/imtiyozlar`).
@@ -360,101 +160,6 @@ Locales `uz` (default) / `ru` / `en`, always prefixed (`/uz/imtiyozlar`).
 - `NextIntlClientProvider` receives only the `nav`, `common` and `topbar`
   namespaces — the three client components' needs. Do not widen this to the
   whole catalog; everything else resolves on the server.
-
-## Known source-data issues
-
-Carried over from the legacy site and resolved as follows:
-
-- **Address** — `index.html` said "Buxoro ko'chasi 6", `imtiyozlar.html` said
-  "Islom Karimov ko'chasi 55". Confirmed as **Buxoro ko'chasi 6**; single
-  source of truth in `content/site.ts`.
-- **Footer links** — the two pages listed different domains. Reconciled;
-  `online-yanki.uz` dropped (does not resolve), `e-auktsion.uz` normalised to
-  `e-auksion.uz`.
-- **Regions** — the legacy map array had 13 entries while the hero claimed 14.
-  Toshkent shahri was missing; added.
-- **Statistics** — all four hero cards are now LIVE and all four follow
-  `?hudud=` and `?tuman=`. Open lots and lots sold this year
-  (`sold_price > 0`) come from the listings feed; signed contracts and leased
-  area come from `RENT_CONTRACTS_API_URL`, a second service whose `region` is
-  optional (omit it for the republic). Each degrades on its own: the first two
-  fall back to the verified static figures, and the sold card is dropped rather
-  than shown empty because nobody has published that number.
-  **Do not derive a leased-AREA figure from the listings feed's `rent_area`.**
-  Summed over 2026 it gives 161 mln m², with one region alone contributing 150
-  mln from 266 lots (~564 000 m² each) — the field is not comparable across lot
-  types. The register's `total_rental_area` is the figure to use; it reports
-  148,8 mln m² nationally against the operator's static 145,9.
-
-- **District figures across the two services.** The register identifies
-  districts by a code (1718203) and a Cyrillic abbreviation ("Оқдарё т."); the
-  listings feed sends a Latin name and no code ("Oqdaryo tumani"). Until the
-  operator adds a district code to the listings feed, `rent-contracts.ts`
-  bridges them by name: transliterate, match exactly, then within two edits
-  when exactly one candidate is that close, and refuse anything ambiguous.
-  Measured over all fourteen regions — 196 districts carrying lots — 183 match
-  exactly, 13 near, none by guesswork. An unmatched district widens to the
-  region and the hero says so.
-- **The order endpoint returns PERSONAL DATA.** `winner_name`,
-  `winner_passport`, `winner_pinfl`, `winner_phone` and `winner_address` come
-  back for every concluded lot. None of it is on any type in `types/content.ts`
-  and none of it may reach a page. The sale is public; the buyer is not.
-  `lib/data/lot-images.ts` reads only `images[]` from that response, and
-  `SoldLot` carries only prices, area and place.
-
-- **No bid count exists.** Neither service reports how many raises a lot took —
-  there is no bid history, participant count or step field anywhere in either
-  response. The sold-lot card shows the rise from the start price instead,
-  which is arithmetic on two published figures. The raises DO land on a
-  10%-of-start grid in 906 of 997 sales, so a step count could be
-  reverse-engineered; 91 sales do not fit it, so it is not printed.
-
-- **Listing photos** — the legacy page showed one hotlinked image on all three
-  cards. Cards render a branded placeholder until real self-hosted photography
-  exists; `aspect-video` reserves the box so adding images causes no shift.
-
-## Accessibility mode
-
-"Maxsus imkoniyatlar" opens as a **dialog from the topbar**, not a route —
-the user changes contrast or text size without losing their place on the page.
-There is deliberately no `/maxsus-imkoniyatlar` page: these controls write to
-`<html>` and localStorage, so they were always JavaScript-dependent and a
-standalone page bought nothing a no-JS visitor could use.
-
-Two independent switches are set as attributes on `<html>` and mirrored to
-localStorage:
-
-- `data-contrast="high"` — black/white/yellow palette at 21:1. It overrides
-  **both** tones: in this mode the deep/light alternation is abandoned, because
-  the goal is uniform legibility rather than brand expression. Note that
-  `--muted-foreground` becomes full white — "muted" text must not stay dimmed
-  for the users this mode exists for.
-- `data-text-size="large" | "xlarge"` — scales the root font size. This only
-  works for `rem`-based sizes: a `text-[13.5px]` silently opts an element out
-  of the control entirely. **Never size text in `px`.** Where an exact optical
-  size is needed, write the rem equivalent (`text-[0.84375rem]` === 13.5px at
-  the default root) — the header's nav and utility strip both do this.
-
-### Borders must use the semantic tokens, not raw gold
-
-`--hairline` (structural dividers) and `--outline` (emphasis borders) exist
-precisely so decorative gold rules survive accessibility mode:
-
-| | deep | light | high contrast |
-|---|---|---|---|
-| `border-hairline` | gold @ 12% | gold-ink @ 18% | **white** |
-| `border-outline` | gold @ 40% | gold-ink @ 45% | **yellow** |
-
-Writing `border-gold/12` instead looks correct in the brand palette but is
-invisible in high contrast — a 12%-alpha gold line on pure black is nothing,
-and because the alpha is baked into the utility, overriding `--color-gold`
-cannot rescue it. The tokens carry the alpha themselves so the high-contrast
-block can swap in solid colours. The header's bottom edge, the Kirish button,
-the language chips and the active-nav underline all went through this bug.
-
-`AccessibilityScript` is a **blocking inline script in `<head>`**. It has to
-be: applying the preference from an effect would flash the navy palette on
-every navigation, for exactly the people who chose not to see it.
 
 ## Logo
 

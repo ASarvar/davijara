@@ -187,22 +187,8 @@
     "empty": "Bu toifada imtiyoz topilmadi."
   },
   "structure": {
-    "metaDescription": "Davlat mulki obyektlaridan samarali foydalanish markazi markaziy apparatining tuzilmasi: boʻlinmalar, shtat birliklari va boʻysunish tartibi.",
-    "levelHead": "Rahbariyat",
-    "levelDeputies": "Direktor oʻrinbosarlari",
-    "levelDirect": "Bevosita direktorga boʻysunuvchi boʻlinmalar",
-    "headNote": "Markazga rahbarlik qiladi; quyidagi barcha boʻlinmalar unga boʻysunadi.",
-    "directNote": "Bu boʻlinmalar oʻrinbosarlar orqali emas, bevosita Markaz direktoriga boʻysunadi.",
-    "subordinate": "Tobe boʻlim",
-    "countUnits": "{count} ta",
-    "staff": "{count} ta shtat birligi",
-    "staffShort": "shtat",
-    "externalNote": "Markaziy apparat tarkibiga kirmaydi",
-    "notesLabel": "Izoh",
-    "statUnits": "Boʻlinmalar",
-    "statStaff": "Shtat birliklari",
-    "statLeadership": "Rahbariyat lavozimlari",
-    "statCaption": "Buyruq bilan tasdiqlangan markaziy apparat tarkibi"
+    "metaDescription": "Davlat mulki obyektlaridan samarali foydalanish markazi markaziy apparatining tuzilmasi: boʻlinmalar va boʻysunish tartibi.",
+    "externalNote": "Markaziy apparat tarkibiga kirmaydi"
   },
   "news": {
     "eyebrow": "Matbuot markazi",
