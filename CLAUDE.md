@@ -264,33 +264,89 @@ and need no `next/image` config.
 Note `ui/` is still shadcn CLI output — do not hand-edit it, and do not put
 project primitives there.
 
+## Designing a new page or component
+
+**Every new page ships with a considered visual design and motion. A stack of
+identical bordered cards with text in them is not a design** — it is what you
+get when the step is skipped, and it is the one review note that has come back
+more than once. Before writing markup, decide what this particular page *is*:
+a chart, a register, a timeline, a comparison, a form. Then build that shape.
+
+Work from what already exists, in this order:
+
+1. **Reach for the primitives** in `src/components/common/` — `SurfaceCard`,
+   `IconTile`, `StatList`, `Eyebrow`, `ActionLink`. New shapes join them there
+   rather than being written inline in a page.
+2. **Give the page a spine.** Numbered levels, a drawn rail, a grid with a
+   deliberate rhythm, a lead element that is genuinely larger than the rest —
+   something that says how the content is organised before a word is read.
+   `/markaz/tuzilma` and `/yangiliklar` are the current references.
+3. **Lead with figures where the data has any.** Counts, sums and dates that
+   are DERIVED from the data layer, never typed into markup.
+4. **Use icons and tiles to give long Uzbek names a shape.** Register the icon
+   in `components/icon.tsx`; content refers to it by name.
+5. **Every interactive surface needs a hover state and an entrance.** See the
+   motion vocabulary below.
+
+Depth is `--shadow-1` / `--shadow-2` and nothing else; colour comes from the
+semantic tokens, never the raw brand scale. Check the result in all four
+combinations (dark/light theme × deep/light tone) plus high contrast before
+calling it done — the light theme's `deep` tone is a PALE surface, and code
+that assumes `deep` means navy has shipped a black-on-black section here
+before.
+
 ## Motion
 
-All CSS. **No animation library, and no section is a client component** — the
-homepage still ships zero page-level JavaScript.
+**GSAP + ScrollTrigger + SplitText, driven from one client island** —
+`components/motion/motion-provider.tsx` — with Lenis for smooth scrolling.
+Sections stay Server Components: the provider reads plain attributes off the
+markup the server already rendered, so nothing animated has to cross the
+server/client boundary. `motion/react` is used in exactly one place
+(`animated-stat-value`), where a value has to be interpolated rather than an
+element transformed.
 
-- `data-reveal="up|fade|scale"` — scroll reveal via `animation-timeline: view()`.
-  Stagger with an inline `--i`.
-- `data-enter` with `--enter-delay` — time-based entrance for above-the-fold
-  content.
+The vocabulary, all of it attribute-driven:
 
-**Two rules that are load-bearing, not stylistic:**
+| Attribute | Effect |
+|---|---|
+| `data-reveal="up\|down\|left\|right\|fade\|scale"` | arrives once on entry, batched into a cascade with its neighbours |
+| `data-split` | heading revealed line by line out of a mask |
+| `data-clip` | wipes up from its own bottom edge |
+| `data-draw` | scrubs a `--p` custom property 0→1 against scroll |
+| `data-parallax="0.12"` | drifts against the scroll |
+| `data-enter` + `--enter-delay` | time-based entrance for above-the-fold content |
 
-1. **Never write `opacity: 0` as a static declaration to hide something an
-   animation will reveal.** Put the hidden state in the keyframe's `from` and
-   let `animation-fill-mode: both` apply it. If the timeline turns out to be
-   inactive at runtime — which `@supports` cannot predict — the animation then
-   produces no output and the content is simply visible, instead of being
-   stranded invisible forever.
-2. **`data-enter` animates transform only, never opacity.** Its document
-   timeline is *active but frozen at 0* in a background tab, and a frozen
-   active timeline still applies the `from` keyframe. Fading here would hide
-   the hero headline from anyone opening the page in a background tab, and
-   from search-engine and print renderers. `data-reveal` does not have this
-   problem because its timeline goes *inactive* rather than frozen.
+Direction carries meaning and is chosen per section, not varied at random:
+`up` for card grids, `left` for list rows and ordered steps, `down` for things
+that belong to what is above them, `scale` for logos and marks, `fade` for
+blocks whose children do the moving.
 
-The word-rotator's delays are negative for the same reason — see the comment in
-`globals.css`.
+**Rules that are load-bearing, not stylistic:**
+
+1. **A hidden start state may only be applied under `.motion-armed`.** That
+   class is added by the inline script in `motion-arm-script.tsx` and is the
+   guarantee that content which starts hidden is content something is going to
+   reveal. Four independent guards each end with the content simply visible:
+   no JavaScript, `prefers-reduced-motion: reduce`, GSAP failing to
+   initialise (a deadman timer strips the class), and the `[data-revealed]`
+   stamp the provider writes when it is finished with an element. Never write
+   a static `opacity: 0` outside that class — on a public-service portal,
+   content nobody can read is worse than content that does not move.
+2. **A scrubbed value defaults to its FINISHED state.** `--p` is `1` unless
+   `.motion-armed` sets it to `0` (see `.step-rail-fill`, `.org-rail-fill`).
+   A progress rail that fails to initialise must be drawn, not missing.
+3. **`data-enter` animates transform only, never opacity.** Its document
+   timeline is active but frozen at 0 in a background tab, and a frozen active
+   timeline still applies the `from` keyframe. Fading here would hide the hero
+   headline from anyone opening the page in a background tab, and from
+   search-engine and print renderers.
+4. **Nothing may depend on hue alone.** A hover is a lift plus a shadow step;
+   an active chip is a fill plus weight. In high contrast every ink is white,
+   and decorative blurred layers are stripped — so a state carried only by
+   colour or glow disappears for exactly the readers who need it most.
+
+The word-rotator's delays are negative for the same reason as rule 3 — see the
+comment in `globals.css`.
 
 ## i18n
 

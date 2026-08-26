@@ -117,7 +117,7 @@ export function NavLinks() {
               {children.length > 0 ? (
                 <ChevronDown
                   aria-hidden="true"
-                  className="size-3.5 shrink-0 opacity-60 transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                  className="size-3.5 shrink-0 opacity-60 transition-transform duration-200 group-focus-within:rotate-180 group-hover:rotate-180"
                 />
               ) : null}
               {sectionActive ? (
@@ -150,9 +150,14 @@ export function NavLinks() {
                   A FIXED WIDTH, not `w-max`. These labels are sentences —
                   "Markaz faoliyatiga oid normativ-huquqiy hujjatlar" is 48
                   characters — and `w-max` sized the panel to the longest one,
-                  producing a 34rem slab of single-line rows. 19rem makes the
+                  producing a 34rem slab of single-line rows. 13rem makes the
                   long ones wrap to a second line and holds every section's
                   panel to the same width.
+
+                  A bounded `w-max min-w-[13rem] max-w-[19rem]` was tried, to
+                  keep long labels off the panel edge — it works, but it gives
+                  each section a different width, and the operator preferred
+                  the uniform one.
                 */
                 className={cn(
                   "invisible absolute top-full left-0 z-50 w-[13rem] translate-y-1 pt-1 opacity-0 transition-[opacity,transform] duration-200",

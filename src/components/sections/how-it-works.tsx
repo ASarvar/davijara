@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
 import { getSteps } from "@/lib/data/catalog";
-import { ActionLink } from "@/components/common/action-link";
 import { Icon } from "@/components/icon";
 import { Section, SectionHeader } from "@/components/layout/section";
 

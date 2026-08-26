@@ -826,8 +826,6 @@ export async function getUpcomingAuctions(
  * request.
  */
 export async function getUpcomingAuctionCounts(): Promise<{
-  /** Every upcoming lot — what the "Hammasi" chip shows. */
-  all: number;
   byWindow: Record<string, number>;
 }> {
   const { listings } = await getListings();
@@ -841,7 +839,7 @@ export async function getUpcomingAuctionCounts(): Promise<{
     }).length;
   }
 
-  return { all: upcomingLots(listings, Date.now()).length, byWindow };
+  return { byWindow };
 }
 
 /* ── Sold lots ────────────────────────────────────────────────────────── */

@@ -9,10 +9,8 @@ import {
   buildFilterQuery,
   getUpcomingAuctionCounts,
   getUpcomingAuctions,
-  withFilters,
 } from "@/lib/data/listings";
 import { cn } from "@/lib/utils";
-import { ActionLink } from "@/components/common/action-link";
 import { CardRotator } from "@/components/common/card-rotator";
 import { LotCard } from "@/components/common/lot-card";
 import { Section, SectionHeader } from "@/components/layout/section";
@@ -105,29 +103,26 @@ export async function UpcomingAuctions({
   };
 
   /*
-    Windows first, "Hammasi" last — the order the row was specified in, and it
-    reads as a scale: the tightest slice on the left, everything on the right.
+    THE THREE WINDOWS ONLY. There was a fourth chip, "Hammasi", carrying the
+    unfiltered count; the operator asked for it out.
 
-    Note that it is the LAST chip that is the default, not the first. That is
-    fine because the active one is filled and bold rather than merely first,
-    but it is the reason the row is not built with the reset at the head like
-    the privileges filter's "Barchasi".
+    Which leaves one thing to keep working: with no reset chip, a reader who
+    picks "5 kun" and finds nothing there has to be able to get back. So the
+    ACTIVE chip clears the filter — pressing it a second time returns to the
+    unfiltered strip — and it carries `aria-pressed` rather than
+    `aria-current`, because it is now a toggle rather than a marker of where
+    you are. A filter a citizen cannot undo without the back button is a
+    dead end, not a shorter row.
   */
-  const chips: Array<{ value: string | null; label: string; count: number }> = [
-    ...AUCTION_WINDOWS.map((w) => ({
-      value: w.value,
-      label: tw(w.labelKey),
-      count: counts.byWindow[w.value] ?? 0,
-    })),
-    { value: null, label: tw("allWindows"), count: counts.all },
-  ];
+  const chips = AUCTION_WINDOWS.map((w) => ({
+    value: w.value,
+    label: tw(w.labelKey),
+    count: counts.byWindow[w.value] ?? 0,
+  }));
 
   return (
     <Section tone="deep" id={ANCHOR} className="scroll-mt-24">
-      <SectionHeader
-        title={t("title")}
-        className="mb-6 sm:mb-8"
-      />
+      <SectionHeader title={t("title")} className="mb-6 sm:mb-8" />
 
       {/*
         Counts are printed on the chips, and that is not decoration. The one
@@ -141,10 +136,11 @@ export async function UpcomingAuctions({
           {chips.map((chip) => {
             const isActive = chip.value === activeWindow;
             return (
-              <li key={chip.value ?? "nearest"}>
+              <li key={chip.value}>
                 <Link
-                  href={chipHref(chip.value)}
-                  aria-current={isActive ? "true" : undefined}
+                  // Pressing the active chip is what clears the filter.
+                  href={chipHref(isActive ? null : chip.value)}
+                  aria-pressed={isActive}
                   className={cn(
                     "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
                     /* Semantic border tokens, never raw gold: these keep the

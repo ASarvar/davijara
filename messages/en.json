@@ -97,7 +97,6 @@
     "upTo1": "1 day",
     "from1to3": "3 days",
     "from3to5": "5 days",
-    "allWindows": "All",
     "filterLabel": "Filter by time until auction",
     "empty": "No objects have an auction opening in the selected window. Try another one."
   },

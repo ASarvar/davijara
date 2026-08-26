@@ -74,8 +74,15 @@ export default async function Page({
                 <Phone aria-hidden="true" className="size-4" />
               </IconTile>
               <div className="min-w-0">
+                {/*
+                  `phone`, not `hotline`. The number under it is
+                  `contacts.phone` — the office line — while `contacts.hotline`
+                  is 1082, a different number that the footer labels. Calling
+                  this card "Ishonch telefoni" put the hotline's name on the
+                  switchboard's number.
+                */}
                 <h2 className="font-heading text-sm font-semibold">
-                  {t("hotline")}
+                  {t("phone")}
                 </h2>
                 <a
                   href={contacts.phoneHref}
@@ -139,7 +146,21 @@ export default async function Page({
           below says so plainly rather than silently rendering nothing.
         */}
         {address.coords ? (
-          <div className="border-hairline h-[26rem] overflow-hidden rounded-xl border lg:h-[34rem]">
+          /*
+            `isolate` is load-bearing, not tidiness — the same note the
+            catalogue's map carries.
+
+            Leaflet stacks its own chrome high INSIDE the map: panes at 200-500,
+            controls at 800, the corner containers at 1000. Nothing above this
+            div created a stacking context, so those numbers were competing
+            directly with the rest of the page — and the sticky header is only
+            `z-40`. The result was the header's dropdown menu being painted over
+            by the map the moment the two overlapped.
+
+            `isolation: isolate` resolves Leaflet's 200-1000 WITHIN the map, so
+            the map as a whole sits at this div's own level in the page.
+          */
+          <div className="border-hairline isolate h-[26rem] overflow-hidden rounded-xl border lg:h-[34rem]">
             {/* A client wrapper, because `dynamic(..., { ssr: false })` cannot
                 be called from a Server Component — see office-map-panel.tsx. */}
             <OfficeMapPanel
@@ -157,9 +178,7 @@ export default async function Page({
             <IconTile size="lg" className="mb-4">
               <MapPin aria-hidden="true" className="size-6" />
             </IconTile>
-            <p className="font-heading text-lg font-semibold">
-              {address.full}
-            </p>
+            <p className="font-heading text-lg font-semibold">{address.full}</p>
             <p className="text-muted-foreground mt-2 max-w-sm text-sm text-pretty">
               {t("mapPending")}
             </p>

@@ -259,6 +259,7 @@
 
   --radius: 20px;
 
+
   --background: #07102b;
   --foreground: rgba(255, 255, 255, 0.85);
 
@@ -398,6 +399,27 @@
 */
 [data-tone="deep"][data-surface="raised"] {
   --background: var(--color-navy-raised);
+}
+
+/*
+  THE RAISED STEP HAS TO BE ANSWERED IN EVERY THEME.
+
+  The rule above set navy-raised unconditionally, which was correct while
+  `deep` meant navy everywhere and became silently wrong the moment the light
+  theme landed: a light-theme `deep` section is a PALE surface carrying navy
+  ink, so the raised step painted #091635 under #07102b text — 1.05:1, a block
+  of content that simply is not there. Found on /markaz/tuzilma, where the
+  three notes under the chart vanished into their own background.
+
+  Same class of bug as the `--heading` note further up, and the same rule
+  applies: a block that redeclares one half of a contrast pair owes an answer
+  for the other half in every theme it can be seen in.
+
+  Mist over mist-pale here — one step DOWN in lightness, which is what "one
+  step forward" means on a pale ground.
+*/
+:root[data-theme="light"] [data-tone="deep"][data-surface="raised"] {
+  --background: var(--color-mist);
 }
 
 /* ── LIGHT tone ──────────────────────────────────────────────────────── */
@@ -717,7 +739,10 @@
 :root[data-contrast="high"],
 :root[data-contrast="high"] [data-tone="deep"],
 :root[data-contrast="high"] [data-tone="light"],
-:root[data-contrast="high"] [data-tone="floor"] {
+:root[data-contrast="high"] [data-tone="floor"],
+/* Beats the per-theme raised rule above, which is more specific than the four
+   selectors on their own. In this mode every surface is black. */
+:root[data-contrast="high"] [data-tone="deep"][data-surface="raised"] {
   --background: #000000;
   --foreground: #ffffff;
 
@@ -1275,6 +1300,23 @@
 }
 
 .motion-armed .step-rail-fill {
+  --p: 0;
+}
+
+/*
+  ── Structure rail ───────────────────────────────────────────────────────
+
+  The spine down /markaz/tuzilma, drawn as the reader scrolls. Same contract
+  as `.step-rail-fill` above, including the default of 1: with no JavaScript,
+  or if GSAP never initialises, the line is simply drawn in full. An org chart
+  whose connecting line is missing is a chart that says nothing.
+*/
+.org-rail-fill {
+  transform-origin: center top;
+  transform: scaleY(var(--p, 1));
+}
+
+.motion-armed .org-rail-fill {
   --p: 0;
 }
 

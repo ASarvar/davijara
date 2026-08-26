@@ -3,7 +3,6 @@ import { getTranslations } from "next-intl/server";
 import { getRegions } from "@/lib/data/catalog";
 import { getRecentlySold } from "@/lib/data/listings";
 import { formatDate } from "@/lib/format";
-import { ActionLink } from "@/components/common/action-link";
 import { CardCarousel } from "@/components/common/card-carousel";
 import { SoldLotCard } from "@/components/common/sold-lot-card";
 import { Section, SectionHeader } from "@/components/layout/section";

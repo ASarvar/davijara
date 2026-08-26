@@ -14,7 +14,7 @@ export async function NewsAndDocs() {
     getTranslations("news"),
     getTranslations("documents"),
   ]);
-  const [news, documents] = await Promise.all([getNews(4), getDocuments(4)]);
+  const [news, documents] = await Promise.all([getNews(3), getDocuments(4)]);
 
   return (
     <Section tone="light">

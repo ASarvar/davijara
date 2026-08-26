@@ -231,6 +231,43 @@ export interface NewsItem {
   image?: string;
 }
 
+/**
+ * One box on the central apparatus org chart.
+ *
+ * Names are VERBATIM from the director's order — see src/content/structure.ts.
+ */
+export interface OrgUnit {
+  id: string;
+  name: string;
+  /** Shtat birliklari, the figure printed in parentheses on the chart. */
+  staff?: number;
+  /**
+   * Drawn with a DASHED outline and a dashed connector in the source, which
+   * is how the chart says "reports here but is not part of the central
+   * apparatus" — the document's own title is `markaziy apparati TUZILMASI`.
+   */
+  external?: boolean;
+  /** Route this unit already has a page for, when one exists. */
+  href?: string;
+  /**
+   * Name from the icon registry in `components/icon.tsx`.
+   *
+   * Presentation, not part of the order — a glyph beside a department name is
+   * a wayfinding aid, and picking one is not a claim about the department.
+   * The NAME beside it is what may not be touched.
+   */
+  icon?: string;
+}
+
+/** A deputy and the unit reporting to them. */
+export interface OrgBranch {
+  id: string;
+  /** Post title, verbatim. */
+  title: string;
+  icon?: string;
+  units: OrgUnit[];
+}
+
 export interface DocItem {
   id: string;
   title: string;
