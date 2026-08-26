@@ -172,6 +172,7 @@ export async function SiteHeader() {
               unused sections in CLAUDE.md). Re-adding it is four lines and a
               `Mail` import.
             */}
+            Telefon
             <a
               href={contacts.phoneHref}
               className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"

@@ -26,7 +26,7 @@ export const site = {
 } as const;
 
 export const contacts = {
-  phone: "1082",
+  phone: "(71) 259-22-70",
   phoneHref: "tel:1082",
   corporatePhone: "1082",
   corporatePhoneHref: "1082",
