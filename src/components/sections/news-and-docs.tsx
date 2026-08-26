@@ -2,7 +2,8 @@ import { Download, FileText } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
-import { getDocuments, getNews } from "@/lib/data/catalog";
+import { getDocuments } from "@/lib/data/catalog";
+import { getNews } from "@/lib/data/news";
 import { ActionLink } from "@/components/common/action-link";
 import { IconTile } from "@/components/common/icon-tile";
 import { SurfaceCard } from "@/components/common/surface-card";
@@ -10,8 +11,9 @@ import { Section, SectionHeader } from "@/components/layout/section";
 import { formatDate } from "@/lib/format";
 
 export async function NewsAndDocs() {
-  const [tn, td] = await Promise.all([
+  const [tn, tCat, td] = await Promise.all([
     getTranslations("news"),
+    getTranslations("news.categories"),
     getTranslations("documents"),
   ]);
   const [news, documents] = await Promise.all([getNews(4), getDocuments(4)]);
@@ -47,12 +49,11 @@ export async function NewsAndDocs() {
                     <time dateTime={item.publishedAt}>
                       {formatDate(item.publishedAt)}
                     </time>
-                    {item.category ? (
-                      <>
-                        <span aria-hidden="true">·</span>
-                        <span>{item.category}</span>
-                      </>
-                    ) : null}
+                    <span aria-hidden="true">·</span>
+                    {/* The topic is a SLUG on the record; its label is
+                        translated, so the chip here and the chip on
+                        /yangiliklar are one string, not two. */}
+                    <span>{tCat(item.category)}</span>
                   </div>
                   <h3 className="group-hover:text-accent-foreground mt-2 text-base font-semibold text-balance transition-colors duration-200">
                     {item.title}

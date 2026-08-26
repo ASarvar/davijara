@@ -28,5 +28,5 @@ export default async function Page({
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  return <PlaceholderPage navKey={NAV_KEY} />;
+  return <PlaceholderPage navKey={NAV_KEY} descriptionKey="news" />;
 }

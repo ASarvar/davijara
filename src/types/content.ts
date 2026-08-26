@@ -184,13 +184,46 @@ export interface Region {
   lng: number;
 }
 
+/**
+ * Topic tag on a news item. A SLUG, not a label.
+ *
+ * It was free text ("Xizmatlar") until the news section became browsable, at
+ * which point the same string had to be three things at once: the chip's
+ * label, the value in `?kategoriya=`, and — once ru/en arrive — a translated
+ * word. A translated label in a URL is not a URL that survives translation,
+ * so the slug lives here and the label lives in `messages/*.json` under
+ * `news.categories`.
+ */
+export type NewsCategory = "xizmatlar" | "imtiyozlar" | "tadbirlar" | "portal";
+
 export interface NewsItem {
   slug: string;
   title: string;
+  /** One or two sentences. Doubles as the lead paragraph on the article page. */
   excerpt: string;
   /** ISO 8601 date. */
   publishedAt: string;
-  category?: string;
+  category: NewsCategory;
+  /**
+   * The full text, one string per paragraph.
+   *
+   * OPTIONAL, and the article page renders correctly without it — a short
+   * announcement whose whole content is its `excerpt` is a legitimate news
+   * item, and inventing body text for one would be inventing a statement by a
+   * state body. See the note at the top of src/content/news.ts.
+   */
+  body?: string[];
+  /** ISO 8601, set only when the text was corrected after publication. */
+  updatedAt?: string;
+  /**
+   * Path to a self-hosted illustration, e.g. `/news/qabul-kunlari.jpg`.
+   *
+   * Absent until the Markaz supplies one, and the card then draws
+   * `ImagePlaceholder` instead of borrowing a stock photograph. A generic
+   * photo under a state announcement reads as a photo OF that event, which is
+   * the same reasoning that keeps stock imagery off the lot cards.
+   */
+  image?: string;
 }
 
 export interface DocItem {

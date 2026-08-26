@@ -6,7 +6,6 @@ import {
   featuredListings,
   heroStats,
   impactStats,
-  news,
   privilegeCategories,
   services,
   steps,
@@ -23,7 +22,6 @@ import type {
   DocItem,
   FaqItem,
   Listing,
-  NewsItem,
   Region,
   Service,
   Stat,
@@ -71,13 +69,6 @@ export async function getListings(filter?: ListingFilter): Promise<Listing[]> {
 
 export async function getFeaturedListings(limit = 3): Promise<Listing[]> {
   return featuredListings.slice(0, limit);
-}
-
-export async function getNews(limit?: number): Promise<NewsItem[]> {
-  const sorted = [...news].sort((a, b) =>
-    b.publishedAt.localeCompare(a.publishedAt),
-  );
-  return limit ? sorted.slice(0, limit) : sorted;
 }
 
 export async function getDocuments(limit?: number): Promise<DocItem[]> {

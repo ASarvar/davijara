@@ -1,7 +1,6 @@
 import type {
   DocItem,
   Listing,
-  NewsItem,
   Service,
   Stat,
   Step,
@@ -213,42 +212,6 @@ export const featuredListings: Listing[] = [
     lat: 40.3894,
     lng: 71.7869,
     lotNumber: "24364718",
-  },
-];
-
-export const news: NewsItem[] = [
-  {
-    slug: "qr-kod-orqali-tolov",
-    title:
-      "Ijara shartnomalari bo'yicha to'lovlar endi QR-kod orqali qabul qilinadi",
-    excerpt:
-      "Shaxsiy kabinetdagi onlayn to'lov imkoniyatlariga QR-kod orqali to'lash qo'shildi.",
-    publishedAt: "2025-07-02",
-    category: "Xizmatlar",
-  },
-  {
-    slug: "ijtimoiy-soha-imtiyoz-uzaytirildi",
-    title: "Ijtimoiy soha obyektlari uchun imtiyozli ijara muddati uzaytirildi",
-    excerpt:
-      "Maktabgacha va maktab yoshidagi bolalar muassasalari uchun imtiyoz 10 yilgacha berildi.",
-    publishedAt: "2025-06-24",
-    category: "Imtiyozlar",
-  },
-  {
-    slug: "sayyor-qabul-kunlari",
-    title: "Hududlarda sayyor qabul kunlari e'lon qilindi",
-    excerpt:
-      "Markaz mutaxassislari tadbirkorlarning savollariga bevosita joylarda javob beradi.",
-    publishedAt: "2025-06-15",
-    category: "Tadbirlar",
-  },
-  {
-    slug: "mobil-versiya",
-    title: "Portalning yangi mobil versiyasi ishga tushirildi",
-    excerpt:
-      "Endi auksion jarayonlarida smartfon orqali ham xuddi shunday oson ishtirok etish mumkin.",
-    publishedAt: "2025-06-06",
-    category: "Portal",
   },
 ];
 

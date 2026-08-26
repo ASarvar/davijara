@@ -192,7 +192,19 @@
   "news": {
     "eyebrow": "Matbuot markazi",
     "title": "Yangiliklar",
-    "action": "Barchasi"
+    "action": "Barchasi",
+    "metaDescription": "Davlat mulki obyektlaridan foydalanish markazining rasmiy xabarlari, eʼlonlari va tadbirlari.",
+    "empty": "Bu boʻlim boʻyicha hozircha xabar yoʻq.",
+    "pagination": "Yangiliklar sahifalari",
+    "latest": "Soʻnggi xabar",
+    "updated": "Yangilangan: {date}",
+    "related": "Boshqa yangiliklar",
+    "categories": {
+      "xizmatlar": "Xizmatlar",
+      "imtiyozlar": "Imtiyozlar",
+      "tadbirlar": "Tadbirlar",
+      "portal": "Portal"
+    }
   },
   "documents": {
     "eyebrow": "Qonunchilik",
