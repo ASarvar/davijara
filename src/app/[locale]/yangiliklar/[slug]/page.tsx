@@ -155,13 +155,19 @@ export default async function ArticlePage({
           </div>
 
           {/*
-            `max-w-[68ch]` on the text below the picture — a measure that runs
-            the full width of a wide column is a measure nobody finishes a line
-            of. The excerpt IS the lead paragraph, set one step up from the
-            body and not repeated further down: carrying the summary twice on
-            one page is how a short announcement ends up looking padded.
+            NO NARROWER MEASURE THAN THE PICTURE. The text used to sit in a
+            `max-w-[68ch]` column while the image spanned the full width above
+            it, so the article had two left-to-right extents and the paragraphs
+            read as though they had been indented by accident. The column is
+            already ~768px at the widest — inside the comfortable range on its
+            own — so the sidebar, not a second cap, is what keeps the line
+            length honest.
+
+            The excerpt IS the lead paragraph, set one step up from the body
+            and not repeated further down: carrying the summary twice on one
+            page is how a short announcement ends up looking padded.
           */}
-          <div className="max-w-[68ch]">
+          <div>
             <p
               data-enter
               style={{ "--enter-delay": 1 } as React.CSSProperties}

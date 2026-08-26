@@ -106,9 +106,7 @@
   },
   "map": {
     "eyebrow": "Xarita",
-    "title": "Ijara obyektlari xaritada",
-    "description": "Hududni tanlang — o'sha hududdagi bo'sh obyektlar ro'yxati ochiladi.",
-    "objectsCount": "{count} ta obyekt"
+    "title": "Ijara obyektlari xaritada"
   },
   "steps": {
     "eyebrow": "Jarayon",
@@ -178,7 +176,7 @@
   "privileges": {
     "eyebrow": "Davlat yordami",
     "title": "Ijara imtiyozlari",
-    "description": "Tadbirkorlik subyektlari uchun davlat mulkini ijaraga olishda amaldagi asosiy yengilliklar.",
+    "description": "Tadbirkorlik subyektlari uchun davlat mulkini ijaraga olishda amaldagi asosiy imtiyozlar.",
     "action": "Barcha imtiyozlar",
     "count": "{count} ta imtiyoz",
     "pageTitle": "Davlat mulkini ijaraga berishda imtiyozlar",
@@ -196,10 +194,10 @@
     "metaDescription": "Davlat mulki obyektlaridan foydalanish markazining rasmiy xabarlari, eʼlonlari va tadbirlari.",
     "empty": "Bu boʻlim boʻyicha hozircha xabar yoʻq.",
     "pagination": "Yangiliklar sahifalari",
-    "latest": "Soʻnggi xabar",
     "updated": "Yangilangan: {date}",
     "related": "Boshqa yangiliklar",
     "categories": {
+      "obyektlar": "Obyektlar",
       "xizmatlar": "Xizmatlar",
       "imtiyozlar": "Imtiyozlar",
       "tadbirlar": "Tadbirlar",
@@ -243,7 +241,7 @@
   "sold": {
     "eyebrow": "NATIJALAR",
     "title": "Soʻnggi savdo kunida ijaraga berilgan obyektlar",
-    "description": "{date} kungi savdolarda ijaraga berilgan obyektlar. Boshlangʻich narx va yakuniy narx solishtirilgan.",
+    "description": "{date} kungi savdolarda ijaraga berilgan obyektlar. Boshlangʻich narx va yakuniy narx.",
     "action": "Barcha natijalar",
     "startPrice": "Boshlangʻich narx",
     "soldPrice": "Yakuniy narx",
@@ -363,7 +361,7 @@
     "yearlyText": "Eng kam stavkalar Vazirlar Mahkamasi qarori asosida belgilanadi."
   },
   "faq": {
-    "title": "Savollar va javoblar",
-    "eyebrow": "Koʻp soʻraladigan savollar"
+    "title": "Koʻp soʻraladigan savollar",
+    "eyebrow": "Savollar va javoblar"
   }
 }

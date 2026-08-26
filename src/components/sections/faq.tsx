@@ -23,10 +23,7 @@ export async function Faq() {
 
   return (
     <Section tone="deep">
-      <SectionHeader
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-      />
+      <SectionHeader title={t("title")} />
 
       <Accordion
         type="single"

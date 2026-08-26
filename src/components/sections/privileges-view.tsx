@@ -28,7 +28,7 @@ export async function PrivilegesView({
 
   return (
     <>
-      <Section tone="deep" className="pb-10">
+      <Section tone="deep" className="pb-5">
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="text-muted-foreground flex items-center gap-2 text-sm">
             <li>

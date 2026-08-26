@@ -29,7 +29,7 @@ export const heroStats: Stat[] = [
   },
   {
     value: "28 075",
-    label: "Ijara shartnomalari",
+    label: "Tuzilgan ijara shartnomalari",
     icon: "FileText",
   },
   /*

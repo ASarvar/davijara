@@ -8,7 +8,6 @@ import {
   summariseByRegion,
   withFilters,
 } from "@/lib/data/listings";
-import { ActionLink } from "@/components/common/action-link";
 import { Section, SectionHeader } from "@/components/layout/section";
 import { ObjectsExplorer } from "./objects-explorer";
 
@@ -28,7 +27,6 @@ export async function ObjectsSection({
   searchParams: Record<string, string | string[] | undefined>;
 }) {
   const t = await getTranslations("map");
-  const tListings = await getTranslations("listings");
   const query = parseListingQuery(searchParams);
 
   const { listings, hasMock } = await getListings(query);
@@ -46,11 +44,14 @@ export async function ObjectsSection({
 
   return (
     <Section tone="deep" id="obyektlar-xarita" className="scroll-mt-24">
-      <SectionHeader
-        eyebrow={t("eyebrow")}
-        title={t("title")}
-        description={t("description")}
-        action={<ActionLink href={moreHref}>{tListings("action")}</ActionLink>}
+      {/*
+        Heading only. The description repeated what the tabs underneath it
+        already demonstrate, and the "Barcha obyektlar" link duplicated the
+        one the explorer itself renders under the results — two links to
+        /obyektlar within a screen of each other, both at the operator's
+        request removed.
+      */}
+      <SectionHeader title={t("title")} 
       />
 
       {/*

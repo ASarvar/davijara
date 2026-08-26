@@ -117,11 +117,13 @@ export async function SearchWidget({
   */
   const panel = (
     <>
-      <Eyebrow as="h2" className="mb-4">
+      {/* sr-only, not deleted: this is the panel's accessible
+          name, and the eyebrow style is what the operator asked to drop. */}
+      <Eyebrow as="h2" className="sr-only">
         {t("label")}
       </Eyebrow>
 
-        {/*
+      {/*
           Still a plain GET form. Submitting reloads with the filters in the
           URL, which is what makes a result set linkable and lets the server
           send only matching records. The `#obyektlar-xarita` fragment drops
@@ -131,10 +133,10 @@ export async function SearchWidget({
           `<Link>` hrefs under a basePath, never this. Unprefixed, every search
           would submit to the domain root, which is a different project.
         */}
-        <form
-          action={withBasePath(action ?? `/${locale}#obyektlar-xarita`)}
-          method="get"
-          /*
+      <form
+        action={withBasePath(action ?? `/${locale}#obyektlar-xarita`)}
+        method="get"
+        /*
             ONE grid, four field columns wide, in both variants — so the
             top row is byte-for-byte the layout it has always been and "Savdo
             kuni" simply wraps onto a second row beneath Hudud.
@@ -151,9 +153,9 @@ export async function SearchWidget({
             text in the 144px box that leaves — clipped mid-word, with
             `text-overflow: clip` not even leaving an ellipsis to signal it.
           */
-          className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
-        >
-          {/*
+        className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
+      >
+        {/*
             Carries the open tab through the submit.
 
             A GET form sends only its own fields, so without this every search
@@ -162,11 +164,11 @@ export async function SearchWidget({
             rendered for the non-default view, so a plain map search keeps a
             clean URL.
           */}
-          {current(VIEW_KEY) === "royxat" ? (
-            <input type="hidden" name={VIEW_KEY} value="royxat" />
-          ) : null}
+        {current(VIEW_KEY) === "royxat" ? (
+          <input type="hidden" name={VIEW_KEY} value="royxat" />
+        ) : null}
 
-          {/*
+        {/*
             Hudud + Tuman are one coupled control — picking a region has to
             narrow the district list immediately, so they live in a small
             client island together. See region-district-fields.tsx.
@@ -180,63 +182,63 @@ export async function SearchWidget({
             `tur` is still honoured by parseListingQuery, so old links keep
             their meaning against the typed fallback records.
           */}
-          <RegionDistrictFields
-            regions={regions}
-            districtsByRegion={districtsByRegion}
-            initialRegion={current("hudud")}
-            initialDistrict={current("tuman")}
-            labels={{
-              region: t("region"),
-              anyRegion: t("anyRegion"),
-              district: t("district"),
-              anyDistrict: t("anyDistrict"),
-              regionFirst: t("regionFirst"),
-            }}
-          />
+        <RegionDistrictFields
+          regions={regions}
+          districtsByRegion={districtsByRegion}
+          initialRegion={current("hudud")}
+          initialDistrict={current("tuman")}
+          labels={{
+            region: t("region"),
+            anyRegion: t("anyRegion"),
+            district: t("district"),
+            anyDistrict: t("anyDistrict"),
+            regionFirst: t("regionFirst"),
+          }}
+        />
 
-          <SelectField
-            id="maydon"
-            name="maydon"
-            label={t("area")}
-            defaultValue={current("maydon")}
-            /*
+        <SelectField
+          id="maydon"
+          name="maydon"
+          label={t("area")}
+          defaultValue={current("maydon")}
+          /*
               Edges taken from the live catalogue's quartiles, not round
               numbers. The previous set started at 50 m², which against real
               data made 59% of lots — every kiosk, ATM bay and technical plot,
               780 of 1319 — unreachable by ANY choice in the dropdown. These
               five each hold 6–30% of the catalogue.
             */
-            options={[
-              { value: ALL_VALUE, label: t("anyArea") },
-              { value: "0-10", label: "0 — 10" },
-              { value: "10-50", label: "10 — 50" },
-              { value: "50-200", label: "50 — 200" },
-              { value: "200-1000", label: "200 — 1000" },
-              { value: "1000-", label: "1000+" },
-            ]}
-          />
+          options={[
+            { value: ALL_VALUE, label: t("anyArea") },
+            { value: "0-10", label: "0 — 10" },
+            { value: "10-50", label: "10 — 50" },
+            { value: "50-200", label: "50 — 200" },
+            { value: "200-1000", label: "200 — 1000" },
+            { value: "1000-", label: "1000+" },
+          ]}
+        />
 
-          <SelectField
-            id="narx"
-            name="narx"
-            label={t("price")}
-            defaultValue={current("narx")}
-            /*
+        <SelectField
+          id="narx"
+          name="narx"
+          label={t("price")}
+          defaultValue={current("narx")}
+          /*
               Also from the live quartiles. "10 mln+" used to collect 39% of
               the catalogue in one bucket, across a range running to 2 224 mln
               — too coarse to narrow anything.
             */
-            options={[
-              { value: ALL_VALUE, label: t("anyPrice") },
-              { value: "0-1", label: "0 — 1 mln" },
-              { value: "1-5", label: "1 — 5 mln" },
-              { value: "5-20", label: "5 — 20 mln" },
-              { value: "20-100", label: "20 — 100 mln" },
-              { value: "100-", label: "100 mln+" },
-            ]}
-          />
+          options={[
+            { value: ALL_VALUE, label: t("anyPrice") },
+            { value: "0-1", label: "0 — 1 mln" },
+            { value: "1-5", label: "1 — 5 mln" },
+            { value: "5-20", label: "5 — 20 mln" },
+            { value: "20-100", label: "20 — 100 mln" },
+            { value: "100-", label: "100 mln+" },
+          ]}
+        />
 
-          {/*
+        {/*
             Savdo kuni — the calendar, on its own row.
 
             Modelled on e-auksion's filter of the same name, so a citizen who
@@ -245,35 +247,35 @@ export async function SearchWidget({
             picked. See auction-day-field.tsx for why, and for why a calendar
             is a client component when nothing else in this panel is.
           */}
-          {auctionDay ? (
-            <AuctionDayField
-              id="savdo"
-              name={AUCTION_DAY_KEY}
-              label={td("field")}
-              value={
-                current(AUCTION_DAY_KEY) === ALL_VALUE
-                  ? undefined
-                  : current(AUCTION_DAY_KEY)
-              }
-              days={auctionDays}
-              /* Placed, not auto-flowed: as the fifth child it would otherwise
+        {auctionDay ? (
+          <AuctionDayField
+            id="savdo"
+            name={AUCTION_DAY_KEY}
+            label={td("field")}
+            value={
+              current(AUCTION_DAY_KEY) === ALL_VALUE
+                ? undefined
+                : current(AUCTION_DAY_KEY)
+            }
+            days={auctionDays}
+            /* Placed, not auto-flowed: as the fifth child it would otherwise
                  land in the button's column at the end of row one. Column 1 of
                  row 2 puts it under Hudud, with the reserved columns to its
                  right. */
-              className="lg:col-start-1 lg:row-start-2"
-              labels={{
-                placeholder: td("placeholder"),
-                clear: td("clear"),
-                months: td.raw("months") as string[],
-                weekdays: td.raw("weekdays") as string[],
-                // `raw`, not `td("lots")`: the {count} is substituted in the
-                // browser once a day is known, so ICU must not try to resolve
-                // it here — there is no value to give it yet.
-                lots: td.raw("lots") as string,
-              }}
-            />
-          ) : (
-            /*
+            className="lg:col-start-1 lg:row-start-2"
+            labels={{
+              placeholder: td("placeholder"),
+              clear: td("clear"),
+              months: td.raw("months") as string[],
+              weekdays: td.raw("weekdays") as string[],
+              // `raw`, not `td("lots")`: the {count} is substituted in the
+              // browser once a day is known, so ICU must not try to resolve
+              // it here — there is no value to give it yet.
+              lots: td.raw("lots") as string,
+            }}
+          />
+        ) : (
+          /*
               Not shown here, but the strip's window is not dropped either.
 
               A GET form submits only its own fields, so on the homepage —
@@ -282,41 +284,41 @@ export async function SearchWidget({
               chips below. Same fix, and same reason, as the `korinish` input
               above.
             */
-            current(AUCTION_WINDOW_KEY) !== ALL_VALUE && (
-              <input
-                type="hidden"
-                name={AUCTION_WINDOW_KEY}
-                value={current(AUCTION_WINDOW_KEY)}
-              />
-            )
-          )}
+          current(AUCTION_WINDOW_KEY) !== ALL_VALUE && (
+            <input
+              type="hidden"
+              name={AUCTION_WINDOW_KEY}
+              value={current(AUCTION_WINDOW_KEY)}
+            />
+          )
+        )}
 
-          {/* Pinned to the last column, and to the second ROW when the
+        {/* Pinned to the last column, and to the second ROW when the
               calendar is there — otherwise it would follow "Savdo kuni"
               straight into column 2 and sit in the middle of the space the
               next filters are reserved for. */}
-          <div
-            className={
-              auctionDay
-                ? "flex items-end lg:col-start-5 lg:row-start-2"
-                : "flex items-end"
-            }
-          >
-            <button
-              type="submit"
-              /* `active:scale` because the transition already declared
+        <div
+          className={
+            auctionDay
+              ? "flex items-end lg:col-start-5 lg:row-start-2"
+              : "flex items-end"
+          }
+        >
+          <button
+            type="submit"
+            /* `active:scale` because the transition already declared
                  `transform` but nothing ever changed it — the button animated
                  opacity only and felt inert on press. */
-              className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-cobalt)] px-6 text-sm font-semibold text-[color:var(--color-mist-pale)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
-            >
-              <Search
-                aria-hidden="true"
-                className="size-4 transition-transform duration-200 group-hover:scale-110"
-              />
-              {t("submit")}
-            </button>
-          </div>
-        </form>
+            className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-cobalt)] px-6 text-sm font-semibold text-[color:var(--color-mist-pale)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
+          >
+            <Search
+              aria-hidden="true"
+              className="size-4 transition-transform duration-200 group-hover:scale-110"
+            />
+            {t("submit")}
+          </button>
+        </div>
+      </form>
     </>
   );
 

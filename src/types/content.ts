@@ -194,7 +194,12 @@ export interface Region {
  * so the slug lives here and the label lives in `messages/*.json` under
  * `news.categories`.
  */
-export type NewsCategory = "xizmatlar" | "imtiyozlar" | "tadbirlar" | "portal";
+export type NewsCategory =
+  | "obyektlar"
+  | "xizmatlar"
+  | "imtiyozlar"
+  | "tadbirlar"
+  | "portal";
 
 export interface NewsItem {
   slug: string;

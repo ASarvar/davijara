@@ -21,7 +21,6 @@ export async function Services() {
     */
     <Section tone="light">
       <SectionHeader
-        eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
         action={<ActionLink href="/xizmatlar">{t("action")}</ActionLink>}

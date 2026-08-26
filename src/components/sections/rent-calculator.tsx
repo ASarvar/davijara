@@ -44,12 +44,13 @@ export function RentCalculator() {
           only h3 at text-lg, which made the calculator look like it belonged
           to a different page. */}
       <h3 className="flex items-center gap-2.5 text-base font-semibold">
-        <Calculator aria-hidden="true" className="text-accent-foreground size-5" />
+        <Calculator
+          aria-hidden="true"
+          className="text-accent-foreground size-5"
+        />
         {t("title")}
       </h3>
-      <p className="text-muted-foreground mt-1.5 text-sm">
-        {t("lead")}
-      </p>
+      <p className="text-muted-foreground mt-1.5 text-sm">{t("lead")}</p>
 
       <div className="mt-7 space-y-6">
         <div>
@@ -72,7 +73,7 @@ export function RentCalculator() {
             step={calculatorBounds.step}
             value={area}
             onChange={(e) => setArea(Number(e.target.value))}
-            className="accent-[color:var(--color-gold)] w-full"
+            className="w-full accent-[color:var(--color-gold)]"
           />
           <div className="text-muted-foreground mt-1 flex justify-between text-xs">
             <span>{calculatorBounds.minArea} m²</span>

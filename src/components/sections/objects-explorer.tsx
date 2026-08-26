@@ -82,7 +82,7 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
     <li data-reveal="left">
       <Link
         href={`/obyektlar?hudud=${summary.slug}`}
-        className="group hover:bg-secondary/60 focus-visible:ring-ring flex flex-col gap-3 px-4 py-3.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none focus-visible:-outline-offset-2 sm:flex-row sm:items-center sm:gap-6"
+        className="group hover:bg-secondary/60 focus-visible:ring-ring flex flex-col gap-3 px-4 py-3.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none sm:flex-row sm:items-center sm:gap-6"
       >
         <div className="flex min-w-0 flex-1 items-start gap-2.5">
           <MapPin
@@ -141,7 +141,6 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
   );
 }
 
-
 /* ── Pagination ───────────────────────────────────────────────────────── */
 
 function Pagination({
@@ -162,7 +161,11 @@ function Pagination({
 
   push(1);
   if (page > 3) pages.push("gap");
-  for (let n = Math.max(2, page - 1); n <= Math.min(totalPages - 1, page + 1); n++) {
+  for (
+    let n = Math.max(2, page - 1);
+    n <= Math.min(totalPages - 1, page + 1);
+    n++
+  ) {
     push(n);
   }
   if (page < totalPages - 2) pages.push("gap");
@@ -353,7 +356,9 @@ export function ObjectsExplorer({
           <span>
             {"Ko'rsatilayotgan obyektlar hozircha "}
             <strong>{"namunaviy"}</strong>
-            {" — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun "}
+            {
+              " — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun "
+            }
             <a
               href="https://e-auksion.uz"
               target="_blank"
@@ -380,9 +385,7 @@ export function ObjectsExplorer({
       <Tabs
         value={view}
         onValueChange={(next) => {
-          const params = new URLSearchParams(
-            searchParams?.toString() ?? "",
-          );
+          const params = new URLSearchParams(searchParams?.toString() ?? "");
           if (next === "royxat") params.set(VIEW_KEY, "royxat");
           else params.delete(VIEW_KEY);
           const qs = params.toString();
@@ -402,12 +405,6 @@ export function ObjectsExplorer({
               {showLots ? t("count") : t("regionsTab")}
             </TabsTrigger>
           </TabsList>
-
-          {/* aria-live so a filter change is announced, not merely seen. */}
-          <p aria-live="polite" className="text-muted-foreground text-sm">
-            {formatNumber(listings.length)} ta obyekt
-            {summaries.length > 0 ? ` · ${summaries.length} ta hududda` : ""}
-          </p>
         </div>
 
         <TabsContent value="xarita" className="mt-0">
@@ -471,9 +468,8 @@ export function ObjectsExplorer({
                     href={moreHref}
                     className="border-outline text-accent-foreground hover:bg-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors duration-200"
                   >
-                    Yana{" "}
-                    {formatNumber(listings.length - pagedListings.length)} ta
-                    obyekt — barchasini ko&apos;rish
+                    Yana {formatNumber(listings.length - pagedListings.length)}{" "}
+                    ta obyekt — barchasini ko&apos;rish
                     <ChevronRight aria-hidden="true" className="size-4" />
                   </Link>
                 </p>

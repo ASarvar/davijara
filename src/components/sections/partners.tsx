@@ -19,18 +19,17 @@ export async function Partners() {
 
   return (
     <section data-tone="deep" className="bg-background border-border border-t">
-      <Container className="py-10">
-        {/* Was a hardcoded Uzbek string here, so it never translated. */}
-        <Eyebrow className="text-muted-foreground mb-6 text-center">
+      <Container className="py-5">
+        {/* sr-only: the row of logos still needs a name, but the eyebrow
+            style above it went with the rest of them. (Was a hardcoded Uzbek
+            string here once, so it never translated.) */}
+        <Eyebrow as="h2" className="sr-only">
           {t("heading")}
         </Eyebrow>
 
         <ul className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
           {partners.map((partner) => (
-            <li
-              key={partner.label}
-              data-reveal="scale"
-            >
+            <li key={partner.label} data-reveal="scale">
               <a
                 href={partner.href}
                 target="_blank"

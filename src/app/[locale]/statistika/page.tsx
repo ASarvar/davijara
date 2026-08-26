@@ -15,7 +15,6 @@ import {
 } from "@/components/charts/shapes";
 import { ScopeSelect } from "@/components/charts/scope-select";
 import { LotImage } from "@/components/common/lot-image";
-import { Eyebrow } from "@/components/common/eyebrow";
 import { StatList } from "@/components/common/stat-list";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
@@ -167,7 +166,7 @@ export default async function StatisticsPage({
 
   return (
     <>
-      <Section tone="deep" className="pb-10">
+      <Section tone="deep" className="pb-5">
         <nav aria-label="Breadcrumb" className="mb-6">
           <ol className="text-muted-foreground flex items-center gap-2 text-sm">
             <li>
@@ -240,7 +239,6 @@ export default async function StatisticsPage({
 
       <Section tone="light">
         <SectionHeader
-          eyebrow={t("rhythmEyebrow")}
           title={t("monthlyTitle")}
           // description={t("monthlyBody")}
         />
@@ -280,9 +278,9 @@ export default async function StatisticsPage({
       <Section tone="deep">
         <div className="grid gap-12 lg:grid-cols-2">
           <div>
-            <Eyebrow as="h2" className="mb-4">
+            <h2 className="mb-4 text-base font-semibold">
               {t("outcomeTitle")}
-            </Eyebrow>
+            </h2>
             <p className="text-muted-foreground mb-7 max-w-md text-sm text-pretty">
               {t("outcomeBody")}
             </p>
@@ -322,9 +320,7 @@ export default async function StatisticsPage({
           </div>
 
           <div>
-            <Eyebrow as="h2" className="mb-4">
-              {t("sizeTitle")}
-            </Eyebrow>
+            <h2 className="mb-4 text-base font-semibold">{t("sizeTitle")}</h2>
             <p className="text-muted-foreground mb-7 max-w-md text-sm text-pretty">
               {t("sizeBody", { typical: formatArea(stats.typicalArea) })}
             </p>
@@ -371,7 +367,6 @@ export default async function StatisticsPage({
       {stats.byRegion.length > 1 ? (
         <Section tone="light">
           <SectionHeader
-            eyebrow={t("geoEyebrow")}
             title={t("regionTitle")}
             description={t("regionBody")}
           />
@@ -416,7 +411,6 @@ export default async function StatisticsPage({
       */}
       <Section tone="deep">
         <SectionHeader
-          eyebrow={t("riseEyebrow")}
           title={t("riseTitle")}
           description={t("riseBody", {
             average: stats.avgRise.toFixed(2).replace(".", ","),
@@ -468,7 +462,6 @@ export default async function StatisticsPage({
 
       <Section tone="light">
         <SectionHeader
-          eyebrow={t("recordsEyebrow")}
           title={t("recordsTitle")}
           description={t("recordsBody")}
         />

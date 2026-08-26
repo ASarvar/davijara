@@ -27,10 +27,8 @@ export async function HowItWorks() {
   return (
     <Section tone="light">
       <SectionHeader
-        eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
-        action={<ActionLink href="/xizmatlar">{t("action")}</ActionLink>}
       />
 
       <ol className="relative grid gap-y-10 lg:grid-cols-4 lg:gap-x-8">

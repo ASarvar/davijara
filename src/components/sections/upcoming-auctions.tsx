@@ -125,17 +125,7 @@ export async function UpcomingAuctions({
   return (
     <Section tone="deep" id={ANCHOR} className="scroll-mt-24">
       <SectionHeader
-        eyebrow={t("eyebrow")}
         title={t("title")}
-        description={t("description")}
-        action={
-          <ActionLink href={withFilters("/obyektlar", searchParams)}>
-            {t("action")}
-          </ActionLink>
-        }
-        /* Tightened from the default mb-10/14: the chips sit between the
-           header and the cards, so the header's full margin would open a gap
-           that reads as a break rather than as one block. */
         className="mb-6 sm:mb-8"
       />
 

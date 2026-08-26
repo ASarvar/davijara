@@ -53,7 +53,8 @@ export function RegionDistrictFields({
     that belongs to what is selected — including on first render, where it
     reflects the region already in the URL.
   */
-  const districts = region === ALL_VALUE ? [] : (districtsByRegion[region] ?? []);
+  const districts =
+    region === ALL_VALUE ? [] : (districtsByRegion[region] ?? []);
 
   /*
     Keep the incoming district only while it belongs to the selected region.

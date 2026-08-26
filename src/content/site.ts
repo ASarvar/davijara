@@ -35,12 +35,12 @@ export const contacts = {
   email: "info@davijara.uz",
   emailHref: "mailto:info@davijara.uz",
   address: {
-    postalCode: "100006",
-    street: "Buxoro ko'chasi 6",
-    city: "Toshkent sh.",
+    postalCode: "100000",
+    street: "Amir Temur shoh ko`chasi 6",
+    city: "Toshkent shahri",
     country: "O'zbekiston",
     /** Rendered form used in the footer and JSON-LD. */
-    full: "100006, Toshkent sh., Buxoro ko'chasi 6",
+    full: "100000, Toshkent shahri, Amir Temur shoh ko`chasi, 6",
     /**
      * Where the map on /aloqa drops its pin. NULL UNTIL VERIFIED.
      *
@@ -62,7 +62,7 @@ export const contacts = {
   /** Reception hours, shown on /aloqa. */
   hours: {
     weekdays: "Dushanba — Juma, 9:00 — 18:00",
-    lunch: "Tushlik: 13:00 — 14:00",
+    lunch: "Tushlik: 13:30 — 14:30",
     weekend: "Shanba, Yakshanba — dam olish kunlari",
   },
 } as const;
@@ -132,6 +132,13 @@ export const socialLinks: Array<{
  * dead end. The other four parents already had a natural own-page.
  */
 export const mainNav: NavItem[] = [
+  /*
+    The logo already links home, and this row deliberately did not repeat it —
+    but the logo is only recognisable as a link to people who know that
+    convention, and on a state portal that is not everyone. Added at the
+    operator's request, first and childless.
+  */
+  { key: "home", href: "/" },
   {
     key: "centre",
     href: "/markaz",

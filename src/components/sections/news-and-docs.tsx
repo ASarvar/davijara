@@ -1,19 +1,17 @@
 import { Download, FileText } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/navigation";
 import { getDocuments } from "@/lib/data/catalog";
 import { getNews } from "@/lib/data/news";
 import { ActionLink } from "@/components/common/action-link";
+import { NewsRow } from "@/components/common/news-row";
 import { IconTile } from "@/components/common/icon-tile";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
-import { formatDate } from "@/lib/format";
 
 export async function NewsAndDocs() {
-  const [tn, tCat, td] = await Promise.all([
+  const [tn, td] = await Promise.all([
     getTranslations("news"),
-    getTranslations("news.categories"),
     getTranslations("documents"),
   ]);
   const [news, documents] = await Promise.all([getNews(4), getDocuments(4)]);
@@ -31,7 +29,6 @@ export async function NewsAndDocs() {
           */}
           <SectionHeader
             size="compact"
-            eyebrow={tn("eyebrow")}
             title={tn("title")}
             action={<ActionLink href="/yangiliklar">{tn("action")}</ActionLink>}
           />
@@ -39,29 +36,9 @@ export async function NewsAndDocs() {
           <ul className="divide-border divide-y">
             {news.map((item) => (
               <li key={item.slug} data-reveal="left">
-                <Link
-                  href={`/yangiliklar/${item.slug}`}
-                  className="group hover:bg-card block rounded-lg px-3 py-5 transition-colors duration-200"
-                >
-                  <div className="text-muted-foreground flex items-center gap-3 text-xs">
-                    {/* <time> with a machine-readable datetime — absent from
-                        the legacy markup, which had bare text dates. */}
-                    <time dateTime={item.publishedAt}>
-                      {formatDate(item.publishedAt)}
-                    </time>
-                    <span aria-hidden="true">·</span>
-                    {/* The topic is a SLUG on the record; its label is
-                        translated, so the chip here and the chip on
-                        /yangiliklar are one string, not two. */}
-                    <span>{tCat(item.category)}</span>
-                  </div>
-                  <h3 className="group-hover:text-accent-foreground mt-2 text-base font-semibold text-balance transition-colors duration-200">
-                    {item.title}
-                  </h3>
-                  <p className="text-muted-foreground mt-1.5 text-sm">
-                    {item.excerpt}
-                  </p>
-                </Link>
+                {/* Same row as the article page's sidebar, one size up — see
+                    news-row.tsx for why these are one component. */}
+                <NewsRow item={item} size="md" showCategory showExcerpt />
               </li>
             ))}
           </ul>
@@ -69,11 +46,7 @@ export async function NewsAndDocs() {
 
         {/* Documents */}
         <div>
-          <SectionHeader
-            size="compact"
-            eyebrow={td("eyebrow")}
-            title={td("title")}
-          />
+          <SectionHeader size="compact" title={td("title")} />
 
           <ul className="space-y-3">
             {documents.map((doc) => (

@@ -49,15 +49,17 @@ export async function PrivilegeFilter({
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors",
                   isActive
-                    ? "border-[color:var(--color-gold)] bg-accent text-accent-foreground font-semibold"
-                    : "border-border text-muted-foreground hover:border-[color:var(--color-gold)]/40 hover:text-foreground",
+                    ? "bg-accent text-accent-foreground border-[color:var(--color-gold)] font-semibold"
+                    : "border-border text-muted-foreground hover:text-foreground hover:border-[color:var(--color-gold)]/40",
                 )}
               >
                 {chip.label}
                 <span
                   className={cn(
                     "rounded-full px-1.5 text-xs",
-                    isActive ? "bg-[color:var(--color-gold)]/20" : "bg-secondary",
+                    isActive
+                      ? "bg-[color:var(--color-gold)]/20"
+                      : "bg-secondary",
                   )}
                 >
                   {counts[chip.value]}

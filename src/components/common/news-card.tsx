@@ -37,8 +37,7 @@ export async function NewsCard({
   /** The lead article: page-one, top of the list, wide and image-led. */
   featured?: boolean;
 } & React.HTMLAttributes<HTMLElement>) {
-  const [t, tCat, tCommon] = await Promise.all([
-    getTranslations("news"),
+  const [tCat, tCommon] = await Promise.all([
     getTranslations("news.categories"),
     getTranslations("common"),
   ]);
@@ -121,11 +120,6 @@ export async function NewsCard({
             <span className="border-hairline text-accent-foreground rounded-full border px-2.5 py-0.5 font-semibold">
               {tCat(item.category)}
             </span>
-            {featured ? (
-              <span className="text-accent-foreground font-semibold tracking-[0.18em] uppercase">
-                {t("latest")}
-              </span>
-            ) : null}
           </div>
 
           <h3

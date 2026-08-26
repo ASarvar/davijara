@@ -61,7 +61,9 @@ export async function SoldFilter({
   return (
     <section data-tone="deep" className="bg-band border-hairline border-y">
       <Container className="py-16">
-        <Eyebrow as="h2" className="mb-4">
+        {/* sr-only, not deleted: this is the panel's accessible
+          name, and the eyebrow style is what the operator asked to drop. */}
+        <Eyebrow as="h2" className="sr-only">
           {ts("filterLabel")}
         </Eyebrow>
 

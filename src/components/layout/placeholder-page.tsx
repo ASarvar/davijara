@@ -42,7 +42,7 @@ export async function PlaceholderPage({
 
   return (
     <Section tone="deep" className="flex-1">
-      <div className="mx-auto max-w-xl py-10 text-center">
+      <div className="mx-auto max-w-xl py-5 text-center">
         <IconTile size="lg" className="mx-auto mb-6">
           <Construction aria-hidden="true" className="size-7" />
         </IconTile>

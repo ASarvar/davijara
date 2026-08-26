@@ -65,7 +65,6 @@ export async function RecentlySold() {
     */
     <Section tone="light" id="sotilgan-obyektlar" className="scroll-mt-24">
       <SectionHeader
-        eyebrow={t("eyebrow")}
         title={t("title")}
         // The date is the section's whole premise, so it goes in the sentence
         // under the heading rather than being left for the reader to infer
@@ -74,9 +73,6 @@ export async function RecentlySold() {
         /* The sold-objects list, not the catalogue. The catalogue is what is
            still for sale; from a section about results the reader is following
            the results. */
-        action={
-          <ActionLink href="/sotilgan-obyektlar">{t("action")}</ActionLink>
-        }
       />
 
       <CardCarousel labels={{ prev: t("prev"), next: t("next") }}>

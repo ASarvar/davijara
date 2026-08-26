@@ -43,7 +43,6 @@ function ToneSpecimen({ tone }: { tone: Tone }) {
   return (
     <Section tone={tone}>
       <SectionHeader
-        eyebrow={`data-tone="${tone}"`}
         title={tone === "deep" ? "Deep tone (navy)" : "Light tone (mist)"}
         description="Every component below is identical markup. Only the data-tone attribute on the section wrapper differs — the semantic tokens re-bind and everything adapts."
         action={<Button variant="outline">Batafsil</Button>}

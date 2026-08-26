@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { Eyebrow } from "@/components/common/eyebrow";
 
 export type Tone = "deep" | "light";
 
@@ -32,7 +31,10 @@ export function Container({
   );
 }
 
-interface SectionProps extends Omit<React.ComponentProps<"section">, "children"> {
+interface SectionProps extends Omit<
+  React.ComponentProps<"section">,
+  "children"
+> {
   /**
    * Surface tone. `deep` is navy (the page default), `light` is mist — a
    * pale tint of the same navy, not a warm cream.
@@ -74,14 +76,14 @@ export function Section({
       */
       data-surface={surface === "raised" ? "raised" : undefined}
       /*
-        Halved, at the operator's request: py-16/24 (64/96px) -> py-8/12
-        (32/48px). Every section on the site reads this, so the page gets
-        roughly 400px shorter overall and the rhythm tightens.
+        Halved twice, both times at the operator's request: py-16/24 (64/96px)
+        -> py-8/12 -> py-4/6 (16/24px). Every section on the site reads this,
+        so each cut shortens the whole page at once.
 
-        The tone alternation is what still separates sections — it was never
-        the whitespace doing that work — so the boundaries survive the cut.
+        The tone alternation is what separates sections — it was never the
+        whitespace doing that work — so the boundaries survive the cut.
       */
-      className={cn("bg-background text-foreground py-8 sm:py-12", className)}
+      className={cn("bg-background text-foreground py-4 sm:py-6", className)}
       {...props}
     >
       {contained ? (
@@ -93,9 +95,21 @@ export function Section({
   );
 }
 
+/*
+  NO EYEBROW. Every section carried a small uppercase label above its heading
+  (legacy `.eyebrow`), and the prop is gone rather than merely unused at the
+  call sites — a decorative slot that nothing fills is a slot someone fills
+  again by accident.
+
+  They were removed at the operator's request. They were also the weakest text
+  on the page: "MATBUOT MARKAZI" over "Yangiliklar" and "XARITA" over "Ijara
+  obyektlari xaritada" both spent a line restating the heading underneath in
+  smaller, lower-contrast type.
+
+  `Eyebrow` itself stays — the hero pill and the form panels' headings still
+  use it, and those are labels rather than decoration.
+*/
 interface SectionHeaderProps {
-  /** Small uppercase label above the heading (legacy `.eyebrow`). */
-  eyebrow?: string;
   title: React.ReactNode;
   description?: React.ReactNode;
   /** Optional trailing link, rendered right-aligned on wide viewports. */
@@ -111,7 +125,6 @@ interface SectionHeaderProps {
 }
 
 export function SectionHeader({
-  eyebrow,
   title,
   description,
   action,
@@ -123,9 +136,8 @@ export function SectionHeader({
   return (
     <div
       data-reveal="fade"
-      className={cn(compact ? "mb-7" : "mb-10 sm:mb-14", className)}
+      className={cn(compact ? "mb-3.5" : "mb-5 sm:mb-7", className)}
     >
-      {eyebrow ? <Eyebrow className="mb-3">{eyebrow}</Eyebrow> : null}
       <div
         className={cn(
           "flex flex-col gap-4",
@@ -152,7 +164,10 @@ export function SectionHeader({
               and rises each one out of its own mask. Every section heading on
               the site goes through here, so this one attribute is the whole
               line-reveal treatment. */}
-          <h2 data-split className="font-semibold text-balance text-xl sm:text-2xl">
+          <h2
+            data-split
+            className="text-xl font-semibold text-balance sm:text-2xl"
+          >
             {title}
           </h2>
           {description ? (

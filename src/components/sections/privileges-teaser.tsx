@@ -18,7 +18,6 @@ export async function PrivilegesTeaser() {
   return (
     <Section tone="deep">
       <SectionHeader
-        eyebrow={t("eyebrow")}
         title={t("title")}
         description={t("description")}
         action={<ActionLink href="/imtiyozlar">{t("action")}</ActionLink>}
