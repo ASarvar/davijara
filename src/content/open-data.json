@@ -1,0 +1,1319 @@
+{
+  "smeta-ijrosi": {
+    "heading": "Davlat mulki obyektlaridan samarali foydalanish markazi xarajatlar smetasining ijrosi boʻyicha maʼlumotlar",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 1,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2023-1.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2023-1.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2023-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 2,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2023-2.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2023-2.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2023-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2023-3.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2023-3.xlsx"
+          },
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2023-4.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2023-4.xlsx"
+          },
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2024-1.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2024-1.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2024-2.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2024-2.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2024-3.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2024-3.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2024-4.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2024-4.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2025-1.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2025-1.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2025-2.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2025-2.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2025-3.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2025-3.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2025-4.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2025-4.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2026-1.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2026-1.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": "Byudjet mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-byudjet-2026-2.xlsx"
+          },
+          {
+            "label": "Byudjetdan tashqari mablagʻlari ijrosi",
+            "path": "/ochiq-malumotlar/smeta-tashqari-2026-2.xlsx"
+          },
+          {
+            "label": "Rivojlantirish jamgʻarmasi ijrosi",
+            "path": "/ochiq-malumotlar/smeta-rivojlantirish-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "veb-sayt-3299": {
+    "heading": "Byudjet jarayonining ochiqligini taʼminlash maqsadida veb-saytlarga maʼlumotlarni joylashtirish tartibiga (roʻyxat raqami−3299) muvofiq maʼlumotlar",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2023-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/veb-sayt-3299-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "balans": {
+    "heading": "Davlat mulki obyektlaridan samarali foydalanish markazi — Balans",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2023-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2023-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/balans-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "qarzdorlik": {
+    "heading": "Davlat mulki obyektlaridan samarali foydalanish markazining debitor va kreditor qarzdorliklari yuzasidan maʼlumotlar",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2023-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2023-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/qarzdorlik-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "tarmoq-shtat": {
+    "heading": "Vazirlik va idoralar, boshqaruv organlari va boshqa tashkilotlar boʻyicha tarmoq, shtatlar va kontingentga doir rejaning bajarilishi (byudjet mablagʻlari boʻyicha) toʻgʻrisida",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2023-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/tarmoq-shtat-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "davlat-xaridlari": {
+    "heading": "Davlat mulki obyektlaridan samarali foydalanish markazining byudjet va byudjetdan tashqari mablagʻlari hisobiga amalga oshirilgan davlat xaridlari toʻgʻrisida maʼlumot",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2023-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/davlat-xaridlari-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "xizmat-safari": {
+    "heading": "Davlat mulki obyektlaridan samarali foydalanish markazining xodimlarining xizmat safari xarajatlari toʻgʻrisida maʼlumot",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 1,
+        "files": [
+          {
+            "label": "1–2-chorak (yanvar–iyun)",
+            "path": "/ochiq-malumotlar/xizmat-safari-2023-1-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-safari-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "xaridlar-rejasi": {
+    "heading": "Davlat mulki obyektlaridan samarali foydalanish markazining davlat byudjeti, davlat maqsadli jamgʻamlari hamda byudjet tashkilotlarining byudjetdan tashqari jamgʻamlari hisobiga xarid qilinishi rejalashtirilgan tovarlar (ishlar, xizmatlar) toʻgʻrisidagi maʼlumot",
+    "quarters": [
+      {
+        "year": 2023,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2023-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2023-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xaridlar-rejasi-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  },
+  "xizmat-avtotransport": {
+    "heading": "Oʻzbekiston Respublikasi Davlat aktivlarini boshqarish agentligi huzuridagi davlat mulki obyektlaridan samarali foydalanish Markaziga tegishli xizmat avtotransport holati toʻgʻrisida maʼlumot",
+    "quarters": [
+      {
+        "year": 2024,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2024-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2024-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2024-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2024-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2025-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2025-2.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 3,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2025-3.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "quarter": 4,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2025-4.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 1,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2026-1.xlsx"
+          }
+        ]
+      },
+      {
+        "year": 2026,
+        "quarter": 2,
+        "files": [
+          {
+            "label": null,
+            "path": "/ochiq-malumotlar/xizmat-avtotransport-2026-2.xlsx"
+          }
+        ]
+      }
+    ]
+  }
+}

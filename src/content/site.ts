@@ -205,7 +205,6 @@ export const mainNav: NavItem[] = [
     clickable: false,
     children: [
       { key: "documentsMain", href: "/hujjatlar" },
-      { key: "documentsInternal", href: "/hujjatlar/idoraviy" },
       { key: "documentsPrograms", href: "/hujjatlar/dasturlar" },
       { key: "documentsDrafts", href: "/hujjatlar/loyihalar" },
     ],
@@ -219,6 +218,7 @@ export const mainNav: NavItem[] = [
       { key: "statistics", href: "/statistika" },
       { key: "openData", href: "/malumotlar/ochiq-malumotlar" },
       { key: "minRates", href: "/eng-kam-stavkalar" },
+      { key: "appeals", href: "/ochiq-malumotlar/murojaatlar" },
     ],
   },
   {

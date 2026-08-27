@@ -79,7 +79,7 @@ export default async function MinRatesPage({
         </ol>
       </nav>
 
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto">
         <h1
           data-split
           className="font-heading text-center text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
@@ -88,7 +88,7 @@ export default async function MinRatesPage({
         </h1>
         <p className="text-muted-foreground mt-3 text-center text-sm text-pretty">
           Davlat mulkidan foydalanganlik uchun ijara toʻlovining eng kam
-          stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar
+          stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar 2026-yil
         </p>
 
         {regions.length === 0 ? (

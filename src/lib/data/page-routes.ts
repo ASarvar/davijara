@@ -149,6 +149,7 @@ const RESERVED_FIRST_SEGMENTS = new Set([
   "hujjatlar",
   "faoliyat",
   "ochiq-malumotlar",
+  "malumotlar",
   "xizmatlar",
   "e-auksion",
   "kirish",
