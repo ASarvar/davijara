@@ -48,11 +48,21 @@ export type Worker = WorkerRole & {
   photo: string | null;
 };
 
+/*
+  workers.json also holds the three leadership entries ("director",
+  "first-deputy", "deputy" — see leadership.ts) since the two share one
+  file. Those have no `position` (their unit name from structure.ts already
+  reads as one) and carry fields — `receptionHours`, `appeals` — this module
+  never looks at. `position`/`phone`/`photo` are therefore typed optional
+  here purely so the JSON's whole shape casts cleanly; WORKER_ROLES itself
+  never resolves to a leadership key, so a department entry's `position` is
+  always actually present at runtime.
+*/
 type WorkerEntry = {
   fullName: string;
-  position: string;
-  phone: string | null;
-  photo: string | null;
+  position?: string;
+  phone?: string | null;
+  photo?: string | null;
 };
 
 const DATA = workersData as Record<string, WorkerEntry>;
@@ -69,7 +79,13 @@ export async function getWorkers(): Promise<Worker[]> {
     DATA[role.unitId]?.fullName?.trim(),
   ).map((role) => {
     const entry = DATA[role.unitId]!;
-    return { ...role, ...entry };
+    return {
+      ...role,
+      fullName: entry.fullName,
+      position: entry.position ?? "",
+      phone: entry.phone ?? null,
+      photo: entry.photo ?? null,
+    };
   });
 }
 
