@@ -229,16 +229,21 @@ already happened or would be silent:
    results instead of the build creating root-owned files the service cannot
    write. Verified by building with a throwaway `DATA_DIR` and checking that
    nothing was written to it.
-6. **The top-level menu architecture stays in code.** `mainNav` in
-   `src/content/site.ts` is the portal's information architecture, with
-   translated labels in `messages/nav` and active-state rules that assume it.
-   The panel may put a page INSIDE one of those sections, or append a section
-   of its own (`menu_sections`) — it can never reorder, rename or remove what
-   is in code. A menu with no published page under it is skipped rather than
-   rendered, so it is never a dead entry. Because the header sits in the root
-   layout, a placement change revalidates `/` as a layout, and
-   `[locale]/layout.tsx` carries a 300 s window so a fresh deploy's build-time
-   menus cannot stay wrong.
+6. **Every menu is editable — the operator reversed this rule from the panel
+   build.** `mainNav` in `src/content/site.ts` still exists, but only as the
+   seed migration 8 copied into `menu_sections` and the fallback
+   `getNavigation()` returns if the database can't be read. The five
+   institutional sections (Markaz, Faoliyat, Hujjatlar, Ochiq maʼlumotlar,
+   Yangiliklar) can be renamed, reordered or deleted from `/admin/menyu`
+   exactly like a section an operator created — see the note at the top of
+   `lib/data/navigation.ts` for how a renamed row keeps its 26 hard-coded
+   site routes (matched by `key`, not by label) and what deleting one
+   actually does to them. Only `home` and `contact` stay literal, plain
+   links with no dropdown. A menu with no page under it is skipped rather
+   than rendered, so an empty one is never a dead entry. Because the header
+   sits in the root layout, a placement or menu change revalidates `/` as a
+   layout, and `[locale]/layout.tsx` carries a 300 s window so a fresh
+   deploy's build-time menus cannot stay wrong.
 7. **Editor content is plain text; nothing renders editor HTML.** Blocks
    store strings, `BlockContent` renders them as React children, and there is
    no `dangerouslySetInnerHTML` anywhere in that path. That is what makes

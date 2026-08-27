@@ -5,18 +5,21 @@ import { slugify } from "./news-admin";
 import { listMenuSections, type MenuSection } from "./navigation";
 
 /*
-  Operator-created menu sections — the panel's write side.
+  Menu sections — the panel's write side. Every menu, whether it is one of
+  the five institutional sections migration 8 seeded from mainNav or a
+  section an operator created afterwards, is a plain row in this table and
+  every function below treats them identically. See the note at the top of
+  lib/data/navigation.ts for how a built-in row keeps its hard-coded
+  mainNav children across a rename, and what deleting one actually does.
 
-  The sections that ship in src/content/site.ts are NOT here and cannot be
-  reached from here. This table only holds sections an operator added, and the
-  read side (lib/data/navigation.ts) appends them after those. The note in
-  migration 7 records why the architecture stays in code.
-
-  KEYS ARE GENERATED, NEVER TYPED. A section's key is derived from its Uzbek
-  label and is only ever an internal identifier: pages point at it, and
-  nothing else does. An operator who renames "Hamkorlar" to "Hamkorlarimiz"
-  keeps the same key, so every page under it stays where it is — which is the
-  whole reason the label is not the key.
+  KEYS ARE GENERATED, NEVER TYPED, for a NEW section — createMenuSection()
+  slugifies the label. A section's key is only ever an internal identifier:
+  pages point at it, and nothing else does. An operator who renames
+  "Hamkorlar" to "Hamkorlarimiz" keeps the same key, so every page under it
+  stays where it is — which is the whole reason the label is not the key.
+  This is what makes renaming a built-in row safe too: "Markaz" can become
+  anything without its 26 registered routes noticing, because they are
+  matched by the key "centre", never by the label.
 */
 
 export type { MenuSection };

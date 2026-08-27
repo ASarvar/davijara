@@ -13,6 +13,10 @@ import { news as legacyNews } from "@/content/news";
 import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
+// Migration 9 only — read there for why a data-fix migration reads this.
+import uzMessages from "../../../messages/uz.json";
+import ruMessages from "../../../messages/ru.json";
+import enMessages from "../../../messages/en.json";
 
 /*
   Schema migrations.
@@ -565,6 +569,138 @@ const migrations: Migration[] = [
         created_by INTEGER REFERENCES users(id) ON DELETE SET NULL
       );
     `,
+  },
+  {
+    version: 8,
+    name: "built-in menus become editable",
+    up: `
+      /*
+        The operator's decision reverses migration 7's own design: the five
+        institutional sections (Markaz, Faoliyat, Hujjatlar, Ochiq
+        maʼlumotlar, Yangiliklar) move from being hard-coded, unrenamable
+        rows in the header into ordinary menu_sections rows an editor can
+        rename, reorder or delete — same table, same actions, no special
+        case in the UI any more.
+
+        NO SCHEMA CHANGE IS NEEDED for this — menu_sections already has
+        everything a row needs. What this migration does is SEED it with one
+        row per institutional section, and existing operator-created rows
+        are shifted after them so the five keep their historical position at
+        the front of the menu.
+
+        The row's key column is the SAME string mainNav has always used for
+        that section ("centre", "activity", …) — not a fresh slug. That is what
+        lets lib/data/navigation.ts recognise these five as still carrying
+        their original hard-coded children (the 26 registered site routes)
+        merely by matching key, with no extra column and no special flag.
+        Renaming the label later never touches the key, so those children
+        stay attached no matter what the row is called.
+      */
+      UPDATE menu_sections SET position = position + 5;
+    `,
+    seed(db) {
+      /*
+        Labels are seeded from the exact strings messages/*.json already
+        carry for these keys — not retyped, not reworded. Where a locale has
+        no translation (ru/en are partial by design), the column stays NULL
+        and falls back to the Uzbek label at render time, the same rule
+        every other menu row already follows.
+      */
+      const builtins: Array<{
+        key: string;
+        uz: string;
+        ru: string | null;
+        en: string | null;
+      }> = [
+        { key: "centre", uz: "Markaz", ru: "Центр", en: "Centre" },
+        { key: "activity", uz: "Faoliyat", ru: null, en: null },
+        { key: "documentsSection", uz: "Hujjatlar", ru: null, en: null },
+        {
+          key: "openData",
+          uz: "Ochiq maʼlumotlar",
+          ru: null,
+          en: null,
+        },
+        { key: "news", uz: "Yangiliklar", ru: "Новости", en: "News" },
+      ];
+
+      const insert = db.prepare(
+        `INSERT INTO menu_sections
+           (key, label_uz, label_ru, label_en, position, created_at, created_by)
+         VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+      );
+
+      builtins.forEach((section, index) => {
+        insert.run(
+          section.key,
+          section.uz,
+          section.ru,
+          section.en,
+          index,
+          new Date().toISOString(),
+        );
+      });
+    },
+  },
+  {
+    version: 9,
+    name: "fix openData key drift",
+    up: "",
+    /*
+      Migration 8 seeded this row with the key "openData" — accurate at the
+      moment that migration was written, but src/content/site.ts had already
+      been restructured underneath it by the time it actually ran: the
+      top-level key for this section is now "Data" ("Ochiq maʼlumotlar" was
+      demoted to one of ITS children, alongside "statistics"). The mismatch
+      meant lib/data/navigation.ts could never match this row back to
+      mainNav, so it carried none of its hard-coded children and vanished
+      from the header the moment an operator's edit made its DB-attached
+      page count read zero — which is exactly what happened in production.
+
+      This is a data fix, not a schema change, and it is written narrowly:
+      rename the one row this actually affects, carry any pages already
+      pointed at the old key across with it, and do nothing if the site has
+      moved on again since (the row is simply absent, or "Data" already
+      exists because an operator got there first through the panel) rather
+      than risk clobbering whatever an operator has since done by hand.
+
+      THE LABEL IS RENAMED TOO, from messages/uz.json's own current
+      nav.Data — read verbatim, not retyped — because the site.ts edit that
+      caused this drift was itself a rename ("Ochiq maʼlumotlar" →
+      "Maʼlumotlar"). Migration 8's seed had already copied the OLD label
+      into this row before that edit landed; leaving it there would silently
+      revert the operator's own rename the moment this fix runs.
+    */
+    seed(db) {
+      const OLD_KEY = "openData";
+      const NEW_KEY = "Data";
+
+      const old = db
+        .prepare("SELECT 1 FROM menu_sections WHERE key = ?")
+        .get(OLD_KEY);
+      const clash = db
+        .prepare("SELECT 1 FROM menu_sections WHERE key = ?")
+        .get(NEW_KEY);
+      if (!old || clash) return;
+
+      const nav = uzMessages.nav as Record<string, string | undefined>;
+      const navRu = (ruMessages.nav ?? {}) as Record<string, string | undefined>;
+      const navEn = (enMessages.nav ?? {}) as Record<string, string | undefined>;
+
+      db.prepare(
+        "UPDATE menu_sections SET key = ?, label_uz = ?, label_ru = ?, label_en = ? WHERE key = ?",
+      ).run(
+        NEW_KEY,
+        nav[NEW_KEY] ?? NEW_KEY,
+        navRu[NEW_KEY] ?? null,
+        navEn[NEW_KEY] ?? null,
+        OLD_KEY,
+      );
+      db.prepare("UPDATE pages SET menu_parent = ? WHERE menu_parent = ?").run(
+        NEW_KEY,
+        OLD_KEY,
+      );
+    },
   },
 ];
 

@@ -78,21 +78,33 @@ export default async function AboutPage({
         </ol>
       </nav>
 
-      <div className="max-w-3xl">
-        <h1
-          data-split
-          className="font-heading text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
-        >
-          {tNav(NAV_KEY)}
-        </h1>
+      <div className="mx-auto max-w-3xl">
+        {/*
+          Title and its citation line are the page's masthead, so they are
+          centered as a block — everything below (the body paragraph, the
+          official-naming list) stays left-aligned, because centering
+          multi-line running prose is what makes long text hard to read, not
+          easy. The `mx-auto` on the outer column is what actually fixes the
+          page reading as pinned to the left edge of the 1200px container:
+          without it, this max-w-3xl div sat flush left with the remaining
+          width as dead space on the right.
+        */}
+        <div className="text-center">
+          <h1
+            data-split
+            className="font-heading text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
+          >
+            {tNav(NAV_KEY)}
+          </h1>
 
-        {/* ── Tashkil etilishi ───────────────────────────────────────── */}
-        <p data-reveal="fade" className="text-muted-foreground mt-6 text-sm">
-          {t("establishedBy")}: {establishmentOrder.reference}{" "}
-          <time dateTime={establishmentOrder.date}>
-            ({formatDate(establishmentOrder.date)})
-          </time>
-        </p>
+          {/* ── Tashkil etilishi ───────────────────────────────────────── */}
+          <p data-reveal="fade" className="text-muted-foreground mt-6 text-sm">
+            {t("establishedBy")}: {establishmentOrder.reference}{" "}
+            <time dateTime={establishmentOrder.date}>
+              ({formatDate(establishmentOrder.date)})
+            </time>
+          </p>
+        </div>
 
         <p data-reveal="fade" className="text-foreground/90 mt-4 text-pretty">
           {establishment.body}

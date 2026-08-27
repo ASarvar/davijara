@@ -77,17 +77,24 @@ export default async function DutiesPage({
         </ol>
       </nav>
 
-      <div className="max-w-3xl">
-        <h1
-          data-split
-          className="font-heading text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
-        >
-          {tNav(NAV_KEY)}
-        </h1>
+      <div className="mx-auto max-w-3xl">
+        {/*
+          Title and its citation centered as a masthead block; everything
+          below stays left-aligned — see the identical note in markaz/page.tsx
+          for why (and for what the outer `mx-auto` actually fixes).
+        */}
+        <div className="text-center">
+          <h1
+            data-split
+            className="font-heading text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
+          >
+            {tNav(NAV_KEY)}
+          </h1>
 
-        <p data-reveal="fade" className="text-muted-foreground mt-6 text-sm">
-          {t("approvedBy")}: {order.reference} — {order.statuteTitle}
-        </p>
+          <p data-reveal="fade" className="text-muted-foreground mt-6 text-sm">
+            {t("approvedBy")}: {order.reference} — {order.statuteTitle}
+          </p>
+        </div>
 
         {/* ── Vazifalari ───────────────────────────────────────────────── */}
         <h2 className="mt-10 text-lg font-semibold sm:text-xl">

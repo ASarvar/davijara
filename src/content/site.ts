@@ -168,11 +168,7 @@ export const mainNav: NavItem[] = [
     key: "activity",
     href: "/faoliyat",
     children: [
-      { key: "inventory", href: "/faoliyat/xatlov" },
-      // The catalogue and the results list, under the names this menu gives
-      // them. Both are long-standing routes; only the label is new.
       { key: "vacantObjects", href: "/obyektlar" },
-      { key: "leasing", href: "/faoliyat/ijaraga-berish" },
       { key: "leasedObjects", href: "/sotilgan-obyektlar" },
       { key: "leasePrivileges", href: "/imtiyozlar" },
       { key: "faq", href: "/faoliyat/savollar" },
@@ -184,7 +180,6 @@ export const mainNav: NavItem[] = [
     children: [
       { key: "documentsMain", href: "/hujjatlar" },
       { key: "documentsInternal", href: "/hujjatlar/idoraviy" },
-      { key: "documentsRepealed", href: "/hujjatlar/kuchini-yoqotgan" },
       { key: "documentsPrograms", href: "/hujjatlar/dasturlar" },
       { key: "documentsDrafts", href: "/hujjatlar/loyihalar" },
     ],
@@ -193,8 +188,8 @@ export const mainNav: NavItem[] = [
     key: "Data",
     href: "/malumotlar",
     children: [
-      { key: "openData", href: "/malumotlar/ochiq-malumotlar" },
       { key: "statistics", href: "/statistika" },
+      { key: "openData", href: "/malumotlar/ochiq-malumotlar" },
     ],
   },
   {
@@ -204,7 +199,6 @@ export const mainNav: NavItem[] = [
       { key: "newsCentre", href: "/yangiliklar" },
       { key: "newsUzbekistan", href: "/yangiliklar/ozbekiston" },
       { key: "newsStatements", href: "/yangiliklar/bayonotlar" },
-      { key: "newsMedia", href: "/yangiliklar/media" },
     ],
   },
   { key: "contact", href: "/aloqa" },

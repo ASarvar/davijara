@@ -70,10 +70,18 @@ export default async function CustomPage({
 
   return (
     <Section tone="deep" className="flex-1">
-      <div className="max-w-3xl">
+      {/*
+        `mx-auto` centers the whole reading column in the 1200px container —
+        without it this max-w-3xl div sits flush against the left edge, which
+        is what read as the page "not filling" its container. The title is
+        centered as its own masthead line; the body stays left-aligned, same
+        as markaz/page.tsx and markaz/vazifalar/page.tsx, because centering
+        running prose hurts readability rather than helping it.
+      */}
+      <div className="mx-auto max-w-3xl">
         <h1
           data-split
-          className="font-heading text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
+          className="font-heading text-center text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
         >
           {page.title}
         </h1>
