@@ -135,6 +135,33 @@ const nextConfig: NextConfig = {
       navigate normally. Remove this flag to turn the feature off entirely.
     */
     viewTransition: true,
+
+    serverActions: {
+      /*
+        Image uploads in the admin panel arrive as a Server Action, and the
+        DEFAULT LIMIT IS 1 MB — which no photograph from a phone meets. Over
+        it, the action fails before any of this project's code runs, so the
+        editor sees a generic failure with nothing about size in it.
+
+        Three limits have to stay in order, smallest first, or the failure
+        surfaces somewhere with a worse message than the one below it:
+
+          5 MB  MAX_UPLOAD_BYTES (lib/media/types.ts)  — the friendly error
+          6 MB  this                                    — multipart overhead
+          8 MB  client_max_body_size (deploy/nginx-*)   — the outermost gate
+
+        ⚠ nginx is the one that catches people out. Its own default is 1 MB,
+        and it answers a larger request with a bare 413 BEFORE Next is
+        reached, so raising this value alone changes nothing in production.
+        Both nginx configs in deploy/ set it explicitly for that reason.
+
+        `allowedOrigins` is deliberately NOT set: Next compares the request's
+        Origin against its Host, and both nginx hops pass `Host $host`
+        through unchanged, so same-origin checking already works. Adding
+        entries here would widen CSRF protection for no reason.
+      */
+      bodySizeLimit: "6mb",
+    },
   },
 
   images: {

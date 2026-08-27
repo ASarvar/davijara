@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link, usePathname } from "@/i18n/navigation";
-import { mainNav } from "@/content/site";
+import type { NavItem } from "@/content/site";
 import { activeHref, isSectionActive } from "@/lib/nav-active";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,19 @@ import { cn } from "@/lib/utils";
  * cover the same URL prefix — see that file for why most-specific-wins is the
  * only rule that marks exactly one of them.
  */
-export function NavLinks() {
+/*
+  A menu item's visible text.
+
+  Static entries carry a `key` into `messages/nav`; entries added through the
+  admin panel carry a literal `label` already resolved for this locale and
+  have no message key at all. Asking next-intl for a key that does not exist
+  throws, so the presence of `label` is what decides which path is taken.
+*/
+function navLabel(item: NavItem, t: (key: string) => string): string {
+  return item.label ?? t(item.key);
+}
+
+export function NavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
   const t = useTranslations("nav");
 
@@ -63,7 +75,7 @@ export function NavLinks() {
     /* flex-wrap so that at 125/150% text the row wraps to a second line and
        grows the bar, instead of running off the right edge. */
     <ul className="hidden flex-wrap items-center justify-center xl:flex">
-      {mainNav.map((item) => {
+      {items.map((item) => {
         const sectionActive = isSectionActive(pathname, item);
         const children = item.children ?? [];
         // Which child, if any, owns the page — resolved across the whole
@@ -113,7 +125,7 @@ export function NavLinks() {
                   : "text-foreground/85 hover:text-accent-foreground",
               )}
             >
-              {t(item.key)}
+              {navLabel(item, t)}
               {children.length > 0 ? (
                 <ChevronDown
                   aria-hidden="true"
@@ -210,7 +222,7 @@ export function NavLinks() {
                                 "text-popover-foreground/80 hover:text-accent-foreground hover:bg-secondary/60",
                           )}
                         >
-                          {t(child.key)}
+                          {navLabel(child, t)}
                         </Link>
                       </li>
                     );

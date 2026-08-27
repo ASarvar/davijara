@@ -9,13 +9,19 @@ import {
   functionsHeading,
   functionsIntro,
 } from "@/content/duties";
+import { getDutiesDocument } from "./documents";
 
 /*
-  Data access for /markaz/vazifalar — the same async-even-though-static
-  contract every module in this folder keeps; see the note in privileges.ts.
-*/
+  Data access for /markaz/vazifalar — now backed by the admin panel.
 
+  Same arrangement as about.ts, including the fallback: the TypeScript module
+  below is what /markaz/vazifalar renders if the database row is missing or
+  fails validation. See the fuller note there.
+*/
 export async function getDuties() {
+  const stored = getDutiesDocument();
+  if (stored) return stored;
+
   return {
     order: dutiesOrder,
     duties: { heading: dutiesHeading, intro: dutiesIntro, items: duties },

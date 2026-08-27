@@ -19,11 +19,19 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: withBasePath("/"),
-      // Internal design reference — should never surface in search results.
       disallow: [
+        // Internal design reference — should never surface in search results.
         withBasePath("/uz/styleguide"),
         withBasePath("/ru/styleguide"),
         withBasePath("/en/styleguide"),
+        /*
+          The admin panel. Belt and braces only: robots.txt is a REQUEST that
+          a crawler may ignore, and — per the warning above — this file is not
+          even read at the domain root today. The instruction that actually
+          binds is `robots: { index: false }` in app/admin/layout.tsx, which
+          every crawler receives as a header on the page itself.
+        */
+        withBasePath("/admin"),
       ],
     },
     sitemap: `${site.url}/sitemap.xml`,

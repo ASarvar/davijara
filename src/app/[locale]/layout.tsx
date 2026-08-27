@@ -20,6 +20,27 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { ScrollToTop } from "@/components/layout/scroll-to-top";
 import "../globals.css";
 
+/*
+  Every page under this layout is revalidated at least this often.
+
+  The header renders the MENU, and the menu now includes pages added in the
+  admin panel — a database read, in a layout, on every page of the site. The
+  build must not open that database (lib/db/index.ts returns an in-memory
+  handle during the production build), so a page prerendered at build time
+  carries a menu with none of the panel's pages in it.
+
+  Publishing revalidates the layout immediately, which fixes it within the
+  running server. What this window fixes is the DEPLOY: a fresh release ships
+  those build-time menus, and without a revalidate they would stay wrong until
+  somebody happened to edit a page. Five minutes is the same figure the
+  API-backed pages already use.
+
+  Per the route segment config, the LOWEST revalidate in a route wins, so the
+  pages that already declare 300 are unaffected and any page may still ask for
+  a shorter window.
+*/
+export const revalidate = 300;
+
 /**
  * Prerender all three locales at build time. Without this the pages would be
  * rendered on demand, since `[locale]` is a dynamic segment.

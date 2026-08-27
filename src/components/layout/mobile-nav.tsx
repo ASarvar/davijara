@@ -5,7 +5,7 @@ import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link, usePathname } from "@/i18n/navigation";
-import { mainNav, contacts } from "@/content/site";
+import { contacts, type NavItem } from "@/content/site";
 import { activeHref, isSectionActive } from "@/lib/nav-active";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +28,19 @@ import { withBasePath } from "@/lib/base-path";
  * Built on shadcn's Sheet (Radix Dialog), so focus trapping, Escape-to-close,
  * scroll locking and `aria-modal` come for free rather than being hand-rolled.
  */
-export function MobileNav() {
+/*
+  A menu item's visible text.
+
+  Static entries carry a `key` into `messages/nav`; entries added through the
+  admin panel carry a literal `label` already resolved for this locale and
+  have no message key at all. Asking next-intl for a key that does not exist
+  throws, so the presence of `label` is what decides which path is taken.
+*/
+function navLabel(item: NavItem, t: (key: string) => string): string {
+  return item.label ?? t(item.key);
+}
+
+export function MobileNav({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const t = useTranslations("nav");
@@ -73,7 +85,7 @@ export function MobileNav() {
           Yangiliklar and Aloqa — were unreachable on a handset.
         */}
         <nav className="flex flex-1 flex-col overflow-y-auto p-2">
-          {mainNav.map((item) => {
+          {items.map((item) => {
             const sectionActive = isSectionActive(pathname, item);
             const children = item.children ?? [];
             const currentChild = activeHref(
@@ -102,7 +114,7 @@ export function MobileNav() {
                       : "hover:bg-secondary",
                   )}
                 >
-                  {t(item.key)}
+                  {navLabel(item, t)}
                 </Link>
                 {children.map((child) => {
                   const childActive = currentChild === child.href;
@@ -122,7 +134,7 @@ export function MobileNav() {
                           : "text-muted-foreground hover:text-accent-foreground",
                       )}
                     >
-                      {t(child.key)}
+                      {navLabel(child, t)}
                     </Link>
                   );
                 })}

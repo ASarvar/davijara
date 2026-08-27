@@ -1,5 +1,5 @@
 import { Download, FileText } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { getDocuments } from "@/lib/data/catalog";
 import { getNews } from "@/lib/data/news";
@@ -14,7 +14,17 @@ export async function NewsAndDocs() {
     getTranslations("news"),
     getTranslations("documents"),
   ]);
-  const [news, documents] = await Promise.all([getNews(3), getDocuments(4)]);
+  /*
+    The locale is read here rather than passed down as a prop: this section is
+    rendered by the homepage, which does not otherwise need to know that news
+    is translated. `getLocale()` resolves from the same request context
+    `getTranslations()` above already uses.
+  */
+  const locale = await getLocale();
+  const [news, documents] = await Promise.all([
+    getNews(3, locale),
+    getDocuments(4),
+  ]);
 
   return (
     <Section tone="light">

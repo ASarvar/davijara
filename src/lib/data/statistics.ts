@@ -174,9 +174,7 @@ export interface Statistics {
  * ONE FIGURE DID NOT FOLLOW: floor area — see `typicalArea` below.
  */
 const mean = (values: number[]): number =>
-  values.length === 0
-    ? 0
-    : values.reduce((a, b) => a + b, 0) / values.length;
+  values.length === 0 ? 0 : values.reduce((a, b) => a + b, 0) / values.length;
 
 /**
  * The middle value, kept for ONE figure: floor area.

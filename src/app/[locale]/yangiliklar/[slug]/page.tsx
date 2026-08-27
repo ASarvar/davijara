@@ -2,22 +2,19 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CalendarDays, RefreshCw } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { mediaSrc } from "@/lib/media/src";
 
-import { routing, type Locale } from "@/i18n/routing";
+import { type Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
-import { getArticle, getNewsSlugs, getRelatedNews } from "@/lib/data/news";
+import { getArticle, getRelatedNews } from "@/lib/data/news";
 import { formatDate } from "@/lib/format";
+import { BlockContent } from "@/components/common/block-content";
 import { ImagePlaceholder } from "@/components/common/placeholder/image-placeholder";
 import { NewsAside } from "@/components/sections/news-aside";
 import { Section } from "@/components/layout/section";
 
 /*
   A single news item.
-
-  PRERENDERED, NOT DYNAMIC. `generateStaticParams` covers every slug in every
-  locale, so an article is a static file — which matters more here than on the
-  catalogue, whose pages depend on a live auction service. Nothing about a
-  published announcement changes between requests.
 
   This route sits beside three static siblings (`/yangiliklar/ozbekiston`,
   `/bayonotlar`, `/media`). Next resolves static segments before dynamic ones,
@@ -31,20 +28,35 @@ import { Section } from "@/components/layout/section";
   about to open.
 */
 
-export async function generateStaticParams() {
-  const slugs = await getNewsSlugs();
-  return routing.locales.flatMap((locale) =>
-    slugs.map((slug) => ({ locale, slug })),
-  );
-}
+/*
+  NOT PRERENDERED AT BUILD TIME ANY MORE, and that is a deliberate reversal.
+
+  While articles lived in a TypeScript module, `generateStaticParams` over
+  every slug was free and obviously right. Now they live in the admin panel's
+  database, and building the list would mean `next build` opening that
+  database — which on the server is the wrong thing twice over:
+
+    * deploy.sh runs the build as the deploying user (root), while the service
+      runs as `davijara`. A database or WAL file created by the build would be
+      owned by root, and the panel's first write would fail with a permission
+      error long after the deploy reported success.
+    * an article published from the panel would not exist as a page until the
+      next deploy, which defeats the point of having a panel.
+
+  Instead each article renders on first request and is cached for the window
+  below. `revalidatePath` in the panel's publish action clears it immediately,
+  so a published item is live at once; `revalidate` is the backstop that heals
+  the cache within five minutes if a revalidation is ever missed.
+*/
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const article = await getArticle(slug);
+  const { locale, slug } = await params;
+  const article = await getArticle(slug, locale);
   if (!article) return {};
 
   return {
@@ -68,7 +80,7 @@ export default async function ArticlePage({
   const { locale, slug } = await params;
   setRequestLocale(locale as Locale);
 
-  const article = await getArticle(slug);
+  const article = await getArticle(slug, locale);
   if (!article) notFound();
 
   const [t, tCat, tNav, tCommon] = await Promise.all([
@@ -78,7 +90,7 @@ export default async function ArticlePage({
     getTranslations("common"),
   ]);
   // Four, to fill the sidebar column beside the text.
-  const related = await getRelatedNews(slug, 4);
+  const related = await getRelatedNews(slug, 4, locale);
 
   return (
     <Section tone="deep">
@@ -145,7 +157,7 @@ export default async function ArticlePage({
             {article.image ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={article.image}
+                src={mediaSrc(article.image)}
                 alt=""
                 className="h-full w-full object-cover"
               />
@@ -176,13 +188,15 @@ export default async function ArticlePage({
               {article.excerpt}
             </p>
 
-            {article.body?.length ? (
-              <div className="text-muted-foreground mt-6 space-y-4 text-pretty">
-                {article.body.map((paragraph, i) => (
-                  <p key={i}>{paragraph}</p>
-                ))}
-              </div>
-            ) : null}
+            {/*
+              The body, as the blocks the editor composed. It was
+              `body: string[]` — one paragraph per string — until the admin
+              panel arrived; migration 2 converted every one of those into a
+              paragraph block, so nothing was lost and the shape simply got
+              wider. BlockContent is where the "plain text only, never HTML"
+              guarantee is kept.
+            */}
+            <BlockContent blocks={article.blocks} className="mt-2" />
 
             {article.updatedAt ? (
               <p className="text-muted-foreground mt-8 inline-flex items-center gap-1.5 text-xs">

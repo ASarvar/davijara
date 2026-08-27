@@ -11,6 +11,14 @@ import { PlaceholderPage } from "@/components/layout/placeholder-page";
 */
 const NAV_KEY = "apparatus";
 
+/*
+  Cached, not static-forever: this route serves whatever an editor has written
+  for it in the panel (see components/layout/placeholder-page.tsx), so it has
+  to be able to change without a deploy. `revalidatePath` in the panel's
+  publish action clears it at once; this window is the backstop.
+*/
+export const revalidate = 300;
+
 export async function generateMetadata({
   params,
 }: {

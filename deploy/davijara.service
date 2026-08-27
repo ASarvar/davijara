@@ -84,6 +84,22 @@ ProtectSystem=strict
 # release was assembled.
 ReadWritePaths=-/var/www/davijara/current/.next/cache
 
+# The admin panel's SQLite database and the files editors upload.
+#
+# NO leading "-" here, deliberately, and it is the opposite call to the line
+# above. That one may legitimately be missing on a fresh release; this one may
+# not. If DATA_DIR is absent the panel cannot store a single news item, and
+# the failure would surface as SQLITE_CANTOPEN on whichever page an editor
+# happened to open — long after the deploy looked successful. Refusing to
+# start is the louder and more honest failure.
+#
+# It is OUTSIDE current/ on purpose: deploy.sh keeps only the last five
+# releases, so a database inside a release directory is deleted five deploys
+# later, silently. See lib/db/index.ts and the DEPLOY.md admin section.
+#
+# ⚠ Must match DATA_DIR in shared/.env. Changing either alone breaks the panel.
+ReadWritePaths=/var/www/davijara/shared/data
+
 LimitNOFILE=65535
 
 [Install]

@@ -74,13 +74,25 @@ reasoning there is the record of what already went wrong once.
 
 ## Non-negotiables
 
-**1. Statutory content is verbatim.** `src/content/privileges.ts` (24 rent
-privileges citing PQ-239, PF-93, VM-626, PQ-3782 …) and `src/content/structure.ts` (the
-org chart from the director's order) were transcribed from binding documents.
-Never reword, reformat, summarise, "improve" or machine-translate any field —
-`legalBasis` above all. Corrections come from the source document, not from
-editing prose here. The same applies to `messages/ru.json` and `en.json`: UI
-chrome may be translated, legal text may not.
+**1. Statutory content is verbatim — and most of it now lives in the
+database.** The 24 rent privileges (PQ-239, PF-93, VM-626 …) and the two
+Markaz documents (`about`, `duties`) were moved out of `src/content/` by
+migrations 5 and 6 at the operator's request. Those modules stay on disk as
+the seeds' source AND as the runtime fallback — `getAbout()` renders them if
+the row is missing or fails validation, so a bad restore shows the last
+known-good text rather than an empty page. **`src/content/structure.ts` is
+deliberately still code**: the operator asked for the org chart to stay out
+of the panel.
+
+The rule itself has not changed: never reword, reformat, summarise, "improve"
+or machine-translate any field — `legalBasis` above all, and the function
+groups' a/b/v/g/d/e/j lettering is the statute's own and must never be
+renumbered into a Latin sequence. What changed is the safeguard: a reviewed
+git diff used to be the only way this text could move, and now the **audit
+log's complete before/after snapshots** are, so nothing may write to
+`privileges` or `documents` without going through `audit()`. `messages/ru.json`
+and `en.json`: UI chrome may be translated, legal text may not — which is why
+none of this content has a translations table.
 
 **2. Components consume semantic tokens, never raw brand colours.** Two
 independent axes — `data-theme` on `<html>`, `data-tone` on each section —
@@ -175,8 +187,76 @@ directly. Sizes, the `<picture>` rationale and the favicon note are in
 Intl output can differ between Node and the browser, which is a hydration
 mismatch waiting to happen. Keep it deterministic.
 
+## Boshqaruv paneli (`/admin`)
+
+Editors write news and pages here instead of through a git commit. It sits
+**outside `[locale]`** — its own root layout, no locale prefix, Uzbek-only
+chrome, and `admin` is excluded from the proxy matcher so it is not
+locale-redirected. The content it edits is still trilingual.
+
+| Where | What |
+|---|---|
+| `src/lib/db/` | SQLite (better-sqlite3, pinned `^12`), append-only migrations |
+| `src/lib/auth/` | scrypt passwords, DB-backed sessions, rate limit, audit log |
+| `src/lib/media/` | uploads: byte-sniffed type, content-addressed, served by a route |
+| `src/lib/data/page-routes.ts` | which of the site's own routes an editor can fill in |
+| `src/lib/data/navigation.ts` | the menu: `mainNav` in code, plus pages the panel placed |
+| `src/types/blocks.ts` | the block model editors compose content out of |
+| `src/app/admin/` | `(panel)` route group = signed-in; `login` / `setup` outside it |
+| `scripts/admin-user.mjs` | break-glass CLI for a locked-out administrator |
+
+Seven rules that are load-bearing, each written against a failure that
+already happened or would be silent:
+
+1. **`getDb()` is called inside the function that queries — never hoisted to
+   module scope.** `next build` collects page data in 23 worker processes; an
+   eager module-level connection made all 23 race to run the migrations and
+   the build died with `SQLITE_BUSY`.
+2. **Every page *and every Server Action* calls its own guard.** A layout
+   check only protects rendering; a Server Action is a POST endpoint that can
+   be reached without the layout ever running. `requireUser()` redirects,
+   `requireUserForAction()` throws — an action must not redirect, because a
+   redirect reads as success to the client.
+3. **The database and uploads live in `DATA_DIR` (`shared/`), never in the
+   release tree.** `deploy.sh` keeps five releases; anything written inside
+   one is deleted five deploys later, silently. The systemd unit needs a
+   matching `ReadWritePaths` or `ProtectSystem=strict` makes it read-only.
+4. **The session cookie is scoped to `basePath`, not `/`.** `davijara.uz/`
+   belongs to other projects on the same server — a `/` cookie would send
+   admin session tokens to all of them.
+5. **The build never opens the database.** `getDb()` returns an in-memory
+   handle during `phase-production-build`, so prerendered routes get empty
+   results instead of the build creating root-owned files the service cannot
+   write. Verified by building with a throwaway `DATA_DIR` and checking that
+   nothing was written to it.
+6. **The top-level menu architecture stays in code.** `mainNav` in
+   `src/content/site.ts` is the portal's information architecture, with
+   translated labels in `messages/nav` and active-state rules that assume it.
+   The panel may put a page INSIDE one of those sections, or append a section
+   of its own (`menu_sections`) — it can never reorder, rename or remove what
+   is in code. A menu with no published page under it is skipped rather than
+   rendered, so it is never a dead entry. Because the header sits in the root
+   layout, a placement change revalidates `/` as a layout, and
+   `[locale]/layout.tsx` carries a 300 s window so a fresh deploy's build-time
+   menus cannot stay wrong.
+7. **Editor content is plain text; nothing renders editor HTML.** Blocks
+   store strings, `BlockContent` renders them as React children, and there is
+   no `dangerouslySetInnerHTML` anywhere in that path. That is what makes
+   editor-supplied content safe without a sanitiser — do not add one, add a
+   structured field instead. Uploads follow the same principle: the type comes
+   from the file's bytes, never its name or `Content-Type`, and SVG is
+   refused because it is a document that can carry script.
+
+Statutory content is being moved here at the operator's request, which is what
+the audit log's full before/after snapshots are for: they replace the reviewed
+git diff that used to be the only way that text could change. Until that
+migration lands, non-negotiable 1 above still applies as written.
+
 ## Still to do
 
+- **Admin panel: complete.** News, images, pages, users, the audit log, the
+  24 privileges and both Markaz documents are editable. `content/structure.ts`
+  is the one deliberate exception.
 - Remaining `davijara-v2.html` features: the Chart.js charts
   (line/doughnut/bar). Needs real data first — see below.
 - Replace the placeholder pages with real content.

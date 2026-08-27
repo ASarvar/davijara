@@ -1,9 +1,11 @@
 import { Construction } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { BlockContent } from "@/components/common/block-content";
 import { IconTile } from "@/components/common/icon-tile";
+import { getPageByNavKey } from "@/lib/data/pages";
 import { Section } from "./section";
 
 /**
@@ -39,6 +41,44 @@ export async function PlaceholderPage({
 }) {
   const t = await getTranslations("placeholder");
   const tNav = await getTranslations("nav");
+
+  /*
+    CONTENT FIRST, PLACEHOLDER SECOND.
+
+    Every one of these 26 routes is a real file that has always rendered the
+    "being prepared" panel below. Now that editors can write pages, the same
+    route serves whatever they wrote — and none of those 26 files had to
+    change, because `page-routes.ts` maps the navKey they already pass to the
+    path the database stores against.
+
+    An unregistered navKey, an unwritten page, or a draft all fall through to
+    the placeholder. That is the safe direction: the worst case is a citizen
+    seeing the honest "not ready yet" panel that was there before.
+  */
+  const locale = await getLocale();
+  const page = await getPageByNavKey(navKey, locale);
+
+  if (page && page.blocks.length > 0) {
+    return (
+      <Section tone="deep" className="flex-1">
+        <div className="max-w-3xl">
+          {/*
+            The heading comes from `nav`, NOT from the page's own title field.
+            The menu item and the page it opens are the same name, and the
+            note on `navKey` above explains what happens when that string
+            exists in two places.
+          */}
+          <h1
+            data-split
+            className="font-heading text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
+          >
+            {tNav(navKey)}
+          </h1>
+          <BlockContent blocks={page.blocks} className="mt-2" />
+        </div>
+      </Section>
+    );
+  }
 
   return (
     <Section tone="deep" className="flex-1">

@@ -100,7 +100,7 @@ export default async function DutiesPage({
           {duties.intro}
         </p>
 
-        <ol className="text-foreground/90 mt-5 list-decimal space-y-3 pl-5 text-pretty marker:text-muted-foreground">
+        <ol className="text-foreground/90 marker:text-muted-foreground mt-5 list-decimal space-y-3 pl-5 text-pretty">
           {duties.items.map((item, i) => (
             <li key={i}>{item}</li>
           ))}
@@ -121,12 +121,10 @@ export default async function DutiesPage({
           {functions.groups.map((group) => (
             <div key={group.letter}>
               <h3 className="text-foreground font-semibold text-pretty">
-                <span className="text-accent-foreground">
-                  {group.letter})
-                </span>{" "}
+                <span className="text-accent-foreground">{group.letter})</span>{" "}
                 {group.heading}
               </h3>
-              <ul className="text-muted-foreground mt-3 list-disc space-y-2 pl-5 text-pretty marker:text-muted-foreground">
+              <ul className="text-muted-foreground marker:text-muted-foreground mt-3 list-disc space-y-2 pl-5 text-pretty">
                 {group.items.map((item, i) => (
                   <li key={i}>{item}</li>
                 ))}

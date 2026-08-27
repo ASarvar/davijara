@@ -76,6 +76,17 @@ export interface NavItem {
   key: string;
   href: string;
   /**
+   * Literal label, already resolved for one locale.
+   *
+   * Only set on entries that come from the ADMIN PANEL, which have no key in
+   * `messages/nav` to look up. Everything in `mainNav` below leaves this
+   * undefined and is labelled by its `key` instead — that is what keeps the
+   * menu item and the page it opens from ever disagreeing about their name.
+   *
+   * See lib/data/navigation.ts, which merges the two kinds into one tree.
+   */
+  label?: string;
+  /**
    * Pages that live UNDER this one in the menu.
    *
    * One level only, and deliberately: a second level of nesting on a portal

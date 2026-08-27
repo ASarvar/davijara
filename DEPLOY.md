@@ -166,3 +166,93 @@ RAM'li serverda image qurish sekin bo'lardi, va ichki API'ga
 `output: "standalone"` allaqachon yoqilgan, shuning uchun kelajakda kerak
 bo'lsa Dockerfile deyarli faqat `.next/standalone` ni ko'chirishdan iborat
 bo'ladi.
+
+## Boshqaruv paneli (admin) — birinchi o'rnatish
+
+Panel `davijara.uz/site/admin` manzilida ishlaydi. Uning ma'lumotlari
+SQLite faylida saqlanadi va **release papkasida emas** — `deploy.sh` faqat
+oxirgi 5 ta release'ni saqlaydi, shuning uchun release ichiga yozilgan
+har qanday narsa 5 ta deploy'dan keyin jimgina o'chib ketadi.
+
+`shared/` — bu deploy'lardan omon qoladigan yagona joy, `.env` ham aynan
+shu sababdan o'sha yerda turadi.
+
+```bash
+mkdir -p /var/www/davijara/shared/data
+chown davijara:davijara /var/www/davijara/shared/data
+chmod 700 /var/www/davijara/shared/data
+```
+
+`shared/.env` ga qo'shing:
+
+```
+DATA_DIR=/var/www/davijara/shared/data
+ADMIN_SETUP_TOKEN=<openssl rand -base64 32 natijasi>
+```
+
+⚠ **`systemd` unit'iga `ReadWritePaths` qo'shish shart.** Servis
+`ProtectSystem=strict` bilan ishlaydi — bu butun fayl tizimini faqat
+o'qish rejimiga qo'yadi, shuning uchun bu qator bo'lmasa baza fayli
+ochilmaydi va panel `SQLITE_CANTOPEN` bilan ishga tushmaydi:
+
+```
+ReadWritePaths=/var/www/davijara/shared/data
+```
+
+So'ng `systemctl daemon-reload && systemctl restart davijara`.
+
+Deploy'dan keyin `https://davijara.uz/site/admin/setup` ni oching, `.env`
+dagi kalitni kiriting va birinchi administratorni yarating. **Shundan
+so'ng bu sahifa butunlay yopiladi (404)** va `ADMIN_SETUP_TOKEN` ni
+`.env` dan o'chirib tashlash mumkin.
+
+### Zaxira nusxa
+
+Baza ishlab turgan paytda faylni oddiy `cp` bilan nusxalash **xavfli** —
+yozuv o'rtasida uzilgan nusxa olinishi mumkin. SQLite'ning o'z buyrug'i
+esa xavfsiz:
+
+```bash
+sqlite3 /var/www/davijara/shared/data/davijara.db ".backup '/backup/davijara-$(date +%F).db'"
+```
+
+`uploads/` papkasini ham birga zaxiralang — bazada fayl **nomlari**
+saqlanadi, fayllarning o'zi emas, shuning uchun biri boshqasisiz tiklansa
+rasmlar buzilgan holda chiqadi.
+
+### Rasm yuklash — uchta chegara
+
+Panel orqali yuklangan rasmlar `DATA_DIR/uploads/` ga tushadi, bazaga emas.
+Uchta chegara bor va ular **shu tartibda** o'sib borishi kerak, aks holda
+xato muharrir tushunmaydigan joyda chiqadi:
+
+| Chegara | Qiymat | Qayerda |
+|---|---|---|
+| Bitta fayl | 5 MB | `src/lib/media/types.ts` |
+| Server Action tanasi | 6 MB | `next.config.ts` |
+| nginx (ikkala hop) | 8 MB | `deploy/nginx-*.conf` |
+
+⚠ **nginx eng ko'p adashtiradi.** Uning o'z standarti — 1 MB, va u katta
+so'rovni Next'ga yetkazmasdan quruq `413` bilan rad etadi. Ya'ni ilovadagi
+chegarani oshirish yolg'iz o'zi hech narsani o'zgartirmaydi. Ikkala nginx
+konfiguratsiyasiga ham `client_max_body_size 8m;` qo'shilgan — bu fayllar
+avtomatik ko'chirilmaydi, serverga qo'lda o'tkazish kerak.
+
+Fayl turi **kengaytma yoki brauzer aytgan tur bo'yicha emas, baytlar bo'yicha**
+aniqlanadi. SVG ataylab qabul qilinmaydi: u hujjat, ichida `<script>` bo'lishi
+mumkin va o'z domenimizdan uzatilsa saqlangan XSS bo'lardi.
+
+### Parolni unutgan bo'lsa
+
+Panelning o'zida administrator boshqa foydalanuvchining parolini
+yangilay oladi. Yagona administrator o'zi kira olmay qolgan holat uchun —
+serverda:
+
+```bash
+cd /opt/davijara
+node scripts/admin-user.mjs passwd admin
+```
+
+Hech narsa stdin'ga berilmasa, kuchli parol yaratib bir marta ko'rsatadi.
+Buyruq eski sessiyalarni ham yopadi. To'liq ro'yxat: `node
+scripts/admin-user.mjs` (argumentsiz).

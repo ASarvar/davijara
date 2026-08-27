@@ -27,10 +27,20 @@ export const config = {
     */
     "/",
     /*
-      Everything except Next internals, API routes, and anything that looks
-      like a static file (has a dot). Without the file exclusion the proxy
-      would try to locale-prefix /logo-dm-light.svg and 404 it.
+      Everything except Next internals, API routes, the admin panel, and
+      anything that looks like a static file (has a dot). Without the file
+      exclusion the proxy would try to locale-prefix /logo-dm-light.svg and
+      404 it.
+
+      `admin` is excluded because the panel lives OUTSIDE `[locale]` and has
+      no locale prefix: left in, this would redirect /admin to /uz/admin,
+      which is not a route, so the whole panel would 404. The panel is
+      Uzbek-only by design — see the note in app/admin/layout.tsx.
+
+      This exclusion is a ROUTING decision and carries no authorisation
+      weight. Nothing here protects the panel; every admin page and every
+      Server Action checks the session for itself (lib/auth/guard.ts).
     */
-    "/((?!api|_next|_vercel|.*\\..*).*)",
+    "/((?!api|admin|_next|_vercel|.*\\..*).*)",
   ],
 };

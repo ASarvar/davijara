@@ -58,7 +58,7 @@ export default async function NewsPage({
     getTranslations("common"),
   ]);
 
-  const items = await getNews();
+  const items = await getNews(undefined, locale);
   const pageCount = Math.max(1, Math.ceil(items.length / NEWS_PER_PAGE));
   // Clamped, not 404'd — a hand-edited ?sahifa=99 lands on the last real page.
   const current = Math.min(parsePage(sp), pageCount);

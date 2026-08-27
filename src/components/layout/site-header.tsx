@@ -1,5 +1,5 @@
 import { Phone } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { contacts, site } from "@/content/site";
@@ -7,6 +7,7 @@ import { Container } from "./section";
 import { Logo } from "./logo";
 import { NavLinks } from "./nav-links";
 import { MobileNav } from "./mobile-nav";
+import { getNavigation } from "@/lib/data/navigation";
 import { AccessibilityDialog } from "./accessibility-dialog";
 import { SocialLinks } from "./social-links";
 import { ThemeToggle } from "./theme-toggle";
@@ -48,6 +49,17 @@ import { ThemeToggle } from "./theme-toggle";
 export async function SiteHeader() {
   const tTopbar = await getTranslations("topbar");
   const tCommon = await getTranslations("common");
+
+  /*
+    The menu is assembled HERE, on the server, and handed to the two client
+    nav components as a prop.
+
+    They used to import `mainNav` directly, which was right while the menu was
+    a static module. It no longer is: pages added through the admin panel are
+    merged into it, and that read needs the database and the request's locale
+    — neither of which a client component has. See lib/data/navigation.ts.
+  */
+  const navItems = await getNavigation(await getLocale());
 
   return (
     <header data-tone="deep" className="sticky top-0 z-40">
@@ -193,7 +205,7 @@ export async function SiteHeader() {
           <div className="flex shrink-0 items-center gap-3 xl:hidden">
             <ThemeToggle />
             <AccessibilityDialog />
-            <MobileNav />
+            <MobileNav items={navItems} />
           </div>
         </Container>
       </div>
@@ -229,7 +241,7 @@ export async function SiteHeader() {
             `flex-wrap` in NavLinks still lets the row break onto a second line
             at 125/150% text rather than running off the edge. */}
         <Container className="flex justify-center">
-          <NavLinks />
+          <NavLinks items={navItems} />
         </Container>
       </nav>
     </header>

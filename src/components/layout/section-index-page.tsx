@@ -1,8 +1,8 @@
 import { ArrowRight } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
-import { mainNav } from "@/content/site";
+import { getNavigation } from "@/lib/data/navigation";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section } from "./section";
 
@@ -16,18 +16,22 @@ import { Section } from "./section";
  * `PlaceholderPage`, would answer that click with "tayyorlanmoqda" for a
  * section whose children exist.
  *
- * So the parent renders its OWN children, read from `mainNav` rather than
- * listed again here — the menu and this page cannot drift apart, and adding a
- * child to the section adds it in both places at once.
+ * So the parent renders its OWN children, read from the same merged menu the
+ * header renders rather than listed again here — the menu and this page
+ * cannot drift apart, and adding a child to the section adds it in both
+ * places at once. That includes pages placed here from the admin panel: a
+ * page that appears in the dropdown must appear on the section page too, or
+ * the two disagree about what the section contains.
  */
 export async function SectionIndexPage({
-  /** The `key` of the entry in `mainNav` whose children this page lists. */
+  /** The `key` of the menu entry whose children this page lists. */
   navKey,
 }: {
   navKey: string;
 }) {
   const t = await getTranslations("nav");
-  const section = mainNav.find((item) => item.key === navKey);
+  const nav = await getNavigation(await getLocale());
+  const section = nav.find((item) => item.key === navKey);
   const children = section?.children ?? [];
 
   return (
@@ -58,7 +62,13 @@ export async function SectionIndexPage({
                 className="flex h-full items-start justify-between gap-4"
               >
                 <span className="font-heading text-lg leading-snug font-semibold text-balance">
-                  {t(child.key)}
+                  {/*
+                    A panel-created page carries its own already-translated
+                    label; a page that lives in code carries a message key.
+                    Asking `t` for a key that is not in messages/nav is not a
+                    fallback — it renders the raw key at citizens.
+                  */}
+                  {child.label ?? t(child.key)}
                 </span>
                 <ArrowRight
                   aria-hidden="true"

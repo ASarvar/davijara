@@ -38,6 +38,17 @@ yarn-error.log*
 # vercel
 .vercel
 
+# Admin panel data — the SQLite database and everything editors upload.
+#
+# In production these live in the deploy's `shared/` directory (DATA_DIR), NOT
+# in the repository; this covers the local dev fallback in lib/db/index.ts.
+# The -wal and -shm files are SQLite's write-ahead log and shared-memory index
+# — committing a database without them captures a torn snapshot.
+/.data/
+*.db
+*.db-wal
+*.db-shm
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

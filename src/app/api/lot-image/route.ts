@@ -83,8 +83,7 @@ export async function GET(request: Request) {
       `Retry-After` says the same thing to anything else in the chain. Still
       `no-store`, because none of this is an answer about the lot.
     */
-    const paused =
-      error instanceof LotImageUnavailable && error.serviceDown;
+    const paused = error instanceof LotImageUnavailable && error.serviceDown;
 
     return Response.json(
       paused ? { image: null, retry: false } : { image: null },

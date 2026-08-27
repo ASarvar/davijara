@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { mediaSrc } from "@/lib/media/src";
 
 import { Link } from "@/i18n/navigation";
 import { ImagePlaceholder } from "@/components/common/placeholder/image-placeholder";
@@ -67,7 +68,7 @@ export async function NewsRow({
           */
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={item.image}
+            src={mediaSrc(item.image)}
             alt=""
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />

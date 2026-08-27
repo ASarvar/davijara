@@ -1,15 +1,59 @@
 import "server-only";
 
-import { privileges } from "@/content/privileges";
+import { getDb } from "@/lib/db";
 import type { Privilege, PrivilegeCategory } from "@/types/content";
 
 /*
-  Data access for statutory privileges.
+  Data access for statutory privileges — now backed by the admin panel.
 
-  These functions are async even though they currently read a local module.
-  That is deliberate: when the real API arrives, only the bodies here change —
-  every call site already awaits, so no component needs touching.
+  These functions were always async against the day they would not read a
+  local module, and this is that day: migration 5 copied all 24 records out of
+  src/content/privileges.ts into the database, once. Not one call site
+  changed. That module stays on disk as the seed's source and nothing reads it
+  at runtime.
+
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │ THE BADGE NUMBER IS COMPUTED HERE, NOT STORED.                           │
+  │                                                                          │
+  │ `Privilege.id` is what the public list prints as 01, 02, 03 — and it     │
+  │ used to be the record's own identifier. Now that a record can be         │
+  │ deleted, keeping that link would leave the list reading …06, 08…, which  │
+  │ looks to a citizen like a privilege that has been quietly removed rather │
+  │ than a list that renumbered.                                             │
+  │                                                                          │
+  │ So the row's real primary key never leaves this module: `id` on the      │
+  │ returned object is the 1-based position in the ordered list. The three   │
+  │ places the UI uses it — React key, accordion value, badge — all want     │
+  │ exactly that, so no component needed touching for this either.           │
+  └──────────────────────────────────────────────────────────────────────────┘
+
+  NOT TRANSLATED, in any locale. See the note on the table in migrate.ts:
+  a machine-translated `legalBasis` is a citation to a document that does not
+  exist under that name.
 */
+
+type Row = {
+  category: PrivilegeCategory;
+  tag: string;
+  title: string;
+  description: string;
+  subject: string;
+  duration: string;
+  legal_basis: string;
+};
+
+function toPrivilege(row: Row, index: number): Privilege {
+  return {
+    id: index + 1,
+    category: row.category,
+    tag: row.tag,
+    title: row.title,
+    description: row.description,
+    subject: row.subject,
+    duration: row.duration,
+    legalBasis: row.legal_basis,
+  };
+}
 
 /** Filter chip labels. Order matters — it is the display order. */
 export const PRIVILEGE_CATEGORIES: Array<{
@@ -27,7 +71,14 @@ export function isPrivilegeCategory(v: string): v is PrivilegeCategory {
 }
 
 export async function getPrivileges(): Promise<Privilege[]> {
-  return privileges;
+  const rows = getDb()
+    .prepare(
+      `SELECT category, tag, title, description, subject, duration, legal_basis
+         FROM privileges
+        ORDER BY position, id`,
+    )
+    .all() as Row[];
+  return rows.map(toPrivilege);
 }
 
 export async function getPrivilegesByCategory(
