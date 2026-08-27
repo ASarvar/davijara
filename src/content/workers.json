@@ -1,0 +1,73 @@
+{
+  "director": {
+    "fullName": "Xalpayev Ilxom Islomovich",
+    "phone": "(71) 259 20 64",
+    "receptionHours": "Juma 14:00 - 16:00",
+    "photo": "/rahbariyat/director.png"
+  },
+  "first-deputy": {
+    "fullName": "Aminov Rustam Anvarovich",
+    "phone": "(71) 259 21 14",
+    "receptionHours": "Chorshanba 14:00 - 16:00",
+    "photo": "/rahbariyat/first-deputy.png"
+  },
+  "deputy": {
+    "fullName": "Vakant",
+    "phone": "(71) 259 20 02",
+    "receptionHours": "Seshanba 14:00 - 16:00"
+  },
+  "metodologiya": {
+    "fullName": "Shxaliyev Ali Allaxshukyur oʻgʻli",
+    "position": "Bosh mutaxassis",
+    "phone": "(71) 259 21 59",
+    "photo": "/markaziy-apparat/metodologiya.png"
+  },
+  "xatlov": {
+    "fullName": "Qodirov Otabek Abduxodiyevich",
+    "position": "Boʻlim boshligʻi",
+    "phone": "(71) 259 22 41",
+    "photo": "/markaziy-apparat/xatlov.png"
+  },
+  "shartnoma": {
+    "fullName": "Farhodov Yigitali",
+    "position": "Boʻlim boshligʻi",
+    "phone": "(71) 259 22 85",
+    "photo": "/markaziy-apparat/shartnoma.png"
+  },
+  "yuriskonsult": {
+    "fullName": "Abdukarimov Yusup Usanovich",
+    "position": "Yuridik byuro boshligʻi",
+    "phone": "(71) 259 21 34",
+    "photo": "/markaziy-apparat/yuriskonsult.png"
+  },
+  "it": {
+    "fullName": "Alibekov Sobir Baxtiyorovich",
+    "position": "Boʻlim boshligʻi",
+    "phone": "(71) 259 21 41",
+    "photo": "/markaziy-apparat/it.png"
+  },
+  "buxgalteriya": {
+    "fullName": "Ermatov Ziyodulla Norjigitovich",
+    "position": "Bosh hisobchi v.v.b.",
+    "phone": "(71) 259 20 85",
+    "photo": "/markaziy-apparat/buxgalteriya.png"
+  },
+  "korrupsiya": {
+    "fullName": "Gʻulomov Shoxrux Rasuljon oʻgʻli",
+    "position": "Bosh mutaxassis v.b.",
+    "phone": "(71) 259 20 85",
+    "photo": "/markaziy-apparat/korrupsiya.png"
+  },
+  "inson-resurslari": {
+    "fullName": "Mamatov Karim Esirgapovich",
+    "position": "Boʻlim boshligʻi",
+    "phone": "(71) 259 21 23",
+    "photo": "/markaziy-apparat/inson-resurslari.png"
+  },
+  "devonxona": {
+    "fullName": "Abdujabarova Madina Furkatovna",
+    "position": "Devonxona mudiri",
+    "phone": "(71) 259 22 70",
+    "photo": "/markaziy-apparat/devonxona.png"
+  }
+}

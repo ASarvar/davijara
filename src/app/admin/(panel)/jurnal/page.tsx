@@ -48,6 +48,7 @@ const ENTITY_LABELS: Record<AuditEntity | "all", string> = {
   structure: "Tuzilma",
   about: "Markaz haqida",
   duties: "Vazifalar",
+  leadership: "Rahbariyat",
   media: "Rasmlar",
 };
 

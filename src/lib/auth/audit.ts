@@ -40,6 +40,7 @@ export type AuditEntity =
   | "structure"
   | "about"
   | "duties"
+  | "leadership"
   | "media";
 
 type WriteAudit = {

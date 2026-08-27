@@ -9,6 +9,7 @@ import {
   ListTree,
   Newspaper,
   ScrollText,
+  UserRound,
   Users,
 } from "lucide-react";
 
@@ -39,6 +40,7 @@ const ITEMS: Item[] = [
   { href: "/admin/yangiliklar", label: "Yangiliklar", icon: Newspaper },
   { href: "/admin/sahifalar", label: "Sahifalar", icon: FileText },
   { href: "/admin/menyu", label: "Menyu", icon: ListTree },
+  { href: "/admin/rahbariyat", label: "Rahbariyat", icon: UserRound },
   {
     href: "/admin/hujjatlar",
     label: "Huquqiy matnlar",

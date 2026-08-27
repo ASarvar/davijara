@@ -645,7 +645,6 @@ const migrations: Migration[] = [
   {
     version: 9,
     name: "fix openData key drift",
-    up: "",
     /*
       Migration 8 seeded this row with the key "openData" — accurate at the
       moment that migration was written, but src/content/site.ts had already
@@ -671,6 +670,7 @@ const migrations: Migration[] = [
       into this row before that edit landed; leaving it there would silently
       revert the operator's own rename the moment this fix runs.
     */
+    up: "",
     seed(db) {
       const OLD_KEY = "openData";
       const NEW_KEY = "Data";
@@ -701,6 +701,46 @@ const migrations: Migration[] = [
         OLD_KEY,
       );
     },
+  },
+  {
+    version: 10,
+    name: "leadership",
+    up: `
+      /*
+        Rahbariyat — who currently holds each of the three roles the org
+        chart names, and their reception details.
+
+        role_id IS NOT GENERATED. It is one of "director", "first-deputy",
+        "deputy" — the exact ids src/content/structure.ts already uses for
+        the director and the two deputies (orgHead / orgBranches[].id). The
+        ROLES themselves stay in code, same reasoning as the org chart itself
+        (see structure.ts's own header comment): who reports to whom is a
+        fact about the organisation's own founding order, not something an
+        editor should be able to invent a fourth of by mistake. What the
+        panel edits is only which PERSON currently holds a role — three rows,
+        never more, never fewer, and this table enforces that by having no
+        way to insert a fourth id the public page would ever read.
+
+        No seed. A freshly migrated install has three roles and nobody named
+        against any of them, which is the honest state until an editor fills
+        one in — see lib/data/leadership.ts for how the public page treats a
+        role with no name yet (skipped, not shown half-empty).
+
+        full_name is the ONLY required field, deliberately — the operator
+        asked for this to be as simple as typing a name. photo, phone and
+        reception_hours are all optional and the public card omits whichever
+        of the three is blank.
+      */
+      CREATE TABLE leadership (
+        role_id         TEXT    NOT NULL PRIMARY KEY,
+        full_name       TEXT    NOT NULL DEFAULT '',
+        photo           TEXT,
+        phone           TEXT,
+        reception_hours TEXT,
+        updated_at      TEXT    NOT NULL,
+        updated_by      INTEGER REFERENCES users(id) ON DELETE SET NULL
+      );
+    `,
   },
 ];
 
