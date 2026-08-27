@@ -142,6 +142,7 @@ const RESERVED_FIRST_SEGMENTS = new Set([
   "obyektlar",
   "sotilgan-obyektlar",
   "statistika",
+  "eng-kam-stavkalar",
   "imtiyozlar",
   "yangiliklar",
   "markaz",

@@ -218,6 +218,7 @@ export const mainNav: NavItem[] = [
     children: [
       { key: "statistics", href: "/statistika" },
       { key: "openData", href: "/malumotlar/ochiq-malumotlar" },
+      { key: "minRates", href: "/eng-kam-stavkalar" },
     ],
   },
   {

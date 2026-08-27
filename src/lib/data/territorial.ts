@@ -64,8 +64,14 @@ type Entry = Omit<TerritorialOffice, "regionId">;
 
 const DATA = territorialData as Record<string, Entry>;
 
-/** The source document's own row order: Qoraqalpogʻiston, then the 12 viloyats, then Toshkent shahar last. */
-const REGION_ORDER = [
+/**
+ * The source document's own row order: Qoraqalpogʻiston, then the 12
+ * viloyats, then Toshkent shahar last. Exported because it is also the
+ * canonical region order for OTHER region-indexed content on the site
+ * (e.g. lib/data/min-rates.ts) — one list, so two pages that both walk
+ * "all 14 regions" list them in the same order.
+ */
+export const REGION_ORDER = [
   "qoraqalpogiston",
   "andijon",
   "buxoro",
@@ -86,4 +92,9 @@ export async function getTerritorialOffices(): Promise<TerritorialOffice[]> {
   return REGION_ORDER.filter((id) => DATA[id]?.fullName?.trim()).map(
     (regionId) => ({ regionId, ...DATA[regionId]! }),
   );
+}
+
+/** A region's display name, e.g. for content that lists regions but isn't about the office itself. */
+export function regionName(regionId: string): string | undefined {
+  return DATA[regionId]?.region;
 }
