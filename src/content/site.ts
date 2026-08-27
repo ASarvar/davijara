@@ -190,14 +190,11 @@ export const mainNav: NavItem[] = [
     ],
   },
   {
-    key: "openData",
-    href: "/ochiq-malumotlar",
+    key: "Data",
+    href: "/malumotlar",
     children: [
-      { key: "report3299", href: "/ochiq-malumotlar/qaror-3299" },
-      { key: "decreePf154", href: "/ochiq-malumotlar/farmon-pf-154" },
-      { key: "resolutionPq447", href: "/ochiq-malumotlar/qaror-pq-447" },
+      { key: "openData", href: "/malumotlar/ochiq-malumotlar" },
       { key: "statistics", href: "/statistika" },
-      { key: "appeals", href: "/ochiq-malumotlar/murojaatlar" },
     ],
   },
   {
