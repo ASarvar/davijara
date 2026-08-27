@@ -85,13 +85,62 @@ export function NavLinks({ items }: { items: NavItem[] }) {
           children.map((c) => c.href),
         );
 
+        // The operator's two named exceptions — see the note on `clickable`
+        // in content/site.ts. Everything else is unconditionally a link.
+        const clickable = item.clickable !== false;
+
+        const triggerClassName = cn(
+          /*
+            1.0625rem === 17px at the default root size. Rem-based, not
+            `text-[17px]`: a fixed px value silently opts the whole nav
+            out of the "Matn o'lchami" accessibility control.
+
+            Larger than the 13.5px this row used to run at, because the
+            nav is no longer competing with the logo and a login button
+            for one row — it has a bar of its own and can be read at a
+            glance rather than squinted at.
+          */
+          // py-2.5, down from py-3.5: the bar is the part that stays on
+          // screen, so every pixel of its height is taken off every page
+          // the reader scrolls. Still a 40px target at the default text
+          // size, so it does not cost tap accuracy.
+          "relative flex items-center gap-1.5 px-4 py-2.5 text-[1.0625rem] whitespace-nowrap transition-colors",
+          sectionActive
+            ? "text-accent-foreground font-semibold"
+            : "text-foreground/85 hover:text-accent-foreground",
+        );
+
+        const triggerContent = (
+          <>
+            {navLabel(item, t)}
+            {children.length > 0 ? (
+              <ChevronDown
+                aria-hidden="true"
+                className="size-3.5 shrink-0 opacity-60 transition-transform duration-200 group-focus-within:rotate-180 group-hover:rotate-180"
+              />
+            ) : null}
+            {sectionActive ? (
+              <span
+                aria-hidden="true"
+                // bg-ring, not raw gold — resolves to yellow in high
+                // contrast so the active item stays marked.
+                className="bg-ring absolute inset-x-3 bottom-0 h-0.5"
+              />
+            ) : null}
+          </>
+        );
+
         return (
           /*
-            `group` + `focus-within` rather than a click-to-open menu: the
-            parent is itself a real page, so a click has to navigate. The
-            submenu opens on hover for a pointer and on focus for the
-            keyboard, which means tabbing into the parent reveals the child
-            and tabbing on reaches it — no JavaScript and no trap.
+            `group` + `focus-within` rather than a click-to-open menu: for a
+            clickable parent, it is itself a real page, so a click has to
+            navigate — the submenu opens on hover for a pointer and on focus
+            for the keyboard, which means tabbing into the parent reveals the
+            child and tabbing on reaches it — no JavaScript and no trap. A
+            non-clickable parent (`clickable: false`) gets the identical
+            hover/focus behaviour from a plain `<button>` instead of a
+            `<Link>` — still focusable, still opens the panel, but Enter and
+            click do nothing, because there is no page for either to open.
           */
           <li
             key={item.href}
@@ -100,47 +149,20 @@ export function NavLinks({ items }: { items: NavItem[] }) {
             // `heldShut` above.
             onPointerLeave={() => setHeldShut(null)}
           >
-            <Link
-              href={item.href}
-              aria-current={sectionActive ? "page" : undefined}
-              onClick={(event) => closeAfterClick(event, item.href)}
-              className={cn(
-                /*
-                  1.0625rem === 17px at the default root size. Rem-based, not
-                  `text-[17px]`: a fixed px value silently opts the whole nav
-                  out of the "Matn o'lchami" accessibility control.
-
-                  Larger than the 13.5px this row used to run at, because the
-                  nav is no longer competing with the logo and a login button
-                  for one row — it has a bar of its own and can be read at a
-                  glance rather than squinted at.
-                */
-                // py-2.5, down from py-3.5: the bar is the part that stays on
-                // screen, so every pixel of its height is taken off every page
-                // the reader scrolls. Still a 40px target at the default text
-                // size, so it does not cost tap accuracy.
-                "relative flex items-center gap-1.5 px-4 py-2.5 text-[1.0625rem] whitespace-nowrap transition-colors",
-                sectionActive
-                  ? "text-accent-foreground font-semibold"
-                  : "text-foreground/85 hover:text-accent-foreground",
-              )}
-            >
-              {navLabel(item, t)}
-              {children.length > 0 ? (
-                <ChevronDown
-                  aria-hidden="true"
-                  className="size-3.5 shrink-0 opacity-60 transition-transform duration-200 group-focus-within:rotate-180 group-hover:rotate-180"
-                />
-              ) : null}
-              {sectionActive ? (
-                <span
-                  aria-hidden="true"
-                  // bg-ring, not raw gold — resolves to yellow in high
-                  // contrast so the active item stays marked.
-                  className="bg-ring absolute inset-x-3 bottom-0 h-0.5"
-                />
-              ) : null}
-            </Link>
+            {clickable ? (
+              <Link
+                href={item.href}
+                aria-current={sectionActive ? "page" : undefined}
+                onClick={(event) => closeAfterClick(event, item.href)}
+                className={triggerClassName}
+              >
+                {triggerContent}
+              </Link>
+            ) : (
+              <button type="button" className={triggerClassName}>
+                {triggerContent}
+              </button>
+            )}
 
             {children.length > 0 ? (
               <ul

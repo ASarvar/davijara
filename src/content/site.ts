@@ -91,10 +91,23 @@ export interface NavItem {
    *
    * One level only, and deliberately: a second level of nesting on a portal
    * this size is a menu the reader has to explore rather than read. The
-   * parent stays a real link — it is a page in its own right, not a folder —
-   * so the submenu adds a way in without taking one away.
+   * parent is USUALLY a real link too — a page in its own right, not a
+   * folder — so the submenu adds a way in without taking one away. `Faoliyat`
+   * and `Hujjatlar` are the operator's named exceptions: see `clickable`.
    */
   children?: NavItem[];
+  /**
+   * Set to `false` to make a parent with children NON-navigable — hovering
+   * or focusing it still opens the submenu, but there is no page for a click
+   * or Enter to land on. Absent (the default) means the item is a real link,
+   * same as every entry always was before the operator asked for these two
+   * exceptions.
+   *
+   * Only meaningful on an item that HAS children; a childless entry has
+   * nothing for the reader to reach except by clicking it, so this flag on
+   * one would just be a dead menu entry.
+   */
+  clickable?: boolean;
 }
 
 /** External links keep a literal label; domain names are not translated. */
@@ -137,10 +150,19 @@ export const socialLinks: Array<{
  * `PlaceholderPage`, so the structure is honest and each one is replaced
  * independently as content arrives.
  *
- * Parents are real pages too, never bare folders — `/faoliyat` and
- * `/ochiq-malumotlar` render a section index listing their own children, so a
- * reader who clicks the section header lands somewhere useful instead of on a
- * dead end. The other four parents already had a natural own-page.
+ * Parents are USUALLY real pages too, never bare folders. Two are the
+ * operator's named exceptions (see `clickable` on `NavItem`):
+ *
+ *   - `activity` ("Faoliyat") and `documentsSection` ("Hujjatlar") open
+ *     their submenu on hover/focus like every other parent, but carry
+ *     `clickable: false` — there is no page for a click to land on, only a
+ *     way in to their children. Their own `href` stays a real route (so
+ *     direct navigation and active-state highlighting still work), it is
+ *     simply never rendered as a link.
+ *   - `Data` ("Ma'lumotlar") points straight at `/statistika`, not at a
+ *     section-index page — clicking it opens Statistika directly, at the
+ *     operator's request, rather than a landing page listing its two
+ *     children.
  */
 export const mainNav: NavItem[] = [
   /*
@@ -167,6 +189,8 @@ export const mainNav: NavItem[] = [
   {
     key: "activity",
     href: "/faoliyat",
+    // No page renders at /faoliyat any more — see the note above.
+    clickable: false,
     children: [
       { key: "vacantObjects", href: "/obyektlar" },
       { key: "leasedObjects", href: "/sotilgan-obyektlar" },
@@ -177,6 +201,8 @@ export const mainNav: NavItem[] = [
   {
     key: "documentsSection",
     href: "/hujjatlar",
+    // No page renders at /hujjatlar any more — see the note above.
+    clickable: false,
     children: [
       { key: "documentsMain", href: "/hujjatlar" },
       { key: "documentsInternal", href: "/hujjatlar/idoraviy" },
@@ -186,7 +212,9 @@ export const mainNav: NavItem[] = [
   },
   {
     key: "Data",
-    href: "/malumotlar",
+    // Opens Statistika directly, at the operator's request — not a
+    // section-index landing page. See the note above.
+    href: "/statistika",
     children: [
       { key: "statistics", href: "/statistika" },
       { key: "openData", href: "/malumotlar/ochiq-malumotlar" },

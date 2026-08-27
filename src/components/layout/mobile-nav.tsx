@@ -93,6 +93,10 @@ export function MobileNav({ items }: { items: NavItem[] }) {
               children.map((c) => c.href),
             );
 
+            // The operator's two named exceptions — see the note on
+            // `clickable` in content/site.ts.
+            const clickable = item.clickable !== false;
+
             return (
               /*
                 No disclosure toggle on mobile. A sheet already has room to
@@ -102,20 +106,38 @@ export function MobileNav({ items }: { items: NavItem[] }) {
                 screen reader will read from the nesting.
               */
               <div key={item.href} className="mb-1">
-                <Link
-                  href={item.href}
-                  // Close on navigate — Radix does not know a route changed.
-                  onClick={() => setOpen(false)}
-                  aria-current={sectionActive ? "page" : undefined}
-                  className={cn(
-                    "block rounded-md px-3 py-2.5 text-sm font-semibold transition-colors",
-                    sectionActive
-                      ? "bg-accent text-accent-foreground"
-                      : "hover:bg-secondary",
-                  )}
-                >
-                  {navLabel(item, t)}
-                </Link>
+                {clickable ? (
+                  <Link
+                    href={item.href}
+                    // Close on navigate — Radix does not know a route changed.
+                    onClick={() => setOpen(false)}
+                    aria-current={sectionActive ? "page" : undefined}
+                    className={cn(
+                      "block rounded-md px-3 py-2.5 text-sm font-semibold transition-colors",
+                      sectionActive
+                        ? "bg-accent text-accent-foreground"
+                        : "hover:bg-secondary",
+                    )}
+                  >
+                    {navLabel(item, t)}
+                  </Link>
+                ) : (
+                  /*
+                    A heading, not a link — there is no page at `item.href`
+                    for a tap to open. `sectionActive` can still style it,
+                    since a reader can land on one of its children.
+                  */
+                  <span
+                    className={cn(
+                      "block rounded-md px-3 py-2.5 text-sm font-semibold",
+                      sectionActive
+                        ? "bg-accent text-accent-foreground"
+                        : "text-foreground",
+                    )}
+                  >
+                    {navLabel(item, t)}
+                  </span>
+                )}
                 {children.map((child) => {
                   const childActive = currentChild === child.href;
                   return (

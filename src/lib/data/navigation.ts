@@ -177,6 +177,14 @@ export async function getNavigation(locale?: string): Promise<NavItem[]> {
       */
       href: builtin?.href ?? children[0]!.href,
       label: sectionLabel(section, resolved),
+      /*
+        Carried across from the mainNav entry, if there is one — this is what
+        makes "Faoliyat"/"Hujjatlar" stay non-clickable after passing through
+        the database merge. An operator-created row has no mainNav
+        counterpart and is always a real link (`undefined` here means
+        "clickable", per the field's own default).
+      */
+      clickable: builtin?.clickable,
       children,
     });
   }
