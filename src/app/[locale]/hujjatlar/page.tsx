@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { ExternalLink } from "lucide-react";
 
 import type { Locale } from "@/i18n/routing";
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { Link } from "@/i18n/navigation";
+import { Section } from "@/components/layout/section";
+import { IconTile } from "@/components/common/icon-tile";
+import { Button } from "@/components/ui/button";
+import { getLegalDocuments } from "@/lib/data/legal-documents";
 
 /*
-  The page's name lives in `messages/*.json` under `nav`, exactly once, and
-  both the browser-tab title and the on-page heading read it from there — see
-  the note on `navKey` in placeholder-page.tsx.
+  Hujjatlar — "Sohaga doir normativ-huquqiy hujjatlar roʻyxati", the
+  Centre's own list of the laws and decrees its work rests on, each linking
+  out to its lex.uz citation. Supplied whole by the operator (2026-08-28);
+  see lib/data/legal-documents.ts for sourcing notes.
+
+  Same numbered divided-list shape as eng-kam-stavkalar and
+  korrupsiyaga-qarshi — a document register, not a card grid.
 */
+
 const NAV_KEY = "documentsMain";
 
-/*
-  Cached, not static-forever: this route serves whatever an editor has written
-  for it in the panel (see components/layout/placeholder-page.tsx), so it has
-  to be able to change without a deploy. `revalidatePath` in the panel's
-  publish action clears it at once; this window is the backstop.
-*/
 export const revalidate = 300;
 
 export async function generateMetadata({
@@ -29,12 +33,87 @@ export async function generateMetadata({
   return { title: t(NAV_KEY) };
 }
 
-export default async function Page({
+export default async function DocumentsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  return <PlaceholderPage navKey={NAV_KEY} descriptionKey="documents" />;
+
+  const [tNav, tCommon, documents] = await Promise.all([
+    getTranslations("nav"),
+    getTranslations("common"),
+    getLegalDocuments(),
+  ]);
+
+  return (
+    <Section tone="deep">
+      <nav aria-label="Breadcrumb" className="mb-6">
+        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+          <li>
+            <Link
+              href="/"
+              className="hover:text-accent-foreground transition-colors"
+            >
+              {tCommon("breadcrumbHome")}
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="text-foreground">{tNav(NAV_KEY)}</li>
+        </ol>
+      </nav>
+
+      <div className="mx-auto">
+        <h1
+          data-split
+          className="font-heading text-center text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
+        >
+          {tNav(NAV_KEY)}
+        </h1>
+        <p className="text-muted-foreground mt-3 text-center text-sm text-pretty">
+          Sohaga doir normativ-huquqiy hujjatlar roʻyxati
+        </p>
+
+        {documents.length === 0 ? (
+          <p className="border-hairline text-muted-foreground mt-8 rounded-lg border border-dashed px-4 py-6 text-center text-sm text-pretty">
+            Hujjatlar roʻyxati hozircha kiritilmagan.
+          </p>
+        ) : (
+          <ul
+            data-reveal="up"
+            className="border-hairline divide-hairline mt-10 divide-y overflow-hidden rounded-sm border"
+          >
+            {documents.map((doc, index) => (
+              <li
+                key={doc.title}
+                className="flex flex-wrap items-center gap-3 px-4 py-3 sm:flex-nowrap sm:gap-4 sm:px-5"
+              >
+                <IconTile
+                  size="sm"
+                  aria-hidden="true"
+                  className="font-heading shrink-0 text-sm font-semibold"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </IconTile>
+                <span className="min-w-0 flex-1 text-sm text-pretty sm:text-base">
+                  {doc.title}
+                </span>
+                <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                  {doc.links.map((link, i) => (
+                    <Button key={i} asChild variant="outline" size="sm">
+                      <a href={link.href} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink aria-hidden="true" />
+                        {link.label ?? "Koʻrish"}
+                      </a>
+                    </Button>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Section>
+  );
 }

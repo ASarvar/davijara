@@ -31,10 +31,13 @@ import { routing, type Locale } from "@/i18n/routing";
   │ slot. Recreating a menu with the same label mints a NEW key (slugified   │
   │ fresh) and does not reattach them; that is a known, accepted edge case.  │
   │                                                                          │
-  │ "Bosh sahifa" and "Aloqa" are NOT in this table. They are plain links    │
-  │ with no dropdown, always first and last respectively — turning one of    │
-  │ them into a manageable "menu" was never asked for and would be a         │
-  │ different feature (a link, not a menu), so they stay literal.            │
+  │ "Bosh sahifa", "Statistika" and "Aloqa" are NOT in this table. They are   │
+  │ plain links with no dropdown — "Bosh sahifa" then "Statistika" leading,   │
+  │ "Aloqa" trailing — turning one of them into a manageable "menu" was      │
+  │ never asked for and would be a different feature (a link, not a menu),  │
+  │ so they stay literal. "Statistika" was added 2026-08-28 as the second    │
+  │ leading link, at the operator's request that it sit right after "Bosh    │
+  │ sahifa" rather than live under "Ma'lumotlar".                            │
   └──────────────────────────────────────────────────────────────────────────┘
 
   A database row has no message key, so it always carries a literal
@@ -57,8 +60,12 @@ type SectionRow = {
   label_en: string | null;
 };
 
-/** The mainNav entries that are plain links, not manageable dropdowns. */
-const LEADING_KEY = "home";
+/**
+ * The mainNav entries that are plain links, not manageable dropdowns.
+ * Order matters: LEADING_KEYS render in this order, before every managed
+ * section; TRAILING_KEY renders last.
+ */
+const LEADING_KEYS = ["home", "statistics"];
 const TRAILING_KEY = "contact";
 
 function safeLocale(locale?: string): Locale {
@@ -145,7 +152,9 @@ export async function getNavigation(locale?: string): Promise<NavItem[]> {
     byParent.set(page.menu_parent, list);
   }
 
-  const leading = mainNavByKey.get(LEADING_KEY);
+  const leading = LEADING_KEYS.map((key) => mainNavByKey.get(key)).filter(
+    (item): item is NavItem => Boolean(item),
+  );
   const trailing = mainNavByKey.get(TRAILING_KEY);
 
   /*
@@ -189,7 +198,7 @@ export async function getNavigation(locale?: string): Promise<NavItem[]> {
     });
   }
 
-  return [...(leading ? [leading] : []), ...managed, ...(trailing ? [trailing] : [])];
+  return [...leading, ...managed, ...(trailing ? [trailing] : [])];
 }
 
 export type MenuTarget = {

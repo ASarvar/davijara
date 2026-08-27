@@ -150,19 +150,20 @@ export const socialLinks: Array<{
  * `PlaceholderPage`, so the structure is honest and each one is replaced
  * independently as content arrives.
  *
- * Parents are USUALLY real pages too, never bare folders. Two are the
+ * Parents are USUALLY real pages too, never bare folders. Three are the
  * operator's named exceptions (see `clickable` on `NavItem`):
  *
- *   - `activity` ("Faoliyat") and `documentsSection` ("Hujjatlar") open
- *     their submenu on hover/focus like every other parent, but carry
- *     `clickable: false` — there is no page for a click to land on, only a
- *     way in to their children. Their own `href` stays a real route (so
- *     direct navigation and active-state highlighting still work), it is
- *     simply never rendered as a link.
- *   - `Data` ("Ma'lumotlar") points straight at `/statistika`, not at a
- *     section-index page — clicking it opens Statistika directly, at the
- *     operator's request, rather than a landing page listing its two
- *     children.
+ *   - `activity` ("Faoliyat"), `documentsSection` ("Hujjatlar") and `Data`
+ *     ("Ma'lumotlar") open their submenu on hover/focus like every other
+ *     parent, but carry `clickable: false` — there is no page for a click
+ *     to land on, only a way in to their children. Their own `href` stays a
+ *     real route (so direct navigation and active-state highlighting still
+ *     work), it is simply never rendered as a link.
+ *
+ * `statistics` ("Statistika") used to be `Data`'s direct-click target and a
+ * child of it; the operator asked for it to be its own top-level item
+ * instead (2026-08-28), right after `home` — it no longer appears under
+ * `Data` at all.
  */
 export const mainNav: NavItem[] = [
   /*
@@ -172,6 +173,7 @@ export const mainNav: NavItem[] = [
     operator's request, first and childless.
   */
   { key: "home", href: "/" },
+  { key: "statistics", href: "/statistika" },
   {
     key: "centre",
     href: "/markaz",
@@ -211,11 +213,11 @@ export const mainNav: NavItem[] = [
   },
   {
     key: "Data",
-    // Opens Statistika directly, at the operator's request — not a
-    // section-index landing page. See the note above.
-    href: "/statistika",
+    href: "/malumotlar/ochiq-malumotlar",
+    // No direct-click target any more — Statistika left as its own
+    // top-level item. See the note above.
+    clickable: false,
     children: [
-      { key: "statistics", href: "/statistika" },
       { key: "openData", href: "/malumotlar/ochiq-malumotlar" },
       { key: "minRates", href: "/eng-kam-stavkalar" },
       { key: "appeals", href: "/ochiq-malumotlar/murojaatlar" },

@@ -2,21 +2,19 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
-import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { Link } from "@/i18n/navigation";
+import { Section } from "@/components/layout/section";
+import { getVacancyInfo } from "@/lib/data/vacancies";
 
 /*
-  The page's name lives in `messages/*.json` under `nav`, exactly once, and
-  both the browser-tab title and the on-page heading read it from there — see
-  the note on `navKey` in placeholder-page.tsx.
+  Bo'sh ish o'rinlari — the statutory hiring-conditions table plus the
+  interview-questions notice, both supplied whole by the operator
+  (2026-08-28); see content/vacancies.ts for sourcing and the flagged
+  "Suhbat savollari ro'yxati" link target.
 */
+
 const NAV_KEY = "vacancies";
 
-/*
-  Cached, not static-forever: this route serves whatever an editor has written
-  for it in the panel (see components/layout/placeholder-page.tsx), so it has
-  to be able to change without a deploy. `revalidatePath` in the panel's
-  publish action clears it at once; this window is the backstop.
-*/
 export const revalidate = 300;
 
 export async function generateMetadata({
@@ -29,12 +27,78 @@ export async function generateMetadata({
   return { title: t(NAV_KEY) };
 }
 
-export default async function Page({
+export default async function VacanciesPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  return <PlaceholderPage navKey={NAV_KEY} />;
+
+  const [tNav, tCommon, info] = await Promise.all([
+    getTranslations("nav"),
+    getTranslations("common"),
+    getVacancyInfo(),
+  ]);
+
+  return (
+    <Section tone="deep">
+      <nav aria-label="Breadcrumb" className="mb-6">
+        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
+          <li>
+            <Link
+              href="/"
+              className="hover:text-accent-foreground transition-colors"
+            >
+              {tCommon("breadcrumbHome")}
+            </Link>
+          </li>
+          <li aria-hidden="true">/</li>
+          <li className="text-foreground">{tNav(NAV_KEY)}</li>
+        </ol>
+      </nav>
+
+      <div className="mx-auto">
+        <h1
+          data-split
+          className="font-heading text-center text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
+        >
+          {tNav(NAV_KEY)}
+        </h1>
+
+
+        <div className="border-hairline bg-card mt-8 rounded-lg border p-5 sm:p-6">
+          <h2 className="font-heading text-center text-lg font-semibold text-balance sm:text-xl">
+            {info.interviewQuestions.title}
+          </h2>
+          <div className="mt-4 space-y-3 text-sm text-pretty">
+            {info.interviewQuestions.paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+          {/*
+            No verified URL for this link — see content/vacancies.ts. Shown
+            as a plain label, not an <a>, so nothing points at a guessed
+            address.
+          */}
+          <p className="border-hairline mt-4 border-t pt-4 text-sm font-medium">
+            {info.interviewQuestions.questionsListUrl ? (
+              <a
+                href={info.interviewQuestions.questionsListUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-accent-foreground underline underline-offset-2"
+              >
+                {info.interviewQuestions.questionsListLabel}
+              </a>
+            ) : (
+              <span className="text-muted-foreground">
+                {info.interviewQuestions.questionsListLabel}
+              </span>
+            )}
+          </p>
+        </div>
+      </div>
+    </Section>
+  );
 }
