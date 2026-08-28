@@ -90,8 +90,8 @@ export default async function ObjectsPage({
           className="text-muted-foreground mt-4 max-w-2xl text-sm text-pretty"
         >
           {isEmptyQuery(query)
-            ? "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida."
-            : "Tanlangan shartlar bo'yicha natijalar."}
+            ? "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida"
+            : "Tanlangan shartlar bo'yicha natijalar"}
         </p>
       </Section>
 
@@ -102,7 +102,7 @@ export default async function ObjectsPage({
         the homepage panel does not carry — the catalogue is where a date is
         worth combining with region, area and price. See search-widget.tsx.
       */}
-      <SearchWidget action={`/${locale}/obyektlar`} values={sp} auctionDay />
+      <SearchWidget action={`/${locale}/ijaraga-obyektlar`} values={sp} auctionDay />
 
       <Section tone="deep">
         <ObjectsExplorer
