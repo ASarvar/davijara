@@ -43,7 +43,7 @@ export async function PrivilegesView({
 
         <h1
           data-enter
-          className="font-heading max-w-3xl text-3xl font-semibold text-balance sm:text-4xl lg:text-5xl"
+          className="font-heading max-w-3xl text-xl font-semibold text-balance sm:text-2xl lg:text-3xl"
         >
           {t("pageTitle")}
         </h1>

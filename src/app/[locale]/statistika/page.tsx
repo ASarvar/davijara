@@ -30,18 +30,18 @@ export async function generateMetadata({
 }
 
 const MONTHS = [
-  "Yan",
-  "Fev",
-  "Mar",
-  "Apr",
+  "Yanvar",
+  "Fevral",
+  "Mart",
+  "Aprel",
   "May",
-  "Iyn",
-  "Iyl",
-  "Avg",
-  "Sen",
-  "Okt",
-  "Noy",
-  "Dek",
+  "Iyun",
+  "Iyul",
+  "Avgust",
+  "Sentyabr",
+  "Oktyabr",
+  "Noyabr",
+  "Dekabr",
 ];
 
 /** `×5,9` — the same shape the sold-lot card prints. */
@@ -333,7 +333,7 @@ export default async function StatisticsPage({
               a field. A strip says that as one object.
             */}
             <ChartFigure
-              caption={t("sizeNote")}
+              // caption={t("sizeNote")}
               legend={stats.area.map((b, i) => ({
                 label: b.label,
                 color: i === 0 ? "accent" : i < 3 ? "muted" : "faint",
@@ -371,7 +371,7 @@ export default async function StatisticsPage({
             description={t("regionBody")}
           />
           <ChartFigure
-            caption={t("scatterNote")}
+            // caption={t("scatterNote")}
             columns={[t("region"), t("soldLots"), t("perM2Short")]}
             rows={stats.byRegion.map((r) => [
               r.name,

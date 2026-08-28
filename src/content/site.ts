@@ -12,7 +12,7 @@ import type { SocialPlatform } from "@/components/layout/social-links";
 export const site = {
   name: "Davijara.uz",
   shortName: "Davijara",
-  operator: "Davlat mulki obyektlaridan foydalanish markazi",
+  operator: "Davlat mulki obyektlaridan samarali foydalanish markazi",
   tagline: "Davlat mulkini ijaraga berish yagona portali",
   description:
     "Davlat mulki obyektlarini ijaraga olish bo'yicha yagona portal: bo'sh obyektlarni qidirish, E-auksion savdolari, ijara imtiyozlari va onlayn shartnoma rasmiylashtirish.",
@@ -240,19 +240,18 @@ export const mainNav: NavItem[] = [
  * Five items is the practical ceiling before targets get too small.
  */
 export const bottomNav: Array<NavItem & { icon: string }> = [
-  { key: "home", href: "/", icon: "Home" },
-  { key: "objects", href: "/obyektlar", icon: "Building2" },
-  { key: "auction", href: "/e-auksion", icon: "Gavel" },
-  { key: "privileges", href: "/imtiyozlar", icon: "BadgePercent" },
-  { key: "cabinet", href: "/kirish", icon: "User" },
+  // { key: "home", href: "/", icon: "Home" },
+  // { key: "objects", href: "/obyektlar", icon: "Building2" },
+  // // { key: "auction", href: "/e-auksion", icon: "Gavel" },
+  // { key: "privileges", href: "/imtiyozlar", icon: "BadgePercent" },
+  // // { key: "cabinet", href: "/kirish", icon: "User" },
 ];
 
 export const footerNav: Array<{ heading: string; items: NavItem[] }> = [
   {
-    heading: "Portal",
+    heading: "Boʻlimlar",
     items: [
       { key: "objects", href: "/obyektlar" },
-      { key: "auction", href: "/e-auksion" },
       { key: "privileges", href: "/imtiyozlar" },
       // { key: "services", href: "/xizmatlar" },
       { key: "documents", href: "/hujjatlar" },

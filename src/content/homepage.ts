@@ -64,10 +64,10 @@ export const heroStats: Stat[] = [
 ];
 
 export const impactStats: Stat[] = [
-  { value: "469,9 mlrd", label: "so'm — 2026 yilgi ijara to'lovlari" },
+  { value: "469,9 mlrd", label: "soʻm — 2026 yilgi ijara toʻlovlari" },
   { value: "98%", label: "Elektron shaklda tuzilgan shartnomalar" },
-  { value: "3 kun", label: "Obyektni savdoga chiqarish o'rtacha muddati" },
-  { value: "24/7", label: "Portal orqali xizmatlardan foydalanish" },
+  { value: "3 kun", label: "Obyektni savdoga chiqarish oʻrtacha muddati" },
+  { value: "24/7", label: "Vebsayt orqali xizmatlardan foydalanish" },
 ];
 
 export const steps: Step[] = [
@@ -75,27 +75,27 @@ export const steps: Step[] = [
     number: "01",
     title: "Obyektni tanlang",
     description:
-      "Portalda hudud, tur va maydon bo'yicha mo'ljallangan obyektni toping.",
+      "davijar.uz saytida hudud, maydon va narx boʻyicha oʻzingizga kerakli obyektni toping.",
     icon: "MapPin",
   },
   {
     number: "02",
     title: "Auksionda qatnashing",
-    description: "«E-auksion» savdo platformasida onlayn ishtirok eting.",
+    description: "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting.",
     icon: "Gavel",
   },
   {
     number: "03",
     title: "Shartnoma tuzing",
     description:
-      "G'olib deb topilgach, shartnoma elektron raqamli imzo bilan imzolanadi.",
+      "Gʻolib deb topilgach, ijara shartnomasini elektron raqamli imzo bilan imzolang.",
     icon: "FileText",
   },
   {
     number: "04",
-    title: "To'lovni amalga oshiring",
+    title: "Toʻlovni amalga oshiring",
     description:
-      "Ijara to'lovlarini shaxsiy kabinet orqali onlayn kuzatib to'lang.",
+      "Ijara toʻlovlarini elektron toʻlov tizimlari orqali toʻlang.",
     icon: "CircleCheck",
   },
 ];
@@ -105,7 +105,7 @@ export const services: Service[] = [
     slug: "kalkulyator",
     title: "Ijara kalkulatori",
     description:
-      "Obyekt maydoni va joylashuviga ko'ra taxminiy ijara to'lovini hisoblang.",
+      "Obyekt maydoni va joylashuviga koʻra taxminiy ijara toʻlovini hisoblang.",
     icon: "Calculator",
     href: "/xizmatlar/kalkulyator",
   },
@@ -113,7 +113,7 @@ export const services: Service[] = [
     slug: "stavkalar",
     title: "Eng kam stavkalar",
     description:
-      "Hudud bo'yicha 1 m² uchun belgilangan eng kam ijara narxlarini ko'ring.",
+      "Hudud boʻyicha 1 m² uchun belgilangan eng kam ijara narxlarini koʻring.",
     icon: "TrendingDown",
     href: "/xizmatlar/stavkalar",
   },
@@ -121,7 +121,7 @@ export const services: Service[] = [
     slug: "ariza",
     title: "Ariza yuborish",
     description:
-      "Obyektni ijaraga chiqarish bo'yicha taklifni onlayn tartibda yuboring.",
+      "Obyektni ijaraga chiqarish boʻyicha taklifni onlayn tartibda yuboring.",
     icon: "Send",
     href: "/xizmatlar/ariza",
   },
@@ -129,7 +129,7 @@ export const services: Service[] = [
     slug: "shartnoma",
     title: "Shartnoma holati",
     description:
-      "Ijara shartnomangiz va to'lovlar holatini raqam bo'yicha kuzating.",
+      "Ijara shartnomangiz va toʻlovlar holatini raqam boʻyicha kuzating.",
     icon: "FileSearch",
     href: "/xizmatlar/shartnoma",
   },
@@ -141,21 +141,21 @@ export const privilegeCategories = [
     category: "ijtimoiy" as const,
     title: "Ijtimoiy himoya guruhlari",
     description:
-      "Ayollar, yoshlar va nogironligi bo'lgan shaxslar ishtirokidagi tadbirkorlik subyektlari uchun ijara to'lovidan 50–100% gacha chegirma.",
+      "Ayollar, yoshlar va nogironligi boʻlgan shaxslar ishtirokidagi tadbirkorlik subyektlari uchun ijara toʻlovidan 50–100% gacha chegirma.",
     icon: "Heart",
   },
   {
     category: "talim" as const,
     title: "Ta'lim va tarbiya muassasalari",
     description:
-      "Xususiy o'quv markazlari, kasb-hunar kolleji binolari va bolalar bog'chalari uchun bepul yoki yengillashtirilgan ijara sharoiti.",
+      "Xususiy oʻquv markazlari, kasb-hunar kolleji binolari va bolalar bogʻchalari uchun bepul yoki yengillashtirilgan ijara sharoiti.",
     icon: "GraduationCap",
   },
   {
     category: "it" as const,
     title: "IT va innovatsion loyihalar",
     description:
-      "IT-park hamda raqamli texnologiyalar sohasidagi korxonalar uchun bo'sh davlat obyektlaridan bepul foydalanish huquqi.",
+      "IT-park hamda raqamli texnologiyalar sohasidagi korxonalar uchun boʻsh davlat obyektlaridan bepul foydalanish huquqi.",
     icon: "Cpu",
   },
   {
@@ -191,9 +191,9 @@ export const featuredListings: Listing[] = [
   },
   {
     id: "lot-24364512",
-    title: "Ishlab chiqarish ombori, temir yo'l tarmog'iga yaqin",
+    title: "Ishlab chiqarish ombori, temir yoʻl tarmogʻiga yaqin",
     region: "samarqand",
-    address: "Samarqand vil., Kattaqo'rg'on tumani",
+    address: "Samarqand vil., Kattaqoʻrgʻon tumani",
     type: "ishlab-chiqarish",
     area: 480,
     pricePerYear: 124_000_000,
@@ -218,30 +218,30 @@ export const featuredListings: Listing[] = [
 export const documents: DocItem[] = [
   {
     id: "vm-660",
-    title: "VM qarori №660 «Davlat mulkini ijaraga berish tartibi to'g'risida»",
-    reference: "14.12.2023 · 1,9 MB",
-    url: "https://lex.uz",
+    title: "VM qarori №660 «Davlat mulkini ijaraga berish tartibi toʻgʻrisida»",
+    reference: "14.12.2023",
+    url: "https://lex.uz/docs/-6693926",
     fileType: "pdf",
   },
   {
     id: "stavkalar-2026",
     title: "2026-yil uchun eng kam ijara stavkalari jadvali",
-    reference: "12.01.2026 · 0,8 MB",
-    url: "https://lex.uz",
+    reference: "12.01.2026",
+    url: "https://davijara.uz/site/uz/eng-kam-stavkalar",
     fileType: "pdf",
   },
   {
     id: "namunaviy-shartnoma",
     title: "Ijara shartnomasining namunaviy shakli",
-    reference: "26.02.2026 · 0,4 MB",
-    url: "https://lex.uz",
+    reference: "26.02.2026",
+    url: "https://static.e-auksion.uz/files/Ijara_shartnomasi_namuna.pdf",
     fileType: "docx",
   },
   {
     id: "auksion-yoriqnoma",
-    title: "Onlayn-auksionda ishtirok etish yo'riqnomasi",
-    reference: "23.09.2026 · 2,1 MB",
-    url: "https://e-auksion.uz",
+    title: "Onlayn-auksionda ishtirok etish yoʻriqnomasi",
+    reference: "23.09.2026",
+    url: "https://e-auksion.uz/info?page=bid-lot",
     fileType: "pdf",
   },
 ];

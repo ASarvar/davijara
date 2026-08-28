@@ -25,18 +25,18 @@ export const faq: FaqItem[] = [
   {
     question: "Shartnoma qancha muddatga tuziladi?",
     answer:
-      "Ijara shartnomasi odatda 1 yildan 5 yilgacha bo'lgan muddatga tuziladi. Ijtimoiy soha uchun 10 yilgacha uzaytirilishi mumkin. Muddatni auktsion shartlari belgilaydi.",
+      "Ijara shartnomasi odatda 1 yildan 5 yilgacha bo'lgan muddatga tuziladi. Ijtimoiy soha uchun 10 yilgacha uzaytirilishi mumkin. Muddat auksion shartlarida belgilanadi.",
   },
   {
-    question: "E-auksionlarda qatnashish uchun elektron imzo kerakmi?",
+    question: "Auksionlarda qatnashish uchun elektron imzo kerakmi?",
     answer:
-      "Ha, elektron raqamli imzo (ERI) talab etiladi. Uni «My.gov.uz» portali yoki vakolatli markazlar orqali bepul olish mumkin. Jarayon taxminan 30 daqiqa davom etadi.",
+      "Ha, elektron raqamli imzo (ERI) talab etiladi. Uni «My.gov.uz» portali yoki Davlat xizmatlari markazlari orqali olish mumkin.",
   },
-  {
-    question: "Ijaraga olgan obyektni subijaraga bersak bo'ladimi?",
-    answer:
-      "Subijaraga berish qonun bo'yicha man etilgan. Faqatgina mulkdorning yozma roziligidan keyin ba'zi hollarda mumkin. Shartnomani diqqat bilan o'qib chiqing.",
-  },
+  // {
+  //   question: "Ijaraga olgan obyektni subijaraga bersak bo'ladimi?",
+  //   answer:
+  //     "Subijaraga berish qonun bo'yicha man etilgan. Faqatgina mulkdorning yozma roziligidan keyin ba'zi hollarda mumkin. Shartnomani diqqat bilan o'qib chiqing.",
+  // },
   {
     question: "To'lovni qanday usullarda amalga oshirish mumkin?",
     answer:
@@ -50,9 +50,9 @@ export const faq: FaqItem[] = [
   the site; "Davlat.uz" kept as listed.
 */
 export const partners = [
-  { label: "Davlat.uz", href: "https://davlat.uz", icon: "Landmark" },
-  { label: "Lex.uz", href: "https://lex.uz", icon: "Scale" },
-  { label: "My.gov.uz", href: "https://my.gov.uz", icon: "IdCard" },
+  { label: "davaktiv.uz", href: "https://davaktiv.uz", icon: "Landmark" },
+  { label: "lex.uz", href: "https://lex.uz", icon: "Scale" },
+  { label: "my.gov.uz", href: "https://my.gov.uz", icon: "IdCard" },
   { label: "e-auksion.uz", href: "https://e-auksion.uz", icon: "Gavel" },
   { label: "Markaziy bank", href: "https://cbu.uz", icon: "Building2" },
   { label: "Opendata.gov.uz", href: "https://opendata.uz", icon: "PieChart" },
