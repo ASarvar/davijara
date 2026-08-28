@@ -75,27 +75,27 @@ export const steps: Step[] = [
     number: "01",
     title: "Obyektni tanlang",
     description:
-      "davijar.uz saytida hudud, maydon va narx boʻyicha oʻzingizga kerakli obyektni toping.",
+      "davijara.uz saytida hudud, maydon va narx boʻyicha oʻzingizga kerakli obyektni tanlang",
     icon: "MapPin",
   },
   {
     number: "02",
     title: "Auksionda qatnashing",
-    description: "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting.",
+    description: "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting",
     icon: "Gavel",
   },
   {
     number: "03",
     title: "Shartnoma tuzing",
     description:
-      "Gʻolib deb topilgach, ijara shartnomasini elektron raqamli imzo bilan imzolang.",
+      "Gʻolib deb topilgach, ijara shartnomasini elektron raqamli imzo bilan imzolang",
     icon: "FileText",
   },
   {
     number: "04",
     title: "Toʻlovni amalga oshiring",
     description:
-      "Ijara toʻlovlarini elektron toʻlov tizimlari orqali toʻlang.",
+      "Ijara toʻlovlarini elektron toʻlov tizimlari orqali toʻlang",
     icon: "CircleCheck",
   },
 ];
@@ -162,7 +162,7 @@ export const privilegeCategories = [
     category: "boshqa" as const,
     title: "Sport, hunarmandchilik va hududlar",
     description:
-      "Sportchi-murabbiylar, hunarmandlar hamda uzoq va kam ta'minlangan hududlardagi tadbirkorlar uchun maxsus ijara stavkalari.",
+      "Sportchi-murabbiylar, hunarmandlar hamda 4-5-toifa hududlardagi tadbirkorlar uchun maxsus ijara stavkalari.",
     icon: "Star",
   },
 ];

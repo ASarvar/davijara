@@ -241,7 +241,7 @@ export const mainNav: NavItem[] = [
  */
 export const bottomNav: Array<NavItem & { icon: string }> = [
   // { key: "home", href: "/", icon: "Home" },
-  // { key: "objects", href: "/obyektlar", icon: "Building2" },
+  // { key: "objects", href: "/ijaraga-obyektlar", icon: "Building2" },
   // // { key: "auction", href: "/e-auksion", icon: "Gavel" },
   // { key: "privileges", href: "/imtiyozlar", icon: "BadgePercent" },
   // // { key: "cabinet", href: "/kirish", icon: "User" },
@@ -251,7 +251,7 @@ export const footerNav: Array<{ heading: string; items: NavItem[] }> = [
   {
     heading: "Boʻlimlar",
     items: [
-      { key: "objects", href: "/obyektlar" },
+      { key: "objects", href: "/ijaraga-obyektlar" },
       { key: "privileges", href: "/imtiyozlar" },
       // { key: "services", href: "/xizmatlar" },
       { key: "documents", href: "/hujjatlar" },

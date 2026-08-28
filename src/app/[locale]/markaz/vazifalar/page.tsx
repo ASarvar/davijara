@@ -108,8 +108,8 @@ export default async function DutiesPage({
         </p>
 
         <ol className="text-foreground/90 marker:text-muted-foreground mt-5 list-decimal space-y-3 pl-5 text-pretty">
-          {duties.items.map((item, i) => (
-            <li key={i}>{item}</li>
+          {duties.items.map((item) => (
+            <li key={item}>{item}</li>
           ))}
         </ol>
 
