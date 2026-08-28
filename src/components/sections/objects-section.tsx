@@ -40,7 +40,7 @@ export async function ObjectsSection({
 
     `withFilters` is the single place that knows which keys those are.
   */
-  const moreHref = withFilters("/obyektlar", searchParams);
+  const moreHref = withFilters("/ijaraga-obyektlar", searchParams);
 
   return (
     <Section tone="deep" id="obyektlar-xarita" className="scroll-mt-24">

@@ -81,7 +81,7 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
   return (
     <li data-reveal="left">
       <Link
-        href={`/obyektlar?hudud=${summary.slug}`}
+        href={`/ijaraga-obyektlar?hudud=${summary.slug}`}
         className="group hover:bg-secondary/60 focus-visible:ring-ring flex flex-col gap-3 px-4 py-3.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none sm:flex-row sm:items-center sm:gap-6"
       >
         <div className="flex min-w-0 flex-1 items-start gap-2.5">
@@ -313,7 +313,7 @@ export function ObjectsExplorer({
 
   const detailHref = useCallback(
     (listing: Listing) =>
-      listing.auctionUrl ?? `/${locale}/obyektlar/${listing.id}`,
+      listing.auctionUrl ?? `/${locale}/ijaraga-obyektlar/${listing.id}`,
     [locale],
   );
 

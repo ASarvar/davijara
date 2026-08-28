@@ -81,7 +81,7 @@ export const steps: Step[] = [
   {
     number: "02",
     title: "Auksionda qatnashing",
-    description: "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting",
+    description: "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting va gʻolib bo‘ling",
     icon: "Gavel",
   },
   {

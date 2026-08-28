@@ -98,12 +98,12 @@ export default async function AboutPage({
           </h1>
 
           {/* ── Tashkil etilishi ───────────────────────────────────────── */}
-          <p data-reveal="fade" className="text-muted-foreground mt-6 text-sm">
+          {/* <p data-reveal="fade" className="text-muted-foreground mt-6 text-sm">
             {t("establishedBy")}: {establishmentOrder.reference}{" "}
             <time dateTime={establishmentOrder.date}>
               ({formatDate(establishmentOrder.date)})
             </time>
-          </p>
+          </p> */}
         </div>
 
         <p data-reveal="fade" className="text-foreground/90 mt-4 text-pretty">
