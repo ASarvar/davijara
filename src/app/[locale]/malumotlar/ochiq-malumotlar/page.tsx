@@ -29,6 +29,7 @@ import {
   getLatestPeriod,
   getOpenDataForPeriod,
 } from "@/lib/data/open-data";
+import { withBasePath } from "@/lib/base-path";
 
 /*
   Ochiq maʼlumotlar — one quarter's worth of the Centre's nine budget-
@@ -184,7 +185,9 @@ export default async function OpenDataPage({
                     {entry.files.map((file, i) => (
                       <Button key={i} asChild variant="outline" size="sm">
                         <a
-                          href={file.path}
+                          // See lib/base-path.ts — a plain <a> to a public/
+                          // file is not covered by Next's basePath rewriting.
+                          href={withBasePath(file.path)}
                           target="_blank"
                           rel="noopener noreferrer"
                           download

@@ -8,6 +8,7 @@ import { Section } from "@/components/layout/section";
 import { IconTile } from "@/components/common/icon-tile";
 import { Button } from "@/components/ui/button";
 import { getMinRates } from "@/lib/data/min-rates";
+import { withBasePath } from "@/lib/base-path";
 
 /*
   Eng kam stavkalar — one downloadable PDF per region: the document
@@ -121,7 +122,10 @@ export default async function MinRatesPage({
                 </span>
                 <Button asChild variant="outline" size="sm">
                   <a
-                    href={region.pdf}
+                    // Plain HTML anchor to a public/ file — Next's basePath
+                    // rewriting only covers its own <Link>/asset URLs, not a
+                    // literal href like this one. See lib/base-path.ts.
+                    href={withBasePath(region.pdf)}
                     target="_blank"
                     rel="noopener noreferrer"
                     download

@@ -221,16 +221,6 @@ export const privileges: Privilege[] = [
     legalBasis: "PQ-3301, 29.09.2017-y. (9-band)",
   },
   {
-    id: 22,
-    category: "talim",
-    tag: "Ta'lim muassasalari",
-    title: "Qishloq maktablari oshxonasidan bepul foydalanish",
-    description: "Qishloq joylardagi ta'lim muassasalari joylashgan hududning ijtimoiy-iqtisodiy rivojlanish holatidan kelib chiqib, ularning oshxonalari umumiy ovqatlanish faoliyati bilan shug'ullanuvchi tadbirkorlik subyektlariga bepul foydalanish huquqi asosida beriladi (vakolatli komissiya tomonidan ko'rib chiqiladi).",
-    subject: "Umumiy ovqatlanish faoliyati bilan shug'ullanuvchi tadbirkorlik subyektlari",
-    duration: "Doimiy",
-    legalBasis: "VM-132, 02.05.2016-y. (5-band)",
-  },
-  {
     id: 23,
     category: "boshqa",
     tag: "Hunarmandchilik va meros",
