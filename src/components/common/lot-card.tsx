@@ -136,8 +136,24 @@ export function LotCard({
               narrow card, and one card wrapping while its neighbours do not
               is another way the row height moves. */}
           <p className="text-muted-foreground mt-1 truncate text-sm">
-            {`Maydoni: ${formatArea(listing.area)}`}
-            {listing.lotNumber ? ` · Lot №${listing.lotNumber}` : ""}
+            {/*
+              `area` is 0 for lots the "floor area" question does not apply
+              to — vehicles among them, since `rent_area` is a property field
+              the auction service sends back empty for a car lot rather than
+              omitting it. "Maydoni: 0 m²" would read as a real, verified
+              measurement, so the line is dropped instead of printed as zero.
+
+              No replacement figure (manufacture year, mileage) is shown in
+              its place: `ApiLot` (see the fetch below) carries no such field
+              for any lot, so there is nothing to read it from without
+              inventing a number — see CLAUDE.md's "never invent facts".
+            */}
+            {[
+              listing.area > 0 ? `Maydoni: ${formatArea(listing.area)}` : null,
+              listing.lotNumber ? `Lot №${listing.lotNumber}` : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
           </p>
 
           {/*

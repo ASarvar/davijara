@@ -562,7 +562,11 @@ export function ListingsMap({
                     wider than the popup. */}
                 <span className="block min-w-0 flex-1 px-3.5 pt-1 pb-3.5 sm:pt-0">
                   <span className="block text-xs text-[#3d4a6b]">
-                    {regionName(listing.region)} · {formatArea(listing.area)}
+                    {/* Same "0 m² is not a measurement" rule as the marker
+                        icon above — see `markerIconFor`. */}
+                    {listing.area > 0
+                      ? `${regionName(listing.region)} · ${formatArea(listing.area)}`
+                      : regionName(listing.region)}
                   </span>
 
                   {/*
