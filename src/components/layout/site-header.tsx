@@ -93,11 +93,7 @@ export async function SiteHeader() {
               wherever their widths happen to leave off, not at the true
               centre. Hidden below `sm`, where centring it on a 375px row
               would sit it on top of the logo. */}
-          <div className="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
-            {/* pointer-events restored here, on the badge alone — the wrapper
-                above spans the full band so it can centre this, but must stay
-                click-through or it would sit on top of the logo and the
-                controls and swallow their clicks. */}
+          {/* <div className="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
             <span
               title={tTopbar("testModeDescription")}
               className="border-outline bg-accent text-accent-foreground pointer-events-auto flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-xs font-medium"
@@ -106,17 +102,6 @@ export async function SiteHeader() {
                 aria-hidden="true"
                 className="bg-accent-foreground size-1.5 shrink-0 rounded-full"
               />
-
-              {/*
-                Per-letter shimmer. The letters are split for the animation
-                ONLY, so they are hidden from assistive tech and the real
-                label is carried by the sr-only span below — a screen reader
-                must hear the sentence, not a string of separate letters.
-
-                The letters live in their own wrapper rather than as direct
-                children of the badge: the badge is `gap-1.5`, which would
-                otherwise open a 6px gap between every character.
-              */}
               <span aria-hidden="true" className="test-mode-text">
                 {(() => {
                   const chars = Array.from(tTopbar("testMode"));
@@ -127,12 +112,6 @@ export async function SiteHeader() {
                       <span
                         key={i}
                         className="test-mode-letter"
-                        /*
-                          A 0–1 position through the label, not a raw index.
-                          CSS multiplies it by one fixed sweep duration, so the
-                          wave takes the same time to cross however long the
-                          label is.
-                        */
                         style={
                           { "--pos": i / chars.length } as React.CSSProperties
                         }
@@ -145,7 +124,7 @@ export async function SiteHeader() {
               </span>
               <span className="sr-only">{tTopbar("testMode")}</span>
             </span>
-          </div>
+          </div> */}
 
           {/*
             THE CONTACT STACK, right-aligned, three rows.
@@ -172,7 +151,6 @@ export async function SiteHeader() {
               <ThemeToggle />
               <AccessibilityDialog />
             </div>
-
             {/*
               PHONE ONLY. The email was removed from this band — it lives on
               /aloqa now, alongside the address, the hours and the map, which
@@ -192,7 +170,6 @@ export async function SiteHeader() {
               <Phone aria-hidden="true" className="size-3.5 shrink-0" />
               {contacts.phone}
             </a>
-
             <SocialLinks className="flex items-center gap-3" />
           </div>
 

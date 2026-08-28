@@ -181,7 +181,7 @@ export const mainNav: NavItem[] = [
       { key: "about", href: "/markaz" },
       { key: "duties", href: "/markaz/vazifalar" },
       { key: "structure", href: "/markaz/tuzilma" },
-      { key: "reception", href: "/markaz/qabul-kunlari" },
+      { key: "reception", href: "/markaz/rahbariyat" },
       { key: "anticorruption", href: "/markaz/korrupsiyaga-qarshi" },
       { key: "territorial", href: "/markaz/hududiy-boshqarmalar" },
       { key: "apparatus", href: "/markaz/markaziy-apparat" },
@@ -194,7 +194,7 @@ export const mainNav: NavItem[] = [
     // No page renders at /faoliyat any more — see the note above.
     clickable: false,
     children: [
-      { key: "vacantObjects", href: "/obyektlar" },
+      { key: "vacantObjects", href: "/ijaraga-obyektlar" },
       { key: "leasedObjects", href: "/sotilgan-obyektlar" },
       { key: "leasePrivileges", href: "/imtiyozlar" },
       { key: "faq", href: "/faoliyat/savollar" },
