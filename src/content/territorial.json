@@ -2,12 +2,12 @@
   "qoraqalpogiston": {
     "region": "Qoraqalpogʻiston Respublikasi",
     "fullName": "Yembergenov Babur Baxtibaevich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "230100, Qoraqalpogʻiston Respublikasi, Nukus shahri, A.Temur koʻchasi, 112a-uy",
     "lat": 42.45684497918053,
     "lng": 59.61165731545943,
     "phone": "+998 61 222 96 91",
-    "email": "krmarkazbushbino@mail.ru",
+    "email": "qr_markaz@davaktiv.uz",
     "receptionHours": "Dushanba-Juma",
     "appeals": "https://t.me/qoraqalpoq_ijara_bot",
     "photo": "/hududiy-boshqarmalar/qoraqalpogiston.jpeg"
@@ -15,7 +15,7 @@
   "andijon": {
     "region": "Andijon viloyati",
     "fullName": "Yuldashev Xurshidbek Baxodirovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "170100, Andijon shahri, A.Navoiy koʻchasi, 126-uy",
     "lat": 40.78148697932435,
     "lng": 72.34793631540708,
@@ -28,7 +28,7 @@
   "buxoro": {
     "region": "Buxoro viloyati",
     "fullName": "Ergashev Fayzillo Kamarovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "200100, Buxoro shahri, I.Karimov koʻchasi, 10-uy",
     "lat": 39.76965297944558,
     "lng": 64.42811631537637,
@@ -41,7 +41,7 @@
   "jizzax": {
     "region": "Jizzax viloyati",
     "fullName": "Xalikov Dilshod Absamatovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "130100, Jizzax shahri, Sh.Rashidov koʻchasi, 63-uy",
     "lat": 40.13302297939914,
     "lng": 67.8207193153873,
@@ -54,7 +54,7 @@
   "qashqadaryo": {
     "region": "Qashqadaryo viloyati",
     "fullName": "Toshev Sanjarbek Samatovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "180100, Qarshi shahri, A.Temur koʻchasi, 43-uy",
     "lat": 38.854302979577334,
     "lng": 65.79079331534909,
@@ -67,8 +67,8 @@
   "navoiy": {
     "region": "Navoiy viloyati",
     "fullName": "Sharipov Akmal Abdurashitovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
-    "address": "210100, Navoiy shahri, C.Ayniy koʻchasi, 27-uy",
+    "title": "Hududiy boshqarma boshligʻi",
+    "address": "210100, Navoiy shahar, Ayniy ko‘chasi, 27 uy",
     "lat": 40.08111097940557,
     "lng": 65.37328331538573,
     "phone": "+998 79 220 62 14",
@@ -80,7 +80,7 @@
   "namangan": {
     "region": "Namangan viloyati",
     "fullName": "Isamiddinov Sardorbek Maxmutali oʻgʻli",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "160100, Namangan shahri, A.Navoiy koʻchasi, 72-uy",
     "lat": 40.99762197930183,
     "lng": 71.64432431541368,
@@ -93,8 +93,8 @@
   "samarqand": {
     "region": "Samarqand viloyati",
     "fullName": "Yangiboyev Abduvoxid Alisherovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
-    "address": "140100, Samarqand shahri, Kamol Otaturk koʻchasi, 21-uy",
+    "title": "Hududiy boshqarma boshligʻi",
+    "address": "140100, Samarqand shahri, Spitamen shox ko‘chasi, 157 A uy",
     "lat": 39.65064097946154,
     "lng": 66.95752731537279,
     "phone": "+998 66 221 70 22",
@@ -106,7 +106,7 @@
   "sirdaryo": {
     "region": "Sirdaryo viloyati",
     "fullName": "Kurbonov Nurbek Isroilovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "120100, Guliston shahri, Oʻzbekiston shoh koʻchasi, 3-uy",
     "lat": 40.51160897935414,
     "lng": 68.76789131539881,
@@ -119,7 +119,7 @@
   "surxondaryo": {
     "region": "Surxondaryo viloyati",
     "fullName": "Namozov Yoʻldosh Xoliyarovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "190100, Termiz shahri, M.Qoshgʻariy koʻchasi, 36a-uy",
     "lat": 37.228221979862596,
     "lng": 67.27153031530202,
@@ -132,7 +132,7 @@
   "fargona": {
     "region": "Fargʻona viloyati",
     "fullName": "Usmanov Rustamjon Mansurovich",
-    "title": "Hududiy boshqarmasi boshligʻi oʻrinbosari",
+    "title": "Hududiy boshqarma boshligʻi oʻrinbosari",
     "address": "150100, Fargʻona shahri, A.Navoiy koʻchasi, 17-uy",
     "lat": 40.37832297936956,
     "lng": 71.78659831539474,
@@ -158,7 +158,7 @@
   "xorazm": {
     "region": "Xorazm viloyati",
     "fullName": "Sabirov Baxtiyor Matyakubovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "220100, Urganch shahri, Al-Xorazmiy koʻchasi, 23-uy",
     "lat": 41.550469979249485,
     "lng": 60.6273513154309,
@@ -171,8 +171,8 @@
   "toshkent-shahar": {
     "region": "Toshkent shahar",
     "fullName": "Kadirov Ilxom Abduxamidovich",
-    "title": "Hududiy boshqarmasi boshligʻi",
-    "address": "100000, Toshkent shahri, Mirobod tumani, Matbuotchilar koʻchasi, 32-uy",
+    "title": "Hududiy boshqarma boshligʻi",
+    "address": "100000, Chilonzor tuman, Islom Karimov ko‘chasi, 55-uy",
     "lat": 41.310608279271406,
     "lng": 69.27349621542335,
     "phone": "+998 95 341 31 61",

@@ -111,16 +111,6 @@ export const privileges: Privilege[] = [
     legalBasis: "Tegishli hukumat qarorlari asosida",
   },
   {
-    id: 11,
-    category: "boshqa",
-    tag: "Sport",
-    title: "Olimpiya g'oliblari tashkil etgan sport muassasalariga chegirma",
-    description: "Yozgi Olimpiya va Paralimpiya o'yinlarida g'olib hamda sovrindor bo'lgan sportchilar tashkil etgan nodavlat sport-ta'lim muassasalari uchun zarur bino va inshootlarning ijara to'lovi 2024-yil 1-yanvardan 2026-yil 1-yanvargacha 50 foizga kamaytiriladi.",
-    subject: "Nodavlat sport-ta'lim muassasalari",
-    duration: "2024–2026-yil 1-yanvargacha",
-    legalBasis: "PQ-302, 01.07.2022-y. (1.2, 1.3-bandlar)",
-  },
-  {
     id: 12,
     category: "ijtimoiy",
     tag: "Ijtimoiy himoya",

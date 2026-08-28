@@ -23,7 +23,5 @@ export const appealSources: AppealSourceStat[] = [
   { source: "Rahbarga murojaat", total: 6, inProgress: 0, closed: 6 },
   { source: "Ishonch telefoni", total: 10, inProgress: 0, closed: 10 },
   { source: "Call markaz", total: 20, inProgress: 0, closed: 20 },
-  { source: "Prezident xalq qabulxonasi", total: 5, inProgress: 0, closed: 0 },
   { source: "Xalq qabulxonasi", total: 2, inProgress: 1, closed: 1 },
-  { source: "Shaxsiy qabul", total: 1, inProgress: 0, closed: 0 },
 ];
