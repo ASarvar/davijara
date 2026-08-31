@@ -67,6 +67,7 @@ in `.claude/skills/`, which load only when the work needs them:
 | `davijara-theming` | any colour, contrast, border, shadow, `globals.css`, or accessibility mode |
 | `davijara-ui` | building a page or section, `"use client"`, filters, or motion |
 | `davijara-data` | `lib/data/*`, hero statistics, or anything reading an upstream API |
+| `davijara-admin` | `/admin`, `src/lib/{db,auth,media}/`, admin data modules, or panel migrations |
 
 The rules below are binding on their own; the skills explain WHY and carry the
 numbers. If a change touches one of those areas, load the skill first — the
@@ -129,36 +130,11 @@ NOT be derived are in `davijara-data`.
 
 ## Shared primitives
 
-`src/components/common/` holds the deduplicated building blocks. Reach for
-these before writing a new card or icon tile — the same shapes were previously
-copy-pasted across nine section files with drifting radii and three different
-hover treatments.
-
-| Primitive | Use |
-|---|---|
-| `SurfaceCard` | every card surface; `interactive` adds the hover lift |
-| `IconTile` | the accent tile behind a section icon (`sm`/`md`/`lg`) |
-| `ActionLink` | "see all →" links; animates the underline and arrow |
-| `Eyebrow` | uppercase label; `as="h2"` when it IS the section's heading |
-| `StatList` | figure + label grid (hero, impact band) |
-| `SelectField` | labelled native `<select>` with a visible chevron |
-
-**Native `<select>` needs two things or it breaks.** `appearance-none` removes
-the dropdown arrow, so a replacement chevron must be drawn (with
-`pointer-events-none`) or the control looks like a plain text input. And the
-option popup inherits `color` from the select while the UA paints its own
-background — white-on-white on a dark surface. `color-scheme` is bound to the
-tone in `globals.css` to fix that at the root; use `SelectField` and both are
-handled.
-
-`src/components/common/placeholder/` holds inline-SVG imagery. These are
-**abstract architectural motifs, never photographs** — a photo on a listing
-card reads as a photo *of that property*, which we cannot support for a state
-asset. They are inline SVG so they inherit the tone tokens, cost no request,
-and need no `next/image` config.
-
-Note `ui/` is still shadcn CLI output — do not hand-edit it, and do not put
-project primitives there.
+`src/components/common/` holds the deduplicated card, tile and link building
+blocks — reach for those before writing a new one. The full catalogue, the
+native `<select>` trap and the placeholder-SVG rule live in the `davijara-ui`
+skill. `ui/` is shadcn CLI output: do not hand-edit it, and do not put project
+primitives there.
 
 ## i18n
 
@@ -194,67 +170,15 @@ Editors write news and pages here instead of through a git commit. It sits
 chrome, and `admin` is excluded from the proxy matcher so it is not
 locale-redirected. The content it edits is still trilingual.
 
-| Where | What |
-|---|---|
-| `src/lib/db/` | SQLite (better-sqlite3, pinned `^12`), append-only migrations |
-| `src/lib/auth/` | scrypt passwords, DB-backed sessions, rate limit, audit log |
-| `src/lib/media/` | uploads: byte-sniffed type, content-addressed, served by a route |
-| `src/lib/data/page-routes.ts` | which of the site's own routes an editor can fill in |
-| `src/lib/data/navigation.ts` | the menu: `mainNav` in code, plus pages the panel placed |
-| `src/types/blocks.ts` | the block model editors compose content out of |
-| `src/app/admin/` | `(panel)` route group = signed-in; `login` / `setup` outside it |
-| `scripts/admin-user.mjs` | break-glass CLI for a locked-out administrator |
+Everything else — where the pieces live (`src/lib/{db,auth,media}/`,
+`navigation.ts`, `blocks.ts`) and the seven load-bearing rules (`getDb()`
+scoping, per-action guards, `DATA_DIR`, cookie `basePath`, the build never
+opening the DB, editable menus, plain-text editor content) — is in the
+**`davijara-admin` skill**. Load it before touching `src/app/admin/`,
+`src/lib/{db,auth,media}/`, the admin data modules, or panel migrations.
 
-Seven rules that are load-bearing, each written against a failure that
-already happened or would be silent:
-
-1. **`getDb()` is called inside the function that queries — never hoisted to
-   module scope.** `next build` collects page data in 23 worker processes; an
-   eager module-level connection made all 23 race to run the migrations and
-   the build died with `SQLITE_BUSY`.
-2. **Every page *and every Server Action* calls its own guard.** A layout
-   check only protects rendering; a Server Action is a POST endpoint that can
-   be reached without the layout ever running. `requireUser()` redirects,
-   `requireUserForAction()` throws — an action must not redirect, because a
-   redirect reads as success to the client.
-3. **The database and uploads live in `DATA_DIR` (`shared/`), never in the
-   release tree.** `deploy.sh` keeps five releases; anything written inside
-   one is deleted five deploys later, silently. The systemd unit needs a
-   matching `ReadWritePaths` or `ProtectSystem=strict` makes it read-only.
-4. **The session cookie is scoped to `basePath`, not `/`.** `davijara.uz/`
-   belongs to other projects on the same server — a `/` cookie would send
-   admin session tokens to all of them.
-5. **The build never opens the database.** `getDb()` returns an in-memory
-   handle during `phase-production-build`, so prerendered routes get empty
-   results instead of the build creating root-owned files the service cannot
-   write. Verified by building with a throwaway `DATA_DIR` and checking that
-   nothing was written to it.
-6. **Every menu is editable — the operator reversed this rule from the panel
-   build.** `mainNav` in `src/content/site.ts` still exists, but only as the
-   seed migration 8 copied into `menu_sections` and the fallback
-   `getNavigation()` returns if the database can't be read. The five
-   institutional sections (Markaz, Faoliyat, Hujjatlar, Ochiq maʼlumotlar,
-   Yangiliklar) can be renamed, reordered or deleted from `/admin/menyu`
-   exactly like a section an operator created — see the note at the top of
-   `lib/data/navigation.ts` for how a renamed row keeps its 26 hard-coded
-   site routes (matched by `key`, not by label) and what deleting one
-   actually does to them. Only `home` and `contact` stay literal, plain
-   links with no dropdown. A menu with no page under it is skipped rather
-   than rendered, so an empty one is never a dead entry. Because the header
-   sits in the root layout, a placement or menu change revalidates `/` as a
-   layout, and `[locale]/layout.tsx` carries a 300 s window so a fresh
-   deploy's build-time menus cannot stay wrong.
-7. **Editor content is plain text; nothing renders editor HTML.** Blocks
-   store strings, `BlockContent` renders them as React children, and there is
-   no `dangerouslySetInnerHTML` anywhere in that path. That is what makes
-   editor-supplied content safe without a sanitiser — do not add one, add a
-   structured field instead. Uploads follow the same principle: the type comes
-   from the file's bytes, never its name or `Content-Type`, and SVG is
-   refused because it is a document that can carry script.
-
-Statutory content is being moved here at the operator's request, which is what
-the audit log's full before/after snapshots are for: they replace the reviewed
-git diff that used to be the only way that text could change. Until that
+Statutory content is being moved into the panel at the operator's request,
+which is what the audit log's full before/after snapshots are for. Until that
 migration lands, non-negotiable 1 above still applies as written.
 
 ## Still to do

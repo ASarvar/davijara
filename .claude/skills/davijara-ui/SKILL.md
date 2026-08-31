@@ -34,6 +34,36 @@ calling it done — the light theme's `deep` tone is a PALE surface, and code
 that assumes `deep` means navy has shipped a black-on-black section here
 before.
 
+## Shared primitives
+
+`src/components/common/` holds the deduplicated building blocks. Reach for
+these before writing a new card or icon tile — the same shapes were previously
+copy-pasted across nine section files with drifting radii and three different
+hover treatments.
+
+| Primitive | Use |
+|---|---|
+| `SurfaceCard` | every card surface; `interactive` adds the hover lift |
+| `IconTile` | the accent tile behind a section icon (`sm`/`md`/`lg`) |
+| `ActionLink` | "see all →" links; animates the underline and arrow |
+| `Eyebrow` | uppercase label; `as="h2"` when it IS the section's heading |
+| `StatList` | figure + label grid (hero, impact band) |
+| `SelectField` | labelled native `<select>` with a visible chevron |
+
+**Native `<select>` needs two things or it breaks.** `appearance-none` removes
+the dropdown arrow, so a replacement chevron must be drawn (with
+`pointer-events-none`) or the control looks like a plain text input. And the
+option popup inherits `color` from the select while the UA paints its own
+background — white-on-white on a dark surface. `color-scheme` is bound to the
+tone in `globals.css` to fix that at the root; use `SelectField` and both are
+handled.
+
+`src/components/common/placeholder/` holds inline-SVG imagery. These are
+**abstract architectural motifs, never photographs** — a photo on a listing
+card reads as a photo *of that property*, which we cannot support for a state
+asset. They are inline SVG so they inherit the tone tokens, cost no request,
+and need no `next/image` config.
+
 ## Server Components by default
 
 The homepage ships **no page-level JavaScript**. Only add `"use client"` when
