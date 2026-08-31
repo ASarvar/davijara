@@ -8,7 +8,7 @@ import { site } from "@/content/site";
 /** Every routable path, without locale prefix. */
 const staticPaths = [
   "",
-  "/obyektlar",
+  "/ijaraga-obyektlar",
   "/sotilgan-obyektlar",
   "/statistika",
   "/e-auksion",
