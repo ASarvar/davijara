@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
+import { notFound } from "next/navigation";
 
 import { Link } from "@/i18n/navigation";
 import { getNavigation } from "@/lib/data/navigation";
@@ -33,6 +34,18 @@ export async function SectionIndexPage({
   const nav = await getNavigation(await getLocale());
   const section = nav.find((item) => item.key === navKey);
   const children = section?.children ?? [];
+
+  /*
+    A section that does not resolve, or that has nothing under it, renders a
+    heading over an empty grid — which is what /ochiq-malumotlar served for as
+    long as it passed `openData`, a menu CHILD rather than one of the five
+    section keys `nav` actually holds. On a state portal an empty page is worse
+    than no page: it reads as content that failed to load rather than a wrong
+    address, and the reader cannot tell which. 404 instead — consistent with
+    the menu, which already skips a section with no page under it rather than
+    rendering a dead entry.
+  */
+  if (children.length === 0) notFound();
 
   return (
     <Section tone="deep" className="flex-1">

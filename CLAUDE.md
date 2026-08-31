@@ -163,6 +163,18 @@ directly. Sizes, the `<picture>` rationale and the favicon note are in
 Intl output can differ between Node and the browser, which is a hydration
 mismatch waiting to happen. Keep it deterministic.
 
+## Maps
+
+Both Leaflet maps — the listings map (the `xarita` tab on `/ijaraga-obyektlar`)
+and the office map on `/aloqa` — are built, clustered, and draw real
+coordinates. The basemap is OpenStreetMap's own tile server, and
+`src/lib/map-tiles.ts` carries the full record of which providers were ruled
+out and why: read that comment before changing the tile source, and get any
+new URL template from the provider's own docs rather than guessing it.
+
+**Do not approximate Uzbekistan's borders by hand**, and do not restore the
+legacy Google tile scraping.
+
 ## Boshqaruv paneli (`/admin`)
 
 Editors write news and pages here instead of through a git commit. It sits
@@ -186,8 +198,6 @@ migration lands, non-negotiable 1 above still applies as written.
 - **Admin panel: complete.** News, images, pages, users, the audit log, the
   24 privileges and both Markaz documents are editable. `content/structure.ts`
   is the one deliberate exception.
-- Remaining `davijara-v2.html` features: the Chart.js charts
-  (line/doughnut/bar). Needs real data first — see below.
 - Replace the placeholder pages with real content.
 - **Three built sections are not on the homepage**: `services` (light),
   `impact` (deep), `partners` (deep). They render correctly and are left out
@@ -209,6 +219,3 @@ migration lands, non-negotiable 1 above still applies as written.
   with server-provided ISO end timestamps so countdowns survive clock skew.
 - **Chat FAB.** Inert UI with no backend behind it.
 - Self-host photography and switch listing cards to `next/image`.
-- A real geographic map at `/obyektlar/xarita`, from proper GeoJSON and an
-  openly-licensed tile provider. **Do not approximate Uzbekistan's borders by
-  hand**, and do not restore the legacy Google tile scraping.
