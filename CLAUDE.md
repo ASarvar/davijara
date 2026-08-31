@@ -184,7 +184,7 @@ locale-redirected. The content it edits is still trilingual.
 
 Everything else — where the pieces live (`src/lib/{db,auth,media}/`,
 `navigation.ts`, `blocks.ts`) and the seven load-bearing rules (`getDb()`
-scoping, per-action guards, `DATA_DIR`, cookie `basePath`, the build never
+scoping, per-action guards, `DATA_DIR`, the admin cookie path, the build never
 opening the DB, editable menus, plain-text editor content) — is in the
 **`davijara-admin` skill**. Load it before touching `src/app/admin/`,
 `src/lib/{db,auth,media}/`, the admin data modules, or panel migrations.

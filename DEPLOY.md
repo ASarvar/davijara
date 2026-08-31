@@ -1,8 +1,10 @@
 # Deploy va yangilash
 
-Bu sayt `davijara.uz/site` manzilida ishlaydi — domenning ildizida (`/`)
-boshqa bir loyiha turibdi, shuning uchun hech qachon standart Next.js
-deploy'i emas, **sub-path** ostida ishlaydigan deploy kerak.
+Bu sayt `davijara.uz` manzilida — domen ildizida — ishlaydi. Ilgari u
+`davijara.uz/site` da turgan; davlat mulki monitoringi endi `/obyektlar`
+manzilida. Domen HALI HAM bo'lishilgan — `/obyektlar`, `/kadastr`,
+`/api2`, `*.php` va `/api/search` boshqa loyihalarga tegishli — shuning
+uchun sub-path mexanizmi olib tashlanmagan, faqat bo'sh qoldirilgan.
 
 ## Server topologiyasi — uchta bosqich
 
@@ -13,7 +15,7 @@ brauzer ──https──> markazsrv   (tashqi server, TLS shu yerda tugaydi)
                    markaz (192.168.1.248, nginx/1.14.2)
                        │  http
                        ▼
-                   [::1]:3001   (Next.js, basePath "/site")
+                   [::1]:3001   (Next.js, basePath bo'sh — ildizda)
 ```
 
 Ikkita alohida server bor, va bu tez-tez unutiladi:
@@ -56,8 +58,8 @@ nano /var/www/davijara/shared/.env
 
 | O'zgaruvchi | Izoh |
 |---|---|
-| `NEXT_PUBLIC_SITE_URL` | `https://davijara.uz/site` — sub-path bilan birga |
-| `NEXT_PUBLIC_BASE_PATH` | `/site` |
+| `NEXT_PUBLIC_SITE_URL` | `https://davijara.uz` — sub-path yo'q |
+| `NEXT_PUBLIC_BASE_PATH` | **bo'sh qoldiring** — ildizda ishlaydi |
 | `LISTINGS_API_URL`, `API_USER`, `API_PASSWORD` | Auksion lotlari API'si |
 
 ```bash
@@ -72,9 +74,11 @@ systemctl daemon-reload && systemctl enable davijara
 ```
 
 [nginx-site-location.conf](deploy/nginx-site-location.conf) dagi
-`location /site { … }` blokini **markaz**dagi mavjud `davijara.uz` vhost
-ichiga qo'ying (bu vhost boshqa loyihalar bilan bo'lishilgan — domen ildizi,
-`/kadastr`, `/new`, `/api/search` boshqa narsaga tegishli), so'ng:
+bloklarni **markaz**dagi mavjud `davijara.uz` vhost ichiga qo'ying (bu vhost
+boshqa loyihalar bilan bo'lishilgan — `/kadastr`, `/api/search` va PHP
+handler boshqa narsaga tegishli, ularga tegmang). Eski
+`location = / { return 301 /site; }` qatorini **albatta o'chiring** —
+u endi mavjud bo'lmagan manzilga qaytaradi. So'ng:
 
 ```bash
 nginx -t && systemctl reload nginx
@@ -120,7 +124,7 @@ Skript quyidagilarni ketma-ket bajaradi:
 Muvaffaqiyatli tugagach:
 
 ```bash
-curl -I https://davijara.uz/site/uz
+curl -I https://davijara.uz/uz
 ```
 
 **200 OK** kelishi kerak.
@@ -131,16 +135,16 @@ Uch bosqich alohida-alohida sinaladi, orqadan oldinga:
 
 ```bash
 # 1. Next.js o'zi (markaz, ichkaridan)
-curl -I http://localhost:3001/site/uz
+curl -I http://localhost:3001/uz
 
 # 2. markaz'ning nginx'i (markaz, 80-port orqali)
-curl -I -H "Host: davijara.uz" http://127.0.0.1/site/uz
+curl -I -H "Host: davijara.uz" http://127.0.0.1/uz
 
 # 3. markazsrv'dan markaz'ga yo'l (markazsrv)
-curl -I -H "Host: davijara.uz" http://192.168.1.248/site/uz
+curl -I -H "Host: davijara.uz" http://192.168.1.248/uz
 
 # 4. Butun zanjir (istalgan joydan)
-curl -I https://davijara.uz/site/uz
+curl -I https://davijara.uz/uz
 ```
 
 Qaysi bosqichda javob yomonlashsa, muammo o'sha yerda.
@@ -169,7 +173,7 @@ bo'ladi.
 
 ## Boshqaruv paneli (admin) — birinchi o'rnatish
 
-Panel `davijara.uz/site/admin` manzilida ishlaydi. Uning ma'lumotlari
+Panel `davijara.uz/admin` manzilida ishlaydi. Uning ma'lumotlari
 SQLite faylida saqlanadi va **release papkasida emas** — `deploy.sh` faqat
 oxirgi 5 ta release'ni saqlaydi, shuning uchun release ichiga yozilgan
 har qanday narsa 5 ta deploy'dan keyin jimgina o'chib ketadi.
@@ -201,7 +205,7 @@ ReadWritePaths=/var/www/davijara/shared/data
 
 So'ng `systemctl daemon-reload && systemctl restart davijara`.
 
-Deploy'dan keyin `https://davijara.uz/site/admin/setup` ni oching, `.env`
+Deploy'dan keyin `https://davijara.uz/admin/setup` ni oching, `.env`
 dagi kalitni kiriting va birinchi administratorni yarating. **Shundan
 so'ng bu sahifa butunlay yopiladi (404)** va `ADMIN_SETUP_TOKEN` ni
 `.env` dan o'chirib tashlash mumkin.

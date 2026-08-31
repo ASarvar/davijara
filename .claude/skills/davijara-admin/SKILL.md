@@ -1,6 +1,6 @@
 ---
 name: davijara-admin
-description: The Boshqaruv paneli (/admin) — how it sits outside [locale], where its pieces live (db, auth, media, navigation, blocks), and the seven load-bearing rules each written against a real or silent failure (getDb() scoping, per-action guards, DATA_DIR, cookie basePath, the build never opening the DB, editable menus, plain-text editor content). Load BEFORE touching src/app/admin/, src/lib/{db,auth,media}/, admin data modules, panel migrations, or the deploy/systemd files for the admin service.
+description: The Boshqaruv paneli (/admin) — how it sits outside [locale], where its pieces live (db, auth, media, navigation, blocks), and the seven load-bearing rules each written against a real or silent failure (getDb() scoping, per-action guards, DATA_DIR, the admin cookie path, the build never opening the DB, editable menus, plain-text editor content). Load BEFORE touching src/app/admin/, src/lib/{db,auth,media}/, admin data modules, panel migrations, or the deploy/systemd files for the admin service.
 ---
 
 # Boshqaruv paneli (`/admin`)
@@ -37,9 +37,15 @@ already happened or would be silent:
    release tree.** `deploy.sh` keeps five releases; anything written inside
    one is deleted five deploys later, silently. The systemd unit needs a
    matching `ReadWritePaths` or `ProtectSystem=strict` makes it read-only.
-4. **The session cookie is scoped to `basePath`, not `/`.** `davijara.uz/`
-   belongs to other projects on the same server — a `/` cookie would send
-   admin session tokens to all of them.
+4. **The session cookie is scoped to `${BASE_PATH}/admin`, never `/`.** The
+   site serves davijara.uz itself now, but the domain is still SHARED:
+   `/obyektlar` (davlat mulki monitoring), `/kadastr`, `/api2`, `*.php` and
+   `/api/search` belong to other projects — and `/api/search` proxies to an
+   external host, otchet.davbaho.uz. A `/` cookie would send admin session
+   tokens to all of them, one of them off the domain entirely. Pinning to the
+   panel is tighter than the old `/site` mount was, which is what kept the
+   move to the root from widening the blast radius. Nothing outside `/admin`
+   reads the session, so nothing is lost by it.
 5. **The build never opens the database.** `getDb()` returns an in-memory
    handle during `phase-production-build`, so prerendered routes get empty
    results instead of the build creating root-owned files the service cannot

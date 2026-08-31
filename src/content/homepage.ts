@@ -227,7 +227,7 @@ export const documents: DocItem[] = [
     id: "stavkalar-2026",
     title: "2026-yil uchun eng kam ijara stavkalari jadvali",
     reference: "12.01.2026",
-    url: "https://davijara.uz/site/uz/eng-kam-stavkalar",
+    url: "https://davijara.uz/uz/eng-kam-stavkalar",
     fileType: "pdf",
   },
   {

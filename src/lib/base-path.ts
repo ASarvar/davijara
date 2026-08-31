@@ -1,21 +1,27 @@
 /*
-  The sub-path this app is mounted at, e.g. "/site".
+  The sub-path this app is mounted at. EMPTY in production today — the site
+  serves davijara.uz itself.
 
-  The site does not own the domain root: davijara.uz/ is a different project,
-  and nginx forwards only `location /site` here. `basePath` in next.config.ts
-  handles most of that automatically — Next's own asset URLs, and every href
-  passed through `<Link>` or `next/navigation`.
+  It was "/site" until the site took over the domain root; davlat mulki
+  monitoring moved to /obyektlar in the same change. The helper is kept
+  rather than deleted because the domain is STILL shared — /obyektlar,
+  /kadastr, /api2, *.php and /api/search all belong to other projects — so
+  remounting under a sub-path has to stay possible, and every call site here
+  is already correct for that day.
+
+  `basePath` in next.config.ts handles most of the work automatically — Next's
+  own asset URLs, and every href passed through `<Link>` or `next/navigation`.
 
   This helper exists for the cases it does NOT handle, because they are plain
   HTML that Next never parses:
 
     <img src="/logo.svg">          → withBasePath("/logo.svg")
     <source srcSet="/logo.svg">    → withBasePath("/logo.svg")
-    <form action="/uz/obyektlar">  → withBasePath(`/${locale}/obyektlar`)
+    <form action="/uz/imtiyozlar"> → withBasePath(`/${locale}/imtiyozlar`)
 
-  Miss one and it silently 404s against the OTHER project at the domain root,
-  which is worse than a normal 404 — the request succeeds against something
-  unrelated instead of failing loudly.
+  With an empty base path these are all no-ops, so a missed call site cannot
+  be spotted by testing — it only breaks on the day the app is remounted.
+  Keep using the helper.
 
   Read from a NEXT_PUBLIC_ variable rather than from the Next config, because
   `basePath` is not exposed to components in the App Router. Both are fed the

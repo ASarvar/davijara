@@ -25,18 +25,32 @@ const SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 /*
   THE COOKIE PATH IS A SECURITY BOUNDARY HERE, NOT A DETAIL.
 
-  davijara.uz is SHARED. The domain root, /kadastr, /new and /api/search all
-  belong to other projects on the same server (DEPLOY.md); this site only owns
-  /site. A cookie set at path "/" would be sent to every one of those
-  projects on every request — handing an admin session token to code this
-  repository does not own. Scoping it to the basePath keeps it inside /site.
+  davijara.uz is SHARED — and it stays shared now that this app serves the
+  domain root. `/obyektlar` (davlat mulki monitoring), `/kadastr`, `/api2`,
+  `*.php` and `/api/search` all belong to other projects on the same domain,
+  and `/api/search` is proxied to an EXTERNAL host (otchet.davbaho.uz). A
+  cookie at path "/" would be sent to every one of them on every request,
+  handing an admin session token to code this repository does not own — and
+  in that last case off the domain entirely.
 
-  Next does NOT prefix cookie paths with basePath automatically; `<Link>` and
-  the router are prefixed, cookies are not. So this reads the same env var
-  next.config.ts does.
+  So the cookie is pinned to the PANEL, not to the app's mount point. That is
+  a tighter scope than the old "/site" ever was, and it is the reason moving
+  to the root does not widen the blast radius. Nothing outside /admin reads
+  the session — `requireUser` and `getSessionUser` appear only under
+  src/app/admin/ — so /admin is both sufficient and the tightest scope
+  available.
+
+  BASE_PATH is still prefixed so this stays correct if the app is ever
+  remounted under a sub-path again. Next does NOT prefix cookie paths with
+  basePath automatically; `<Link>` and the router are prefixed, cookies are
+  not. So this reads the same env var next.config.ts does.
+
+  Changing this value logs every administrator out once, because a cookie
+  stored at the old path is no longer sent to the new one. That is expected
+  on the deploy that moves the mount point.
 */
 function cookiePath(): string {
-  return process.env.NEXT_PUBLIC_BASE_PATH || "/";
+  return `${process.env.NEXT_PUBLIC_BASE_PATH || ""}/admin`;
 }
 
 function hashToken(token: string): string {
