@@ -13,6 +13,7 @@ import {
 } from "@/content/site";
 import { Container } from "./section";
 import { Logo } from "./logo";
+import { SiteTraffic } from "./site-traffic";
 
 export async function Footer() {
   const t = await getTranslations("footer");
@@ -33,7 +34,7 @@ export async function Footer() {
       data-tone="floor"
       className="bg-background text-foreground border-hairline mt-auto border-t"
     >
-      <Container className="pt-12 pb-4">
+      <Container className="pt-12 pb-10">
         {/*
           Uneven tracks, not four equal columns. The outer two carry prose that
           has to wrap — the operator sentence, the street address, "Korporativ
@@ -156,8 +157,18 @@ export async function Footer() {
             </ul>
           </div>
         </div>
+      </Container>
 
-        <div className="border-border text-muted-foreground mt-12 flex flex-col gap-4 border-t pt-6 text-sm sm:flex-row sm:items-center sm:justify-between">
+      {/*
+        The visitor counter — a full-width navy band. It renders nothing until
+        the server has taken some traffic (getTrafficStats() is null during the
+        build), so on a freshly deployed page this band is absent and the
+        copyright row follows the columns directly.
+      */}
+      <SiteTraffic />
+
+      <Container>
+        <div className="text-muted-foreground flex flex-col gap-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between">
           <p>
             © {year} {site.name} — {t("rights")}
           </p>

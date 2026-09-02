@@ -1198,6 +1198,27 @@
 }
 
 /*
+  The footer's visitor-counter band. Navy in EVERY theme — a deliberate brand
+  strip, like the homepage national banner — so it takes `--color-cobalt`
+  directly rather than a tone token, which would resolve pale in the light
+  theme. High contrast turns it black like every other surface (and rules it
+  off top and bottom), or it would sit blue on an otherwise mono page — the
+  bug `--color-band` was introduced to avoid.
+*/
+.footer-traffic-band {
+  background: var(--color-cobalt);
+  color: #fff;
+}
+:root[data-contrast="high"] .footer-traffic-band {
+  background: #000;
+  border-block: 2px solid #fff;
+}
+/* The muted label half of each figure must not stay dimmed in this mode. */
+:root[data-contrast="high"] .footer-traffic-band [class~="text-white/70"] {
+  color: #fff;
+}
+
+/*
   ── Scroll reveals ───────────────────────────────────────────────────────
 
   Driven by GSAP + ScrollTrigger (components/motion/motion-provider.tsx).

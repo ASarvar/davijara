@@ -742,6 +742,65 @@ const migrations: Migration[] = [
       );
     `,
   },
+  {
+    version: 11,
+    name: "visitor counter",
+    up: `
+      /*
+        The footer's visitor counter — "Onlayn", "Amallar", "Tashriflar",
+        "Veb-saytdagi oʻrtacha vaqt".
+
+        ┌────────────────────────────────────────────────────────────────────┐
+        │ NO RAW IP, NO COOKIE, SO NO CONSENT BANNER.                        │
+        │                                                                    │
+        │ A visitor is identified only by                                    │
+        │   sha256(ip + "\\n" + user-agent + "\\n" + that day's salt)         │
+        │ truncated to 16 hex chars — see src/app/api/hit/route.ts. The salt │
+        │ is 16 random bytes generated on the first hit of each calendar day │
+        │ and never leaves the server, so the hash cannot be reversed to an  │
+        │ address and the same person's hash does not match across days.     │
+        │ Nothing is written to the browser, so this sits outside the        │
+        │ cookie-consent question entirely.                                  │
+        └────────────────────────────────────────────────────────────────────┘
+
+        TWO TABLES:
+
+        · traffic_visit — one row per (day, visitor). first_ts/last_ts bound
+          the visit, hits counts its page views. This one table answers three
+          of the four figures:
+            - "Onlayn"    — rows with last_ts within the last 5 minutes;
+            - "Tashriflar"— rows for today (== traffic_day.visitors, kept there
+              too so the count survives this table being pruned);
+            - "oʻrtacha vaqt" — AVG(last_ts - first_ts) over today's rows with
+              hits >= 2, capped at 30 min per visit.
+          Pruned after three days — none of those questions reach further back.
+
+        · traffic_day — one row per calendar day, kept for ever (a few dozen
+          bytes each): that day's salt, the running page-view count ("Amallar")
+          and the running unique-visitor count ("Tashriflar").
+
+        Days are TASHKENT calendar days (YYYY-MM-DD), the same convention
+        lib/data/statistics.ts uses — the figures roll over at local midnight,
+        not at 05:00Z.
+      */
+      CREATE TABLE traffic_visit (
+        day      TEXT    NOT NULL,
+        visitor  TEXT    NOT NULL,
+        first_ts INTEGER NOT NULL,
+        last_ts  INTEGER NOT NULL,
+        hits     INTEGER NOT NULL DEFAULT 1,
+        PRIMARY KEY (day, visitor)
+      );
+      CREATE INDEX traffic_visit_last_ts_idx ON traffic_visit(last_ts);
+
+      CREATE TABLE traffic_day (
+        day      TEXT    NOT NULL PRIMARY KEY,
+        salt     TEXT    NOT NULL,
+        hits     INTEGER NOT NULL DEFAULT 0,
+        visitors INTEGER NOT NULL DEFAULT 0
+      );
+    `,
+  },
 ];
 
 export function migrate(db: Database): void {

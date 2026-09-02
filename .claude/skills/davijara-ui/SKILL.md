@@ -78,6 +78,8 @@ something genuinely needs the browser:
 | `rent-calculator` | recomputes as the range input is dragged |
 | `bottom-nav` | reads pathname for the active item |
 | `scroll-to-top` | scroll position listener |
+| `traffic-beacon` | one `sendBeacon` per page view for the footer counter; renders nothing |
+| `site-traffic-live` | polls `/api/traffic` once a minute so "hozir onlayn" stays current |
 | `accessibility-controls` | reads/writes `data-contrast` + `data-text-size` on `<html>` |
 | `accessibility-dialog` | Dialog open/close state for the topbar trigger |
 

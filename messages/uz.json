@@ -233,7 +233,13 @@
     "hotline": "Ishonch telefoni",
     "contact": "Bog'lanish",
     "rights": "Barcha huquqlar himoyalangan",
-    "corporate": "Korporativ haqida batafsil"
+    "corporate": "Korporativ haqida batafsil",
+    "trafficOnline": "Onlayn",
+    "trafficActions": "Amallar",
+    "trafficVisits": "Tashriflar",
+    "trafficAvgTime": "Veb-saytdagi oʻrtacha vaqt",
+    "trafficSecondsShort": "s",
+    "trafficMinutesShort": "daq"
   },
   "notFound": {
     "title": "Sahifa topilmadi",

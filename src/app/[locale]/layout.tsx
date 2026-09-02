@@ -13,6 +13,7 @@ import { AccessibilityScript } from "@/components/layout/accessibility-script";
 import { MotionArmScript } from "@/components/motion/motion-arm-script";
 import { MotionProvider } from "@/components/motion/motion-provider";
 import { SkipLink } from "@/components/layout/skip-link";
+import { TrafficBeacon } from "@/components/layout/traffic-beacon";
 import { HomeBanner } from "@/components/sections/home-banner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Footer } from "@/components/layout/footer";
@@ -138,6 +139,8 @@ export default async function LocaleLayout({
       bottom-nav           -> nav, common
       accessibility-dialog -> topbar
       home-banner          -> (none; route check only)
+      traffic-beacon       -> (none; pathname only)
+      site-traffic-live    -> (none; polls /api/traffic)
       office-map-panel     -> common
       objects-explorer     -> objects
       lot-card             -> listings   (rendered inside objects-explorer)
@@ -220,6 +223,11 @@ export default async function LocaleLayout({
             `usePathname` from @/i18n/navigation, which reads that context.
           */}
           <MotionProvider />
+          {/*
+            One sendBeacon per page view, for the footer visitor counter.
+            Inside the provider so `usePathname` resolves; renders nothing.
+          */}
+          <TrafficBeacon />
           <SkipLink />
           {/*
             ABOVE the header, at the operator's request — so the national
