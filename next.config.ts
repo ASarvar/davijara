@@ -25,9 +25,38 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 */
 const isDev = process.env.NODE_ENV === "development";
 
+/*
+  Yandex.Metrica, and it is the ONLY third-party origin this policy allows.
+
+  The counter is opt-in: with YANDEX_METRICA_ID unset — the default, and the
+  whole of local development — none of these hosts are added and the policy
+  stays exactly as tight as the comment above describes. When the operator
+  sets the id in shared/.env, `deploy.sh` exports it before `next build`
+  (`set -a; source .env`), so both this header and the <YandexMetrica>
+  component see it at build time. Changing it is a rebuild, like every
+  NEXT_PUBLIC_ value.
+
+  mc.yandex.ru serves the tag loader (script), the no-JS tracking pixel and
+  some beacon GIFs (img), the hit/beacon uploads (connect), and a hidden sync
+  iframe (frame). Webvisor session recording is deliberately NOT enabled in
+  the component, so no wildcard *.mc.yandex.ru upload hosts are needed here.
+
+  ONE THING STAYS BLOCKED ON PURPOSE. The tag also tries to load
+  `yandex.ru/an/mapuid/…` — an advertising user-id match between Metrica,
+  Yandex's ad network and Google's. `yandex.ru` is not in this list, so the
+  browser blocks it and logs a CSP notice. That is the intended outcome: a
+  state leasing portal has no ad campaigns to attribute, and syncing a
+  citizen's id into ad-targeting networks is not something to enable by
+  accident. Page views, sources, geography and goals all record without it —
+  verified, `mc.yandex.ru/watch/<id>` answers 200. Do not add `yandex.ru`
+  here to silence the notice.
+*/
+const metricaOn = Boolean(process.env.YANDEX_METRICA_ID);
+const ym = metricaOn ? " https://mc.yandex.ru" : "";
+
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${ym}`,
   "style-src 'self' 'unsafe-inline'",
   /*
     tile.openstreetmap.org serves the Leaflet map tiles. Plain raster <img>
@@ -51,10 +80,18 @@ const csp = [
     opaque content hashes, so they can only ever arrive as data, never be
     constructed from a lot number.
   */
-  "img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz",
+  `img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz${ym}`,
   "font-src 'self' data:",
   // Dev needs the HMR websocket.
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+  `connect-src 'self'${isDev ? " ws: wss:" : ""}${ym}`,
+  /*
+    `frame-src` was absent, so it inherited `default-src 'self'`. Named
+    explicitly now only because Metrica opens a hidden sync iframe on
+    mc.yandex.ru; with the counter off this line is just `'self'`, i.e. the
+    same value the fallback already gave. `frame-ancestors 'none'` below is a
+    different question — who may embed US — and is untouched.
+  */
+  `frame-src 'self'${ym}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

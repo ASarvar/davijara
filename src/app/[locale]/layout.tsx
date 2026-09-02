@@ -14,6 +14,7 @@ import { MotionArmScript } from "@/components/motion/motion-arm-script";
 import { MotionProvider } from "@/components/motion/motion-provider";
 import { SkipLink } from "@/components/layout/skip-link";
 import { TrafficBeacon } from "@/components/layout/traffic-beacon";
+import { YandexMetrica } from "@/components/layout/yandex-metrica";
 import { HomeBanner } from "@/components/sections/home-banner";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Footer } from "@/components/layout/footer";
@@ -141,6 +142,7 @@ export default async function LocaleLayout({
       home-banner          -> (none; route check only)
       traffic-beacon       -> (none; pathname only)
       site-traffic-live    -> (none; polls /api/traffic)
+      yandex-metrica-hit   -> (none; fires ym('hit') on navigation)
       office-map-panel     -> common
       objects-explorer     -> objects
       lot-card             -> listings   (rendered inside objects-explorer)
@@ -212,6 +214,12 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-dvh flex-col">
         <OrganizationJsonLd />
+        {/*
+          Analytics. Renders nothing unless YANDEX_METRICA_ID is set — see the
+          component. Outside the intl provider: it reads no messages and tracks
+          the real locale-prefixed URL, which is not the provider's concern.
+        */}
+        <YandexMetrica />
         <NextIntlClientProvider messages={clientMessages}>
           {/*
             One client island drives every animation on the site off the

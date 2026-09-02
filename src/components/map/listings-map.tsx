@@ -43,9 +43,26 @@ import type { Listing } from "@/types/content";
   terms. That is not restored.
 */
 
-/** Uzbekistan, framed to fit the whole country. */
+/** Uzbekistan, framed to fit the whole country — the empty-results view. */
 const COUNTRY_CENTER: [number, number] = [41.3775, 64.5853];
 const COUNTRY_ZOOM = 5.6;
+
+/*
+  Bounds for the fit-to-pins zoom in `FitToListings`.
+
+  MIN is a floor: a national spread (or one lonely far region) used to let the
+  automatic fit drop to zoom 4-ish, where the country is a smudge and the
+  clustered pins are unreadable. Clamping up to 6 can push an outlying pin off
+  the initial view — the right trade, since the reader pans to it rather than
+  starting on a frame where nothing is legible. `mapApiLot` in
+  lib/data/listings.ts now also drops pins outside the country, so genuine
+  outliers should be rare; this is the backstop for a merely wide spread.
+
+  MAX is the old `fitBounds` cap, unchanged: filtering to a single lot should
+  not slam the map to street level.
+*/
+const MIN_FIT_ZOOM = 6;
+const MAX_FIT_ZOOM = 12;
 
 /*
   Pin drawn as inline SVG rather than Leaflet's default PNG: the default icon
@@ -402,12 +419,20 @@ function FitToListings({ listings }: { listings: Listing[] }) {
     }
 
     const bounds = L.latLngBounds(listings.map((l) => [l.lat, l.lng]));
-    map.fitBounds(bounds, {
-      padding: [48, 48],
-      maxZoom: 12,
-      animate,
-      duration: 0.6,
-    });
+
+    /*
+      `getBoundsZoom` + `setView` rather than `fitBounds`, so the zoom can be
+      clamped BEFORE the view moves. `fitBounds` applies its own `maxZoom`
+      internally but has no `minZoom`, and reading `map.getZoom()` to clamp
+      afterwards is unreliable on an animated transition — Leaflet only writes
+      the new `_zoom` when the animation ends.
+
+      Tighter padding than the old 48px: on the national view 48px on every
+      edge was a visible margin of empty country around the outermost pins.
+    */
+    const fitZoom = map.getBoundsZoom(bounds, false, L.point(24, 24));
+    const zoom = Math.min(Math.max(fitZoom, MIN_FIT_ZOOM), MAX_FIT_ZOOM);
+    map.setView(bounds.getCenter(), zoom, { animate, duration: 0.6 });
     // `key` is the dependency that actually matters; `map` is stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);

@@ -80,6 +80,7 @@ something genuinely needs the browser:
 | `scroll-to-top` | scroll position listener |
 | `traffic-beacon` | one `sendBeacon` per page view for the footer counter; renders nothing |
 | `site-traffic-live` | polls `/api/traffic` once a minute so "hozir onlayn" stays current |
+| `yandex-metrica-hit` | fires `ym('hit')` on App Router navigation; only mounts when `YANDEX_METRICA_ID` is set |
 | `accessibility-controls` | reads/writes `data-contrast` + `data-text-size` on `<html>` |
 | `accessibility-dialog` | Dialog open/close state for the topbar trigger |
 

@@ -465,6 +465,27 @@ const lotResultUrl = (lotNumber: string | undefined) =>
     ? `https://e-auksion.uz/auction-result?lots_id=${lotNumber}`
     : undefined;
 
+/*
+  Uzbekistan's bounding box, with roughly half a degree of margin on each side.
+
+  The real extent is about 37.18–45.59 N and 55.99–73.17 E; this box is
+  36.6–46.1 / 55.4–73.7, so a lot just across a border or on a slightly rounded
+  coordinate is still kept.
+
+  It exists because the feed occasionally sends a lot with lat/lng transposed
+  or mistyped, and that pin lands in Kazakhstan or — with one axis near zero —
+  the Gulf of Guinea. A SINGLE such pin makes the catalogue map's fit-to-pins
+  zoom out to half of Asia (see FitToListings in listings-map.tsx). Dropped
+  here for the same reason (0, 0) already is: a lot that cannot be placed
+  honestly is better left off the map than shown in the wrong country.
+*/
+const UZ_BOUNDS = {
+  minLat: 36.6,
+  maxLat: 46.1,
+  minLng: 55.4,
+  maxLng: 73.7,
+} as const;
+
 function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
   const lat = Number(lot.lat);
   const lng = Number(lot.lng);
@@ -472,6 +493,21 @@ function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
   // than drop a pin at (0, 0) in the Gulf of Guinea.
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   if (lat === 0 && lng === 0) return null;
+  if (
+    lat < UZ_BOUNDS.minLat ||
+    lat > UZ_BOUNDS.maxLat ||
+    lng < UZ_BOUNDS.minLng ||
+    lng > UZ_BOUNDS.maxLng
+  ) {
+    // Surprising data rather than missing data — worth a line in the journal,
+    // because a whole region's coordinates breaking at once would show up here
+    // as a burst rather than a silent gap in the map.
+    console.warn(
+      `[listings] ${regionSlug}: lot ${lot.lot_number ?? lot.order_id} at ` +
+        `(${lat}, ${lng}) is outside Uzbekistan — dropped from the map`,
+    );
+    return null;
+  }
 
   // `order_id` is the row; `lot_number` is what a citizen sees on e-auksion.
   const id = lot.order_id ?? lot.lot_number;
