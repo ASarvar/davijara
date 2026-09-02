@@ -37,9 +37,13 @@ const isDev = process.env.NODE_ENV === "development";
   NEXT_PUBLIC_ value.
 
   mc.yandex.ru serves the tag loader (script), the no-JS tracking pixel and
-  some beacon GIFs (img), the hit/beacon uploads (connect), and a hidden sync
-  iframe (frame). Webvisor session recording is deliberately NOT enabled in
-  the component, so no wildcard *.mc.yandex.ru upload hosts are needed here.
+  some beacon GIFs (img), the hit/beacon uploads AND a `wss://` real-time
+  channel — `wss://mc.yandex.ru/solid.ws` — (connect), and a hidden sync
+  iframe (frame). `connect-src` needs the `wss://` origin spelled out
+  separately: an `https://` source does not cover a WebSocket scheme, and the
+  block was live ("Connecting to 'wss://mc.yandex.ru/solid.ws' violates …").
+  Webvisor session recording is deliberately NOT enabled in the component, so
+  no wildcard *.mc.yandex.ru upload hosts are needed here.
 
   ONE THING STAYS BLOCKED ON PURPOSE. The tag also tries to load
   `yandex.ru/an/mapuid/…` — an advertising user-id match between Metrica,
@@ -53,6 +57,9 @@ const isDev = process.env.NODE_ENV === "development";
 */
 const metricaOn = Boolean(process.env.YANDEX_METRICA_ID);
 const ym = metricaOn ? " https://mc.yandex.ru" : "";
+/* connect-src only: the tag's real-time channel is a WebSocket, and a
+   `wss://` URL is not matched by the `https://` source above. */
+const ymConnect = metricaOn ? " https://mc.yandex.ru wss://mc.yandex.ru" : "";
 
 const csp = [
   "default-src 'self'",
@@ -83,7 +90,7 @@ const csp = [
   `img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz${ym}`,
   "font-src 'self' data:",
   // Dev needs the HMR websocket.
-  `connect-src 'self'${isDev ? " ws: wss:" : ""}${ym}`,
+  `connect-src 'self'${isDev ? " ws: wss:" : ""}${ymConnect}`,
   /*
     `frame-src` was absent, so it inherited `default-src 'self'`. Named
     explicitly now only because Metrica opens a hidden sync iframe on
