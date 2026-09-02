@@ -17,6 +17,7 @@ import {
   getSoldCount,
 } from "@/lib/data/listings";
 import { getRentContracts } from "@/lib/data/rent-contracts";
+import { olderOf } from "@/lib/data/snapshot";
 import { formatFixed, TASHKENT_OFFSET_MS } from "@/lib/format";
 import type {
   DocItem,
@@ -156,6 +157,12 @@ export interface HeroStatsResult {
   /** True when contracts/area are the REGION's because the district is
       absent from the register. The hero prints a line saying so. */
   contractsWidened: boolean;
+  /**
+   * Set when at least one card is a stored figure rather than a live one, and
+   * then it is the OLDEST such figure in the row. ISO 8601; the hero prints
+   * it. See lib/data/snapshot.ts for why it is never optional to show.
+   */
+  asOf?: string;
 }
 
 export async function getHeroStats(
@@ -165,16 +172,22 @@ export async function getHeroStats(
   const [objectsStat, contractsStat, areaStat, soldStat] = heroStats;
   const year = currentYear();
 
-  const [{ listings, source }, sold, register] = await Promise.all([
-    getLiveListings({ region: regionSlug, district: districtName }),
-    getSoldCount(year, regionSlug, districtName),
-    getRentContracts(year, regionSlug, districtName),
-  ]);
+  const [{ listings, source, asOf: listingsAsOf }, sold, register] =
+    await Promise.all([
+      getLiveListings({ region: regionSlug, district: districtName }),
+      getSoldCount(year, regionSlug, districtName),
+      getRentContracts(year, regionSlug, districtName),
+    ]);
 
+  /*
+    `snapshot` counts as a real figure and `mock` does not — a count taken over
+    generated sample lots must never reach this row, which is why this tests
+    for the one excluded source rather than for `=== "api"`.
+  */
   const live: Stat =
-    source === "api"
-      ? { ...objectsStat, value: formatNumber(listings.length) }
-      : objectsStat;
+    source === "mock"
+      ? objectsStat
+      : { ...objectsStat, value: formatNumber(listings.length) };
 
   const area = register ? formatLeasedArea(register.areaM2) : null;
 
@@ -194,10 +207,32 @@ export async function getHeroStats(
   ];
 
   if (sold != null) {
-    stats.push({ ...soldStat, value: formatNumber(sold) });
+    stats.push({ ...soldStat, value: formatNumber(sold.count) });
   }
 
-  return { stats, year, contractsWidened: register?.widened ?? false };
+  /*
+    ONE DATE FOR THE ROW, and it is the oldest of whichever cards fell back.
+    Three services feed these four cards and they fail independently, so a
+    row can be part live and part stored. Dating it by the freshest part would
+    put a current timestamp over a figure that is a day old; the oldest is the
+    only claim every card on screen actually supports.
+
+    `source: "mock"` contributes no date on purpose — the sample set is not an
+    observation of anything, so it has no "as of". That card keeps the
+    operator's static figure and the row's date describes the rest.
+  */
+  const asOf = [
+    source === "snapshot" ? listingsAsOf : undefined,
+    sold?.asOf,
+    register?.asOf,
+  ].reduce<string | undefined>((oldest, ts) => olderOf(oldest, ts), undefined);
+
+  return {
+    stats,
+    year,
+    contractsWidened: register?.widened ?? false,
+    asOf,
+  };
 }
 
 export async function getImpactStats(): Promise<Stat[]> {

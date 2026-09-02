@@ -17,6 +17,7 @@ import { useSearchParams } from "next/navigation";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LotCard } from "@/components/common/lot-card";
+import { StaleNotice } from "@/components/common/stale-notice";
 import { formatArea, formatNumber, formatSom } from "@/lib/format";
 // From lib/listings-view, NOT lib/data/listings — the latter is `server-only`
 // and importing it here pulls the API credentials into the browser bundle.
@@ -254,6 +255,7 @@ export function ObjectsExplorer({
   listings,
   summaries,
   hasMock,
+  asOf,
   showLots,
   page = 1,
   perPage,
@@ -266,6 +268,12 @@ export function ObjectsExplorer({
   listings: Listing[];
   summaries: RegionSummary[];
   hasMock: boolean;
+  /**
+   * Set when the feed was unreachable and these are its last real lots. Real
+   * records, so no mock warning — but dated, so the reader knows the auction
+   * dates on them may already have passed. See lib/data/snapshot.ts.
+   */
+  asOf?: string;
   /**
    * Which tab is open, read from the URL by the page. Not internal state:
    * a search is a full navigation, so a tab held in React would reset on
@@ -347,6 +355,13 @@ export function ObjectsExplorer({
         Mock notice. Required whenever generated records are on screen — a
         citizen must never take a sample lot for a real state asset.
       */}
+      {/*
+        The feed was down and these are its last real lots. Mutually exclusive
+        with the mock notice below — a snapshot never contains generated
+        records, so the two can never both apply.
+      */}
+      {asOf ? <StaleNotice asOf={asOf} className="mb-5" /> : null}
+
       {hasMock ? (
         <p className="border-outline text-muted-foreground mb-5 flex items-start gap-2.5 rounded-lg border border-dashed p-3 text-xs">
           <TriangleAlert

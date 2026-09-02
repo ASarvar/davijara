@@ -7,6 +7,7 @@ import { getRegions } from "@/lib/data/catalog";
 import { getStatistics, STATS_YEAR } from "@/lib/data/statistics";
 import { formatArea, formatNumber, formatSom } from "@/lib/format";
 import { ChartFigure } from "@/components/charts/chart-figure";
+import { StaleNotice } from "@/components/common/stale-notice";
 import { MonthlyChart, OutcomeDonut } from "@/components/charts/charts";
 import {
   DistributionStrip,
@@ -195,6 +196,14 @@ export default async function StatisticsPage({
         >
           {t("lede", { year: STATS_YEAR, scope: scopeName })}
         </p>
+
+        {/*
+          The listings service was unreachable and every figure below comes
+          from its last real answer. Directly under the lede rather than at the
+          foot of the page: it qualifies all thirty-odd numbers on this page,
+          so it has to be read before them, not after.
+        */}
+        {stats.asOf ? <StaleNotice asOf={stats.asOf} className="mt-4" /> : null}
 
         {/*
           One select rather than fifteen chips. Two wrapped rows of

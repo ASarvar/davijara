@@ -3,6 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { regions } from "@/content/regions";
+import { readSnapshot, saveSnapshot, snapshotKeys } from "@/lib/data/snapshot";
 
 /*
   Signed lease contracts and leased area, from the operator's own register.
@@ -62,6 +63,12 @@ export interface RentContractTotals {
    * letting a regional total sit under a district's name.
    */
   widened: boolean;
+  /**
+   * Set when the register was unreachable and these are its last real answer.
+   * ISO 8601. The hero prints it — an undated stale figure would claim
+   * something untrue about today (CLAUDE.md 6). See lib/data/snapshot.ts.
+   */
+  asOf?: string;
 }
 
 /* ── Matching a district across two feeds ─────────────────────────────── */
@@ -266,6 +273,15 @@ const fetchRegister = unstable_cache(
     if (!json.success) {
       throw new Error(json.message ?? `Region ${apiId} returned success:false`);
     }
+
+    /*
+      Keep this answer as the scope's last-known-good. The WHOLE response, not
+      just the summary: `data` carries the per-district rows, and a snapshot
+      that dropped them would silently widen every district view to its region
+      the moment the register went down — the one case `widened` exists to
+      report honestly.
+    */
+    saveSnapshot(snapshotKeys.register(apiId, year), json);
     return json;
   },
   ["rent-contracts"],
@@ -275,10 +291,15 @@ const fetchRegister = unstable_cache(
 /**
  * Signed contracts and leased area for the republic, a region, or a district.
  *
- * Null when the service is not configured or the request fails — the hero then
- * keeps the operator's verified static figures rather than showing nothing.
- * That fallback is why this returns null instead of throwing: an unreachable
- * register should cost the page two live numbers, not the whole row.
+ * Null only when the service is not configured, or when it fails AND has never
+ * answered successfully — the hero then keeps the operator's verified static
+ * figures rather than showing nothing. That fallback is why this returns null
+ * instead of throwing: an unreachable register should cost the page two live
+ * numbers, not the whole row.
+ *
+ * When the live call fails but a snapshot exists, the snapshot's real figures
+ * are returned with `asOf` set, and the hero prints that date. See snapshot.ts
+ * for why serving them undated would not be acceptable here.
  */
 export async function getRentContracts(
   year: number,
@@ -292,16 +313,28 @@ export async function getRentContracts(
     : undefined;
   if (regionSlug && !region) return null;
 
+  const apiId = region?.apiId ?? 0;
+
   let json: ApiResponse | null;
+  let asOf: string | undefined;
   try {
-    json = await fetchRegister(region?.apiId ?? 0, year);
+    json = await fetchRegister(apiId, year);
   } catch (error) {
     console.error(
       "[rent-contracts]",
       regionSlug ?? "republic",
       error instanceof Error ? error.message : error,
     );
-    return null;
+    /*
+      The last real answer for this exact scope. `summary` is what every branch
+      below reads, so a row without one predates a shape change and is treated
+      as absent — the caller drops to the static figures rather than throwing
+      on a field that is no longer there.
+    */
+    const snap = readSnapshot<ApiResponse>(snapshotKeys.register(apiId, year));
+    if (!snap?.data?.summary) return null;
+    json = snap.data;
+    asOf = snap.fetchedAt;
   }
   if (!json?.summary) return null;
 
@@ -312,6 +345,7 @@ export async function getRentContracts(
         contracts: num(row.contracts_count),
         areaM2: num(row.rental_area),
         widened: false,
+        asOf,
       };
     }
     // Named but not found: the region's figures, flagged as such.
@@ -319,6 +353,7 @@ export async function getRentContracts(
       contracts: num(json.summary.contracts_count),
       areaM2: num(json.summary.total_rental_area),
       widened: true,
+      asOf,
     };
   }
 
@@ -326,5 +361,6 @@ export async function getRentContracts(
     contracts: num(json.summary.contracts_count),
     areaM2: num(json.summary.total_rental_area),
     widened: false,
+    asOf,
   };
 }

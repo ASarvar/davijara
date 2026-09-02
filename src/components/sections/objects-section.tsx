@@ -29,7 +29,7 @@ export async function ObjectsSection({
   const t = await getTranslations("map");
   const query = parseListingQuery(searchParams);
 
-  const { listings, hasMock } = await getListings(query);
+  const { listings, hasMock, asOf } = await getListings(query);
   const summaries = summariseByRegion(listings);
 
   /*
@@ -65,6 +65,7 @@ export async function ObjectsSection({
         listings={listings}
         summaries={summaries}
         hasMock={hasMock}
+        asOf={asOf}
         showLots={!isEmptyQuery(query)}
         perPage={9}
         moreHref={moreHref}

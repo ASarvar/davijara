@@ -7,6 +7,12 @@ import { TASHKENT_OFFSET_MS } from "@/lib/format";
 import { regions } from "@/content/regions";
 import { featuredListings } from "@/content/homepage";
 import { mockListings } from "@/content/listings-mock";
+import {
+  olderOf,
+  readSnapshot,
+  saveSnapshot,
+  snapshotKeys,
+} from "@/lib/data/snapshot";
 import type {
   Listing,
   ListingQuery,
@@ -554,9 +560,20 @@ const fetchRegion = unstable_cache(
       throw new Error(json.message ?? `Region ${apiId} returned success:false`);
     }
 
-    return (json.data ?? [])
+    const mapped = (json.data ?? [])
       .map((lot) => mapApiLot(lot, slug))
       .filter((l): l is Listing => l !== null);
+
+    /*
+      Keep this answer as the region's last-known-good. Written here rather
+      than in `getListings` because this is the only place that knows the call
+      SUCCEEDED — by the time the caller sees a rejected promise the response
+      is gone. Inside `unstable_cache`, so it costs one write per revalidation
+      window rather than one per render.
+    */
+    saveSnapshot(snapshotKeys.listingsRegion(slug), mapped);
+
+    return mapped;
   },
   ["listings-by-region"],
   { revalidate: 300, tags: ["listings"] },
@@ -630,7 +647,16 @@ export interface ListingsResult {
   listings: Listing[];
   /** True when any record on screen is generated rather than verified. */
   hasMock: boolean;
-  source: "api" | "mock";
+  /**
+   * Where the records came from.
+   *
+   * `snapshot` means the feed was unreachable and these are the last real lots
+   * it sent — genuine records, but not necessarily today's. Whenever it is
+   * set, `asOf` is too, and the page must print the date: see snapshot.ts.
+   */
+  source: "api" | "snapshot" | "mock";
+  /** When the snapshot was taken — ISO, and only set for `source: "snapshot"`. */
+  asOf?: string;
 }
 
 export async function getListings(
@@ -653,19 +679,42 @@ export async function getListings(
 
     const listings: Listing[] = [];
     const failed: string[] = [];
+    /*
+      PER REGION, not all-or-nothing. A failed leg falls back to that region's
+      own last good answer, so one unreachable region is replaced with its real
+      lots from an hour ago while the other thirteen stay live. Dating the view
+      by the OLDEST snapshot in it is what stops a single stale region from
+      being hidden behind thirteen fresh ones.
+    */
+    let asOf: string | undefined;
     for (const [i, result] of settled.entries()) {
-      if (result.status === "fulfilled") listings.push(...result.value);
-      else failed.push(wanted[i].slug);
+      if (result.status === "fulfilled") {
+        listings.push(...result.value);
+        continue;
+      }
+
+      const slug = wanted[i].slug;
+      const snap = readSnapshot<Listing[]>(snapshotKeys.listingsRegion(slug));
+      if (snap && Array.isArray(snap.data) && snap.data.length > 0) {
+        listings.push(...snap.data);
+        asOf = olderOf(asOf, snap.fetchedAt);
+      } else {
+        failed.push(slug);
+      }
     }
 
     if (failed.length > 0) {
-      console.error("[listings] region request(s) failed:", failed.join(", "));
+      console.error(
+        "[listings] region request(s) failed with no snapshot:",
+        failed.join(", "),
+      );
     }
 
     /*
       One region being down must not empty the whole map, but every region
-      being down means we have nothing — fall through to the sample set and
-      its visible notice rather than claim the country has no property.
+      being down with nothing stored means we have nothing — fall through to
+      the sample set and its visible notice rather than claim the country has
+      no property.
     */
     if (listings.length > 0) {
       reportUnknownStatuses(listings);
@@ -673,7 +722,8 @@ export async function getListings(
       return {
         listings: filterListings(open, query),
         hasMock: false,
-        source: "api",
+        source: asOf ? "snapshot" : "api",
+        asOf,
       };
     }
   }
@@ -772,14 +822,14 @@ export async function getUpcomingAuctions(
     ? parseRange(window)
     : [undefined, undefined];
   const windowed = minDays != null || maxDays != null;
-  const { listings, source } = await getListings(
+  const { listings, source, asOf } = await getListings(
     windowed ? { minDaysToAuction: minDays, maxDaysToAuction: maxDays } : {},
   );
 
   const now = Date.now();
   const pool = upcomingLots(listings, now);
   if (pool.length === 0) {
-    return { listings: [], hasMock: false, source };
+    return { listings: [], hasMock: false, source, asOf };
   }
 
   /* Mulberry32 — small, fast, and identical everywhere it runs. */
@@ -807,6 +857,7 @@ export async function getUpcomingAuctions(
     listings: picked,
     hasMock: picked.some((l) => l.isMock),
     source,
+    asOf,
   };
 }
 
@@ -881,19 +932,18 @@ const SOLD_LEAD_MONTHS = 3;
  * on the order of 200 lots a year, so an entry holds ~50KB rather than the
  * megabyte the national total suggests.
  */
+export interface SoldYear {
+  total: number;
+  /** Lots whose auction has not been held yet. */
+  pending: number;
+  /** Lots whose auction concluded without a buyer. */
+  unsold: number;
+  byDistrict: Record<string, number>;
+  sales: SoldLot[];
+}
+
 export const fetchSoldYear = unstable_cache(
-  async (
-    apiId: number,
-    year: number,
-  ): Promise<{
-    total: number;
-    /** Lots whose auction has not been held yet. */
-    pending: number;
-    /** Lots whose auction concluded without a buyer. */
-    unsold: number;
-    byDistrict: Record<string, number>;
-    sales: SoldLot[];
-  }> => {
+  async (apiId: number, year: number): Promise<SoldYear> => {
     const base = process.env.LISTINGS_API_URL;
     if (!base)
       return { total: 0, pending: 0, unsold: 0, byDistrict: {}, sales: [] };
@@ -1011,7 +1061,10 @@ export const fetchSoldYear = unstable_cache(
         auctionUrl: lotResultUrl(lot.lot_number),
       });
     }
-    return { total: sold, pending, unsold, byDistrict, sales };
+    const answer = { total: sold, pending, unsold, byDistrict, sales };
+    // The region's last-known-good sold year. Same reasoning as fetchRegion's.
+    saveSnapshot(snapshotKeys.soldYear(apiId, year), answer);
+    return answer;
   },
   // v3: `recent` (six weeks) became `sales` (the whole year).
   // v4: added `pending` / `unsold` for the statistics page.
@@ -1033,15 +1086,84 @@ export const fetchSoldYear = unstable_cache(
   { revalidate: 600, tags: ["listings"] },
 );
 
+export interface SoldYearFanOut {
+  results: SoldYear[];
+  /** Oldest snapshot in the set, when any leg fell back to one. */
+  asOf?: string;
+  /** Regions that failed AND had nothing stored — the set is incomplete. */
+  missing: string[];
+}
+
+/**
+ * One sold-year per region, falling back per region to its last good answer.
+ *
+ * Shared by `getSoldCount` and the statistics page so the two can never
+ * disagree about which regions answered: they used to fan out separately, one
+ * with `Promise.allSettled` and one with `Promise.all`, so the same outage
+ * dropped a hero card on one page and threw on the other.
+ *
+ * `missing` is what callers must check. A region that failed with no snapshot
+ * contributes NOTHING to these totals, and a sum over thirteen regions
+ * presented as the country's is a wrong number stated as a fact — so callers
+ * refuse rather than under-report. See `getSoldCount`.
+ */
+export async function fetchSoldYearForRegions(
+  wanted: Array<{ slug: string; apiId: number }>,
+  year: number,
+): Promise<SoldYearFanOut> {
+  const settled = await Promise.allSettled(
+    wanted.map((r) => fetchSoldYear(r.apiId, year)),
+  );
+
+  const results: SoldYear[] = [];
+  const missing: string[] = [];
+  let asOf: string | undefined;
+
+  for (const [i, result] of settled.entries()) {
+    if (result.status === "fulfilled") {
+      results.push(result.value);
+      continue;
+    }
+
+    const { slug, apiId } = wanted[i];
+    const snap = readSnapshot<SoldYear>(snapshotKeys.soldYear(apiId, year));
+    // `total` is the field every caller sums; its absence means the row
+    // predates a shape change and cannot be trusted to add up.
+    if (snap && typeof snap.data?.total === "number") {
+      results.push(snap.data);
+      asOf = olderOf(asOf, snap.fetchedAt);
+    } else {
+      missing.push(slug);
+    }
+  }
+
+  if (missing.length > 0) {
+    console.error(
+      "[listings] sold-year request(s) failed with no snapshot:",
+      missing.join(", "),
+    );
+  }
+
+  return { results, asOf, missing };
+}
+
+export interface SoldCountResult {
+  count: number;
+  /** Set when any region's figure came from a snapshot. The page prints it. */
+  asOf?: string;
+}
+
 /**
  * Lots sold at auction in `year` — nationally, in one region, or in one
  * district of one region.
  *
- * Null rather than a number when the service is not configured, or when ANY
- * region's request fails. A partial sum would be a wrong figure presented as
- * a fact on a state portal, which is worse than the card not being there —
- * so the caller drops the card instead of showing a total it cannot stand
- * behind.
+ * Null rather than a number when the service is not configured, or when any
+ * region both fails AND has no snapshot. A partial sum would be a wrong figure
+ * presented as a fact on a state portal, which is worse than the card not
+ * being there — so the caller drops the card instead of showing a total it
+ * cannot stand behind. A region answered from its snapshot is NOT partial: it
+ * is a complete real figure from a stated moment, which is why it counts and
+ * only sets `asOf`.
  *
  * `districtName` is upstream's own string and needs no region to be given
  * with it, but passing one avoids fanning out over fourteen.
@@ -1050,7 +1172,7 @@ export async function getSoldCount(
   year: number,
   regionSlug?: string,
   districtName?: string,
-): Promise<number | null> {
+): Promise<SoldCountResult | null> {
   if (!process.env.LISTINGS_API_URL) return null;
 
   const wanted = regionSlug
@@ -1058,32 +1180,17 @@ export async function getSoldCount(
     : regions;
   if (wanted.length === 0) return null;
 
-  const settled = await Promise.allSettled(
-    wanted.map((r) => fetchSoldYear(r.apiId, year)),
+  const { results, asOf, missing } = await fetchSoldYearForRegions(
+    wanted,
+    year,
   );
+  if (missing.length > 0) return null;
 
-  const failed = wanted
-    .filter((_, i) => settled[i].status === "rejected")
-    .map((r) => r.slug);
-  if (failed.length > 0) {
-    console.error(
-      "[listings] sold-count request(s) failed:",
-      failed.join(", "),
-    );
-    return null;
-  }
+  const count = districtName
+    ? results.reduce((sum, r) => sum + (r.byDistrict[districtName] ?? 0), 0)
+    : results.reduce((sum, r) => sum + r.total, 0);
 
-  const results = settled.flatMap((r) =>
-    r.status === "fulfilled" ? [r.value] : [],
-  );
-
-  if (districtName) {
-    return results.reduce(
-      (sum, r) => sum + (r.byDistrict[districtName] ?? 0),
-      0,
-    );
-  }
-  return results.reduce((sum, r) => sum + r.total, 0);
+  return { count, asOf };
 }
 
 /**

@@ -801,6 +801,58 @@ const migrations: Migration[] = [
       );
     `,
   },
+  {
+    version: 12,
+    name: "upstream snapshots",
+    up: `
+      /*
+        The last answer each upstream service gave successfully.
+
+        ┌────────────────────────────────────────────────────────────────────┐
+        │ WHY THIS EXISTS: SAMPLE LOTS WERE THE FALLBACK.                    │
+        │                                                                    │
+        │ Three services back this site — the listings feed, the sold-lot    │
+        │ window and the rent-contracts register — and all three live on the │
+        │ ministry's internal network. When one was unreachable the          │
+        │ catalogue fell through to GENERATED sample lots and the hero to    │
+        │ hand-typed totals. The sample set carried a visible notice, but a  │
+        │ portal whose degraded state is invented records is the wrong       │
+        │ shape for a state service: the honest answer to "the feed is down" │
+        │ is the last real answer it gave, with the date it was given.       │
+        │                                                                    │
+        │ So every successful upstream response is written here, and the     │
+        │ read path falls back live -> snapshot -> (sample/static). The date │
+        │ travels with the data and the page prints it — see                 │
+        │ src/lib/data/snapshot.ts for why serving it unlabelled would be a  │
+        │ CLAUDE.md non-negotiable 6 violation rather than a UI choice.      │
+        └────────────────────────────────────────────────────────────────────┘
+
+        BOUNDED WITHOUT PRUNING. The key names a scope, not a moment —
+        "listings:region:samarqand", "register:1718:2026" — so a refresh
+        REPLACES a row rather than appending one. The table holds one row per
+        region per feed (about 45 today), and only a new calendar year adds
+        any. That is why there is no sweep here and no fetched_at index:
+        nothing accumulates.
+
+        REPLACED AT MOST EVERY SIX HOURS, which is a different clock from the
+        one that keeps the SITE fresh — see SNAPSHOT_MIN_INTERVAL_MS in
+        lib/data/snapshot.ts for why the two are deliberately separate. Rows
+        are ~150KB each, so the throttle is the difference between rewriting
+        the whole table 288 times a day and 4.
+
+        The data column is JSON of the MAPPED domain objects, not the raw body:
+        the shapes in types/content.ts are this project's own and change far
+        less often than the service's field names. A snapshot that no longer
+        parses is discarded on read and the caller drops to its next fallback,
+        so a shape change degrades rather than throws.
+      */
+      CREATE TABLE api_snapshot (
+        key        TEXT NOT NULL PRIMARY KEY,
+        data       TEXT NOT NULL,
+        fetched_at TEXT NOT NULL
+      );
+    `,
+  },
 ];
 
 export function migrate(db: Database): void {

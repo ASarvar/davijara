@@ -45,7 +45,7 @@ export default async function ObjectsPage({
   const sp = await searchParams;
   const query = parseListingQuery(sp);
   const page = parsePage(sp);
-  const { listings, hasMock } = await getListings(query);
+  const { listings, hasMock, asOf } = await getListings(query);
   const summaries = summariseByRegion(listings);
 
   /*
@@ -109,6 +109,7 @@ export default async function ObjectsPage({
           listings={listings}
           summaries={summaries}
           hasMock={hasMock}
+          asOf={asOf}
           // The catalogue always lists lots; region totals are a homepage
           // overview device, not what someone opening /obyektlar wants.
           showLots

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { getHeroStats, getRegions } from "@/lib/data/catalog";
 import { parseListingQuery } from "@/lib/data/listings";
 import { StatPanel } from "@/components/common/stat-panel";
+import { StaleNotice } from "@/components/common/stale-notice";
 import { Container } from "@/components/layout/section";
 
 /**
@@ -38,7 +39,7 @@ export async function Hero({
 } = {}) {
   const t = await getTranslations("hero");
   const { region, district } = parseListingQuery(searchParams);
-  const [{ stats, year, contractsWidened }, regions] = await Promise.all([
+  const [{ stats, year, contractsWidened, asOf }, regions] = await Promise.all([
     getHeroStats(region, district),
     region ? getRegions() : Promise.resolve([]),
   ]);
@@ -186,6 +187,13 @@ export async function Hero({
               })}
             </p>
           ) : null}
+
+          {/*
+            At least one card is a stored figure rather than a live one. The
+            date is the oldest in the row — see `getHeroStats` for why the
+            oldest and not the freshest.
+          */}
+          {asOf ? <StaleNotice asOf={asOf} className="mt-4" /> : null}
         </div>
 
         {children}

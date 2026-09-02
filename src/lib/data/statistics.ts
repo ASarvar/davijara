@@ -2,7 +2,7 @@ import "server-only";
 
 import { regions } from "@/content/regions";
 import { TASHKENT_OFFSET_MS } from "@/lib/format";
-import { fetchSoldYear } from "@/lib/data/listings";
+import { fetchSoldYearForRegions } from "@/lib/data/listings";
 import type { SoldLot } from "@/types/content";
 
 /*
@@ -126,6 +126,12 @@ export interface Statistics {
   year: number;
   /** The region this is scoped to, or undefined for the republic. */
   region?: string;
+  /**
+   * Set when the listings service was unreachable and these figures come from
+   * its last real answer — the oldest one in the set. ISO 8601; the page
+   * prints it. See lib/data/snapshot.ts.
+   */
+  asOf?: string;
   sold: number;
   pending: number;
   unsold: number;
@@ -260,9 +266,25 @@ export async function getStatistics(
     : regions;
   if (scope.length === 0) return null;
 
-  const settled = await Promise.all(
-    scope.map((r) => fetchSoldYear(r.apiId, STATS_YEAR)),
-  );
+  /*
+    Was `Promise.all(scope.map(fetchSoldYear))`, which threw the whole page
+    away the moment one region's request failed. It now goes through the same
+    fan-out `getSoldCount` uses, so an outage degrades identically on both:
+    each region falls back to its own last real answer, and a region with
+    nothing stored makes the set incomplete rather than partial.
+  */
+  const {
+    results: settled,
+    asOf,
+    missing,
+  } = await fetchSoldYearForRegions(scope, STATS_YEAR);
+  /*
+    REFUSE A PARTIAL YEAR. Every figure on /statistika is a sum or a mean over
+    this set — a national total assembled from thirteen of fourteen regions is
+    not "slightly low", it is a wrong number printed as a fact. The page says
+    the service is unavailable instead.
+  */
+  if (missing.length > 0) return null;
 
   const sales = settled.flatMap((s) => s.sales);
   if (sales.length === 0) return null;
@@ -388,6 +410,7 @@ export async function getStatistics(
   return {
     year: STATS_YEAR,
     region: regionSlug,
+    asOf,
     sold: sales.length,
     pending,
     unsold,
