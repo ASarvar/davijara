@@ -106,6 +106,26 @@ export async function generateMetadata({
       apple: withBasePath("/logo-short-light.svg"),
     },
     robots: { index: true, follow: true },
+    /*
+      Search-console ownership proofs. Both are optional and OFF by default:
+      with the env vars unset — all of local development — no verification
+      <meta> is emitted at all.
+
+      Set in shared/.env on the server, exported by deploy.sh before
+      `next build` alongside every other NEXT_PUBLIC_ / build-time value, so
+      changing one is a rebuild. They are the token halves of
+      "google-site-verification" / "yandex-verification" — the string the
+      console shows, not the whole tag.
+
+      Yandex first, deliberately: it carries a large share of search in
+      Uzbekistan, so Yandex Webmaster is the registration that matters most
+      here. Google Search Console second. Bing can import from Google and
+      needs nothing of its own.
+    */
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      yandex: process.env.YANDEX_VERIFICATION || undefined,
+    },
   };
 }
 
