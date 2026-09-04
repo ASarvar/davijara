@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { getRegions } from "@/lib/data/catalog";
@@ -63,7 +64,6 @@ export default async function SoldObjectsPage({
 
   const sp = await searchParams;
   const t = await getTranslations("sold");
-  const tCommon = await getTranslations("common");
 
   const query = parseSoldQuery(sp);
   const [lots, regions] = await Promise.all([getSoldLots(query), getRegions()]);
@@ -99,20 +99,7 @@ export default async function SoldObjectsPage({
   return (
     <>
       <Section tone="deep" className="pb-4">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="text-muted-foreground flex items-center gap-2 text-sm">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-accent-foreground transition-colors"
-              >
-                {tCommon("breadcrumbHome")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">{t("pageTitle")}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ label: t("pageTitle") }]} />
 
         <h1
           data-enter

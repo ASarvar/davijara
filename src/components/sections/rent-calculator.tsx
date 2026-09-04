@@ -88,13 +88,15 @@ export function RentCalculator() {
           onValueChange={setTypeValue}
           options={objectRates.map((o) => ({
             value: o.value,
-            label: `${o.label} (${formatNumber(o.ratePerM2)} so'm/m²/yil)`,
+            /* `o.label` is content data (content/calculator.ts) and stays as
+               it is; only the rate suffix is chrome, so only that is keyed. */
+            label: `${o.label} (${t("rateSuffix", { rate: formatNumber(o.ratePerM2) })})`,
           }))}
         />
 
         <SelectField
           id="calc-region"
-          label="Hudud"
+          label={t("region")}
           value={regionValue}
           onValueChange={setRegionValue}
           options={regionCoefficients.map((r) => ({

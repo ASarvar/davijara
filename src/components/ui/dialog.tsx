@@ -51,9 +51,22 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeLabel = "Close",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  /**
+   * Accessible name for the × button. A screen reader speaks it, so on a
+   * trilingual site it has to come from `messages/` — callers pass
+   * `t("close")` from `common`.
+   *
+   * A PROP rather than a `useTranslations` call inside this file, deliberately:
+   * `ui/` is shadcn output that must keep working anywhere, and the admin panel
+   * renders outside `NextIntlClientProvider` — a hook here would crash the day
+   * someone opens a dialog in it. The English default is shadcn's own, so an
+   * unlabelled caller degrades to upstream behaviour rather than to a blank.
+   */
+  closeLabel?: string
 }) {
   return (
     <DialogPortal>
@@ -76,7 +89,7 @@ function DialogContent({
             >
               <XIcon
               />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{closeLabel}</span>
             </Button>
           </DialogPrimitive.Close>
         )}
@@ -98,10 +111,13 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 function DialogFooter({
   className,
   showCloseButton = false,
+  closeLabel = "Close",
   children,
   ...props
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean
+  /** Visible label for the footer close button. See DialogContent above. */
+  closeLabel?: string
 }) {
   return (
     <div
@@ -115,7 +131,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline">{closeLabel}</Button>
         </DialogPrimitive.Close>
       )}
     </div>

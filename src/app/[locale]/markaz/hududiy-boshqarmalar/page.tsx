@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Clock3, Mail, MapPin, Phone, Send, UserRound } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/layout/section";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { getTerritorialOffices } from "@/lib/data/territorial";
@@ -50,29 +50,7 @@ export default async function TerritorialPage({
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li>
-            <Link
-              href="/markaz"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tNav("centre")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{tNav(NAV_KEY)}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
 
       <div className="mx-auto mb-20">
         <h1
@@ -90,7 +68,7 @@ export default async function TerritorialPage({
 
         {offices.length === 0 ? (
           <p className="border-hairline text-muted-foreground mt-8 rounded-lg border border-dashed px-4 py-6 text-center text-sm text-pretty">
-            Hududiy boshqarmalar maʼlumotlari hozircha kiritilmagan.
+            {tCommon("sectionPending", { section: tNav(NAV_KEY) })}
           </p>
         ) : (
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

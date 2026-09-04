@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Download, FileWarning } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/layout/section";
 import { IconTile } from "@/components/common/icon-tile";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,13 @@ import { withBasePath } from "@/lib/base-path";
   stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar") — kept verbatim rather
   than paraphrased, same rule as any other government document title on this
   site.
+
+  It lives in `minRates.pageLede` so a translator can reach it, but ru.json
+  and en.json deliberately DO NOT define it: this is the title of a Vazirlar
+  Mahkamasi decision, and the Russian wording has to be the official one, not
+  a rendering invented here (CLAUDE.md non-negotiable 6). Until someone
+  supplies it, the deep-merge in i18n/request.ts falls back to this Uzbek —
+  which is exactly what the page showed before.
 */
 
 const NAV_KEY = "minRates";
@@ -57,28 +64,16 @@ export default async function MinRatesPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon, regions] = await Promise.all([
+  const [tNav, tCommon, t, regions] = await Promise.all([
     getTranslations("nav"),
     getTranslations("common"),
+    getTranslations("minRates"),
     getMinRates(),
   ]);
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{tNav(NAV_KEY)}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav(NAV_KEY) }]} />
 
       <div className="mx-auto">
         <h1
@@ -88,8 +83,7 @@ export default async function MinRatesPage({
           {tNav(NAV_KEY)}
         </h1>
         <p className="text-muted-foreground mt-3 text-center text-sm text-pretty">
-          Davlat mulkidan foydalanganlik uchun ijara toʻlovining eng kam
-          stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar 2026-yil
+          {t("pageLede")}
         </p>
 
         {regions.length === 0 ? (
@@ -98,7 +92,7 @@ export default async function MinRatesPage({
               aria-hidden="true"
               className="mx-auto mb-2 size-5 opacity-70"
             />
-            Hududlar boʻyicha hujjatlar hozircha kiritilmagan.
+            {t("empty")}
           </p>
         ) : (
           <ul
@@ -131,7 +125,7 @@ export default async function MinRatesPage({
                     download
                   >
                     <Download aria-hidden="true" />
-                    Yuklab olish
+                    {tCommon("download")}
                   </a>
                 </Button>
               </li>

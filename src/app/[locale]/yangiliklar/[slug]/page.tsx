@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CalendarDays, RefreshCw } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { mediaSrc } from "@/lib/media/src";
 
 import { type Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { getArticle, getRelatedNews } from "@/lib/data/news";
 import { formatDate } from "@/lib/format";
 import { BlockContent } from "@/components/common/block-content";
@@ -83,44 +83,17 @@ export default async function ArticlePage({
   const article = await getArticle(slug, locale);
   if (!article) notFound();
 
-  const [t, tCat, tNav, tCommon] = await Promise.all([
+  const [t, tCat, tNav] = await Promise.all([
     getTranslations("news"),
     getTranslations("news.categories"),
     getTranslations("nav"),
-    getTranslations("common"),
   ]);
   // Four, to fill the sidebar column beside the text.
   const related = await getRelatedNews(slug, 4, locale);
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li>
-            <Link
-              href="/yangiliklar"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tNav("newsCentre")}
-            </Link>
-          </li>
-          {/*
-            The headline is NOT repeated as a third crumb. It is already the
-            <h1> two lines below, and a 90-character title wraps the crumb
-            trail to three lines on a phone to tell the reader something the
-            page is about to shout.
-          */}
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav("newsCentre"), href: "/yangiliklar" }]} />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-12">
         <article>

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/layout/section";
 import { getVacancyInfo } from "@/lib/data/vacancies";
 
@@ -35,28 +35,14 @@ export default async function VacanciesPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon, info] = await Promise.all([
+  const [tNav, info] = await Promise.all([
     getTranslations("nav"),
-    getTranslations("common"),
     getVacancyInfo(),
   ]);
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{tNav(NAV_KEY)}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav(NAV_KEY) }]} />
 
       <div className="mx-auto">
         <h1

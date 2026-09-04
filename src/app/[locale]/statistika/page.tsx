@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { getRegions } from "@/lib/data/catalog";
 import { getStatistics, STATS_YEAR } from "@/lib/data/statistics";
 import { formatArea, formatNumber, formatSom } from "@/lib/format";
@@ -81,7 +81,6 @@ export default async function StatisticsPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  const tCommon = await getTranslations("common");
 
   const sp = await searchParams;
   const t = await getTranslations("stats");
@@ -168,20 +167,7 @@ export default async function StatisticsPage({
   return (
     <>
       <Section tone="deep" className="pb-5">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="text-muted-foreground flex items-center gap-2 text-sm">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-accent-foreground transition-colors"
-              >
-                {tCommon("breadcrumbHome")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">{t("title")}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ label: t("title") }]} />
 
         <h1
           data-enter

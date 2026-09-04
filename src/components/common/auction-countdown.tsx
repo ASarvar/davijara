@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 /*
   Time remaining until an auction opens.
@@ -42,7 +43,12 @@ export function AuctionCountdown({
   iso,
   /** Shown before hydration and to anyone without JavaScript. */
   fallback,
-  startedLabel = "Savdo boshlandi",
+  /**
+   * Override for the "auction has opened" text. `listings-map` passes its own
+   * because it already builds a label bag on the server; everything else takes
+   * the translated default below.
+   */
+  startedLabel,
   className,
 }: {
   iso: string;
@@ -50,6 +56,11 @@ export function AuctionCountdown({
   startedLabel?: string;
   className?: string;
 }) {
+  /* `common`, because this is a client component — see the i18n note in
+     CLAUDE.md for why the client provider carries only three namespaces. */
+  const t = useTranslations("common");
+  const started = startedLabel ?? t("auctionStarted");
+  const dayUnit = t("dayShort");
   const [remaining, setRemaining] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,13 +72,13 @@ export function AuctionCountdown({
     const tick = () => {
       const left = target - Date.now();
       if (left <= 0) {
-        setRemaining(startedLabel);
+        setRemaining(started);
         return true; // stop
       }
       const { days, hours, minutes, seconds } = split(left);
       setRemaining(
         days > 0
-          ? `${days} kun ${p(hours)}:${p(minutes)}:${p(seconds)}`
+          ? `${days} ${dayUnit} ${p(hours)}:${p(minutes)}:${p(seconds)}`
           : `${p(hours)}:${p(minutes)}:${p(seconds)}`,
       );
       return false;
@@ -78,7 +89,7 @@ export function AuctionCountdown({
       if (tick()) window.clearInterval(id);
     }, 1000);
     return () => window.clearInterval(id);
-  }, [iso, startedLabel]);
+  }, [iso, started, dayUnit]);
 
   return (
     <span

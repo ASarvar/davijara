@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/layout/section";
 import { getAppealSources } from "@/lib/data/appeals-stats";
 
@@ -35,28 +35,15 @@ export default async function AppealsPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon, sources] = await Promise.all([
+  const [tNav, t, sources] = await Promise.all([
     getTranslations("nav"),
-    getTranslations("common"),
+    getTranslations("appeals"),
     getAppealSources(),
   ]);
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{tNav(NAV_KEY)}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav(NAV_KEY) }]} />
 
       <div className="mx-auto max-w-4xl mb-20">
         <h1
@@ -68,7 +55,7 @@ export default async function AppealsPage({
 
         {sources.length === 0 ? (
           <p className="border-hairline text-muted-foreground mt-8 rounded-lg border border-dashed px-4 py-6 text-center text-sm text-pretty">
-            Murojaatlar statistikasi hozircha kiritilmagan.
+            {t("empty")}
           </p>
         ) : (
           <div className="border-hairline mt-10 overflow-x-auto rounded-sm border">
@@ -85,25 +72,25 @@ export default async function AppealsPage({
                     scope="col"
                     className="border-hairline border-b px-3 py-2 text-left font-semibold"
                   >
-                    Murojaat manbasi
+                    {t("source")}
                   </th>
                   <th
                     scope="col"
                     className="border-hairline border-b px-3 py-2 text-center font-semibold"
                   >
-                    Barchasi
+                    {t("total")}
                   </th>
                   <th
                     scope="col"
                     className="border-hairline border-b px-3 py-2 text-center font-semibold"
                   >
-                    Jarayonda
+                    {t("inProgress")}
                   </th>
                   <th
                     scope="col"
                     className="border-hairline border-b px-3 py-2 text-center font-semibold"
                   >
-                    Yopilgan murojaatlar
+                    {t("closed")}
                   </th>
                 </tr>
               </thead>

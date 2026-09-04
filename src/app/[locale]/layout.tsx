@@ -123,8 +123,13 @@ export async function generateMetadata({
       needs nothing of its own.
     */
     verification: {
-      google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
-      yandex: process.env.YANDEX_VERIFICATION || undefined,
+      /*
+        `.trim()` for the same reason yandex-metrica.tsx trims its id: a stray
+        space from shared/.env would emit content="abcd1234 " and the console
+        would reject it with a message identical to "tag not found".
+      */
+      google: process.env.GOOGLE_SITE_VERIFICATION?.trim() || undefined,
+      yandex: process.env.YANDEX_VERIFICATION?.trim() || undefined,
     },
   };
 }

@@ -59,7 +59,12 @@ export function MobileNav({ items }: { items: NavItem[] }) {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="right" data-tone="deep" className="w-[300px] p-0">
+      <SheetContent
+        side="right"
+        data-tone="deep"
+        className="w-[300px] p-0"
+        closeLabel={tc("close")}
+      >
         <SheetHeader className="border-border border-b">
           <SheetTitle className="flex items-center gap-2.5 text-left">
             {/* Mark only — the sheet is 300px wide, the wordmark would crowd it. */}

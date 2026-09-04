@@ -136,18 +136,50 @@ native `<select>` trap and the placeholder-SVG rule live in the `davijara-ui`
 skill. `ui/` is shadcn CLI output: do not hand-edit it, and do not put project
 primitives there.
 
+**One documented exception, and it is shaped so a re-add cannot break it
+silently.** `dialog.tsx` and `sheet.tsx` shipped a hardcoded English "Close" as
+the × button's accessible name — spoken text, on a trilingual portal. They now
+take a `closeLabel` prop that still DEFAULTS to `"Close"`, so the files remain
+valid shadcn with no `next-intl` import and no provider requirement; the two
+callers (`accessibility-dialog`, `mobile-nav`) pass `t("close")`. It is a prop
+and not a hook because the admin panel renders outside
+`NextIntlClientProvider`, where a hook in `ui/` would crash the first dialog
+anyone put there. If `shadcn add dialog` ever overwrites these, the prop
+disappears and TypeScript fails at both call sites — which is the point.
+
 ## i18n
 
 Locales `uz` (default) / `ru` / `en`, always prefixed (`/uz/imtiyozlar`).
 
 - Import `Link`, `usePathname`, `useRouter` from `@/i18n/navigation`, never
   from `next/link` — the plain versions drop the locale prefix.
-- All UI strings go in `messages/`. `ru.json` and `en.json` are partial by
-  design; `src/i18n/request.ts` deep-merges them over `uz.json`, so a missing
-  key falls back to Uzbek instead of rendering a raw key.
-- `NextIntlClientProvider` receives only the `nav`, `common` and `topbar`
-  namespaces — the three client components' needs. Do not widen this to the
-  whole catalog; everything else resolves on the server.
+- All UI strings go in `messages/`. **No user-visible string is written into a
+  component** — that includes `aria-label`, `alt`, `placeholder` and `title`,
+  which a screen reader speaks and which are therefore as visible as body text.
+  `ru.json` and `en.json` are partial by design; `src/i18n/request.ts`
+  deep-merges them over `uz.json`, so a missing key falls back to Uzbek instead
+  of rendering a raw key. Their `_note` records what is deliberately left
+  untranslated and why — chiefly the operator's registered name and the decree
+  titles, which need an official source rather than a rendering invented here.
+- `NextIntlClientProvider` receives only the namespaces CLIENT components
+  actually read — today `nav`, `common`, `topbar`, `objects`, `listings`,
+  `calculator`. The authoritative list, with the component that needs each one,
+  is the comment above `clientMessages` in `app/[locale]/layout.tsx`. Do not
+  widen it to the whole catalog; everything else resolves on the server. A
+  client component reaching for a namespace outside that set is the one
+  mistake this rule exists to prevent — put its string in `common` instead, the
+  way `stale-notice` and `auction-countdown` do.
+- A sentence with a link or emphasis inside it is **one** rich-text message
+  (`t.rich`), never fragments concatenated around markup — `common.staleNotice`
+  and `objects.mockNotice` are the pattern. Word order moves between languages;
+  concatenation hard-codes Uzbek's.
+
+`npm run check:i18n` finds strings written into a component instead of
+`messages/`, `aria-label` and `alt` included. Run it after touching any
+component that renders text; a clean tree reports zero, so anything it prints
+is new. What it cannot see is in its header — chiefly the `menu_sections`
+table, whose blank `label_ru` shows Uzbek on /ru with nothing in the code to
+find. That one is filled in from `/admin/menyu`.
 
 ## Logo
 

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { NEWS_PER_PAGE, getNews } from "@/lib/data/news";
@@ -52,10 +53,9 @@ export default async function NewsPage({
   const [{ locale }, sp] = await Promise.all([params, searchParams]);
   setRequestLocale(locale as Locale);
 
-  const [t, tNav, tCommon] = await Promise.all([
+  const [t, tNav] = await Promise.all([
     getTranslations("news"),
     getTranslations("nav"),
-    getTranslations("common"),
   ]);
 
   const items = await getNews(undefined, locale);
@@ -82,20 +82,7 @@ export default async function NewsPage({
   return (
     <>
       <Section tone="deep" className="pb-4">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="text-muted-foreground flex items-center gap-2 text-sm">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-accent-foreground transition-colors"
-              >
-                {tCommon("breadcrumbHome")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">{tNav("newsCentre")}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ label: tNav("newsCentre") }]} />
 
         {/*
           The heading stands alone. The count-and-last-updated line that used

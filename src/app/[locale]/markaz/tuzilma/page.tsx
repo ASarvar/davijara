@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { getOrgStructure } from "@/lib/data/structure";
 import { OrgChart } from "@/components/sections/org-chart";
 import { Section } from "@/components/layout/section";
@@ -45,38 +45,15 @@ export default async function StructurePage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon] = await Promise.all([
+  const [tNav] = await Promise.all([
     getTranslations("nav"),
-    getTranslations("common"),
   ]);
   const structure = await getOrgStructure();
 
   return (
     <>
       <Section tone="deep" className="pb-6">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-accent-foreground transition-colors"
-              >
-                {tCommon("breadcrumbHome")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li>
-              <Link
-                href="/markaz"
-                className="hover:text-accent-foreground transition-colors"
-              >
-                {tNav("centre")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">{tNav(NAV_KEY)}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
 
         {/*
           Centred, unlike its siblings on the other five pages — the operator

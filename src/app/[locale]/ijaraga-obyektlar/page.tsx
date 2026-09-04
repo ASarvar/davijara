@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import {
   buildFilterQuery,
   getListings,
@@ -40,7 +40,6 @@ export default async function ObjectsPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const t = await getTranslations("objects");
-  const tCommon = await getTranslations("common");
 
   const sp = await searchParams;
   const query = parseListingQuery(sp);
@@ -63,20 +62,7 @@ export default async function ObjectsPage({
   return (
     <>
       <Section tone="deep" className="pb-4">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="text-muted-foreground flex items-center gap-2 text-sm">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-accent-foreground transition-colors"
-              >
-                {tCommon("breadcrumbHome")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">{t("title")}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ label: t("title") }]} />
 
         <h1
           data-enter
@@ -89,9 +75,7 @@ export default async function ObjectsPage({
           style={{ "--enter-delay": 1 } as React.CSSProperties}
           className="text-muted-foreground mt-4 max-w-2xl text-sm text-pretty"
         >
-          {isEmptyQuery(query)
-            ? "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida"
-            : "Tanlangan shartlar bo'yicha natijalar"}
+          {isEmptyQuery(query) ? t("pageLede") : t("pageLedeFiltered")}
         </p>
       </Section>
 

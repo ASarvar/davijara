@@ -57,12 +57,22 @@ const ListingsMap = dynamic(
   },
 );
 
-const TYPE_LABELS: Record<string, string> = {
-  noturar: "Noturar joy",
-  turar: "Turar joy",
-  "ishlab-chiqarish": "Ishlab chiqarish",
-  mamuriy: "Ma'muriy bino",
-};
+/*
+  The SHORT form of each object type, for the one-line "Asosan: …" summary on a
+  region row. `search.types` carries the long form ("Noturar joy binosi") that
+  the search dropdown needs; these are deliberately separate keys rather than a
+  shared one, because the row has a single truncating line to work with.
+*/
+const TYPE_KEYS = [
+  "noturar",
+  "turar",
+  "ishlab-chiqarish",
+  "mamuriy",
+] as const;
+
+function isTypeKey(v: string): v is (typeof TYPE_KEYS)[number] {
+  return (TYPE_KEYS as readonly string[]).includes(v);
+}
 
 /* ── Region total ─────────────────────────────────────────────────────── */
 
@@ -99,11 +109,17 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
                 matching set — neither is ever typed into markup. */}
             {summary.topType ? (
               <p className="text-muted-foreground mt-0.5 truncate text-xs">
-                Asosan: {TYPE_LABELS[summary.topType] ?? summary.topType}
+                {t("mostly", {
+                  type: isTypeKey(summary.topType)
+                    ? t(`types.${summary.topType}`)
+                    : summary.topType,
+                })}
               </p>
             ) : summary.districtCount ? (
               <p className="text-muted-foreground mt-0.5 truncate text-xs">
-                {formatNumber(summary.districtCount)} ta tuman va shaharda
+                {t("inDistricts", {
+                  count: formatNumber(summary.districtCount),
+                })}
               </p>
             ) : null}
           </div>
@@ -114,7 +130,7 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
           <div className="sm:w-20 sm:text-right">
             <dt className="text-muted-foreground text-xs">{t("count")}</dt>
             <dd className="mt-0.5 text-sm font-medium">
-              {formatNumber(summary.count)} ta
+              {t("countValue", { count: formatNumber(summary.count) })}
             </dd>
           </div>
           <div className="sm:w-28 sm:text-right">
@@ -260,7 +276,7 @@ export function ObjectsExplorer({
   page = 1,
   perPage,
   moreHref,
-  emptyLabel = "Tanlangan shartlarga mos obyekt topilmadi.",
+  emptyLabel,
   filterQuery,
   basePath,
   view = "xarita",
@@ -290,6 +306,7 @@ export function ObjectsExplorer({
   perPage?: number;
   /** Homepage: link on to the full catalogue instead of paginating. */
   moreHref?: string;
+  /** Override for the "nothing matched" line; defaults to `objects.empty`. */
   emptyLabel?: string;
   /**
    * Active filters as a query string ("hudud=samarqand&tur=noturar"), used to
@@ -303,6 +320,7 @@ export function ObjectsExplorer({
   basePath?: string;
 }) {
   const t = useTranslations("objects");
+  const empty = emptyLabel ?? t("empty");
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -325,20 +343,25 @@ export function ObjectsExplorer({
     [locale],
   );
 
+  /*
+    The map is a lazily-loaded client island that takes its strings as props
+    rather than reading them itself — see listings-map.tsx. Resolved here, in
+    the component that already has the namespace.
+  */
   const mapLabels = useMemo(
     () => ({
-      mock: "Namunaviy yozuv",
-      details: "E-auksionda ko'rish",
-      lot: "Lot №",
-      zoomHint: "Kattalashtirish uchun Ctrl + Scroll",
+      mock: t("mapMock"),
+      details: t("mapDetails"),
+      lot: t("mapLot"),
+      zoomHint: t("mapZoomHint"),
       // Same wording as LotCard's countdown, so a pin's popup and a card read
       // as the same feature rather than two different ones.
-      auctionCountdown: "Savdo boshlanishiga",
-      auctionStarted: "Savdo boshlandi",
-      fullscreenEnter: "Butun ekranga ochish",
-      fullscreenExit: "Butun ekrandan chiqish",
+      auctionCountdown: t("auctionCountdown"),
+      auctionStarted: t("auctionStarted"),
+      fullscreenEnter: t("mapFullscreenEnter"),
+      fullscreenExit: t("mapFullscreenExit"),
     }),
-    [],
+    [t],
   );
 
   const totalPages = perPage
@@ -368,21 +391,25 @@ export function ObjectsExplorer({
             aria-hidden="true"
             className="text-accent-foreground mt-0.5 size-4 shrink-0"
           />
+          {/*
+            Rich text, not three concatenated fragments: the emphasis and the
+            e-auksion.uz link both sit mid-sentence, and every language puts
+            them somewhere different. A translator moves the tags.
+          */}
           <span>
-            {"Ko'rsatilayotgan obyektlar hozircha "}
-            <strong>{"namunaviy"}</strong>
-            {
-              " — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun "
-            }
-            <a
-              href="https://e-auksion.uz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent-foreground underline"
-            >
-              e-auksion.uz
-            </a>
-            {" saytiga murojaat qiling."}
+            {t.rich("mockNotice", {
+              b: (chunks) => <strong>{chunks}</strong>,
+              link: (chunks) => (
+                <a
+                  href="https://e-auksion.uz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent-foreground underline"
+                >
+                  {chunks}
+                </a>
+              ),
+            })}
           </span>
         </p>
       ) : null}
@@ -446,7 +473,7 @@ export function ObjectsExplorer({
             {listings.length === 0 ? (
               <div className="text-muted-foreground flex h-full items-center justify-center gap-2 text-sm">
                 <Building2 aria-hidden="true" className="size-4" />
-                {emptyLabel}
+                {empty}
               </div>
             ) : (
               <ListingsMap
@@ -462,7 +489,7 @@ export function ObjectsExplorer({
         <TabsContent value="royxat" className="mt-0">
           {listings.length === 0 ? (
             <p className="border-border text-muted-foreground rounded-lg border border-dashed py-12 text-center text-sm">
-              {emptyLabel}
+              {empty}
             </p>
           ) : showLots ? (
             <>

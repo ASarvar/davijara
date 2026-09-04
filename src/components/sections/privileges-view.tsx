@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/navigation";
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { getPrivilegesByCategory } from "@/lib/data/privileges";
 import type { PrivilegeCategory } from "@/types/content";
 import { Section } from "@/components/layout/section";
@@ -23,23 +23,12 @@ export async function PrivilegesView({
   active: PrivilegeCategory | "barchasi";
 }) {
   const t = await getTranslations("privileges");
-  const tCommon = await getTranslations("common");
   const items = await getPrivilegesByCategory(active);
 
   return (
     <>
       <Section tone="deep" className="pb-5">
-        <nav aria-label="Breadcrumb" className="mb-6">
-          <ol className="text-muted-foreground flex items-center gap-2 text-sm">
-            <li>
-              <Link href="/" className="hover:text-accent-foreground">
-                {tCommon("breadcrumbHome")}
-              </Link>
-            </li>
-            <li aria-hidden="true">/</li>
-            <li className="text-foreground">{t("title")}</li>
-          </ol>
-        </nav>
+        <Breadcrumbs items={[{ label: t("title") }]} />
 
         <h1
           data-enter

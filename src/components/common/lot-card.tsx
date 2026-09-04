@@ -95,7 +95,7 @@ export function LotCard({
 
           {listing.isMock ? (
             <span className="absolute top-2.5 right-2.5 rounded-full bg-[color:var(--color-navy)]/85 px-2.5 py-0.5 text-xs text-[color:var(--color-gold-light)] backdrop-blur-sm">
-              Namunaviy
+              {t("badgeMock")}
             </span>
           ) : null}
         </div>
@@ -196,7 +196,7 @@ export function LotCard({
                   an hour before it. See auction-countdown.tsx.
                 */}
                 <span className="text-muted-foreground block text-xs">
-                  {countdown ? "Savdo boshlanishiga" : "Savdo kuni"}
+                  {countdown ? t("auctionCountdown") : t("auctionDay")}
                 </span>
                 {countdown ? (
                   <AuctionCountdown

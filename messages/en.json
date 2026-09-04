@@ -1,5 +1,5 @@
 {
-  "_note": "PARTIAL. Only unambiguous UI chrome (navigation, buttons, labels) is translated. Every omitted key falls back to messages/uz.json via the deep-merge in src/i18n/request.ts. Content prose and ALL statutory text remain Uzbek pending human translation — do not machine-translate legal material into this file.",
+  "_note": "PARTIAL BY DESIGN, ~98% covered. UI chrome — navigation, buttons, labels, chart notes — is translated. Every omitted key falls back to messages/uz.json via the deep-merge in src/i18n/request.ts. STILL UZBEK ON PURPOSE, do not fill these in without a verified source: the seven keys that lead with the operator's registered name (footer.operator and the about/duties/structure/news/sold/contact metaDescriptions) need the organisation's OFFICIAL name in this language, not a rendering invented here; minRates.pageLede is the title of a Vazirlar Mahkamasi decision and needs its official wording. Statutory content (the 24 privileges, the Markaz documents) is not in this file at all — it lives in the database and is deliberately untranslated.",
   "common": {
     "skipToContent": "Skip to main content",
     "menu": "Menu",
@@ -7,7 +7,19 @@
     "readMore": "Learn more",
     "all": "All",
     "loading": "Loading…",
-    "backToTop": "Back to top"
+    "backToTop": "Back to top",
+    "breadcrumbHome": "Home",
+    "mainMenu": "Main menu",
+    "mobileMenu": "Mobile menu",
+    "mapLoading": "Loading map…",
+    "auctionStarted": "Auction has started",
+    "dayShort": "d",
+    "breadcrumb": "Breadcrumb",
+    "download": "Download",
+    "view": "View",
+    "select": "Select",
+    "staleNotice": "The data service is temporarily unavailable. The figures shown are as of <b>{date}</b>.",
+    "sectionPending": "No {section} information has been published yet."
   },
   "topbar": {
     "accessibility": "Accessibility options",
@@ -15,7 +27,22 @@
     "themeToLight": "Switch to light theme",
     "themeToDark": "Switch to dark theme",
     "testMode": "Test mode",
-    "testModeDescription": "The site is currently running in test mode — data may not be final"
+    "testModeDescription": "The site is currently running in test mode — data may not be final",
+    "accessibilityDescription": "Adjust the site to suit you. Your choice is saved in your browser.",
+    "keyboardTitle": "Keyboard controls",
+    "keyNext": "next element",
+    "keyPrev": "previous element",
+    "keyActivate": "activate",
+    "keyClose": "close the dialog",
+    "colorScheme": "Colour scheme",
+    "contrastNormal": "Normal mode",
+    "contrastNormalHint": "Standard colour scheme",
+    "contrastHigh": "High contrast",
+    "contrastHighHint": "Black background, white text, yellow accent",
+    "textSize": "Text size",
+    "sizeNormal": "Normal",
+    "sizeLarge": "Large",
+    "sizeXlarge": "Extra large"
   },
   "nav": {
     "home": "Home",
@@ -29,10 +56,54 @@
     "login": "Sign in",
     "cabinet": "Account",
     "statistics": "Statistics",
-    "centre": "Centre"
+    "centre": "Centre",
+    "duties": "Tasks and functions",
+    "structure": "Organisational structure",
+    "reception": "Management",
+    "anticorruption": "Anti-corruption",
+    "territorial": "Territorial departments",
+    "apparatus": "Central office",
+    "vacancies": "Vacancies",
+    "activity": "Activity",
+    "inventory": "Inventory and effective use",
+    "vacantObjects": "Objects offered for lease",
+    "leasing": "Leasing",
+    "leasedObjects": "Leased objects",
+    "leasePrivileges": "Lease privileges",
+    "faq": "Frequently asked questions",
+    "documentsSection": "Documents",
+    "documentsMain": "Regulatory documents on the Centre's activity",
+    "documentsInternal": "Internal departmental documents",
+    "documentsRepealed": "Repealed documents",
+    "documentsPrograms": "Approved programmes",
+    "documentsDrafts": "Draft regulatory documents",
+    "Data": "Data",
+    "openData": "Open data",
+    "minRates": "Minimum rates",
+    "appeals": "Appeals",
+    "report3299": "Reports under resolution No. 3299",
+    "resolutionPq447": "Data from annex 5 to resolution PQ-447",
+    "decreePf154": "Data under decree PF-154",
+    "newsCentre": "Centre news",
+    "newsUzbekistan": "Uzbekistan news",
+    "newsStatements": "Management statements and addresses",
+    "newsMedia": "Photo and video materials",
+    "contact": "Contact",
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "sitemap": "Sitemap",
+    "loginFull": "Sign in to your account"
   },
   "hero": {
-    "statScope": "The register has no contracts or area for <strong>{district}</strong> — showing <strong>{region}</strong> instead."
+    "statScope": "The register has no contracts or area for <strong>{district}</strong> — showing <strong>{region}</strong> instead.",
+    "eyebrow": "Digital Uzbekistan — 2030",
+    "titleLead": "Leasing state property —",
+    "rotator": {
+      "first": "simple",
+      "second": "transparent",
+      "third": "online"
+    },
+    "statsTitle": "State property leasing data"
   },
   "search": {
     "label": "Search for a rental object",
@@ -43,7 +114,17 @@
     "type": "Object type",
     "area": "Area, m²",
     "price": "Price (annual)",
-    "submit": "Search"
+    "submit": "Search",
+    "anyRegion": "All regions",
+    "anyType": "All types",
+    "anyArea": "Any area",
+    "anyPrice": "All",
+    "types": {
+      "noturar": "Non-residential building",
+      "turar": "Residential building",
+      "ishlab-chiqarish": "Industrial",
+      "mamuriy": "Administrative building"
+    }
   },
   "partners": {
     "heading": "Partner organisations and platforms"
@@ -51,7 +132,14 @@
   "footer": {
     "hotline": "Hotline",
     "contact": "Contact",
-    "rights": "All rights reserved"
+    "rights": "All rights reserved",
+    "corporate": "Corporate information",
+    "trafficOnline": "Online",
+    "trafficActions": "Actions",
+    "trafficVisits": "Visits",
+    "trafficAvgTime": "Average time on site",
+    "trafficSecondsShort": "s",
+    "trafficMinutesShort": "min"
   },
   "notFound": {
     "title": "Page not found",
@@ -82,15 +170,7 @@
       "November",
       "December"
     ],
-    "weekdays": [
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat",
-      "Sun"
-    ],
+    "weekdays": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     "lots": "lots: {count}"
   },
   "auctionWindow": {
@@ -118,5 +198,246 @@
     "dateFrom": "From",
     "dateTo": "To",
     "pageLedeRange": "{count} objects leased at auction between {from} and {to}."
+  },
+  "meta": {
+    "title": "Davijara.uz — the single portal for leasing state property",
+    "description": "The single portal for leasing state-owned property: search vacant objects, E-auksion auctions, lease privileges and online contract registration."
+  },
+  "map": {
+    "eyebrow": "Map",
+    "title": "Objects offered for lease, on the map"
+  },
+  "steps": {
+    "eyebrow": "Process",
+    "title": "How is state property leased?",
+    "description": "Lease state property in four simple steps",
+    "action": "Full guide"
+  },
+  "listings": {
+    "eyebrow": "Current offers",
+    "title": "Newly listed objects",
+    "action": "All objects",
+    "perYear": "soʻm / per year",
+    "badgeAuction": "At auction",
+    "badgeNew": "New lot",
+    "empty": "No objects match the selected criteria.",
+    "startPrice": "Starting price",
+    "badgeMock": "Sample",
+    "auctionCountdown": "Auction starts in",
+    "auctionDay": "Auction day"
+  },
+  "services": {
+    "eyebrow": "Online services",
+    "title": "Interactive services",
+    "description": "Handle everything online — without leaving home.",
+    "action": "All services"
+  },
+  "documents": {
+    "eyebrow": "Legislation",
+    "title": "Regulatory documents",
+    "action": "All",
+    "pageLede": "List of regulatory and legal documents for the sector",
+    "empty": "The list of documents has not been published yet."
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "eyebrow": "Questions and answers"
+  },
+  "minRates": {
+    "empty": "Documents by region have not been published yet."
+  },
+  "appeals": {
+    "empty": "Appeal statistics have not been published yet.",
+    "source": "Appeal source",
+    "total": "All",
+    "inProgress": "In progress",
+    "closed": "Closed appeals"
+  },
+  "openData": {
+    "pageLede": "Open data published under budget-transparency legislation — updated every quarter.",
+    "period": "Period",
+    "empty": "No open data has been published yet.",
+    "emptyPeriod": "No documents found for this period.",
+    "file": "File {n}"
+  },
+  "objects": {
+    "metaDescription": "Search vacant state property by region, type, area and price — on the map and by region.",
+    "count": "Objects",
+    "totalArea": "Total area",
+    "averagePrice": "Average price",
+    "mapTab": "Map",
+    "listTab": "List",
+    "mapLoading": "Loading map…",
+    "pagination": "Pages",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "regionsTab": "Regions",
+    "title": "Lease objects",
+    "emptyFiltered": "No objects match the selected criteria. Try widening the filter.",
+    "empty": "No objects match the selected criteria.",
+    "pageLede": "Every vacant state property object, on the map and by region",
+    "pageLedeFiltered": "Results for the selected criteria",
+    "mostly": "Mostly: {type}",
+    "inDistricts": "In {count} districts and cities",
+    "countValue": "{count}",
+    "types": {
+      "noturar": "Non-residential",
+      "turar": "Residential",
+      "ishlab-chiqarish": "Industrial",
+      "mamuriy": "Administrative"
+    },
+    "mapMock": "Sample record",
+    "mapDetails": "View on E-auksion",
+    "mapLot": "Lot no.",
+    "mapZoomHint": "Ctrl + scroll to zoom",
+    "auctionCountdown": "Auction starts in",
+    "auctionStarted": "Auction has started",
+    "mapFullscreenEnter": "Open full screen",
+    "mapFullscreenExit": "Exit full screen",
+    "mockNotice": "The objects shown are still <b>samples</b> — they were created to demonstrate how the system works and are not real state property. For official information please refer to <link>e-auksion.uz</link>."
+  },
+  "calculator": {
+    "title": "Rent calculator",
+    "metaDescription": "Estimate the annual rent from an object's area, type and location.",
+    "lead": "Estimate the annual rent",
+    "pageLead": "Know the price of an object in advance",
+    "area": "Area (m²)",
+    "objectType": "Object type",
+    "result": "Estimated annual rent",
+    "regionFactor": "Regional coefficient",
+    "typeFactor": "By object type",
+    "pageLede": "The calculator estimates the annual payment from the minimum lease rates in force and the regional coefficients. The final price is set by the outcome of the auction.",
+    "regionFactorText": "The price varies by region and city.",
+    "typeFactorText": "Separate tariffs for offices, warehouses, retail and administrative buildings.",
+    "yearly": "Updated every year",
+    "yearlyText": "Minimum rates are set by a resolution of the Cabinet of Ministers.",
+    "region": "Region",
+    "rateSuffix": "{rate} soʻm/m²/year"
+  },
+  "privileges": {
+    "eyebrow": "State support",
+    "title": "Lease privileges",
+    "description": "The main privileges in force for business entities leasing state property.",
+    "action": "All privileges",
+    "count": "{count, plural, one {# privilege} other {# privileges}}",
+    "pageTitle": "Privileges in leasing state property",
+    "pageDescription": "The list of privileges granted when leasing state property under the legislation in force.",
+    "filterLabel": "Filter by category",
+    "subject": "Beneficiary",
+    "duration": "Period",
+    "basis": "Basis",
+    "empty": "No privileges found in this category."
+  },
+  "structure": {
+    "externalNote": "Not part of the central office"
+  },
+  "about": {
+    "establishedBy": "Basis",
+    "fullName": "Full name",
+    "shortName": "Short name"
+  },
+  "duties": {
+    "approvedBy": "Approved",
+    "contents": "Contents"
+  },
+  "news": {
+    "eyebrow": "Press centre",
+    "title": "News",
+    "action": "All",
+    "empty": "There are no items in this section yet.",
+    "pagination": "News pages",
+    "updated": "Updated: {date}",
+    "related": "More news",
+    "categories": {
+      "obyektlar": "Objects",
+      "xizmatlar": "Services",
+      "imtiyozlar": "Privileges",
+      "tadbirlar": "Events",
+      "portal": "Portal"
+    }
+  },
+  "placeholder": {
+    "title": "Section in progress",
+    "description": "Work on this section is under way and it will launch shortly.",
+    "action": "Back to the home page",
+    "centre": "Information about the Centre is being prepared.",
+    "documents": "The regulatory document base is being prepared.",
+    "news": "The press centre section is being prepared.",
+    "services": "The online services section is being prepared.",
+    "privacy": "The privacy policy text is being prepared.",
+    "terms": "The terms of use text is being prepared.",
+    "sitemap": "The sitemap is being prepared.",
+    "auction": "Integration with the electronic auction platform is under way.",
+    "login": "Integration with the authorisation system (OneID) is under way."
+  },
+  "contact": {
+    "title": "Contact",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Working hours",
+    "mapPending": "The map is being prepared — it will be added once the exact location is confirmed."
+  },
+  "stats": {
+    "title": "Statistics",
+    "lede": "Results of the {year} electronic auctions for {scope}",
+    "republic": "Republic",
+    "unavailable": "The statistics service is currently unavailable. Please try again later.",
+    "soldLots": "Objects leased",
+    "totalValue": "Annual lease value",
+    "sellRate": "Share leased",
+    "valueNote": "Annual lease value is the sum of one year's lease payments on the lots leased. It is not a sale price: state property is leased, not sold.",
+    "rhythmEyebrow": "Trend",
+    "monthlyTitle": "By month",
+    "monthlyBody": "The bars are the number of lots leased in the month. The dashed line is the average lot price that month. An average, not a total: a single large lot can move a whole month.",
+    "outcomeTitle": "By lot",
+    "outcomeBody": "Every lot is in one of three states: leased, at auction, or cancelled.",
+    "sold": "Leased",
+    "pending": "At auction",
+    "noBuyer": "Lot cancelled",
+    "riseTitle": "By price rise",
+    "riseBody": "Final price as a ratio of the starting price",
+    "geoEyebrow": "Regions",
+    "regionTitle": "By region",
+    "regionBody": "By lot price and count",
+    "byCount": "Number of lots leased",
+    "byPerM2": "Average price per 1 m² per year (up to 100 m²)",
+    "perM2Note": "Objects up to 100 m² only — 68 % of all auctions fall in that band. The cap is necessary: in some regions more than half of what is leased is natural water bodies and open land, which cost a few soʻm per 1 m² and distort the building rate completely. A region needs at least 20 measurements.",
+    "sizeTitle": "By object area",
+    "sizeBody": "",
+    "sizeNote": "Most of the group above 1000 m² is natural water bodies. They are few in number but enormous in area: a single lot reaches 48 million m². Areas are therefore never summed on this page, and the typical (median) value is used rather than the mean — otherwise the “ordinary” lot would come out at five hectares.",
+    "recordsEyebrow": "Results",
+    "recordsTitle": "The year's largest results",
+    "recordsBody": "Lots with a starting price above 1 million soʻm are included in the largest-rise list",
+    "topByPrice": "Highest lease prices",
+    "topByRise": "Largest rises",
+    "riseFloor": "Lots with a starting price above 1 million soʻm are included in the largest-rise list.",
+    "registerEyebrow": "Register of lease contracts",
+    "registerTitle": "Contracts in force",
+    "registerBody": "This comes from a different service and does not match the auctions above: the register also counts contracts extended without an auction.",
+    "contracts": "Number of contracts",
+    "leasedArea": "Area under lease",
+    "published": "Lots published",
+    "month": "Month",
+    "lots": "lots",
+    "share": "Share",
+    "region": "Region",
+    "perM2Short": "per 1 m² per year",
+    "scopeLabel": "Region:",
+    "scatterNote": "Each circle is one region. Horizontal axis: how many lots were leased. Vertical axis: what 1 m² costs (for objects up to 100 m²). Circle size is that region's annual lease value. The two measures do not agree: the region that leased the most lots is not the most expensive one.",
+    "contractsByRegion": "Contracts by region",
+    "contractsByRegionNote": "The register's own figures, ordered by size. This is not a time axis — do not read it as growth from left to right.",
+    "contractsShort": "contracts",
+    "riseEyebrow": "Auction outcome",
+    "oneStepShare": "In one step",
+    "oneStepNote": "The share of lots leased in the 1.0–1.5× band — the most common case.",
+    "tenPlusShare": "More than tenfold",
+    "tenPlusNote": "Lots leased at more than ten times the starting price.",
+    "atLeast": "At least",
+    "cumulativeNote": "Each point is the share of lots leased at least that many times above the starting price.",
+    "avgPrice": "Average lot price",
+    "avgRise": "Average rise",
+    "avgRiseNote": "The mean of the final price as a ratio of the starting price.",
+    "metaDescription": "Auction statistics for leasing state property — by region, by month, and price trends."
   }
 }

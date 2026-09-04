@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Contrast, Type } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -41,6 +42,13 @@ function useHtmlAttribute<T extends string>(attr: string, fallback: T): T {
 }
 
 export function AccessibilityControls() {
+  /*
+    `topbar`, not a namespace of its own: this is a client component, and
+    NextIntlClientProvider is only sent `nav`, `common` and `topbar` (see the
+    i18n note in CLAUDE.md). A new namespace here would have to widen that
+    payload on every page to serve one dialog.
+  */
+  const t = useTranslations("topbar");
   const contrast = useHtmlAttribute<ContrastMode>("data-contrast", "normal");
   const textSize = useHtmlAttribute<TextSize>("data-text-size", "normal");
 
@@ -80,13 +88,13 @@ export function AccessibilityControls() {
       <fieldset>
         <legend className="mb-3 flex items-center gap-2 text-sm font-semibold">
           <Contrast aria-hidden="true" className="size-4" />
-          Rang sxemasi
+          {t("colorScheme")}
         </legend>
         <div className="space-y-2">
           {(
             [
-              ["normal", "Oddiy rejim", "Standart rang sxemasi"],
-              ["high", "Yuqori kontrast", "Qora fon, oq matn, sariq urg'u"],
+              ["normal", "contrastNormal", "contrastNormalHint"],
+              ["high", "contrastHigh", "contrastHighHint"],
             ] as const
           ).map(([value, label, hint]) => (
             <button
@@ -97,9 +105,9 @@ export function AccessibilityControls() {
               className={optionClass(contrast === value)}
             >
               <span>
-                <span className="block">{label}</span>
+                <span className="block">{t(label)}</span>
                 <span className="text-muted-foreground mt-0.5 block text-xs font-normal">
-                  {hint}
+                  {t(hint)}
                 </span>
               </span>
               {contrast === value ? (
@@ -113,14 +121,15 @@ export function AccessibilityControls() {
       <fieldset>
         <legend className="mb-3 flex items-center gap-2 text-sm font-semibold">
           <Type aria-hidden="true" className="size-4" />
-          Matn o&apos;lchami
+          {t("textSize")}
         </legend>
         <div className="space-y-2">
+          {/* The hints are percentages, not prose — no translation key. */}
           {(
             [
-              ["normal", "Oddiy", "100%"],
-              ["large", "Katta", "125%"],
-              ["xlarge", "Juda katta", "150%"],
+              ["normal", "sizeNormal", "100%"],
+              ["large", "sizeLarge", "125%"],
+              ["xlarge", "sizeXlarge", "150%"],
             ] as const
           ).map(([value, label, hint]) => (
             <button
@@ -131,7 +140,7 @@ export function AccessibilityControls() {
               className={optionClass(textSize === value)}
             >
               <span>
-                <span className="block">{label}</span>
+                <span className="block">{t(label)}</span>
                 <span className="text-muted-foreground mt-0.5 block text-xs font-normal">
                   {hint}
                 </span>

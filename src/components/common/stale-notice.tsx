@@ -1,4 +1,5 @@
 import { History } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -19,10 +20,12 @@ import { cn } from "@/lib/utils";
  * are real records with a timestamp on them, so they get a muted line. Reading
  * both as equally alarming would train readers to ignore the one that matters.
  *
- * Uzbek is hardcoded here rather than read from `messages/`, matching the mock
- * notice this sits beside — `objects-explorer` is a client component and the
- * locale layout deliberately ships it only the `nav`/`common`/`topbar`
- * namespaces. Move both strings together if that changes.
+ * The string lives in the `common` namespace, not one of its own: this renders
+ * inside `objects-explorer`, a client component, and the locale layout
+ * deliberately ships the client only `nav`/`common`/`topbar`. It is rich text
+ * rather than a sentence with the date concatenated on, because Russian and
+ * English put the timestamp in a different place in the sentence than Uzbek
+ * does — a translator has to be able to move it.
  */
 export function StaleNotice({
   asOf,
@@ -32,6 +35,8 @@ export function StaleNotice({
   asOf: string;
   className?: string;
 }) {
+  const t = useTranslations("common");
+
   return (
     <p
       className={cn(
@@ -44,13 +49,12 @@ export function StaleNotice({
         className="text-accent-foreground mt-0.5 size-3.5 shrink-0"
       />
       <span>
-        {
-          "Maʼlumot xizmati vaqtincha javob bermayapti. Koʻrsatilgan maʼlumotlar "
-        }
-        <strong className="text-foreground font-semibold">
-          {formatDateTime(asOf)}
-        </strong>
-        {" holatiga koʻra."}
+        {t.rich("staleNotice", {
+          date: formatDateTime(asOf),
+          b: (chunks) => (
+            <strong className="text-foreground font-semibold">{chunks}</strong>
+          ),
+        })}
       </span>
     </p>
   );

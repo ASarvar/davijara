@@ -26,6 +26,7 @@ import { AccessibilityControls } from "@/components/sections/accessibility-contr
  */
 export function AccessibilityDialog() {
   const t = useTranslations("topbar");
+  const tCommon = useTranslations("common");
 
   return (
     <Dialog>
@@ -50,12 +51,15 @@ export function AccessibilityDialog() {
         </button>
       </DialogTrigger>
 
-      <DialogContent data-tone="deep" className="sm:max-w-lg">
+      <DialogContent
+        data-tone="deep"
+        className="sm:max-w-lg"
+        closeLabel={tCommon("close")}
+      >
         <DialogHeader>
           <DialogTitle>{t("accessibility")}</DialogTitle>
           <DialogDescription>
-            Saytni o&apos;zingizga qulay ko&apos;rinishda sozlang. Tanlovingiz
-            brauzeringizda saqlanadi.
+            {t("accessibilityDescription")}
           </DialogDescription>
         </DialogHeader>
 
@@ -64,25 +68,28 @@ export function AccessibilityDialog() {
         </div>
 
         <div className="border-border mt-4 border-t pt-4">
-          <h3 className="mb-3 text-sm font-semibold">
-            Klaviatura bilan boshqarish
-          </h3>
+          <h3 className="mb-3 text-sm font-semibold">{t("keyboardTitle")}</h3>
+          {/*
+            The <dt> keys are the literal key names printed on the keyboard —
+            Tab, Esc — so they are not translated. Only the <dd> descriptions
+            are. The em-dash is punctuation and stays in the markup.
+          */}
           <dl className="text-muted-foreground grid gap-x-4 gap-y-2 text-xs sm:grid-cols-2">
             <div className="flex gap-2">
               <dt className="text-foreground font-medium">Tab</dt>
-              <dd>— keyingi element</dd>
+              <dd>— {t("keyNext")}</dd>
             </div>
             <div className="flex gap-2">
               <dt className="text-foreground font-medium">Shift + Tab</dt>
-              <dd>— oldingi element</dd>
+              <dd>— {t("keyPrev")}</dd>
             </div>
             <div className="flex gap-2">
               <dt className="text-foreground font-medium">Enter / Space</dt>
-              <dd>— faollashtirish</dd>
+              <dd>— {t("keyActivate")}</dd>
             </div>
             <div className="flex gap-2">
               <dt className="text-foreground font-medium">Esc</dt>
-              <dd>— oynani yopish</dd>
+              <dd>— {t("keyClose")}</dd>
             </div>
           </dl>
         </div>

@@ -13,8 +13,8 @@ import {
   Users,
 } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/layout/section";
 import {
   Select,
@@ -88,9 +88,10 @@ export default async function OpenDataPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon, sp, periods, defaultPeriod] = await Promise.all([
+  const [tNav, tCommon, t, sp, periods, defaultPeriod] = await Promise.all([
     getTranslations("nav"),
     getTranslations("common"),
+    getTranslations("openData"),
     searchParams,
     getAvailablePeriods(),
     getLatestPeriod(),
@@ -104,20 +105,7 @@ export default async function OpenDataPage({
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{tNav(NAV_KEY)}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav(NAV_KEY) }]} />
 
       <div className="mx-auto">
         <h1
@@ -127,8 +115,7 @@ export default async function OpenDataPage({
           {tNav(NAV_KEY)}
         </h1>
         <p className="text-muted-foreground mt-3 text-center text-sm text-pretty">
-          Byudjet toʻgʻrisidagi qonunchilik hujjatlariga muvofiq ochiq
-          maʼlumotlar — maʼlumotlar har chorakda yangilanib boradi.
+          {t("pageLede")}
         </p>
 
         {periods.length > 0 ? (
@@ -136,7 +123,7 @@ export default async function OpenDataPage({
             <Select name="davr" defaultValue={selected?.value}>
               <SelectTrigger
                 id="davr"
-                aria-label="Davr"
+                aria-label={t("period")}
                 className="border-input bg-card text-foreground hover:border-ring/50 w-44 rounded-sm px-3 text-sm"
               >
                 <SelectValue />
@@ -150,7 +137,7 @@ export default async function OpenDataPage({
               </SelectContent>
             </Select>
             <Button type="submit" variant="outline">
-              Tanlash
+              {tCommon("select")}
             </Button>
           </form>
         ) : null}
@@ -158,8 +145,8 @@ export default async function OpenDataPage({
         {entries.length === 0 ? (
           <p className="border-hairline text-muted-foreground mt-8 rounded-md border border-dashed px-4 py-6 text-center text-sm text-pretty">
             {periods.length === 0
-              ? "Ochiq maʼlumotlar hozircha kiritilmagan."
-              : "Bu davr uchun hujjat topilmadi."}
+              ? t("empty")
+              : t("emptyPeriod")}
           </p>
         ) : (
           <div className="mt-8 space-y-3">
@@ -193,7 +180,7 @@ export default async function OpenDataPage({
                           download
                         >
                           <Download aria-hidden="true" />
-                          {entry.files.length > 1 ? `${i + 1}-fayl` : "1-fayl"}
+                          {t("file", { n: i + 1 })}
                         </a>
                       </Button>
                     ))}

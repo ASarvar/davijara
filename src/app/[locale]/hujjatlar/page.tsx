@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ExternalLink } from "lucide-react";
 
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import { Section } from "@/components/layout/section";
 import { IconTile } from "@/components/common/icon-tile";
 import { Button } from "@/components/ui/button";
@@ -41,28 +41,16 @@ export default async function DocumentsPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon, documents] = await Promise.all([
+  const [tNav, tCommon, t, documents] = await Promise.all([
     getTranslations("nav"),
     getTranslations("common"),
+    getTranslations("documents"),
     getLegalDocuments(),
   ]);
 
   return (
     <Section tone="deep">
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <ol className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
-          <li>
-            <Link
-              href="/"
-              className="hover:text-accent-foreground transition-colors"
-            >
-              {tCommon("breadcrumbHome")}
-            </Link>
-          </li>
-          <li aria-hidden="true">/</li>
-          <li className="text-foreground">{tNav(NAV_KEY)}</li>
-        </ol>
-      </nav>
+      <Breadcrumbs items={[{ label: tNav(NAV_KEY) }]} />
 
       <div className="mx-auto">
         <h1
@@ -72,12 +60,12 @@ export default async function DocumentsPage({
           {tNav(NAV_KEY)}
         </h1>
         <p className="text-muted-foreground mt-3 text-center text-sm text-pretty">
-          Sohaga doir normativ-huquqiy hujjatlar roʻyxati
+          {t("pageLede")}
         </p>
 
         {documents.length === 0 ? (
           <p className="border-hairline text-muted-foreground mt-8 rounded-lg border border-dashed px-4 py-6 text-center text-sm text-pretty">
-            Hujjatlar roʻyxati hozircha kiritilmagan.
+            {t("empty")}
           </p>
         ) : (
           <ul
@@ -104,7 +92,7 @@ export default async function DocumentsPage({
                     <Button key={i} asChild variant="outline" size="sm">
                       <a href={link.href} target="_blank" rel="noopener noreferrer">
                         <ExternalLink aria-hidden="true" />
-                        {link.label ?? "Koʻrish"}
+                        {link.label ?? tCommon("view")}
                       </a>
                     </Button>
                   ))}

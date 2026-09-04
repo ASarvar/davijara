@@ -50,10 +50,19 @@ function SheetContent({
   children,
   side = "right",
   showCloseButton = true,
+  closeLabel = "Close",
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
+  /**
+   * Accessible name for the × button — a screen reader speaks it, so callers
+   * pass `t("close")` from `common`. A prop rather than a hook in this file
+   * for the reason spelled out on DialogContent's copy of it: `ui/` has to
+   * keep working outside `NextIntlClientProvider`, which is where the admin
+   * panel renders.
+   */
+  closeLabel?: string
 }) {
   return (
     <SheetPortal>
@@ -77,7 +86,7 @@ function SheetContent({
             >
               <XIcon
               />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">{closeLabel}</span>
             </Button>
           </SheetPrimitive.Close>
         )}

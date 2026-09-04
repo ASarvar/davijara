@@ -14,7 +14,15 @@
     "breadcrumbHome": "Bosh sahifa",
     "mainMenu": "Asosiy menyu",
     "mobileMenu": "Mobil menyu",
-    "mapLoading": "Xarita yuklanmoqda…"
+    "mapLoading": "Xarita yuklanmoqda…",
+    "auctionStarted": "Savdo boshlandi",
+    "dayShort": "kun",
+    "breadcrumb": "Sahifa yoʻli",
+    "download": "Yuklab olish",
+    "view": "Koʻrish",
+    "select": "Tanlash",
+    "staleNotice": "Maʼlumot xizmati vaqtincha javob bermayapti. Koʻrsatilgan maʼlumotlar <b>{date}</b> holatiga koʻra.",
+    "sectionPending": "{section} maʼlumotlari hozircha kiritilmagan."
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",
@@ -22,7 +30,22 @@
     "themeToLight": "Yorug' rejimga o'tish",
     "themeToDark": "Qorong'i rejimga o'tish",
     "testMode": "Sayt sinov rejimida ishlamoqda",
-    "testModeDescription": "Sayt hozircha sinov rejimida ishlamoqda — ma'lumotlar yakuniy bo'lmasligi mumkin"
+    "testModeDescription": "Sayt hozircha sinov rejimida ishlamoqda — ma'lumotlar yakuniy bo'lmasligi mumkin",
+    "accessibilityDescription": "Saytni o'zingizga qulay ko'rinishda sozlang. Tanlovingiz brauzeringizda saqlanadi.",
+    "keyboardTitle": "Klaviatura bilan boshqarish",
+    "keyNext": "keyingi element",
+    "keyPrev": "oldingi element",
+    "keyActivate": "faollashtirish",
+    "keyClose": "oynani yopish",
+    "colorScheme": "Rang sxemasi",
+    "contrastNormal": "Oddiy rejim",
+    "contrastNormalHint": "Standart rang sxemasi",
+    "contrastHigh": "Yuqori kontrast",
+    "contrastHighHint": "Qora fon, oq matn, sariq urg'u",
+    "textSize": "Matn o'lchami",
+    "sizeNormal": "Oddiy",
+    "sizeLarge": "Katta",
+    "sizeXlarge": "Juda katta"
   },
   "nav": {
     "home": "Bosh sahifa",
@@ -124,7 +147,10 @@
     "badgeAuction": "Auksionda",
     "badgeNew": "Yangi lot",
     "empty": "Tanlangan shartlarga mos obyekt topilmadi.",
-    "startPrice": "Boshlangʻich narx"
+    "startPrice": "Boshlangʻich narx",
+    "badgeMock": "Namunaviy",
+    "auctionCountdown": "Savdo boshlanishiga",
+    "auctionDay": "Savdo kuni"
   },
   "auctions": {
     "eyebrow": "SAVDOLAR",
@@ -150,15 +176,7 @@
       "Noyabr",
       "Dekabr"
     ],
-    "weekdays": [
-      "Du",
-      "Se",
-      "Cho",
-      "Pay",
-      "Ju",
-      "Sha",
-      "Yak"
-    ],
+    "weekdays": ["Du", "Se", "Cho", "Pay", "Ju", "Sha", "Yak"],
     "lots": "{count} ta lot"
   },
   "auctionWindow": {
@@ -223,7 +241,9 @@
   "documents": {
     "eyebrow": "Qonunchilik",
     "title": "Normativ hujjatlar",
-    "action": "Barchasi"
+    "action": "Barchasi",
+    "pageLede": "Sohaga doir normativ-huquqiy hujjatlar roʻyxati",
+    "empty": "Hujjatlar roʻyxati hozircha kiritilmagan."
   },
   "partners": {
     "heading": "Hamkor tashkilotlar va platformalar"
@@ -364,7 +384,28 @@
     "nextPage": "Keyingi sahifa",
     "regionsTab": "Hududlar",
     "title": "Ijara obyektlari",
-    "emptyFiltered": "Tanlangan shartlarga mos obyekt topilmadi. Filtrni kengaytirib koʻring."
+    "emptyFiltered": "Tanlangan shartlarga mos obyekt topilmadi. Filtrni kengaytirib koʻring.",
+    "empty": "Tanlangan shartlarga mos obyekt topilmadi.",
+    "pageLede": "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida",
+    "mostly": "Asosan: {type}",
+    "inDistricts": "{count} ta tuman va shaharda",
+    "countValue": "{count} ta",
+    "types": {
+      "noturar": "Noturar joy",
+      "turar": "Turar joy",
+      "ishlab-chiqarish": "Ishlab chiqarish",
+      "mamuriy": "Ma'muriy bino"
+    },
+    "mapMock": "Namunaviy yozuv",
+    "mapDetails": "E-auksionda ko'rish",
+    "mapLot": "Lot №",
+    "mapZoomHint": "Kattalashtirish uchun Ctrl + Scroll",
+    "auctionCountdown": "Savdo boshlanishiga",
+    "auctionStarted": "Savdo boshlandi",
+    "mapFullscreenEnter": "Butun ekranga ochish",
+    "mapFullscreenExit": "Butun ekrandan chiqish",
+    "mockNotice": "Ko'rsatilayotgan obyektlar hozircha <b>namunaviy</b> — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun <link>e-auksion.uz</link> saytiga murojaat qiling.",
+    "pageLedeFiltered": "Tanlangan shartlar bo'yicha natijalar"
   },
   "calculator": {
     "title": "Ijara kalkulatori",
@@ -380,10 +421,30 @@
     "regionFactorText": "Narx viloyat va shaharga qarab oʻzgaradi.",
     "typeFactorText": "Ofis, ombor, savdo va maʼmuriy binolar uchun alohida tariflar.",
     "yearly": "Har yili yangilanadi",
-    "yearlyText": "Eng kam stavkalar Vazirlar Mahkamasi qarori asosida belgilanadi."
+    "yearlyText": "Eng kam stavkalar Vazirlar Mahkamasi qarori asosida belgilanadi.",
+    "region": "Hudud",
+    "rateSuffix": "{rate} so'm/m²/yil"
   },
   "faq": {
     "title": "Koʻp soʻraladigan savollar",
     "eyebrow": "Savollar va javoblar"
+  },
+  "minRates": {
+    "pageLede": "Davlat mulkidan foydalanganlik uchun ijara toʻlovining eng kam stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar 2026-yil",
+    "empty": "Hududlar boʻyicha hujjatlar hozircha kiritilmagan."
+  },
+  "appeals": {
+    "empty": "Murojaatlar statistikasi hozircha kiritilmagan.",
+    "source": "Murojaat manbasi",
+    "total": "Barchasi",
+    "inProgress": "Jarayonda",
+    "closed": "Yopilgan murojaatlar"
+  },
+  "openData": {
+    "pageLede": "Byudjet toʻgʻrisidagi qonunchilik hujjatlariga muvofiq ochiq maʼlumotlar — maʼlumotlar har chorakda yangilanib boradi.",
+    "period": "Davr",
+    "empty": "Ochiq maʼlumotlar hozircha kiritilmagan.",
+    "emptyPeriod": "Bu davr uchun hujjat topilmadi.",
+    "file": "{n}-fayl"
   }
 }
