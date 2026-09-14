@@ -93,6 +93,12 @@ export default async function ArticlePage({
 
   return (
     <Section tone="deep">
+      {/*
+        The trail ends on a LINK and the headline is NOT repeated as a third
+        crumb. It is already the <h1> two lines below, and a 90-character title
+        wraps the crumb trail to three lines on a phone to tell the reader
+        something the page is about to shout.
+      */}
       <Breadcrumbs items={[{ label: tNav("newsCentre"), href: "/yangiliklar" }]} />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-12">

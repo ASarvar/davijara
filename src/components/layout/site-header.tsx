@@ -49,6 +49,7 @@ import { ThemeToggle } from "./theme-toggle";
 export async function SiteHeader() {
   const tTopbar = await getTranslations("topbar");
   const tCommon = await getTranslations("common");
+  const tContact = await getTranslations("contact");
 
   /*
     The menu is assembled HERE, on the server, and handed to the two client
@@ -162,7 +163,7 @@ export async function SiteHeader() {
               unused sections in CLAUDE.md). Re-adding it is four lines and a
               `Mail` import.
             */}
-            Telefon
+            {tContact("phone")}
             <a
               href={contacts.phoneHref}
               className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"

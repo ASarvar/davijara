@@ -28,6 +28,11 @@
       filled in from the panel. A blank `label_ru` shows Uzbek on /ru and no
       amount of code scanning will find it — check /admin/menyu.
     · Anything assembled at runtime from data.
+    · Strings inside JS expressions — template literals, ternaries, arrays
+      of labels (`{ok ? "Ha" : "Yoʻq"}`, `` `Maydoni: ${area}` ``) — and
+      text that contains a parenthesis, which CODEY reads as a call. Review
+      those by eye: `Maydoni:` in lot-card.tsx and `(hudud koeffitsienti)` in
+      rent-calculator.tsx both sat through a clean run before they were found.
 
   It is a lint, not a test: heuristics, tuned so that a clean tree reports
   zero. If it flags something that is genuinely not user-visible text, widen
@@ -66,6 +71,11 @@ const ALLOW = [
     text: ["Xarita yuklanmoqda…"],
     why: "next/dynamic loading fallback — renders before the component that owns the namespace mounts; see the comment there",
   },
+  {
+    file: "src/app/[locale]/opengraph-image.tsx",
+    text: ["O&apos;zbekiston Respublikasi"],
+    why: "one build-time PNG shared by all three locales, beside site.name from content/site; translating it means a per-locale OG route, not a key",
+  },
 ];
 
 /* Props whose value is read out or displayed. */
@@ -80,14 +90,29 @@ const PROPS =
   a match that runs to the next type argument — `=>\n document\n
   .querySelectorAll<HTMLElement>` read as the text "document .querySelectorAll".
   Real JSX text is always preceded by the `>` that closes a tag, never by `=`.
+
+  A run may also START after `}` or END at `{`: text beside an interpolation
+  is still text. `Yana {n}{" "}ta obyekt — barchasini koʻrish` has no `>…<`
+  run at all, so a pattern that demands both tag edges never sees it. The
+  code this lets in (`} else {`, `}: {`) is what CODEY is for.
 */
-const JSXTEXT = /(?<![=\-!<>])>([^<>{}]{3,300})</g;
+const JSXTEXT = /(?:(?<![=\-!<>])>|\})([^<>{}]{3,300})[<{]/g;
 
-/* Reject code that the two patterns above pick up incidentally. */
+/*
+  Reject code that the two patterns above pick up incidentally. A quote or a
+  backtick is code too: react/no-unescaped-entities keeps both out of real JSX
+  text, so seeing one means the match wandered into a string expression.
+*/
 const CODEY =
-  /[;=(){}[\]|&]|=>|\b(return|const|let|var|null|undefined|true|false|Promise|useRef|useState|useMemo|Array|Record|Readonly|Partial|number|string|boolean|typeof|keyof|extends|as|await|async|function|import|export|interface|type|VariantProps|ComponentProps|React)\b|\?\?|\.\w+\(|::|\$\{/;
+  /[;=(){}[\]|&`"]|=>|\b(return|const|let|var|null|undefined|true|false|Promise|useRef|useState|useMemo|Array|Record|Readonly|Partial|number|string|boolean|typeof|keyof|extends|as|await|async|function|import|export|interface|type|VariantProps|ComponentProps|React)\b|\?\?|\.\w+\(|::|\$\{/;
 
-function isProse(t) {
+function isProse(raw) {
+  /*
+    Entities first. JSX text must spell an apostrophe `&apos;`, and CODEY
+    rejects `&` and `;` — so before this line, every Uzbek sentence with an
+    oʻ/gʻ/ʼ in it (most of them) was classified as code and never reported.
+  */
+  const t = raw.replace(/&(?:[a-z]+|#\d+|#x[\da-f]+);/gi, "'");
   if (t.length < 4) return false;
   if (!/[A-Za-zʻʼ]/.test(t)) return false;
   if (CODEY.test(t)) return false;
@@ -101,8 +126,17 @@ function isProse(t) {
     // A lone word is a label only if it is capitalised and a real word.
     return /^[A-ZʻʼĀ-ſ][A-Za-zʻʼ’]{3,}$/.test(t.replace(/&apos;|['’]/g, ""));
   }
-  // A class list / path list: every token lowercase-with-punctuation.
-  if (words.every((w) => /^[a-z0-9:[\]/.\-]+$/.test(w))) return false;
+  /*
+    A class list / path list: every token lowercase-with-punctuation AND at
+    least one carrying the punctuation that makes it one (`mt-2`, `sm:flex`,
+    `w-[300px]`, `a/b`). Lowercase alone is not enough — the Uzbek tail of
+    `{n} ta tuman va shaharda` is lowercase from start to finish.
+  */
+  if (
+    words.every((w) => /^[a-z0-9:[\]/.\-]+$/.test(w)) &&
+    words.some((w) => /[\d:[\]/\-]/.test(w))
+  )
+    return false;
   // Needs at least one word of three or more letters.
   return words.some((w) => /[A-Za-zʻʼ]{3,}/.test(w));
 }

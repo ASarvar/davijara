@@ -118,7 +118,9 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
             ) : summary.districtCount ? (
               <p className="text-muted-foreground mt-0.5 truncate text-xs">
                 {t("inDistricts", {
-                  count: formatNumber(summary.districtCount),
+                  // Raw for ru/en plural selection; formatted for display.
+                  count: summary.districtCount,
+                  n: formatNumber(summary.districtCount),
                 })}
               </p>
             ) : null}
@@ -510,8 +512,10 @@ export function ObjectsExplorer({
                     href={moreHref}
                     className="border-outline text-accent-foreground hover:bg-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors duration-200"
                   >
-                    Yana {formatNumber(listings.length - pagedListings.length)}{" "}
-                    ta obyekt — barchasini ko&apos;rish
+                    {t("showAll", {
+                      count: listings.length - pagedListings.length,
+                      n: formatNumber(listings.length - pagedListings.length),
+                    })}
                     <ChevronRight aria-hidden="true" className="size-4" />
                   </Link>
                 </p>

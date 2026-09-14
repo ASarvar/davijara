@@ -56,8 +56,9 @@ export function AuctionCountdown({
   startedLabel?: string;
   className?: string;
 }) {
-  /* `common`, because this is a client component — see the i18n note in
-     CLAUDE.md for why the client provider carries only three namespaces. */
+  /* `common`, because this is a client component and the client provider
+     carries only the namespaces listed in `clientMessages`
+     (app/[locale]/layout.tsx) — see the i18n note in CLAUDE.md. */
   const t = useTranslations("common");
   const started = startedLabel ?? t("auctionStarted");
   const dayUnit = t("dayShort");

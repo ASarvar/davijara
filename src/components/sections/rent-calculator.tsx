@@ -115,11 +115,14 @@ export function RentCalculator() {
           aria-live="polite"
           className="font-heading text-accent-foreground mt-1.5 text-3xl font-semibold"
         >
-          {formatNumber(total)} so&apos;m
+          {t("resultValue", { amount: formatNumber(total) })}
         </p>
         <p className="text-muted-foreground mt-2 text-xs">
-          {formatNumber(area)} m² × {formatNumber(type.ratePerM2)} so&apos;m ×{" "}
-          {region.coefficient.toFixed(2)} (hudud koeffitsienti)
+          {t("formula", {
+            area: formatNumber(area),
+            rate: formatNumber(type.ratePerM2),
+            coef: region.coefficient.toFixed(2),
+          })}
         </p>
       </div>
 
@@ -130,11 +133,7 @@ export function RentCalculator() {
       */}
       <p className="text-muted-foreground mt-4 flex gap-2 text-xs">
         <Info aria-hidden="true" className="mt-0.5 size-3.5 shrink-0" />
-        <span>
-          Natija taxminiy bo&apos;lib, rasmiy hisob-kitob emas. Yakuniy ijara
-          haqi auksion natijasida belgilanadi. Eng kam stavkalar Vazirlar
-          Mahkamasi qarori bilan har yili yangilanadi.
-        </span>
+        <span>{t("disclaimer")}</span>
       </p>
     </SurfaceCard>
   );

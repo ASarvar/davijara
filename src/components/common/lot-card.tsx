@@ -149,7 +149,9 @@ export function LotCard({
               inventing a number — see CLAUDE.md's "never invent facts".
             */}
             {[
-              listing.area > 0 ? `Maydoni: ${formatArea(listing.area)}` : null,
+              listing.area > 0
+                ? t("areaValue", { area: formatArea(listing.area) })
+                : null,
               listing.lotNumber ? `Lot №${listing.lotNumber}` : null,
             ]
               .filter(Boolean)

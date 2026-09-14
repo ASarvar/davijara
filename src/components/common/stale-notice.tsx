@@ -22,7 +22,8 @@ import { cn } from "@/lib/utils";
  *
  * The string lives in the `common` namespace, not one of its own: this renders
  * inside `objects-explorer`, a client component, and the locale layout
- * deliberately ships the client only `nav`/`common`/`topbar`. It is rich text
+ * deliberately ships the client only the short list in `clientMessages`
+ * (app/[locale]/layout.tsx), which has no namespace of its own for this. It is rich text
  * rather than a sentence with the date concatenated on, because Russian and
  * English put the timestamp in a different place in the sentence than Uzbek
  * does — a translator has to be able to move it.

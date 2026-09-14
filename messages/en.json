@@ -19,7 +19,7 @@
     "view": "View",
     "select": "Select",
     "staleNotice": "The data service is temporarily unavailable. The figures shown are as of <b>{date}</b>.",
-    "sectionPending": "No {section} information has been published yet."
+    "sectionPending": "No information has been published under “{section}” yet."
   },
   "topbar": {
     "accessibility": "Accessibility options",
@@ -224,7 +224,8 @@
     "startPrice": "Starting price",
     "badgeMock": "Sample",
     "auctionCountdown": "Auction starts in",
-    "auctionDay": "Auction day"
+    "auctionDay": "Auction day",
+    "areaValue": "Area: {area}"
   },
   "services": {
     "eyebrow": "Online services",
@@ -278,7 +279,7 @@
     "pageLede": "Every vacant state property object, on the map and by region",
     "pageLedeFiltered": "Results for the selected criteria",
     "mostly": "Mostly: {type}",
-    "inDistricts": "In {count} districts and cities",
+    "inDistricts": "{count, plural, one {In {n} district or city} other {In {n} districts and cities}}",
     "countValue": "{count}",
     "types": {
       "noturar": "Non-residential",
@@ -294,7 +295,8 @@
     "auctionStarted": "Auction has started",
     "mapFullscreenEnter": "Open full screen",
     "mapFullscreenExit": "Exit full screen",
-    "mockNotice": "The objects shown are still <b>samples</b> — they were created to demonstrate how the system works and are not real state property. For official information please refer to <link>e-auksion.uz</link>."
+    "mockNotice": "The objects shown are still <b>samples</b> — they were created to demonstrate how the system works and are not real state property. For official information please refer to <link>e-auksion.uz</link>.",
+    "showAll": "{count, plural, one {{n} more object} other {{n} more objects}} — view all"
   },
   "calculator": {
     "title": "Rent calculator",
@@ -312,7 +314,10 @@
     "yearly": "Updated every year",
     "yearlyText": "Minimum rates are set by a resolution of the Cabinet of Ministers.",
     "region": "Region",
-    "rateSuffix": "{rate} soʻm/m²/year"
+    "rateSuffix": "{rate} soʻm/m²/year",
+    "resultValue": "{amount} soʻm",
+    "formula": "{area} m² × {rate} soʻm × {coef} (regional coefficient)",
+    "disclaimer": "The result is an estimate, not an official calculation. The final rent is determined by the auction. Minimum rates are updated every year by a resolution of the Cabinet of Ministers."
   },
   "privileges": {
     "eyebrow": "State support",
@@ -439,5 +444,8 @@
     "avgRise": "Average rise",
     "avgRiseNote": "The mean of the final price as a ratio of the starting price.",
     "metaDescription": "Auction statistics for leasing state property — by region, by month, and price trends."
+  },
+  "territorial": {
+    "count": "{count, plural, one {{n} territorial department} other {{n} territorial departments}}"
   }
 }

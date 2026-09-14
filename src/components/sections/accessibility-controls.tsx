@@ -44,9 +44,9 @@ function useHtmlAttribute<T extends string>(attr: string, fallback: T): T {
 export function AccessibilityControls() {
   /*
     `topbar`, not a namespace of its own: this is a client component, and
-    NextIntlClientProvider is only sent `nav`, `common` and `topbar` (see the
-    i18n note in CLAUDE.md). A new namespace here would have to widen that
-    payload on every page to serve one dialog.
+    NextIntlClientProvider is only sent the namespaces in `clientMessages`
+    (app/[locale]/layout.tsx; see the i18n note in CLAUDE.md). A new namespace
+    here would have to widen that payload on every page to serve one dialog.
   */
   const t = useTranslations("topbar");
   const contrast = useHtmlAttribute<ContrastMode>("data-contrast", "normal");

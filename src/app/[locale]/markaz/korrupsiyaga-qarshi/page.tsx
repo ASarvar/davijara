@@ -49,9 +49,7 @@ export default async function AnticorruptionPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav] = await Promise.all([
-    getTranslations("nav"),
-  ]);
+  const tNav = await getTranslations("nav");
 
   return (
     <Section tone="deep">

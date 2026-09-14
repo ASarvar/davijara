@@ -150,7 +150,8 @@
     "startPrice": "Boshlangʻich narx",
     "badgeMock": "Namunaviy",
     "auctionCountdown": "Savdo boshlanishiga",
-    "auctionDay": "Savdo kuni"
+    "auctionDay": "Savdo kuni",
+    "areaValue": "Maydoni: {area}"
   },
   "auctions": {
     "eyebrow": "SAVDOLAR",
@@ -388,7 +389,7 @@
     "empty": "Tanlangan shartlarga mos obyekt topilmadi.",
     "pageLede": "Barcha bo'sh davlat mulki obyektlari xaritada va hududlar kesimida",
     "mostly": "Asosan: {type}",
-    "inDistricts": "{count} ta tuman va shaharda",
+    "inDistricts": "{n} ta tuman va shaharda",
     "countValue": "{count} ta",
     "types": {
       "noturar": "Noturar joy",
@@ -405,7 +406,8 @@
     "mapFullscreenEnter": "Butun ekranga ochish",
     "mapFullscreenExit": "Butun ekrandan chiqish",
     "mockNotice": "Ko'rsatilayotgan obyektlar hozircha <b>namunaviy</b> — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun <link>e-auksion.uz</link> saytiga murojaat qiling.",
-    "pageLedeFiltered": "Tanlangan shartlar bo'yicha natijalar"
+    "pageLedeFiltered": "Tanlangan shartlar bo'yicha natijalar",
+    "showAll": "Yana {n} ta obyekt — barchasini ko'rish"
   },
   "calculator": {
     "title": "Ijara kalkulatori",
@@ -423,7 +425,10 @@
     "yearly": "Har yili yangilanadi",
     "yearlyText": "Eng kam stavkalar Vazirlar Mahkamasi qarori asosida belgilanadi.",
     "region": "Hudud",
-    "rateSuffix": "{rate} so'm/m²/yil"
+    "rateSuffix": "{rate} so'm/m²/yil",
+    "resultValue": "{amount} so'm",
+    "formula": "{area} m² × {rate} so'm × {coef} (hudud koeffitsienti)",
+    "disclaimer": "Natija taxminiy bo'lib, rasmiy hisob-kitob emas. Yakuniy ijara haqi auksion natijasida belgilanadi. Eng kam stavkalar Vazirlar Mahkamasi qarori bilan har yili yangilanadi."
   },
   "faq": {
     "title": "Koʻp soʻraladigan savollar",
@@ -446,5 +451,8 @@
     "empty": "Ochiq maʼlumotlar hozircha kiritilmagan.",
     "emptyPeriod": "Bu davr uchun hujjat topilmadi.",
     "file": "{n}-fayl"
+  },
+  "territorial": {
+    "count": "{n} ta hududiy boshqarma"
   }
 }

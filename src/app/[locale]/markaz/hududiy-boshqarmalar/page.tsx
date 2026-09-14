@@ -7,6 +7,7 @@ import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { getTerritorialOffices } from "@/lib/data/territorial";
+import { formatNumber } from "@/lib/format";
 import { mediaSrc } from "@/lib/media/src";
 
 /*
@@ -42,9 +43,10 @@ export default async function TerritorialPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, tCommon, offices] = await Promise.all([
+  const [tNav, tCommon, t, offices] = await Promise.all([
     getTranslations("nav"),
     getTranslations("common"),
+    getTranslations("territorial"),
     getTerritorialOffices(),
   ]);
 
@@ -62,7 +64,10 @@ export default async function TerritorialPage({
 
         {offices.length > 0 ? (
           <p className="text-muted-foreground mt-3 text-center text-sm">
-            {offices.length} ta hududiy boshqarma
+            {t("count", {
+              count: offices.length,
+              n: formatNumber(offices.length),
+            })}
           </p>
         ) : null}
 

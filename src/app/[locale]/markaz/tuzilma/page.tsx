@@ -45,9 +45,7 @@ export default async function StructurePage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav] = await Promise.all([
-    getTranslations("nav"),
-  ]);
+  const tNav = await getTranslations("nav");
   const structure = await getOrgStructure();
 
   return (
