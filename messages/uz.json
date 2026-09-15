@@ -454,5 +454,16 @@
   },
   "territorial": {
     "count": "{n} ta hududiy boshqarma"
+  },
+  "vacancies": {
+    "openTitle": "Eʼlon qilingan vakansiyalar",
+    "count": "{n} ta vakansiya",
+    "empty": "Hozirda eʼlon qilingan vakansiyalar yoʻq.",
+    "deadline": "Hujjatlar qabuli: {date} gacha",
+    "testDate": "Test sinovi: {date}",
+    "statusOpen": "Qabul davom etmoqda",
+    "statusExpired": "Qabul muddati tugagan",
+    "toggle": "Batafsil",
+    "apply": "Hujjatlarni yuborish manzili"
   }
 }

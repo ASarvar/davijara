@@ -4,13 +4,19 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
-import { getVacancyInfo } from "@/lib/data/vacancies";
+import { VacancyList } from "@/components/sections/vacancy-list";
+import { getOpenVacancies, getVacancyInfo } from "@/lib/data/vacancies";
 
 /*
   Bo'sh ish o'rinlari — the statutory hiring-conditions table plus the
   interview-questions notice, both supplied whole by the operator
   (2026-08-28); see content/vacancies.ts for sourcing and the flagged
   "Suhbat savollari ro'yxati" link target.
+
+  Below them, the Markaz's own announcements, edited from /admin/vakansiyalar
+  (2026-09-14). Only OPEN ones reach this page — closing one in the panel is
+  how it comes down. The panel's actions revalidate this route directly; the
+  window below is only the fallback.
 */
 
 const NAV_KEY = "vacancies";
@@ -35,9 +41,10 @@ export default async function VacanciesPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
 
-  const [tNav, info] = await Promise.all([
+  const [tNav, info, vacancies] = await Promise.all([
     getTranslations("nav"),
     getVacancyInfo(),
+    getOpenVacancies(),
   ]);
 
   return (
@@ -51,7 +58,6 @@ export default async function VacanciesPage({
         >
           {tNav(NAV_KEY)}
         </h1>
-
 
         <div className="border-hairline bg-card mt-8 rounded-lg border p-5 sm:p-6">
           <h2 className="font-heading text-center text-lg font-semibold text-balance sm:text-xl">
@@ -84,6 +90,12 @@ export default async function VacanciesPage({
             )}
           </p>
         </div>
+
+        {/*
+          null means the store could not be read: render nothing rather than
+          the "no open vacancies" line, which would be a claim we cannot back.
+        */}
+        {vacancies ? <VacancyList vacancies={vacancies} /> : null}
       </div>
     </Section>
   );

@@ -447,5 +447,16 @@
   },
   "territorial": {
     "count": "{count, plural, one {{n} territorial department} other {{n} territorial departments}}"
+  },
+  "vacancies": {
+    "openTitle": "Open vacancies",
+    "count": "{count, plural, one {{n} vacancy} other {{n} vacancies}}",
+    "empty": "There are no open vacancies at the moment.",
+    "deadline": "Applications until {date}",
+    "testDate": "Test: {date}",
+    "statusOpen": "Accepting applications",
+    "statusExpired": "Application period has ended",
+    "toggle": "Details",
+    "apply": "Send documents to"
   }
 }

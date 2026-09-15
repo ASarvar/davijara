@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Briefcase,
   FileText,
   Gauge,
   Landmark,
@@ -41,6 +42,7 @@ const ITEMS: Item[] = [
   { href: "/admin/sahifalar", label: "Sahifalar", icon: FileText },
   { href: "/admin/menyu", label: "Menyu", icon: ListTree },
   { href: "/admin/rahbariyat", label: "Rahbariyat", icon: UserRound },
+  { href: "/admin/vakansiyalar", label: "Vakansiyalar", icon: Briefcase },
   {
     href: "/admin/hujjatlar",
     label: "Huquqiy matnlar",

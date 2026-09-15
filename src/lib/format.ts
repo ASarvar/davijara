@@ -88,6 +88,19 @@ export function formatDate(iso: string): string {
  */
 export const TASHKENT_OFFSET_MS = 5 * 60 * 60 * 1000;
 
+/**
+ * Today's calendar day in Tashkent, YYYY-MM-DD.
+ *
+ * SERVER-SIDE ONLY: it reads the clock, so rendering it in a client component
+ * would differ either side of hydration. For comparing against stored
+ * Tashkent days (a vacancy's deadline) — the UTC date lags Tashkent's by five
+ * hours after local midnight, long enough to call a deadline still open on
+ * the morning after it passed.
+ */
+export function tashkentToday(): string {
+  return new Date(Date.now() + TASHKENT_OFFSET_MS).toISOString().slice(0, 10);
+}
+
 /** ISO instant -> "21.08.2026, 10:00" in Tashkent time. */
 export function formatDateTime(iso: string): string {
   const t = new Date(iso).getTime();

@@ -13,6 +13,9 @@ import { news as legacyNews } from "@/content/news";
 import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
+// Migration 13 only — the announcement supplied with the vacancies feature.
+import { vacancySeeds } from "@/content/vacancy-announcements";
+import { tashkentToday } from "@/lib/format";
 // Migration 9 only — read there for why a data-fix migration reads this.
 import uzMessages from "../../../messages/uz.json";
 import ruMessages from "../../../messages/ru.json";
@@ -852,6 +855,78 @@ const migrations: Migration[] = [
         fetched_at TEXT NOT NULL
       );
     `,
+  },
+  {
+    version: 13,
+    name: "vacancies",
+    up: `
+      /*
+        Vakansiya eʼlonlari — the Markaz's own job announcements, shown as
+        expandable cards under /markaz/bosh-ish-orinlari.
+
+        TWO STATES, AND "closed" MEANS OFF THE SITE. The operator's rule
+        (2026-09-14): when a competition ends an editor closes it, and the
+        announcement stops being shown. No third "archived" state, and no
+        date closes one automatically — the deadline is printed, and a card
+        past it says so, but taking it down is a person's decision: a
+        competition can be extended, and a page that silently dropped a
+        still-running one would be the worse error.
+
+        A NEW row starts 'closed', like a news draft: saving and making
+        something public are separate acts in this panel.
+
+        ONE LANGUAGE, so no translations table. The announcement is published
+        in Uzbek, in the Latin script (see content/vacancy-announcements.ts);
+        the page chrome around it is translated through messages/.
+
+        deadline / test_date are Tashkent calendar days, YYYY-MM-DD, like
+        news.published_at. blocks is the plain-text block JSON news uses
+        (types/blocks.ts) — no HTML, rendered by BlockContent.
+      */
+      CREATE TABLE vacancies (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        status      TEXT    NOT NULL DEFAULT 'closed'
+                            CHECK (status IN ('open', 'closed')),
+        title       TEXT    NOT NULL,
+        unit        TEXT    NOT NULL DEFAULT '',
+        deadline    TEXT,
+        test_date   TEXT,
+        email       TEXT    NOT NULL DEFAULT '',
+        blocks      TEXT    NOT NULL DEFAULT '[]',
+        created_at  TEXT    NOT NULL,
+        created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        updated_at  TEXT,
+        updated_by  INTEGER REFERENCES users(id) ON DELETE SET NULL
+      );
+      CREATE INDEX vacancies_status_idx ON vacancies(status);
+    `,
+    /*
+      The announcement the operator supplied with this feature. Seeded 'open'
+      only while its deadline is still ahead: an install restored after the
+      competition has ended must not bring a finished announcement back onto
+      the site.
+    */
+    seed(db) {
+      const today = tashkentToday();
+      const now = new Date().toISOString();
+      const insert = db.prepare(
+        `INSERT INTO vacancies
+           (status, title, unit, deadline, test_date, email, blocks, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      );
+      for (const v of vacancySeeds) {
+        insert.run(
+          v.deadline >= today ? "open" : "closed",
+          v.title,
+          v.unit,
+          v.deadline,
+          v.testDate,
+          v.email,
+          JSON.stringify(v.blocks),
+          now,
+        );
+      }
+    },
   },
 ];
 

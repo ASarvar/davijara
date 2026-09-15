@@ -50,6 +50,7 @@ const ENTITY_LABELS: Record<AuditEntity | "all", string> = {
   duties: "Vazifalar",
   leadership: "Rahbariyat",
   media: "Rasmlar",
+  vacancy: "Vakansiyalar",
 };
 
 const ACTION_LABELS: Record<AuditAction | "all", string> = {

@@ -228,8 +228,10 @@ migration lands, non-negotiable 1 above still applies as written.
 ## Still to do
 
 - **Admin panel: complete.** News, images, pages, users, the audit log, the
-  24 privileges and both Markaz documents are editable. `content/structure.ts`
-  is the one deliberate exception.
+  24 privileges, both Markaz documents and the vacancy announcements on
+  `/markaz/bosh-ish-orinlari` are editable — a vacancy is open (on the site)
+  or closed (off it), and a new one starts closed, like a news draft.
+  `content/structure.ts` is the one deliberate exception.
 - Replace the placeholder pages with real content.
 - **Three built sections are not on the homepage**: `services` (light),
   `impact` (deep), `partners` (deep). They render correctly and are left out

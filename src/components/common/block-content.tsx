@@ -25,22 +25,37 @@ import type { Block } from "@/types/blocks";
 export function BlockContent({
   blocks,
   className,
+  headingOffset = 0,
 }: {
   blocks: Block[];
   className?: string;
+  /**
+   * Render every heading this many levels deeper. Blocks are authored for a
+   * page whose <h1> is the title, so they start at h2 — right in an article,
+   * wrong inside a card that is itself an h3 (the vacancy list), where an h2
+   * in the body would claim to outrank its own card. Only the ELEMENT moves;
+   * the styling follows the authored level, so nothing looks different.
+   */
+  headingOffset?: number;
 }) {
   if (blocks.length === 0) return null;
 
   return (
     <div className={className}>
       {blocks.map((block, i) => (
-        <BlockView key={i} block={block} />
+        <BlockView key={i} block={block} headingOffset={headingOffset} />
       ))}
     </div>
   );
 }
 
-function BlockView({ block }: { block: Block }) {
+function BlockView({
+  block,
+  headingOffset,
+}: {
+  block: Block;
+  headingOffset: number;
+}) {
   switch (block.type) {
     case "paragraph":
       return (
@@ -53,7 +68,8 @@ function BlockView({ block }: { block: Block }) {
         derived from position — a document outline is a meaning, not a
         layout. The article's own <h1> is its title, so these start at 2.
       */
-      const Tag = block.level === 2 ? "h2" : "h3";
+      const Tag = `h${Math.min(block.level + headingOffset, 6)}` as
+        "h2" | "h3" | "h4" | "h5" | "h6";
       return (
         <Tag
           className={

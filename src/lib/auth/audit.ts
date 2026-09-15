@@ -41,7 +41,8 @@ export type AuditEntity =
   | "about"
   | "duties"
   | "leadership"
-  | "media";
+  | "media"
+  | "vacancy";
 
 type WriteAudit = {
   user: Pick<SessionUser, "id" | "username"> | { id: null; username: string };
