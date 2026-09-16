@@ -1,75 +1,61 @@
-import { TASHKENT_OFFSET_MS } from "@/lib/format";
-
 /*
-  Where a lot is in its auction, derived from the one timestamp upstream sends.
+  Has a lot's auction moment arrived?
 
-  WHAT THE SERVICE GIVES US, AND WHAT IT DOES NOT. `auction_date` is the moment
-  the auction OPENS — verified against e-auksion for lot 24823151, sent as
-  2026-08-21T05:00:00.000Z, whose lot page reads "Savdo boshlanish vaqti:
-  21.08.2026 10:00" (UTC+5). There is no end timestamp anywhere in either
-  service and no status meaning "bidding right now": an open lot carries
-  "Arizalarni qabul qilish" until it carries something with "yakunlandi" in it,
-  and the catalogue drops the latter entirely (isOpenForApplications in
-  lib/data/listings.ts).
+  ONE QUESTION, AND NOT THE ONE THIS FILE USED TO ANSWER. It also worked out
+  whether an auction was still OPEN, by treating the auction's own Tashkent
+  day as the window — the listings feed sends a start timestamp and nothing
+  else, so there was nothing better to infer from. The inference was wrong in
+  the way inference usually is: an e-auksion room closes minutes after it
+  opens, so a lot that finished at 10:12 stayed marked as live until midnight.
 
-  SO "live" IS BOUNDED BY THE AUCTION'S OWN TASHKENT CALENDAR DAY. Past
-  midnight the lot looks like every other pin again, because "this auction
-  opened at 10:00 today" is a fact while "it is still running nine days later"
-  is a guess — and that guess would walk a citizen into a bidding room that
-  closed last week. It is the same rule that keeps the legacy site's invented
-  "JONLI" countdowns out of this codebase (CLAUDE.md, "Deliberately not
-  ported").
+  Which lots are live is now ANSWERED rather than guessed — e-auksion
+  publishes the open rooms and `lib/data/live-auctions.ts` reads them. What is
+  left here is the countdown caption's own question: is the start still ahead
+  of us, or behind? That is a comparison against one timestamp, it is needed
+  in the browser, and it needs no service.
 
-  NOTHING HERE CLAIMS BIDDING IS OPEN. The UI says the auction has started and
-  offers a link to e-auksion's own live page, which is the only place that
-  knows. Read `live` as "worth looking at right now", never as "you can bid".
-
-  Client-safe on purpose: lib/data/listings.ts is `server-only` and the map is
-  a client component, so this sits beside lib/listings-view.ts for the same
-  reason that one does.
+  CLIENT-SAFE ON PURPOSE. `lib/data/listings.ts` opens with `import
+  "server-only"`, so a client component importing from it drags the server
+  module into the bundle and the build fails — the same reason
+  `lib/listings-view.ts` exists separately.
 */
 
-const DAY_MS = 86_400_000;
-
-export type AuctionPhase = "upcoming" | "live" | "past";
-
-/** End of the Tashkent calendar day `at` falls in, epoch ms. */
-function endOfTashkentDay(at: number): number {
-  const local = at + TASHKENT_OFFSET_MS;
-  return Math.floor(local / DAY_MS) * DAY_MS + DAY_MS - TASHKENT_OFFSET_MS;
-}
-
-export function auctionPhase(
-  iso: string | undefined,
-  now: number,
-): AuctionPhase | null {
+/**
+ * When the auction opens, as an epoch millisecond value.
+ *
+ * `null` for a lot with no auction date and for a date upstream sent in a
+ * shape `Date` cannot read — both are "we cannot say", never "now".
+ */
+export function auctionStartAt(iso: string | undefined): number | null {
   if (!iso) return null;
   const at = new Date(iso).getTime();
-  if (!Number.isFinite(at)) return null;
-  if (now < at) return "upcoming";
-  return now < endOfTashkentDay(at) ? "live" : "past";
-}
-
-/** True while the auction has opened and its own day has not run out. */
-export function isAuctionLive(iso: string | undefined, now: number): boolean {
-  return auctionPhase(iso, now) === "live";
+  return Number.isFinite(at) ? at : null;
 }
 
 /**
- * When this lot's phase changes next, epoch ms, or null if it never will.
- *
- * Lets a caller sleep until the boundary instead of polling: a map holding a
- * thousand pins would otherwise re-render every minute to learn that nothing
- * had changed.
+ * Whether the auction's start has passed, or `null` when there is no usable
+ * date to compare against.
  */
-export function nextPhaseChange(
+export function auctionStarted(
+  iso: string | undefined,
+  now: number,
+): boolean | null {
+  const at = auctionStartAt(iso);
+  return at == null ? null : now >= at;
+}
+
+/**
+ * The next moment this answer changes for the given lot, or `null` if it never
+ * will again.
+ *
+ * Callers use it to sleep until the boundary instead of ticking: once an
+ * auction has started, nothing here changes for that lot ever again.
+ */
+export function nextAuctionStart(
   iso: string | undefined,
   now: number,
 ): number | null {
-  if (!iso) return null;
-  const at = new Date(iso).getTime();
-  if (!Number.isFinite(at)) return null;
-  if (now < at) return at;
-  const ends = endOfTashkentDay(at);
-  return now < ends ? ends : null;
+  const at = auctionStartAt(iso);
+  if (at == null) return null;
+  return now < at ? at : null;
 }

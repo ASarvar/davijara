@@ -44,6 +44,19 @@ Carried over from the legacy site and resolved as follows:
   `lib/data/lot-images.ts` reads only `images[]` from that response, and
   `SoldLot` carries only prices, area and place.
 
+- **The listings feed cannot say whether bidding is OPEN.** It carries an
+  auction START timestamp and a `lot_status`, and neither moves while the
+  auction runs: on 16.09.2026, with lot 25472672 in its e-auksion room, the
+  feed still reported `lot_status: "Savdoda ishtirok etish uchun elektron
+  arizalarni qabul qilish"` and `order_status: "Lotga chiqarilgan"` — the same
+  values a lot whose auction is next week carries. There is no end timestamp
+  either, and a room closes minutes after it opens. Deriving "live" from the
+  auction's own Tashkent day put 48 pins in the live state nationwide on a day
+  when exactly 1 rent lot was actually being bid on. `lib/data/live-auctions.ts`
+  therefore reads e-auksion's public `GET /api/front/lots/current?lang=uz` —
+  the list behind its own "Joriy savdolar" block — and a fault there means no
+  lot is marked live, never all of them.
+
 - **No bid count exists.** Neither service reports how many raises a lot took —
   there is no bid history, participant count or step field anywhere in either
   response. The sold-lot card shows the rise from the start price instead,

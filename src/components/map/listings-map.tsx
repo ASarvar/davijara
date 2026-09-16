@@ -30,11 +30,8 @@ import {
   MAP_TILE_MAX_ZOOM,
   MAP_TILE_URL,
 } from "@/lib/map-tiles";
-import {
-  auctionPhase,
-  nextPhaseChange,
-  type AuctionPhase,
-} from "@/lib/auction-phase";
+import { auctionStarted, nextAuctionStart } from "@/lib/auction-phase";
+import { withBasePath } from "@/lib/base-path";
 import type { Listing } from "@/types/content";
 
 /*
@@ -148,7 +145,7 @@ const escapeHtml = (s: string) => s.replace(/[&<>"]/g, (c) => ESCAPES[c]);
 
 function markerIconFor(
   area: number,
-  /** Auction open today — see useLiveAuctions and lib/auction-phase.ts. */
+  /** Bidding room open now — see useLiveLots and lib/data/live-auctions.ts. */
   live: boolean,
   /** "Savdo boshlandi", for the screen reader only: the ring is silent. */
   liveLabel: string,
@@ -232,9 +229,13 @@ function clusterIcon(cluster: {
         box-shadow:0 2px 12px rgba(7,16,43,.35);
         transition:transform .2s ease-out;
       ">${count}</div>${
-        live ? `<span class="listing-cluster-blip" aria-hidden="true"></span>` : ""
+        live
+          ? `<span class="listing-cluster-blip" aria-hidden="true"></span>`
+          : ""
       }`,
-    className: live ? "listing-cluster listing-cluster-live" : "listing-cluster",
+    className: live
+      ? "listing-cluster listing-cluster-live"
+      : "listing-cluster",
     iconSize: L.point(size, size, true),
   });
 }
@@ -535,15 +536,67 @@ function FitToListings({ listings }: { listings: Listing[] }) {
   return null;
 }
 
+/*
+  A room turns over in minutes, so the list is re-read on the minute. Cheap:
+  `/api/live-auctions` caches upstream for 30 seconds, and the response is a
+  few dozen lot numbers.
+*/
+const LIVE_POLL_MS = 60_000;
+
 /**
- * Where each lot with an auction date currently stands.
+ * Lot numbers whose bidding room is open right now, as e-auksion reports
+ * them — see lib/data/live-auctions.ts for why this is asked rather than
+ * worked out from the auction date.
+ *
+ * STARTS EMPTY AND FAILS CLOSED. Nothing is marked live until the first
+ * answer arrives, and a failed refresh leaves the previous answer standing
+ * rather than clearing it — one bad response should not blink every pin.
+ */
+function useLiveLots(): ReadonlySet<string> {
+  const [lots, setLots] = useState<ReadonlySet<string>>(() => new Set());
+
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      try {
+        const res = await fetch(withBasePath("/api/live-auctions"), {
+          cache: "no-store",
+        });
+        // 503 is the route saying "no answer" rather than "nobody is live".
+        if (!res.ok) return;
+        const data: unknown = await res.json();
+        const rows =
+          typeof data === "object" && data !== null && "lots" in data
+            ? (data as { lots: unknown }).lots
+            : null;
+        if (!active || !Array.isArray(rows)) return;
+        setLots(new Set(rows.map(String)));
+      } catch {
+        // Offline, or the reader navigated away mid-flight. Keep what we have.
+      }
+    };
+
+    void load();
+    const id = window.setInterval(() => void load(), LIVE_POLL_MS);
+    return () => {
+      active = false;
+      window.clearInterval(id);
+    };
+  }, []);
+
+  return lots;
+}
+
+/**
+ * Which lots' auction moment has already passed — for the countdown caption,
+ * and nothing else. Whether bidding is still OPEN is `useLiveLots`' answer.
  *
  * WAKES AT THE BOUNDARY, NOT ON A TIMER. The catalogue carries ~1 150 pins; a
  * one-minute tick would re-render the whole cluster group 1 440 times a day to
- * learn that nothing had changed. The only moments the answer can change are
- * when an auction opens and when its Tashkent day runs out, so the effect
- * sleeps until the nearest of those — capped at an hour, which also re-reads
- * the clock after a laptop wakes from sleep.
+ * learn that nothing had changed. The only moment this answer changes is when
+ * an auction opens, so the effect sleeps until the nearest one — capped at an
+ * hour, which also re-reads the clock after a laptop wakes from sleep.
  *
  * READING THE CLOCK IN THE INITIALISER IS SAFE HERE, and only here: this map
  * is loaded with `ssr: false` (see objects-explorer), so the component never
@@ -551,15 +604,13 @@ function FitToListings({ listings }: { listings: Listing[] }) {
  * disagree with. AuctionCountdown, in the popup below, starts at null instead
  * — that one DOES render on the server.
  */
-function useAuctionPhases(
-  listings: Listing[],
-): ReadonlyMap<string, AuctionPhase> {
+function useStartedAuctions(listings: Listing[]): ReadonlySet<string> {
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     let next: number | null = null;
     for (const listing of listings) {
-      const at = nextPhaseChange(listing.auctionDate, now);
+      const at = nextAuctionStart(listing.auctionDate, now);
       if (at != null && (next == null || at < next)) next = at;
     }
     if (next == null) return;
@@ -570,12 +621,11 @@ function useAuctionPhases(
   }, [listings, now]);
 
   return useMemo(() => {
-    const phases = new Map<string, AuctionPhase>();
+    const started = new Set<string>();
     for (const listing of listings) {
-      const phase = auctionPhase(listing.auctionDate, now);
-      if (phase) phases.set(listing.id, phase);
+      if (auctionStarted(listing.auctionDate, now)) started.add(listing.id);
     }
-    return phases;
+    return started;
   }, [listings, now]);
 }
 
@@ -602,7 +652,10 @@ export function ListingsMap({
     fullscreenExit: string;
   };
 }) {
-  const phases = useAuctionPhases(listings);
+  const liveLots = useLiveLots();
+  const started = useStartedAuctions(listings);
+  const isLive = (listing: Listing) =>
+    listing.lotNumber != null && liveLots.has(listing.lotNumber);
 
   return (
     <MapContainer
@@ -670,7 +723,7 @@ export function ListingsMap({
             position={[listing.lat, listing.lng]}
             icon={markerIconFor(
               listing.area,
-              phases.get(listing.id) === "live",
+              isLive(listing),
               labels.auctionStarted,
             )}
           >
@@ -777,11 +830,11 @@ export function ListingsMap({
                         reading "Savdo boshlandi" says the opposite of itself.
                         AuctionCountdown then stands alone as the statement.
                       */}
-                      {phases.get(listing.id) === "upcoming" ? (
+                      {started.has(listing.id) ? null : (
                         <span className="block text-xs text-[#3d4a6b]">
                           {labels.auctionCountdown}
                         </span>
-                      ) : null}
+                      )}
                       <AuctionCountdown
                         iso={listing.auctionDate}
                         fallback={formatDateTime(listing.auctionDate)}
@@ -813,15 +866,15 @@ export function ListingsMap({
                     thing. Which lots show it is the distinction that matters,
                     and the pin already carries that.
 
-                    ONLY while the auction is open today
-                    — lib/auction-phase.ts carries why that window closes at
-                    midnight instead of staying up until the lot leaves the
-                    feed. Withheld for mock records, which have no lot behind
-                    them, and for lots upstream sent with no number.
+                    ONLY while e-auksion lists the lot's room as open —
+                    lib/data/live-auctions.ts carries why that list is read
+                    rather than worked out here. Withheld for mock records,
+                    which have no lot behind them, and for lots upstream sent
+                    with no number.
                   */}
                   {!listing.isMock &&
                   listing.liveAuctionUrl &&
-                  phases.get(listing.id) === "live" ? (
+                  isLive(listing) ? (
                     <a
                       href={listing.liveAuctionUrl}
                       target="_blank"
