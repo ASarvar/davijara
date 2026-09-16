@@ -180,14 +180,23 @@ async function pageComparisonText(
  * Per locale, because a provider need not cover all three. Azure covers uz,
  * ru and en; a service that declined one would simply hand that locale to the
  * reader's own browser, which is where ru and en voices come from anyway.
+ *
+ * `pageCheck` REPORTS THE OTHER HALF, and it is here because of a production
+ * failure that was invisible from outside: the key was configured, the
+ * service was reachable, and every synthesis still answered 502 because the
+ * server could not read its own pages back. A boolean, not a diagnosis — it
+ * says whether the check can run, and the server log says why it cannot.
  */
 export async function GET(request: Request) {
   const raw = new URL(request.url).searchParams.get("locale") ?? "uz";
   const locale: TtsLocale = isTtsLocale(raw) ? raw : "uz";
   const provider = await activeProvider();
 
+  const pageCheck =
+    (await pageComparisonText(`/${locale}`, selfOrigins(request))) !== null;
+
   return Response.json(
-    { available: Boolean(provider?.supports(locale)) },
+    { available: Boolean(provider?.supports(locale)) && pageCheck, pageCheck },
     { headers: { "Cache-Control": "no-store" } },
   );
 }
