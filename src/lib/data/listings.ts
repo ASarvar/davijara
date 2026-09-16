@@ -443,9 +443,10 @@ const WINDOW_DAYS = 180;
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
 /*
-  e-auksion has TWO pages per lot and they are not interchangeable.
+  e-auksion has THREE pages per lot and they are not interchangeable.
 
     /lot-view?lot_id=…        the offer — terms, documents, "Ariza berish"
+    /lot-game-view?lot_id=…   the bidding room, while the auction is running
     /auction-result?lots_id=… the outcome — what it went for
 
   Note the parameter is `lot_id` on one and `lots_id` on the other; that is
@@ -464,6 +465,37 @@ const lotResultUrl = (lotNumber: string | undefined) =>
   lotNumber
     ? `https://e-auksion.uz/auction-result?lots_id=${lotNumber}`
     : undefined;
+
+/*
+  The bidding room. URL supplied by the operator (2026-09-16), same `lot_id`
+  spelling as /lot-view. Built for every lot with a number; lib/auction-phase.ts
+  decides when a reader is shown it.
+*/
+const lotGameUrl = (lotNumber: string | undefined) =>
+  lotNumber
+    ? `https://e-auksion.uz/lot-game-view?lot_id=${lotNumber}`
+    : undefined;
+
+/*
+  Fills in URLs a SNAPSHOT row may predate.
+
+  A snapshot holds mapped Listings as they looked when it was written, so a row
+  taken before `liveAuctionUrl` existed carries every other field and not that
+  one — and the bidding-room link would be missing for exactly as long as the
+  feed stays down, which is the moment it is least convenient to lose a link.
+  Both URLs are pure functions of the lot number, so deriving them on read adds
+  nothing the row did not already imply. Nothing else is back-filled: a field
+  that cannot be derived stays absent rather than guessed.
+*/
+function withDerivedUrls(listing: Listing): Listing {
+  if (!listing.lotNumber) return listing;
+  if (listing.auctionUrl && listing.liveAuctionUrl) return listing;
+  return {
+    ...listing,
+    auctionUrl: listing.auctionUrl ?? lotOfferUrl(listing.lotNumber),
+    liveAuctionUrl: listing.liveAuctionUrl ?? lotGameUrl(listing.lotNumber),
+  };
+}
 
 /*
   Uzbekistan's bounding box, with roughly half a degree of margin on each side.
@@ -548,6 +580,7 @@ function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
     lat,
     lng,
     auctionUrl: lotOfferUrl(lot.lot_number),
+    liveAuctionUrl: lotGameUrl(lot.lot_number),
   };
 }
 
@@ -732,7 +765,7 @@ export async function getListings(
       const slug = wanted[i].slug;
       const snap = readSnapshot<Listing[]>(snapshotKeys.listingsRegion(slug));
       if (snap && Array.isArray(snap.data) && snap.data.length > 0) {
-        listings.push(...snap.data);
+        listings.push(...snap.data.map(withDerivedUrls));
         asOf = olderOf(asOf, snap.fetchedAt);
       } else {
         failed.push(slug);

@@ -407,7 +407,8 @@
     "mapFullscreenExit": "Butun ekrandan chiqish",
     "mockNotice": "Ko'rsatilayotgan obyektlar hozircha <b>namunaviy</b> — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun <link>e-auksion.uz</link> saytiga murojaat qiling.",
     "pageLedeFiltered": "Tanlangan shartlar bo'yicha natijalar",
-    "showAll": "Yana {n} ta obyekt — barchasini ko'rish"
+    "showAll": "Yana {n} ta obyekt — barchasini ko'rish",
+    "mapLiveView": "Joriy savdoni koʻrish"
   },
   "calculator": {
     "title": "Ijara kalkulatori",

@@ -74,6 +74,17 @@ export interface Listing {
   /** Deep link to the e-auksion lot, when one exists. */
   auctionUrl?: string;
   /**
+   * Deep link to e-auksion's LIVE auction room for this lot.
+   *
+   * A different page from `auctionUrl`: that one is the offer a citizen
+   * applies through, this is the bidding itself. Built whenever a lot number
+   * exists, because the URL is a fact about the lot and not a claim about its
+   * phase — WHEN it may be shown is `isAuctionLive` (lib/auction-phase.ts),
+   * and outside that window the link is withheld rather than pointing a reader
+   * at a room that is not open.
+   */
+  liveAuctionUrl?: string;
+  /**
    * True for generated sample records. The UI surfaces this so a mock lot is
    * never mistaken for a real state asset — see lib/data/listings.ts.
    */

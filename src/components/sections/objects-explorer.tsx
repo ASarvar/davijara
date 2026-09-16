@@ -362,6 +362,7 @@ export function ObjectsExplorer({
       auctionStarted: t("auctionStarted"),
       fullscreenEnter: t("mapFullscreenEnter"),
       fullscreenExit: t("mapFullscreenExit"),
+      liveView: t("mapLiveView"),
     }),
     [t],
   );

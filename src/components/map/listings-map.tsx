@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { Maximize2, Minimize2 } from "lucide-react";
@@ -24,6 +30,11 @@ import {
   MAP_TILE_MAX_ZOOM,
   MAP_TILE_URL,
 } from "@/lib/map-tiles";
+import {
+  auctionPhase,
+  nextPhaseChange,
+  type AuctionPhase,
+} from "@/lib/auction-phase";
 import type { Listing } from "@/types/content";
 
 /*
@@ -77,6 +88,28 @@ const PIN_SVG = `
     </svg>`;
 
 /*
+  A lot whose auction is open today: the same pin, at the same size, in green.
+
+  A LIVE PIN CANNOT BE A SHADE OF THE CROWD. Every other pin on this map is
+  navy with a gold core, so a live lot drawn in gold — as the first version
+  was — is exactly the colour the eye has already learned to skim past. Green
+  is used nowhere else on the portal, which is what makes it legible here at
+  a glance.
+
+  SAME DIMENSIONS AS THE NAVY PIN, deliberately: the pins are a set, and one
+  of them drawn larger reads as a different KIND of thing rather than as the
+  same thing in a different state. What separates it instead is the colour,
+  the core turning over between white and gold (globals.css), and the filled
+  area tab — the white stroke lifts it off the beige streets underneath.
+*/
+const PIN_SVG_LIVE = `
+    <svg viewBox="0 0 24 32" width="26" height="34" aria-hidden="true">
+      <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
+            fill="#0f7a3d" stroke="#ffffff" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="4.5" fill="#ffffff"/>
+    </svg>`;
+
+/*
   The pin, with the lot's floor area on a tab above it.
 
   THE PIN ITSELF IS UNTOUCHED, and so is every number Leaflet positions it by
@@ -99,31 +132,91 @@ const PIN_SVG = `
 */
 const markerIcons = new Map<string, L.DivIcon>();
 
-function markerIconFor(area: number): L.DivIcon {
+/*
+  divIcon html is a STRING, so anything interpolated into it is markup. The
+  area label is a formatted number, but `liveLabel` comes from messages/ and a
+  future translator is not a reason to trust the path — escaped rather than
+  resting on where today's value happens to come from.
+*/
+const ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+};
+const escapeHtml = (s: string) => s.replace(/[&<>"]/g, (c) => ESCAPES[c]);
+
+function markerIconFor(
+  area: number,
+  /** Auction open today — see useLiveAuctions and lib/auction-phase.ts. */
+  live: boolean,
+  /** "Savdo boshlandi", for the screen reader only: the ring is silent. */
+  liveLabel: string,
+): L.DivIcon {
   // Upstream sends 0 for a lot with no area recorded; a "0 m²" tab would be
   // noise on the map and a claim we cannot make.
   const label = area > 0 ? formatArea(area) : "";
 
-  const cached = markerIcons.get(label);
+  /*
+    The cache key carries the live flag AND the label text: the same 60 m² lot
+    is a different icon once its auction opens, and the label is translated, so
+    keying on area alone would serve a Russian reader Uzbek markup after a
+    locale switch.
+  */
+  const key = live ? `live:${liveLabel}:${label}` : label;
+  const cached = markerIcons.get(key);
   if (cached) return cached;
 
+  // The tab turns green with the pin, so the lot reads as live from the label
+  // as well as from the pin under it.
+  const tab = label
+    ? `<span class="listing-marker-label${live ? " listing-marker-label-live" : ""}">` +
+      `${label}</span>`
+    : "";
+  /*
+    A pin Leaflet keyboard-focuses is something a screen reader lands on, so
+    the state the colour and the blink show visually is also said in words.
+  */
+  const state = live
+    ? `<span class="listing-marker-sr">${escapeHtml(liveLabel)}</span>`
+    : "";
+
+  /*
+    One geometry for both states — the anchor is the pin's TIP, which is the
+    point actually on the coordinate, and a live lot is not at a different
+    place than an upcoming one.
+  */
   const icon = L.divIcon({
-    className: "listing-marker",
-    html: label
-      ? `<span class="listing-marker-label">${label}</span>${PIN_SVG}`
-      : PIN_SVG,
+    className: live ? "listing-marker listing-marker-live" : "listing-marker",
+    html: live ? `${tab}${state}${PIN_SVG_LIVE}` : `${tab}${PIN_SVG}`,
     iconSize: [26, 34],
     iconAnchor: [13, 34],
     popupAnchor: [0, -34],
   });
-  markerIcons.set(label, icon);
+  markerIcons.set(key, icon);
   return icon;
 }
 
-/** Cluster bubble, sized by how many lots it holds. */
-function clusterIcon(cluster: { getChildCount: () => number }) {
+/**
+ * Cluster bubble, sized by how many lots it holds.
+ *
+ * A CLUSTER CARRIES THE LIVE STATE UP. The map opens on the whole country,
+ * where every pin is inside a bubble — so a live pin that only announces
+ * itself once it is uncovered announces itself to nobody. If any lot folded
+ * into this bubble has its auction open, the bubble takes the red edge and a
+ * badge, and clicking through leads to the pin.
+ */
+function clusterIcon(cluster: {
+  getChildCount: () => number;
+  getAllChildMarkers: () => { options: { icon?: L.DivIcon | L.Icon } }[];
+}) {
   const count = cluster.getChildCount();
   const size = count < 10 ? 34 : count < 100 ? 42 : 50;
+  const live = cluster
+    .getAllChildMarkers()
+    .some((marker) =>
+      marker.options.icon?.options.className?.includes("listing-marker-live"),
+    );
 
   return L.divIcon({
     html: `
@@ -132,14 +225,16 @@ function clusterIcon(cluster: { getChildCount: () => number }) {
         display:flex;align-items:center;justify-content:center;
         border-radius:9999px;
         background:#1a3a7c;
-        border:2px solid #c8a96e;
-        color:#e8d5a8;
+        border:2px solid ${live ? "#0f7a3d" : "#c8a96e"};
+        color:${live ? "#ffffff" : "#e8d5a8"};
         font-size:${count < 100 ? 13 : 12}px;
         font-weight:600;
         box-shadow:0 2px 12px rgba(7,16,43,.35);
         transition:transform .2s ease-out;
-      ">${count}</div>`,
-    className: "listing-cluster",
+      ">${count}</div>${
+        live ? `<span class="listing-cluster-blip" aria-hidden="true"></span>` : ""
+      }`,
+    className: live ? "listing-cluster listing-cluster-live" : "listing-cluster",
     iconSize: L.point(size, size, true),
   });
 }
@@ -440,6 +535,50 @@ function FitToListings({ listings }: { listings: Listing[] }) {
   return null;
 }
 
+/**
+ * Where each lot with an auction date currently stands.
+ *
+ * WAKES AT THE BOUNDARY, NOT ON A TIMER. The catalogue carries ~1 150 pins; a
+ * one-minute tick would re-render the whole cluster group 1 440 times a day to
+ * learn that nothing had changed. The only moments the answer can change are
+ * when an auction opens and when its Tashkent day runs out, so the effect
+ * sleeps until the nearest of those — capped at an hour, which also re-reads
+ * the clock after a laptop wakes from sleep.
+ *
+ * READING THE CLOCK IN THE INITIALISER IS SAFE HERE, and only here: this map
+ * is loaded with `ssr: false` (see objects-explorer), so the component never
+ * renders on the server and there is no hydration pass for a first value to
+ * disagree with. AuctionCountdown, in the popup below, starts at null instead
+ * — that one DOES render on the server.
+ */
+function useAuctionPhases(
+  listings: Listing[],
+): ReadonlyMap<string, AuctionPhase> {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    let next: number | null = null;
+    for (const listing of listings) {
+      const at = nextPhaseChange(listing.auctionDate, now);
+      if (at != null && (next == null || at < next)) next = at;
+    }
+    if (next == null) return;
+
+    const delay = Math.min(Math.max(next - Date.now() + 1000, 1000), 3_600_000);
+    const id = window.setTimeout(() => setNow(Date.now()), delay);
+    return () => window.clearTimeout(id);
+  }, [listings, now]);
+
+  return useMemo(() => {
+    const phases = new Map<string, AuctionPhase>();
+    for (const listing of listings) {
+      const phase = auctionPhase(listing.auctionDate, now);
+      if (phase) phases.set(listing.id, phase);
+    }
+    return phases;
+  }, [listings, now]);
+}
+
 export function ListingsMap({
   listings,
   regionName,
@@ -458,10 +597,13 @@ export function ListingsMap({
     zoomHint: string;
     auctionCountdown: string;
     auctionStarted: string;
+    liveView: string;
     fullscreenEnter: string;
     fullscreenExit: string;
   };
 }) {
+  const phases = useAuctionPhases(listings);
+
   return (
     <MapContainer
       center={COUNTRY_CENTER}
@@ -526,7 +668,11 @@ export function ListingsMap({
           <Marker
             key={listing.id}
             position={[listing.lat, listing.lng]}
-            icon={markerIconFor(listing.area)}
+            icon={markerIconFor(
+              listing.area,
+              phases.get(listing.id) === "live",
+              labels.auctionStarted,
+            )}
           >
             <Popup>
               {/*
@@ -625,9 +771,17 @@ export function ListingsMap({
                   */}
                   {listing.auctionDate ? (
                     <span className="mt-2 block">
-                      <span className="block text-xs text-[#3d4a6b]">
-                        {labels.auctionCountdown}
-                      </span>
+                      {/*
+                        The caption is a countdown label, so it goes once the
+                        auction has opened: "Savdo boshlanishiga" above a line
+                        reading "Savdo boshlandi" says the opposite of itself.
+                        AuctionCountdown then stands alone as the statement.
+                      */}
+                      {phases.get(listing.id) === "upcoming" ? (
+                        <span className="block text-xs text-[#3d4a6b]">
+                          {labels.auctionCountdown}
+                        </span>
+                      ) : null}
                       <AuctionCountdown
                         iso={listing.auctionDate}
                         fallback={formatDateTime(listing.auctionDate)}
@@ -651,6 +805,32 @@ export function ListingsMap({
                       {labels.details}
                     </a>
                   )}
+
+                  {/*
+                    The bidding room, styled exactly like the offer link above
+                    it: two links to the same site, one under the other, and
+                    the second dressed differently read as a different kind of
+                    thing. Which lots show it is the distinction that matters,
+                    and the pin already carries that.
+
+                    ONLY while the auction is open today
+                    — lib/auction-phase.ts carries why that window closes at
+                    midnight instead of staying up until the lot leaves the
+                    feed. Withheld for mock records, which have no lot behind
+                    them, and for lots upstream sent with no number.
+                  */}
+                  {!listing.isMock &&
+                  listing.liveAuctionUrl &&
+                  phases.get(listing.id) === "live" ? (
+                    <a
+                      href={listing.liveAuctionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1.5 inline-block text-xs font-medium text-[#1a3a7c] underline"
+                    >
+                      {labels.liveView}
+                    </a>
+                  ) : null}
                 </span>
               </div>
             </Popup>

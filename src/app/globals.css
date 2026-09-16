@@ -1845,3 +1845,150 @@ figure:has(canvas[data-drawn]) [data-chart-table] {
     transform: none;
   }
 }
+
+/*
+  A lot whose auction is open today: a GREEN pin, the same size and shape as
+  the rest, whose core turns over between white and gold.
+
+  GREEN BECAUSE GOLD WAS INVISIBLE. The first version ringed the pin in the
+  brand gold — the colour every one of the other ~1 150 pins already carries
+  on its core, and the colour of the cluster bubbles' edge. On a map the eye
+  skims, a state drawn in the crowd's own colour is not a state. This green is
+  used nowhere else on the portal, so it cannot be read as a link or a tone,
+  and it is dark and saturated enough (#0f7a3d) to hold against the Voyager
+  basemap's pale park greens rather than sink into them.
+
+  THE MOVEMENT IS INSIDE THE PIN. Rings expanding out of it were tried and
+  taken back out: on a clustered map they spill over the neighbouring pins and
+  the streets, which is a lot of motion spent on one lot. The core blinking is
+  the whole of it — the pin's own outline never changes size, so nothing
+  moves across anything else and the tip stays on its coordinate.
+
+  HUE IS NEVER THE ONLY DIFFERENCE (davijara-theming). The core's turnover is
+  a movement, not a colour; the area tab is filled rather than navy; the pin
+  sits above the ones it overlaps; and it says "Savdo boshlandi" to a screen
+  reader. With motion off the core simply stays white. Raw hex like the rest of this Leaflet section —
+  the pins sit on the OSM basemap, which is the same light imagery in both
+  themes, so the tone tokens would swing them out of contrast, not into it.
+*/
+.listing-marker-live {
+  /* Over the neighbours it overlaps. The hover rule further up (1000) still
+     wins, so pointing at any other pin still brings that one forward. */
+  z-index: 700 !important;
+}
+
+.listing-marker-live svg {
+  position: relative;
+  z-index: 1;
+  /* The white outline reads as a sticker over the streets; the shadow is what
+     keeps the pin's edge when it crosses a pale patch of basemap. */
+  filter: drop-shadow(0 1px 2px rgb(7 16 43 / 0.45));
+}
+
+/*
+  The blink: the core turns over between white and the brand gold rather than
+  fading out. Fading left the pin looking momentarily unfinished — a core that
+  is simply dimmer reads as a rendering fault at 12px — and this way the mark
+  is fully drawn in both halves of the cycle, so the movement is a change of
+  colour rather than a loss of the shape.
+
+  ON AN EASE-IN-OUT CURVE, not the site's `--ease-out-soft`: an ease-out
+  covers most of its distance in the first quarter and sits at the far end for
+  the rest, which reads as a flicker rather than something breathing.
+*/
+.listing-marker-live svg circle {
+  animation: listing-marker-core 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes listing-marker-core {
+  0%,
+  100% {
+    fill: #ffffff;
+  }
+  50% {
+    fill: #c8a96e;
+  }
+}
+
+/*
+  The area tab goes green with the pin. White on #0f7a3d is 5.44:1, so the
+  figure is still AA at this size.
+*/
+.listing-marker-label-live {
+  background: #0f7a3d;
+}
+
+/* The state in words, for the screen reader Leaflet hands the marker to. */
+.listing-marker-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/*
+  A cluster holding a live lot. The map opens on the whole country with every
+  pin folded away, so without this the green pin is a state nobody is at the
+  zoom level to see. The badge blinks on the same beat as the pin's core.
+*/
+.listing-cluster-live {
+  overflow: visible;
+  z-index: 700 !important;
+}
+.listing-cluster-live .listing-cluster-blip {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: #0f7a3d;
+  box-shadow: 0 0 0 2px #ffffff;
+  animation: listing-cluster-blip 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* The badge turns over on the same beat, between the live green and the gold
+   the pin's core goes to. */
+@keyframes listing-cluster-blip {
+  0%,
+  100% {
+    background: #0f7a3d;
+  }
+  50% {
+    background: #c8a96e;
+  }
+}
+
+/*
+  High contrast: yellow is this mode's accent, and this green on black is
+  3.86:1 — below the floor the mode exists to clear. The pin body keeps its
+  green fill (it is a shape on a light basemap, not text); the parts that
+  carry meaning as marks go yellow.
+*/
+/* The turnover itself goes: white and gold are two of this mode's three
+   colours away, and a mark that changes colour is not what a reader who
+   chose this mode is being helped by. */
+:root[data-contrast="high"] .listing-marker-live svg circle {
+  animation: none;
+  fill: #ffff00;
+}
+:root[data-contrast="high"] .listing-marker-label-live {
+  background: #000000;
+  color: #ffff00;
+  box-shadow: 0 0 0 1px #ffff00;
+}
+:root[data-contrast="high"] .listing-cluster-live .listing-cluster-blip {
+  animation: none;
+  background: #ffff00;
+  box-shadow: 0 0 0 2px #000000;
+}
+
+/* Motion off: the core stays white. Colour, size and the tab still carry it. */
+@media (prefers-reduced-motion: reduce) {
+  .listing-marker-live svg circle,
+  .listing-cluster-live .listing-cluster-blip {
+    animation: none;
+  }
+}
