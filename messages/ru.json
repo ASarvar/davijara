@@ -19,7 +19,18 @@
     "view": "Просмотр",
     "select": "Выбрать",
     "staleNotice": "Сервис данных временно не отвечает. Показанные данные приведены по состоянию на <b>{date}</b>.",
-    "sectionPending": "Данные «{section}» пока не внесены."
+    "sectionPending": "Данные «{section}» пока не внесены.",
+    "readAloud": "Озвучить текст",
+    "readAloudStart": "Начать чтение",
+    "readAloudPause": "Пауза",
+    "readAloudStop": "Остановить",
+    "readAloudNext": "Следующий абзац",
+    "readAloudPrev": "Предыдущий абзац",
+    "readAloudVoiceFemale": "Женский голос",
+    "readAloudVoiceMale": "Мужской голос",
+    "readAloudPosition": "{current} / {total}",
+    "readAloudError": "Сервис озвучивания сейчас недоступен",
+    "readAloudUnavailable": "Сервис озвучивания не подключён, а в устройстве нет голоса для этого языка"
   },
   "topbar": {
     "accessibility": "Версия для слабовидящих",
@@ -42,7 +53,12 @@
     "textSize": "Размер текста",
     "sizeNormal": "Обычный",
     "sizeLarge": "Крупный",
-    "sizeXlarge": "Очень крупный"
+    "sizeXlarge": "Очень крупный",
+    "readAloud": "Озвучивание текста",
+    "readAloudOff": "Выключено",
+    "readAloudOffHint": "Страница только для чтения",
+    "readAloudOn": "Включено",
+    "readAloudOnHint": "Внизу страницы появится панель озвучивания"
   },
   "nav": {
     "home": "Главная",

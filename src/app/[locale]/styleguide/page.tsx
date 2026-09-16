@@ -142,7 +142,7 @@ export default async function StyleguidePage({
   setRequestLocale(locale as Locale);
 
   return (
-    <main>
+    <div>
       <Section tone="deep" className="pb-0">
         <p className="text-accent-foreground mb-3 text-xs font-semibold tracking-[0.18em] uppercase">
           Davijara.uz
@@ -184,6 +184,6 @@ export default async function StyleguidePage({
 
       <ToneSpecimen tone="deep" />
       <ToneSpecimen tone="light" />
-    </main>
+    </div>
   );
 }

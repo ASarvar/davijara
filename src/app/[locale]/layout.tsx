@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import {
+  getMessages,
+  getTranslations,
+  setRequestLocale,
+} from "next-intl/server";
 
 import { fontVariables } from "../fonts";
 import { routing, type Locale } from "@/i18n/routing";
@@ -16,6 +20,7 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { TrafficBeacon } from "@/components/layout/traffic-beacon";
 import { YandexMetrica } from "@/components/layout/yandex-metrica";
 import { HomeBanner } from "@/components/sections/home-banner";
+import { ReadAloud } from "@/components/layout/read-aloud";
 import { SiteHeader } from "@/components/layout/site-header";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/layout/bottom-nav";
@@ -284,11 +289,24 @@ export default async function LocaleLayout({
             cross-fade instead of snapping; the chrome around it stays put,
             which is what makes the transition read as "same site, new page".
           */}
-          <div id="main" className="flex flex-1 flex-col">
+          {/*
+            <main>, not a <div id="main">, which is what this was until the
+            read-aloud player needed a content root to read from. The skip
+            link has always pointed here, so the element a keyboard user is
+            sent to is now also the landmark a screen reader announces — and
+            everything outside it (header, footer, the player itself) is
+            thereby excluded from the reading.
+          */}
+          <main id="main" className="flex flex-1 flex-col">
             <ViewTransition default="cross-fade">{children}</ViewTransition>
-          </div>
+          </main>
           <Footer />
           <ScrollToTop />
+          {/*
+            Renders nothing at all unless the reader turned it on AND a speech
+            service is configured — see components/layout/read-aloud.tsx.
+          */}
+          <ReadAloud />
           <BottomNav />
           {/* Clears the fixed bottom nav so it never covers footer content. */}
           <div aria-hidden="true" className="h-16 lg:hidden" />

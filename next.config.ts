@@ -89,6 +89,14 @@ const csp = [
   */
   `img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz${ym}`,
   "font-src 'self' data:",
+  /*
+    `media-src` was absent and therefore inherited `default-src 'self'`, which
+    blocked the read-aloud player outright: /api/tts answers with the audio
+    itself, the player turns it into a `blob:` URL, and 'self' does not cover
+    blob URLs. Nothing else on the site plays media, so this is exactly two
+    sources — our own responses, and the object URLs made from them.
+  */
+  "media-src 'self' blob:",
   // Dev needs the HMR websocket.
   `connect-src 'self'${isDev ? " ws: wss:" : ""}${ymConnect}`,
   /*

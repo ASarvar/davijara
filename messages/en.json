@@ -19,7 +19,18 @@
     "view": "View",
     "select": "Select",
     "staleNotice": "The data service is temporarily unavailable. The figures shown are as of <b>{date}</b>.",
-    "sectionPending": "No information has been published under “{section}” yet."
+    "sectionPending": "No information has been published under “{section}” yet.",
+    "readAloud": "Read aloud",
+    "readAloudStart": "Start reading",
+    "readAloudPause": "Pause",
+    "readAloudStop": "Stop",
+    "readAloudNext": "Next paragraph",
+    "readAloudPrev": "Previous paragraph",
+    "readAloudVoiceFemale": "Female voice",
+    "readAloudVoiceMale": "Male voice",
+    "readAloudPosition": "{current} / {total}",
+    "readAloudError": "The speech service is not responding right now",
+    "readAloudUnavailable": "No speech service is connected and your device has no voice for this language"
   },
   "topbar": {
     "accessibility": "Accessibility options",
@@ -42,7 +53,12 @@
     "textSize": "Text size",
     "sizeNormal": "Normal",
     "sizeLarge": "Large",
-    "sizeXlarge": "Extra large"
+    "sizeXlarge": "Extra large",
+    "readAloud": "Read the text aloud",
+    "readAloudOff": "Off",
+    "readAloudOffHint": "The page is shown for reading only",
+    "readAloudOn": "On",
+    "readAloudOnHint": "A playback bar appears at the foot of the page"
   },
   "nav": {
     "home": "Home",
