@@ -32,6 +32,38 @@ const pageTexts = new Map<string, { text: string; at: number }>();
 const rates = new Map<string, { count: number; resetAt: number }>();
 
 /*
+  WHERE THE SERVER FINDS ITS OWN PAGES, and the production bug that put this
+  list here: reading the page back from `new URL(request.url).origin` meant
+  the server asking for https://davijara.uz — its own public name — from
+  inside the network it is hosted in. That connection is refused in about 30
+  milliseconds, and every synthesis answered `page-unavailable` while the site
+  itself was perfectly healthy.
+
+  So the loopback address is tried FIRST and the public origin is kept only as
+  the last resort. `TTS_SELF_ORIGIN` is for a deployment where neither fits —
+  a socket, a different port, a container talking to a sibling.
+
+  The origin that answers is remembered, so this costs one extra connection
+  once and nothing afterwards.
+*/
+let workingOrigin: string | null = null;
+
+function selfOrigins(request: Request): string[] {
+  const configured = process.env.TTS_SELF_ORIGIN?.trim();
+  const port = process.env.PORT ?? "3000";
+  const candidates = [
+    configured,
+    `http://127.0.0.1:${port}`,
+    new URL(request.url).origin,
+  ].filter((value): value is string => Boolean(value));
+
+  const ordered = workingOrigin
+    ? [workingOrigin, ...candidates.filter((o) => o !== workingOrigin)]
+    : candidates;
+  return [...new Set(ordered)];
+}
+
+/*
   A path this server will fetch from itself. Locale-prefixed, no scheme, no
   host, no traversal — the browser sends `location.pathname`, which already
   carries the base path when the app is mounted under one, so the URL is built
@@ -92,29 +124,54 @@ function htmlToComparisonText(html: string): string {
   return comparisonForm(stripped);
 }
 
-async function pageComparisonText(url: string): Promise<string | null> {
-  const cached = pageTexts.get(url);
+async function pageComparisonText(
+  path: string,
+  origins: string[],
+): Promise<string | null> {
+  const cached = pageTexts.get(path);
   if (cached && Date.now() - cached.at < PAGE_TEXT_TTL_MS) return cached.text;
 
-  try {
-    const res = await fetch(url, {
-      headers: { Accept: "text/html" },
-      signal: AbortSignal.timeout(10_000),
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
+  let lastError: unknown = null;
+  for (const origin of origins) {
+    try {
+      const res = await fetch(new URL(path, origin), {
+        headers: { Accept: "text/html" },
+        signal: AbortSignal.timeout(10_000),
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        lastError = `${origin} answered ${res.status}`;
+        continue;
+      }
 
-    const text = htmlToComparisonText(await res.text());
-    if (pageTexts.size >= PAGE_TEXT_MAX) {
-      // Oldest out. A map iterates in insertion order, so this is the first.
-      const oldest = pageTexts.keys().next().value;
-      if (oldest) pageTexts.delete(oldest);
+      const text = htmlToComparisonText(await res.text());
+      workingOrigin = origin;
+      if (pageTexts.size >= PAGE_TEXT_MAX) {
+        // Oldest out. A map iterates in insertion order, so this is the first.
+        const oldest = pageTexts.keys().next().value;
+        if (oldest) pageTexts.delete(oldest);
+      }
+      pageTexts.set(path, { text, at: Date.now() });
+      return text;
+    } catch (error) {
+      lastError = error;
     }
-    pageTexts.set(url, { text, at: Date.now() });
-    return text;
-  } catch {
-    return null;
   }
+
+  /*
+    Logged rather than swallowed: from the browser this is one 502 among many,
+    and the difference between "the page moved" and "the server cannot reach
+    itself" is only visible here.
+  */
+  console.warn(
+    "[tts] could not read",
+    path,
+    "from",
+    origins.join(", "),
+    "-",
+    lastError instanceof Error ? lastError.message : lastError,
+  );
+  return null;
 }
 
 /**
@@ -191,9 +248,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "bad-request" }, { status: 400 });
   }
 
-  const pageText = await pageComparisonText(
-    new URL(path, new URL(request.url).origin).toString(),
-  );
+  const pageText = await pageComparisonText(path, selfOrigins(request));
   if (!pageText) {
     return Response.json({ error: "page-unavailable" }, { status: 502 });
   }
