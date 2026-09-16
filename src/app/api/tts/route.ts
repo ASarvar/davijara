@@ -40,8 +40,11 @@ const rates = new Map<string, { count: number; resetAt: number }>();
   itself was perfectly healthy.
 
   So the loopback address is tried FIRST and the public origin is kept only as
-  the last resort. `TTS_SELF_ORIGIN` is for a deployment where neither fits —
-  a socket, a different port, a container talking to a sibling.
+  the last resort — and loopback means BOTH families: this site's own server
+  listens on `[::1]:3001` (nginx proxies to it there), and a candidate list of
+  127.0.0.1 alone found nothing. `TTS_SELF_ORIGIN` remains for a deployment
+  where neither fits, and is the cheapest thing to set when the port is not in
+  `PORT` either — as it was not here.
 
   The origin that answers is remembered, so this costs one extra connection
   once and nothing afterwards.
@@ -54,6 +57,7 @@ function selfOrigins(request: Request): string[] {
   const candidates = [
     configured,
     `http://127.0.0.1:${port}`,
+    `http://[::1]:${port}`,
     new URL(request.url).origin,
   ].filter((value): value is string => Boolean(value));
 
