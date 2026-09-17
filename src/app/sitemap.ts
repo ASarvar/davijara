@@ -24,6 +24,33 @@ const staticPaths = [
   // No /maxsus-imkoniyatlar entry — accessibility settings are a dialog in the
   // topbar, available from every page, rather than a route of their own.
   "/xizmatlar/kalkulyator",
+  "/aloqa",
+  "/eng-kam-stavkalar",
+  "/faoliyat",
+  "/faoliyat/ijaraga-berish",
+  "/faoliyat/savollar",
+  "/faoliyat/xatlov",
+  "/hujjatlar/dasturlar",
+  "/hujjatlar/idoraviy",
+  "/hujjatlar/kuchini-yoqotgan",
+  "/hujjatlar/loyihalar",
+  "/markaz/bosh-ish-orinlari",
+  "/markaz/hududiy-boshqarmalar",
+  "/markaz/korrupsiyaga-qarshi",
+  "/markaz/markaziy-apparat",
+  "/markaz/rahbariyat",
+  "/markaz/tuzilma",
+  "/markaz/vazifalar",
+  // /ochiq-malumotlar itself only redirects here; its sub-pages do not.
+  "/malumotlar/ochiq-malumotlar",
+  "/ochiq-malumotlar/farmon-pf-154",
+  "/ochiq-malumotlar/murojaatlar",
+  "/ochiq-malumotlar/qaror-3299",
+  "/ochiq-malumotlar/qaror-pq-447",
+  "/yangiliklar/bayonotlar",
+  "/yangiliklar/media",
+  "/yangiliklar/ozbekiston",
+  // Not /styleguide: a development page, marked noindex.
 ];
 
 /*
