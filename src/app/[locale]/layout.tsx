@@ -303,8 +303,9 @@ export default async function LocaleLayout({
           <Footer />
           <ScrollToTop />
           {/*
-            Renders nothing at all unless the reader turned it on AND a speech
-            service is configured — see components/layout/read-aloud.tsx.
+            Renders nothing until text is selected inside <main>, and nothing
+            then unless a speech service can speak it — see
+            components/layout/read-aloud.tsx.
           */}
           <ReadAloud />
           <BottomNav />

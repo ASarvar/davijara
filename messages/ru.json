@@ -20,19 +20,11 @@
     "select": "Выбрать",
     "staleNotice": "Сервис данных временно не отвечает. Показанные данные приведены по состоянию на <b>{date}</b>.",
     "sectionPending": "Данные «{section}» пока не внесены.",
-    "readAloud": "Озвучить текст",
-    "readAloudStart": "Начать чтение",
     "readAloudPause": "Пауза",
-    "readAloudStop": "Остановить",
-    "readAloudNext": "Следующий абзац",
-    "readAloudPrev": "Предыдущий абзац",
-    "readAloudVoiceFemale": "Женский голос",
-    "readAloudVoiceMale": "Мужской голос",
-    "readAloudPosition": "{current} / {total}",
     "readAloudError": "Сервис озвучивания сейчас недоступен",
-    "readAloudUnavailable": "Сервис озвучивания не подключён, а в устройстве нет голоса для этого языка",
     "readAloudSelection": "Озвучить выделенное",
-    "readAloudClose": "Отключить озвучивание"
+    "readAloudResume": "Продолжить",
+    "readAloudLoading": "Готовим озвучку"
   },
   "topbar": {
     "accessibility": "Версия для слабовидящих",
@@ -60,7 +52,10 @@
     "readAloudOff": "Выключено",
     "readAloudOffHint": "Страница только для чтения",
     "readAloudOn": "Включено",
-    "readAloudOnHint": "Внизу страницы появится панель озвучивания"
+    "readAloudOnHint": "Выделите текст — рядом появится кнопка озвучивания",
+    "readAloudVoice": "Голос",
+    "readAloudVoiceFemale": "Женский голос",
+    "readAloudVoiceMale": "Мужской голос"
   },
   "nav": {
     "home": "Главная",

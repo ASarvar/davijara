@@ -39,6 +39,7 @@ try {
   var s = localStorage.getItem('davijara-text-size');
   var t = localStorage.getItem('davijara-theme');
   var r = localStorage.getItem('davijara-read-aloud');
+  var v = localStorage.getItem('davijara-read-aloud-voice');
   /*
     A marker that JavaScript ran at all. /statistika ships every chart's
     numbers as a visible <table> so a no-JS visitor gets the figures — but the
@@ -53,11 +54,11 @@ try {
   if (c === 'high') document.documentElement.setAttribute('data-contrast', 'high');
   if (s === 'large' || s === 'xlarge') document.documentElement.setAttribute('data-text-size', s);
   /*
-    The read-aloud bar is fixed to the foot of the page, so the preference is
-    applied here with the others rather than from an effect: set later, the
-    page would lay out once without room for it and again with.
+    Reading a selection aloud is ON unless the reader switched it off, so only
+    'off' is written here; the reader treats a missing attribute as on.
   */
-  if (r === 'on') document.documentElement.setAttribute('data-read-aloud', 'on');
+  if (r === 'off') document.documentElement.setAttribute('data-read-aloud', 'off');
+  if (v === 'male') document.documentElement.setAttribute('data-read-aloud-voice', 'male');
 } catch (e) {}
 `.trim();
 

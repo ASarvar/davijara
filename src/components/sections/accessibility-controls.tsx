@@ -2,17 +2,19 @@
 
 import { useCallback, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Contrast, Type, Volume2 } from "lucide-react";
+import { Check, Contrast, Mic, Type, Volume2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 type ContrastMode = "normal" | "high";
 type TextSize = "normal" | "large" | "xlarge";
 type ReadAloud = "off" | "on";
+type ReadAloudVoice = "female" | "male";
 
 const CONTRAST_KEY = "davijara-contrast";
 const TEXT_SIZE_KEY = "davijara-text-size";
 const READ_ALOUD_KEY = "davijara-read-aloud";
+const READ_ALOUD_VOICE_KEY = "davijara-read-aloud-voice";
 
 /**
  * Subscribe to attribute changes on <html>.
@@ -29,7 +31,12 @@ function subscribe(onChange: () => void) {
   const observer = new MutationObserver(onChange);
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ["data-contrast", "data-text-size", "data-read-aloud"],
+    attributeFilter: [
+      "data-contrast",
+      "data-text-size",
+      "data-read-aloud",
+      "data-read-aloud-voice",
+    ],
   });
   return () => observer.disconnect();
 }
@@ -53,7 +60,15 @@ export function AccessibilityControls() {
   const t = useTranslations("topbar");
   const contrast = useHtmlAttribute<ContrastMode>("data-contrast", "normal");
   const textSize = useHtmlAttribute<TextSize>("data-text-size", "normal");
-  const readAloud = useHtmlAttribute<ReadAloud>("data-read-aloud", "off");
+  /*
+    ON unless switched off: the attribute is absent for a reader who never
+    chose, which is why "off" is written out rather than removed.
+  */
+  const readAloud = useHtmlAttribute<ReadAloud>("data-read-aloud", "on");
+  const voice = useHtmlAttribute<ReadAloudVoice>(
+    "data-read-aloud-voice",
+    "female",
+  );
 
   const applyContrast = (value: ContrastMode) => {
     const root = document.documentElement;
@@ -79,16 +94,25 @@ export function AccessibilityControls() {
   };
 
   /*
-    The player itself lives in the layout and watches this attribute; all this
-    control does is set it. That split is what lets the bar survive a
-    navigation while the dialog it was turned on from is long closed.
+    The reader itself lives in the layout and watches these attributes; all
+    this control does is set them. It reads the voice at the moment it speaks,
+    so a change here applies to the next press without a reload.
   */
   const applyReadAloud = (value: ReadAloud) => {
-    const root = document.documentElement;
-    if (value === "on") root.setAttribute("data-read-aloud", "on");
-    else root.removeAttribute("data-read-aloud");
+    document.documentElement.setAttribute("data-read-aloud", value);
     try {
       localStorage.setItem(READ_ALOUD_KEY, value);
+    } catch {
+      // See above.
+    }
+  };
+
+  const applyVoice = (value: ReadAloudVoice) => {
+    const root = document.documentElement;
+    if (value === "male") root.setAttribute("data-read-aloud-voice", "male");
+    else root.removeAttribute("data-read-aloud-voice");
+    try {
+      localStorage.setItem(READ_ALOUD_VOICE_KEY, value);
     } catch {
       // See above.
     }
@@ -172,22 +196,16 @@ export function AccessibilityControls() {
         </div>
       </fieldset>
 
-      {/*
-        Full width under the other two: this one needs a sentence of
-        explanation that the contrast and size options do not, because it is
-        the only setting here that adds a control to the page rather than
-        changing how the page looks.
-      */}
-      <fieldset className="sm:col-span-2">
+      <fieldset>
         <legend className="mb-3 flex items-center gap-2 text-sm font-semibold">
           <Volume2 aria-hidden="true" className="size-4" />
           {t("readAloud")}
         </legend>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-2">
           {(
             [
-              ["off", "readAloudOff", "readAloudOffHint"],
               ["on", "readAloudOn", "readAloudOnHint"],
+              ["off", "readAloudOff", "readAloudOffHint"],
             ] as const
           ).map(([value, label, hint]) => (
             <button
@@ -204,6 +222,38 @@ export function AccessibilityControls() {
                 </span>
               </span>
               {readAloud === value ? (
+                <Check aria-hidden="true" className="size-4 shrink-0" />
+              ) : null}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      {/*
+        Disabled rather than hidden while reading is off, so the dialog keeps
+        its shape and the choice is still visible for when it is turned on.
+      */}
+      <fieldset disabled={readAloud === "off"} className="disabled:opacity-50">
+        <legend className="mb-3 flex items-center gap-2 text-sm font-semibold">
+          <Mic aria-hidden="true" className="size-4" />
+          {t("readAloudVoice")}
+        </legend>
+        <div className="space-y-2">
+          {(
+            [
+              ["female", "readAloudVoiceFemale"],
+              ["male", "readAloudVoiceMale"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => applyVoice(value)}
+              aria-pressed={voice === value}
+              className={optionClass(voice === value)}
+            >
+              <span className="block">{t(label)}</span>
+              {voice === value ? (
                 <Check aria-hidden="true" className="size-4 shrink-0" />
               ) : null}
             </button>

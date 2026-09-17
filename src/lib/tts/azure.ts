@@ -110,6 +110,20 @@ const XML_ESCAPES: Record<string, string> = {
 const escapeXml = (value: string) =>
   value.replace(/[&<>"']/g, (char) => XML_ESCAPES[char]);
 
+/*
+  A line break is where one piece of the page ended and the next began — a
+  card title and its address, a price and its label — which the reader joins
+  into one request so a selected card costs one synthesis instead of seven.
+  Spoken without a pause they would run together, so each becomes a short
+  break. The break is markup, added after escaping, never text from the page.
+*/
+const toSsmlText = (value: string) =>
+  value
+    .split(/\n+/)
+    .map((line) => escapeXml(line.trim()))
+    .filter(Boolean)
+    .join('<break time="350ms"/>');
+
 async function synthesize({
   text,
   locale,
@@ -129,7 +143,7 @@ async function synthesize({
 
   const ssml =
     `<speak version="1.0" xml:lang="${LOCALE_TAGS[locale]}">` +
-    `<voice name="${voiceName}">${escapeXml(text)}</voice>` +
+    `<voice name="${voiceName}">${toSsmlText(text)}</voice>` +
     `</speak>`;
 
   try {

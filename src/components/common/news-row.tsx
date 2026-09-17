@@ -46,6 +46,12 @@ export async function NewsRow({
   return (
     <Link
       href={`/yangiliklar/${item.slug}`}
+      /*
+        Not draggable, so text on the card can be selected. The whole card
+        is one link, and a browser drags a link rather than selecting inside
+        it — which made reading a card aloud nearly impossible to start.
+      */
+      draggable={false}
       className={cn(
         "group flex gap-3",
         md

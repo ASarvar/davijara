@@ -2,78 +2,66 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import {
-  Loader2,
-  Pause,
-  Play,
-  Square,
-  SkipBack,
-  SkipForward,
-  Volume2,
-  X,
-} from "lucide-react";
+import { AlertCircle, Loader2, Pause, Play, Volume2 } from "lucide-react";
 
 import { usePathname } from "@/i18n/navigation";
 import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
-import {
-  splitIntoChunks,
-  TTS_BLOCK_SELECTOR,
-  TTS_BLOCK_TAGS,
-} from "@/lib/tts/chunks";
+import { MAX_CHUNK_CHARS, splitIntoChunks } from "@/lib/tts/chunks";
 import { isTtsLocale, type TtsVoice } from "@/lib/tts/voices";
 
 /*
-  "Matnni o'qib berish" — the page read aloud, block by block.
+  "Matnni o'qib berish" — the text a reader selects, read aloud.
 
   NOT A REPLACEMENT FOR A SCREEN READER, and the distinction decides the
   design. Someone running NVDA or VoiceOver already has the page, and gets it
-  better than this could: the headings, the landmarks, the tables, the links.
-  This is for the reader who does not run one — low vision, tired eyes, poor
-  literacy, a long statute — and it is therefore an ordinary audio player with
-  ordinary controls, not an accessibility layer competing with theirs. It
-  never starts by itself, it is reachable by keyboard like any other control,
-  and turning it off leaves no trace on the page.
+  better than this could. This is for the reader who does not run one — low
+  vision, tired eyes, poor literacy, a long statute — so it is one small
+  control beside the words they chose, in the manner of my.gov.uz, and never
+  starts by itself.
 
-  IT READS THE PAGE'S OWN PROSE, in document order: the headings, paragraphs
-  and list items inside <main>. Nav, footer and controls are not read —
-  hearing the whole menu before the first sentence is how these players get
-  turned off — and neither are tables, which are for reading.
+  ON BY DEFAULT, and that is only acceptable because it costs nothing until
+  used: no request is made, and nothing is drawn, until someone selects text
+  inside <main>. The switch and the voice live in "Maxsus imkoniyatlar"
+  (accessibility-controls.tsx), which writes them to <html>.
+
+  There was a whole-page player with a bar at the foot of the screen before
+  this. The operator removed it: the selection is the reading.
 
   THE AUDIO IS NOT MADE HERE. `/api/tts` holds the key, checks that the words
-  are actually on the page it was told, and caches the result, so a paragraph
-  of the rent statute is synthesised once for the whole site. See
+  are actually on the page it was told, and caches the result. See
   lib/tts/azure.ts.
 */
 
-/*
-  A piece of text to speak, and the block it came from.
-
-  `el` IS NULL FOR A SELECTION. Reading the whole page walks block elements,
-  so each chunk has one to highlight and scroll to; a reader who has selected
-  a phrase has already marked it themselves, and the browser's own selection
-  is a better highlight than anything painted over it.
-*/
-type Chunk = { text: string; el: HTMLElement | null };
 type Status = "idle" | "loading" | "playing" | "paused" | "error";
 
 /*
   WHO IS DOING THE SPEAKING.
 
-  `server` is the real answer: Azure, through /api/tts, which is the only one
-  of the three that can say an Uzbek sentence properly.
-
-  `browser` is the fallback for a deployment with no speech service
-  configured. It costs nothing and needs no key, but it can only offer what
-  the reader's own device has installed — and no desktop browser ships an
-  Uzbek voice, so in practice it serves /ru and /en and says so plainly on
-  /uz rather than pretending.
-
-  `none` is not hidden. A control that is switched on and then does nothing
-  visible is indistinguishable from a broken one, so the bar still appears and
-  carries the reason.
+  `server` is the real answer: Azure, through /api/tts, the only one that can
+  say an Uzbek sentence properly. `browser` is the fallback for a deployment
+  with no speech service — it can only offer what the reader's device has, and
+  no desktop browser ships an Uzbek voice. `none` shows no control at all:
+  with the feature on for everyone, a button beside every selection that
+  could only say "unavailable" would be noise on every copy of an address.
 */
 type Engine = "server" | "browser" | "none";
+
+type Selected = {
+  /* `toString()`, only to tell one selection from another. */
+  text: string;
+  range: Range;
+  top: number;
+  bottom: number;
+  left: number;
+};
+
+/*
+  A chunk the server refused as not on the page. Skipped rather than fatal: a
+  selection is many chunks, and one that cannot be checked — text a script
+  changed after the page was served — should not silence all the others.
+*/
+class RefusedChunk extends Error {}
 
 /** The device's own voices for a locale, if it has any. */
 function browserVoices(locale: string): SpeechSynthesisVoice[] {
@@ -102,139 +90,117 @@ function whenVoicesReady(): Promise<void> {
   });
 }
 
-const VOICE_KEY = "davijara-read-aloud-voice";
-const READING_CLASS = "tts-reading";
+/** Read at the moment of speaking, so a change in the dialog applies at once. */
+function currentVoice(): TtsVoice {
+  return document.documentElement.getAttribute("data-read-aloud-voice") ===
+    "male"
+    ? "male"
+    : "female";
+}
+
 /*
-  How much clear space the selection button needs above the selection before it
-  is put there: its own height, plus the sticky header it would cover.
-*/
-const SELECTION_BUTTON_HEADROOM = 120;
+  The selection, split where the page splits it.
 
-/**
- * The blocks of the current page, in the order they are written.
- *
- * A block that CONTAINS another block is skipped — a <li> wrapping a <p>
- * would otherwise be read once as itself and once as its child — and so is
- * anything hidden, aria-hidden, or marked `data-tts-skip`.
- */
+  The text has a line break between blocks. One whole paragraph or heading is
+  one line and so exactly the chunk the deploy-time warm-up already voiced
+  (scripts/warm-tts.mjs), served from the cache; anything longer is packed.
+*/
+function selectionChunks(text: string): string[] {
+  const lines = text
+    .split(/\n+/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  /*
+    SHORT LINES ARE PACKED TOGETHER, joined by a line break the server turns
+    into a pause. A lot card is seven lines — title, place, area, label,
+    price, label, time — and sent one by one it cost seven syntheses, which on
+    the free tier is a third of a minute's allowance for one card.
+  */
+  const chunks: string[] = [];
+  let current = "";
+  for (const line of lines) {
+    if (line.length > MAX_CHUNK_CHARS) {
+      if (current) chunks.push(current);
+      current = "";
+      chunks.push(...splitIntoChunks(line));
+    } else if (current && current.length + 1 + line.length > MAX_CHUNK_CHARS) {
+      chunks.push(current);
+      current = line;
+    } else {
+      current = current ? `${current}\n${line}` : line;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
 /*
-  A block's words, without the ones that are not words.
+  The words of a selection, without the ones that are not for reading.
 
-  NOT `innerText`, which was the first version and was wrong twice over. It
-  includes `aria-hidden` content — the decorative "01", "02" numbering on the
-  privilege cards, which a reader heard read out before every title — and it
-  therefore also disagreed with the server's own extraction, so the warmed
-  cache missed on every card. A clone with those subtrees removed fixes both:
-  the reading is what a screen reader would say, and both sides produce the
-  same string.
+  NOT `Selection.toString()`, which includes everything the range covers —
+  the ticking countdown on a lot card among it, which the server can never
+  find on its copy of the page and so refused. The same subtrees the server
+  strips (lib/tts/extract.ts) are removed from a copy of the range here.
 
-  TAGS ARE REPLACED BY SPACES rather than simply dropped, which is the same
-  thing `lib/tts/extract.ts` does on the server and is not cosmetic: a card
-  whose category and title are two sibling elements came out as
-  "Ta'lim muassasalariXususiy o'quv markazlariga…" from plain `textContent`,
-  and that is what would have been spoken for any text the warm-up had not
-  already voiced.
+  `innerText` needs a rendered element to put line breaks between blocks, so
+  the copy is attached off-screen for the moment it takes to read.
 */
-function readableText(el: HTMLElement): string {
-  const clone = el.cloneNode(true) as HTMLElement;
-  for (const hidden of clone.querySelectorAll(
+function readableSelection(range: Range): string {
+  const box = document.createElement("div");
+  box.append(range.cloneContents());
+  for (const hidden of box.querySelectorAll(
     '[aria-hidden="true"], [data-tts-skip]',
   )) {
     hidden.remove();
   }
-
-  const spaced = clone.innerHTML.replace(/<[^>]+>/g, " ");
-  const decoded =
-    new DOMParser().parseFromString(spaced, "text/html").body.textContent ?? "";
-  return decoded.replace(/\s+/g, " ").trim();
+  box.style.cssText = "position:fixed;left:-99999px;top:0;width:60rem";
+  document.body.append(box);
+  const text = box.innerText;
+  box.remove();
+  return text.trim();
 }
 
-function collectChunks(): Chunk[] {
-  const chunks: Chunk[] = [];
-
-  for (const el of document.querySelectorAll<HTMLElement>(TTS_BLOCK_SELECTOR)) {
-    if (el.querySelector(TTS_BLOCK_TAGS)) continue;
-    if (el.closest("[data-tts-skip]")) continue;
-    if (el.closest("[aria-hidden='true']")) continue;
-    /*
-      Navigation inside the content is still navigation. The filter chips on
-      /imtiyozlar are an <li> list in a <nav>, so a reading that took every
-      list item began "Barchasi 24, Ijtimoiy himoya 8, Ta'lim muassasalari 4"
-      before reaching a sentence. Links themselves are kept — a card's title
-      is a link and is very much part of the page.
-    */
-    if (el.closest("nav, button, [role='tablist']")) continue;
-    // `offsetParent` is null for a display:none subtree, which is how the
-    // mobile/desktop duplicates in the header and the closed <details> of the
-    // vacancy list stay out of the reading.
-    if (!el.offsetParent) continue;
-
-    const text = readableText(el);
-    if (!text) continue;
-
-    for (const piece of splitIntoChunks(text)) chunks.push({ text: piece, el });
-  }
-
-  return chunks;
-}
+/*
+  How much clear space the button needs above the selection before it is put
+  there: its own height, plus the sticky header it would cover.
+*/
+const BUTTON_HEADROOM = 120;
 
 export function ReadAloud() {
   const t = useTranslations("common");
   const locale = useLocale();
   const pathname = usePathname();
 
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState(true);
   const [engine, setEngine] = useState<Engine | null>(null);
   const [status, setStatus] = useState<Status>("idle");
-  /*
-    READ IN THE INITIALISER, which is safe here and would not be in most
-    components: until the effect below finds `data-read-aloud` on <html> this
-    component renders null, so the server output does not depend on this value
-    and there is nothing for hydration to disagree with. The `window` guard is
-    for the server pass itself, where localStorage does not exist.
-  */
-  const [voice, setVoice] = useState<TtsVoice>(() => {
-    if (typeof window === "undefined") return "female";
-    try {
-      const saved = localStorage.getItem(VOICE_KEY);
-      return saved === "male" || saved === "female" ? saved : "female";
-    } catch {
-      // Privacy mode: the default voice is used and nothing is remembered.
-      return "female";
-    }
-  });
-  const [position, setPosition] = useState({ index: 0, total: 0 });
-  const [selection, setSelection] = useState<{
-    text: string;
-    top: number;
-    bottom: number;
-    left: number;
-  } | null>(null);
+  const [selection, setSelection] = useState<Selected | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const chunksRef = useRef<Chunk[]>([]);
+  const chunksRef = useRef<string[]>([]);
   const indexRef = useRef(0);
+  /* The text being read, so a new selection can be told from a re-measure. */
+  const spokenRef = useRef<string | null>(null);
   const urlsRef = useRef(new Map<number, string>());
   const nextRef = useRef<{ index: number; promise: Promise<string> } | null>(
     null,
   );
   /*
-    `play` calls itself when a browser utterance ends, and an utterance's
-    callback outlives the render that created it. The ref is what keeps that
-    call pointed at the current closure instead of the one from four
-    paragraphs ago.
+    `play` calls itself when a chunk ends, and that callback outlives the
+    render that created it. The ref keeps the call pointed at the current
+    closure.
   */
   const playRef = useRef<(index: number) => void>(() => {});
 
   /*
-    The preference lives on <html>, set before paint by AccessibilityScript
-    and toggled by AccessibilityControls — the same mechanism as contrast and
-    text size, so all three survive a navigation the same way.
+    The switch lives on <html>: set before paint by AccessibilityScript and
+    toggled by AccessibilityControls. Only an explicit "off" turns it off.
   */
   useEffect(() => {
     const read = () =>
       setEnabled(
-        document.documentElement.getAttribute("data-read-aloud") === "on",
+        document.documentElement.getAttribute("data-read-aloud") !== "off",
       );
     read();
     const observer = new MutationObserver(read);
@@ -248,20 +214,11 @@ export function ReadAloud() {
   /*
     What the reader has selected, and where it is on the screen.
 
-    ONLY WHILE THE FEATURE IS ON: a button that appeared beside every
-    selection would interrupt copying an address for every visitor, most of
-    whom never asked to be read to.
-
     Coalesced into a frame, because `selectionchange` fires continuously while
     a selection is dragged, and re-measured on scroll and resize so the button
     stays on the words it belongs to.
   */
   useEffect(() => {
-    /*
-      Nothing to clear on the way out: with the feature off the component
-      renders null, so a selection remembered here is invisible, and the
-      immediate `read()` below corrects it the moment it is switched back on.
-    */
     if (!enabled) return;
 
     let frame = 0;
@@ -282,7 +239,6 @@ export function ReadAloud() {
             ? (range.commonAncestorContainer as Element)
             : range.commonAncestorContainer.parentElement;
 
-        // Inside the page's own content, and not inside the player itself.
         if (
           text.length < 2 ||
           !node ||
@@ -296,6 +252,7 @@ export function ReadAloud() {
         const rect = range.getBoundingClientRect();
         setSelection({
           text,
+          range: range.cloneRange(),
           top: rect.top,
           bottom: rect.bottom,
           left: rect.left + rect.width / 2,
@@ -316,11 +273,12 @@ export function ReadAloud() {
   }, [enabled]);
 
   /*
-    Asked once, and only once the reader has turned the feature on — there is
-    no reason to wake a speech service for someone who has not.
+    Asked once, on the first selection — not on page load. The feature is on
+    for every visitor, and most of them will never select anything.
   */
+  const wanted = enabled && selection !== null;
   useEffect(() => {
-    if (!enabled || engine !== null) return;
+    if (!wanted || engine !== null) return;
     let active = true;
 
     void (async () => {
@@ -350,13 +308,7 @@ export function ReadAloud() {
     return () => {
       active = false;
     };
-  }, [enabled, engine, locale]);
-
-  const clearHighlight = useCallback(() => {
-    for (const el of document.querySelectorAll(`.${READING_CLASS}`)) {
-      el.classList.remove(READING_CLASS);
-    }
-  }, []);
+  }, [wanted, engine, locale]);
 
   const releaseAudio = useCallback(() => {
     for (const url of urlsRef.current.values()) URL.revokeObjectURL(url);
@@ -369,24 +321,32 @@ export function ReadAloud() {
       window.speechSynthesis.cancel();
     }
     audioRef.current?.pause();
-    if (audioRef.current) audioRef.current.currentTime = 0;
     chunksRef.current = [];
     indexRef.current = 0;
+    spokenRef.current = null;
     releaseAudio();
-    clearHighlight();
-    setPosition({ index: 0, total: 0 });
     setStatus("idle");
-  }, [clearHighlight, releaseAudio]);
+  }, [releaseAudio]);
 
-  // A new page is a new text. Nothing carries over except the preference.
+  // A new page is a new text.
   useEffect(() => stop, [pathname, stop]);
+
+  /*
+    The reading belongs to the words it was started on. When the selection
+    goes away, or becomes different words, the reading stops — otherwise audio
+    would carry on with no control left on the screen to stop it.
+  */
+  const selectedText = enabled ? (selection?.text ?? null) : null;
+  useEffect(() => {
+    if (spokenRef.current !== null && selectedText !== spokenRef.current) {
+      stop();
+    }
+  }, [selectedText, stop]);
 
   /*
     SPEECH OUTLIVES THE PAGE. `speechSynthesis` belongs to the browser, not to
     the document: an utterance queued here keeps speaking through a full
-    navigation, and React's cleanup does not run on one. So the queue is
-    cleared on the way out, and again on the way in — a reader who leaves
-    mid-paragraph should not be read the previous page by the next one.
+    navigation, so the queue is cleared on the way out and on the way in.
   */
   useEffect(() => {
     if (!("speechSynthesis" in window)) return;
@@ -404,73 +364,53 @@ export function ReadAloud() {
       const cached = urlsRef.current.get(index);
       if (cached) return cached;
 
-      const chunk = chunksRef.current[index];
       const res = await fetch(withBasePath("/api/tts"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           path: window.location.pathname,
-          text: chunk.text,
+          text: chunksRef.current[index],
           locale: isTtsLocale(locale) ? locale : "uz",
-          voice,
+          voice: currentVoice(),
         }),
       });
+      if (res.status === 400) throw new RefusedChunk();
       if (!res.ok) throw new Error(`tts ${res.status}`);
 
       const url = URL.createObjectURL(await res.blob());
-      /*
-        Only a short tail is kept. A long page is hundreds of chunks, and a
-        browser holding every blob would be holding the whole reading in
-        memory for a reader who is unlikely to go back more than a paragraph.
-      */
       urlsRef.current.set(index, url);
       for (const [key, value] of urlsRef.current) {
-        if (key < index - 3) {
+        if (key < index - 1) {
           URL.revokeObjectURL(value);
           urlsRef.current.delete(key);
         }
       }
       return url;
     },
-    [locale, voice],
+    [locale],
   );
 
   const play = useCallback(
     async (index: number) => {
       const chunks = chunksRef.current;
       if (index < 0 || index >= chunks.length) {
+        // Finished. The selection is still there, so the button returns to ▶.
         stop();
         return;
       }
-
       indexRef.current = index;
-      setPosition({ index, total: chunks.length });
-      clearHighlight();
-
-      const { el } = chunks[index];
-      if (el) {
-        el.classList.add(READING_CLASS);
-        el.scrollIntoView({
-          block: "center",
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "auto"
-            : "smooth",
-        });
-      }
 
       /*
-        The device's own voice: no request, no cache, no prefetch — the
-        utterance IS the audio. Male and female map onto the first two voices
-        the platform lists for the locale, because a voice's gender is not
-        something the Web Speech API reports; where it lists only one, both
-        buttons land on it.
+        The device's own voice: no request, no cache — the utterance IS the
+        audio. Male and female map onto the first two voices the platform
+        lists, because the Web Speech API does not report a voice's gender.
       */
       if (engine === "browser") {
         try {
-          const utterance = new SpeechSynthesisUtterance(chunks[index].text);
+          const utterance = new SpeechSynthesisUtterance(chunks[index]);
           const voices = browserVoices(locale);
-          const picked = voices[voice === "male" && voices.length > 1 ? 1 : 0];
+          const picked =
+            voices[currentVoice() === "male" && voices.length > 1 ? 1 : 0];
           if (picked) {
             utterance.voice = picked;
             utterance.lang = picked.lang;
@@ -484,7 +424,6 @@ export function ReadAloud() {
           window.speechSynthesis.speak(utterance);
           setStatus("playing");
         } catch {
-          clearHighlight();
           setStatus("error");
         }
         return;
@@ -498,14 +437,12 @@ export function ReadAloud() {
             : await fetchChunk(index);
 
         const audio = audioRef.current;
-        if (!audio || indexRef.current !== index) return;
+        if (!audio || indexRef.current !== index || !spokenRef.current) return;
         audio.src = url;
         await audio.play();
         setStatus("playing");
 
-        // The next block is fetched while this one is still speaking, so the
-        // gap between paragraphs is the service's latency and not the
-        // reader's wait.
+        // The next chunk is fetched while this one speaks.
         if (index + 1 < chunks.length) {
           nextRef.current = {
             index: index + 1,
@@ -515,359 +452,145 @@ export function ReadAloud() {
             nextRef.current = null;
           });
         }
-      } catch {
-        clearHighlight();
+      } catch (error) {
+        if (error instanceof RefusedChunk && indexRef.current === index) {
+          nextRef.current = null;
+          void playRef.current(index + 1);
+          return;
+        }
         setStatus("error");
       }
     },
-    [clearHighlight, engine, fetchChunk, locale, stop, voice],
+    [engine, fetchChunk, locale, stop],
   );
 
   useEffect(() => {
     playRef.current = play;
   }, [play]);
 
-  const start = useCallback(() => {
-    const chunks = collectChunks();
-    chunksRef.current = chunks;
-    releaseAudio();
-
-    if (chunks.length === 0) {
-      setStatus("error");
-      return;
-    }
-    void play(0);
-  }, [play, releaseAudio]);
-
   /*
-    The reader's own selection, read on request.
-
-    A BUTTON, NOT A REFLEX. Speaking on selection alone would talk over every
-    accidental double-click and every attempt to copy an address — and the
-    whole feature's first rule is that it never starts by itself. The button
-    appears beside the selection while the feature is switched on, and the bar
-    offers the same action for anyone not using a mouse.
-
-    The selection is chunked like any other text, so a selected page's worth
-    of statute is spoken in order rather than refused for being too long.
+    One button, four jobs: start, pause, resume, and retry after a fault.
+    While the audio is being prepared it shows a spinner and ignores presses,
+    which is the reaction a reader was missing when it said nothing at all.
   */
-  const speakSelection = useCallback(() => {
-    const raw = selection?.text.trim();
-    if (!raw) return;
-
-    const pieces = splitIntoChunks(raw);
-    if (pieces.length === 0) return;
-
-    releaseAudio();
-    clearHighlight();
-    chunksRef.current = pieces.map((text) => ({ text, el: null }));
-    void play(0);
-  }, [clearHighlight, play, releaseAudio, selection]);
-
-  const toggle = useCallback(() => {
-    if (engine === "browser") {
-      if (status === "playing") {
-        window.speechSynthesis.pause();
-        setStatus("paused");
-        return;
-      }
-      if (status === "paused") {
-        window.speechSynthesis.resume();
-        setStatus("playing");
-        return;
-      }
-      start();
-      return;
-    }
-
-    const audio = audioRef.current;
-    if (!audio) return;
+  const press = useCallback(() => {
+    if (!selection) return;
 
     if (status === "playing") {
-      audio.pause();
+      if (engine === "browser") window.speechSynthesis.pause();
+      else audioRef.current?.pause();
       setStatus("paused");
       return;
     }
     if (status === "paused") {
-      void audio.play().then(() => setStatus("playing"));
+      if (engine === "browser") {
+        window.speechSynthesis.resume();
+        setStatus("playing");
+      } else {
+        void audioRef.current?.play().then(() => setStatus("playing"));
+      }
       return;
     }
-    start();
-  }, [engine, start, status]);
+    if (status === "loading") return;
 
-  const step = useCallback(
-    (delta: number) => {
-      if (chunksRef.current.length === 0) return;
-      void play(indexRef.current + delta);
-    },
-    [play],
-  );
+    const chunks = selectionChunks(readableSelection(selection.range));
+    if (chunks.length === 0) return;
 
-  /*
-    Closing the bar turns the whole feature off, rather than hiding a player
-    that is still there — the attribute and the stored preference are what the
-    dialog reads, so a reader who closes the bar finds the switch off when
-    they next open "Maxsus imkoniyatlar", instead of a setting that says on
-    with nothing to show for it.
-  */
-  const close = useCallback(() => {
-    stop();
-    document.documentElement.removeAttribute("data-read-aloud");
-    try {
-      localStorage.setItem("davijara-read-aloud", "off");
-    } catch {
-      // Privacy mode: it closes for this page and is not remembered.
-    }
-  }, [stop]);
-
-  const chooseVoice = useCallback(
-    (next: TtsVoice) => {
-      setVoice(next);
-      try {
-        localStorage.setItem(VOICE_KEY, next);
-      } catch {
-        // See above.
-      }
-      // Everything cached was spoken by the other voice.
-      releaseAudio();
-      if (status === "playing" || status === "paused") {
-        audioRef.current?.pause();
-        setStatus("idle");
-      }
-    },
-    [releaseAudio, status],
-  );
+    releaseAudio();
+    chunksRef.current = chunks;
+    spokenRef.current = selection.text;
+    void play(0);
+  }, [engine, play, releaseAudio, selection, status]);
 
   useEffect(() => releaseAudio, [releaseAudio]);
 
-  const active = enabled && engine !== null;
+  const visible =
+    enabled && selection !== null && engine !== null && engine !== "none";
 
-  /*
-    Tells the stylesheet to reserve room at the foot of the page. Keyed off
-    the player actually BEING there rather than off the preference: with no
-    speech service configured the bar never renders, and a strip of empty
-    space at the bottom of every page would be the only sign of it.
-  */
-  useEffect(() => {
-    if (!active) return;
-    const root = document.documentElement;
-    root.setAttribute("data-read-aloud-active", "");
-    return () => root.removeAttribute("data-read-aloud-active");
-  }, [active]);
-
-  if (!active) return null;
-
-  const playing = status === "playing";
-  const busy = status === "loading";
-  /*
-    One voice on the device means the male/female choice is a lie, so it is
-    not offered. The server engine always has both.
-  */
-  const offerVoices = engine === "server" || browserVoices(locale).length > 1;
+  const label =
+    status === "loading"
+      ? t("readAloudLoading")
+      : status === "playing"
+        ? t("readAloudPause")
+        : status === "paused"
+          ? t("readAloudResume")
+          : status === "error"
+            ? t("readAloudError")
+            : t("readAloudSelection");
 
   return (
     <>
       {/*
-        The button beside a selection.
-
         `onMouseDown` IS PREVENTED, and without that line this button cannot
         be clicked at all: pressing anywhere outside a selection collapses it,
         `selectionchange` fires, and the button unmounts before the click
         lands on it.
 
-        Positioned in viewport coordinates because the rectangle it follows is
-        measured that way; clamped so a selection at the very edge of a phone
-        screen does not push it off.
+        Icon-only, like my.gov.uz: the speaker says what it is, the disc says
+        what pressing does. The name a screen reader hears is the label, and
+        the same text is the tooltip.
       */}
-      {selection ? (
+      {visible ? (
         <button
           type="button"
           data-tts-skip
           onMouseDown={(event) => event.preventDefault()}
-          onClick={speakSelection}
+          onClick={press}
+          aria-busy={status === "loading"}
+          title={label}
           style={{
-            /*
-              Above the selection, or below it when the selection starts too
-              near the top of the screen — the header is sticky, and a button
-              pinned to the top of the viewport lands on the navigation.
-            */
             top:
-              selection.top > SELECTION_BUTTON_HEADROOM
-                ? selection.top - 44
+              selection.top > BUTTON_HEADROOM
+                ? selection.top - 48
                 : selection.bottom + 8,
             left: Math.min(
-              Math.max(selection.left, 90),
-              window.innerWidth - 90,
+              Math.max(selection.left, 48),
+              window.innerWidth - 48,
             ),
           }}
-          className="border-outline bg-card text-accent-foreground focus-visible:ring-ring fixed z-[950] flex -translate-x-1/2 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold [box-shadow:var(--shadow-2)] focus-visible:ring-2 focus-visible:outline-none"
+          className="group border-outline bg-card text-accent-foreground focus-visible:ring-ring fixed z-[950] flex -translate-x-1/2 items-center gap-1.5 rounded-full border py-1 pr-1 pl-2.5 [box-shadow:var(--shadow-2)] focus-visible:ring-2 focus-visible:outline-none"
         >
-          {busy ? (
-            <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
-          ) : (
-            <Volume2 aria-hidden="true" className="size-3.5" />
-          )}
-          {t("readAloudSelection")}
+          <Volume2 aria-hidden="true" className="size-4" />
+          <span
+            aria-hidden="true"
+            className={cn(
+              "grid size-7 place-items-center rounded-full transition-colors",
+              status === "error"
+                ? "bg-secondary text-foreground"
+                : "bg-primary text-primary-foreground group-hover:opacity-90",
+            )}
+          >
+            {status === "loading" ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : status === "playing" ? (
+              <Pause className="size-3.5 fill-current" />
+            ) : status === "error" ? (
+              <AlertCircle className="size-3.5" />
+            ) : (
+              <Play className="size-3.5 translate-x-px fill-current" />
+            )}
+          </span>
+          <span className="sr-only">{label}</span>
         </button>
       ) : null}
 
+      {/* A fault is said once, where a screen reader will hear it. */}
+      <span aria-live="polite" className="sr-only">
+        {status === "error" ? t("readAloudError") : null}
+      </span>
+
       {/*
-        `data-tts-skip` on the player itself: it is inside no <main>, but the
-        rule is cheap and the day someone moves it is not the day to rediscover
-        why the reading began with the word "Pauza".
+        No <track>: the caption for this audio is the text the reader has
+        selected and is looking at.
       */}
-      <div
-        data-tts-skip
-        data-tone="deep"
-        /* Above the mobile bottom nav, which is itself fixed and 4rem tall. */
-        className="bg-card border-border fixed inset-x-0 bottom-16 z-[900] border-t [box-shadow:var(--shadow-2)] lg:bottom-0"
-      >
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2.5 sm:gap-3">
-          <span className="text-accent-foreground flex items-center gap-2 text-sm font-semibold">
-            <Volume2 aria-hidden="true" className="size-4" />
-            {t("readAloud")}
-          </span>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => step(-1)}
-              disabled={status === "idle" || position.index === 0}
-              className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
-            >
-              <SkipBack aria-hidden="true" className="size-4" />
-              <span className="sr-only">{t("readAloudPrev")}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={toggle}
-              disabled={busy || engine === "none"}
-              className="border-outline bg-accent text-accent-foreground focus-visible:ring-ring rounded-lg border px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-            >
-              {busy ? (
-                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
-              ) : playing ? (
-                <Pause aria-hidden="true" className="size-4" />
-              ) : (
-                <Play aria-hidden="true" className="size-4" />
-              )}
-              <span className="sr-only">
-                {playing ? t("readAloudPause") : t("readAloudStart")}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => step(1)}
-              disabled={
-                status === "idle" || position.index + 1 >= position.total
-              }
-              className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
-            >
-              <SkipForward aria-hidden="true" className="size-4" />
-              <span className="sr-only">{t("readAloudNext")}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={stop}
-              disabled={status === "idle"}
-              className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
-            >
-              <Square aria-hidden="true" className="size-4" />
-              <span className="sr-only">{t("readAloudStop")}</span>
-            </button>
-          </div>
-
-          <div
-            className={cn(
-              "flex items-center gap-1.5",
-              !offerVoices && "hidden",
-            )}
-          >
-            {(
-              [
-                ["female", "readAloudVoiceFemale"],
-                ["male", "readAloudVoiceMale"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => chooseVoice(value)}
-                aria-pressed={voice === value}
-                className={cn(
-                  "rounded-lg border px-2.5 py-1.5 text-xs transition-colors",
-                  voice === value
-                    ? "border-outline bg-accent text-accent-foreground font-semibold"
-                    : "border-border hover:bg-secondary",
-                )}
-              >
-                {t(label)}
-              </button>
-            ))}
-          </div>
-
-          {/*
-          The same action in the bar. A reader selecting with shift+arrows
-          never reaches the floating button without hunting for it; this one
-          is two Tabs from anywhere.
-        */}
-          {selection ? (
-            <button
-              type="button"
-              onClick={speakSelection}
-              className="border-outline bg-accent text-accent-foreground focus-visible:ring-ring rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {t("readAloudSelection")}
-            </button>
-          ) : null}
-
-          {/*
-          Closing is last and set apart, because it does more than it looks:
-          it switches the feature off. A reader who only wants silence has
-          Stop two buttons to the left.
-        */}
-          <button
-            type="button"
-            onClick={close}
-            className="border-border hover:bg-secondary focus-visible:ring-ring ml-auto rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
-          >
-            <X aria-hidden="true" className="size-4" />
-            <span className="sr-only">{t("readAloudClose")}</span>
-          </button>
-
-          {/*
-          The spoken position, said once rather than on every block: a live
-          region that announced "4 / 210" each time a paragraph ended would
-          talk over the reading it is describing.
-        */}
-          <span aria-live="polite" className="text-muted-foreground text-xs">
-            {engine === "none"
-              ? t("readAloudUnavailable")
-              : status === "error"
-                ? t("readAloudError")
-                : position.total > 0
-                  ? t("readAloudPosition", {
-                      current: position.index + 1,
-                      total: position.total,
-                    })
-                  : null}
-          </span>
-        </div>
-
-        {/*
-        No <track>: the caption for this audio is the page it was generated
-        from, which the reader is looking at.
-      */}
-        <audio
-          ref={audioRef}
-          onEnded={() => step(1)}
-          onError={() => setStatus("error")}
-          className="hidden"
-        />
-      </div>
+      <audio
+        ref={audioRef}
+        onEnded={() => void play(indexRef.current + 1)}
+        onError={() => {
+          if (spokenRef.current) setStatus("error");
+        }}
+        className="hidden"
+      />
     </>
   );
 }

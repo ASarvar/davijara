@@ -14,9 +14,11 @@ import { TTS_BLOCK_TAGS } from "@/lib/tts/chunks";
   text with whitespace removed and case folded, which is what absorbs the
   small differences between rendered text and markup.
 
-  The rules mirror `collectChunks` in components/layout/read-aloud.tsx: the
-  same tags, innermost only, and nothing from <nav>, from a `data-tts-skip`
-  subtree or from anything hidden from assistive technology.
+  The rules follow what a reader can select and have read: the same tags,
+  innermost only, and nothing from <nav>, from a `data-tts-skip` subtree or
+  from anything hidden from assistive technology. The reader splits a
+  selection at block boundaries, so a selected whole paragraph asks for the
+  same chunk this produced.
 */
 
 const TAGS = TTS_BLOCK_TAGS.split(",");
@@ -78,18 +80,34 @@ export function blocksFromHtml(html: string): string[] {
     and a block wrongly dropped here is worse than one wrongly kept: kept
     costs a few characters of synthesis, dropped costs a reader a live call.
   */
-  const body = main
+  const body = withoutUnreadable(
+    main.replace(/<nav\b[^>]*>[\s\S]*?<\/nav>/gi, " "),
+  );
+
+  const blocks: string[] = [];
+  collect(body, blocks, 0);
+  return blocks;
+}
+
+/*
+  The markup with everything the reader never speaks taken out: scripts, any
+  `data-tts-skip` subtree (the ticking auction countdown above all), and what
+  is hidden from assistive technology.
+
+  SHARED WITH /api/tts's page check, and it has to be. The reader removes the
+  same things from a selection before sending it, so a selected card arrives
+  as "…Savdo boshlanishiga" followed directly by the next card's title. Left
+  in here, the countdown would sit between those words on the server's copy
+  of the page and a perfectly genuine selection would be refused.
+*/
+export function withoutUnreadable(html: string): string {
+  return html
     .replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
-    .replace(/<nav\b[^>]*>[\s\S]*?<\/nav>/gi, " ")
     .replace(/<([a-z0-9]+)\b[^>]*\bdata-tts-skip\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
     .replace(
       /<(svg|button|span|i)\b[^>]*aria-hidden="true"[^>]*>[\s\S]*?<\/\1>/gi,
       " ",
     );
-
-  const blocks: string[] = [];
-  collect(body, blocks, 0);
-  return blocks;
 }
 
 /*

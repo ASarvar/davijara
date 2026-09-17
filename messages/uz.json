@@ -23,19 +23,11 @@
     "select": "Tanlash",
     "staleNotice": "Maʼlumot xizmati vaqtincha javob bermayapti. Koʻrsatilgan maʼlumotlar <b>{date}</b> holatiga koʻra.",
     "sectionPending": "{section} maʼlumotlari hozircha kiritilmagan.",
-    "readAloud": "Matnni o'qib berish",
-    "readAloudStart": "O'qishni boshlash",
     "readAloudPause": "To'xtatib turish",
-    "readAloudStop": "To'xtatish",
-    "readAloudNext": "Keyingi xatboshi",
-    "readAloudPrev": "Oldingi xatboshi",
-    "readAloudVoiceFemale": "Ayol ovozi",
-    "readAloudVoiceMale": "Erkak ovozi",
-    "readAloudPosition": "{current} / {total}",
     "readAloudError": "Ovoz xizmati hozircha javob bermayapti",
-    "readAloudUnavailable": "Ovoz xizmati ulanmagan, qurilmangizda esa bu til uchun ovoz yo'q",
     "readAloudSelection": "Belgilanganni o'qish",
-    "readAloudClose": "O'qib berishni o'chirish"
+    "readAloudResume": "Davom ettirish",
+    "readAloudLoading": "Ovoz tayyorlanmoqda"
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",
@@ -63,7 +55,10 @@
     "readAloudOff": "O'chirilgan",
     "readAloudOffHint": "Sahifa faqat o'qish uchun ko'rsatiladi",
     "readAloudOn": "Yoqilgan",
-    "readAloudOnHint": "Sahifa pastida o'qib berish boshqaruvi chiqadi"
+    "readAloudOnHint": "Matnni belgilang — yonida o'qib berish tugmasi chiqadi",
+    "readAloudVoice": "Ovoz",
+    "readAloudVoiceFemale": "Ayol ovozi",
+    "readAloudVoiceMale": "Erkak ovozi"
   },
   "nav": {
     "home": "Bosh sahifa",

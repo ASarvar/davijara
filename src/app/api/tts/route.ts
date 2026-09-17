@@ -1,4 +1,5 @@
 import { comparisonForm } from "@/lib/tts/chunks";
+import { withoutUnreadable } from "@/lib/tts/extract";
 import { activeProvider } from "@/lib/tts/provider";
 import { isTtsLocale, type TtsLocale, type TtsVoice } from "@/lib/tts/voices";
 
@@ -101,8 +102,7 @@ function tooMany(ip: string): boolean {
   the reader cannot see.
 */
 function htmlToComparisonText(html: string): string {
-  const stripped = html
-    .replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
+  const stripped = withoutUnreadable(html)
     .replace(/<[^>]+>/g, " ")
     .replace(/&(#\d+|#x[\da-f]+|[a-z]+);/gi, (entity, body: string) => {
       if (body.startsWith("#x") || body.startsWith("#X"))

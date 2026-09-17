@@ -100,6 +100,12 @@ export function AuctionCountdown({
       // accessible name carries the absolute time instead.
       aria-live="off"
       title={fallback}
+      /*
+        Never read aloud: the words change every second, so the server can
+        never find them on the page it rendered, and a reading that included
+        them was refused. A stale time spoken aloud would be wrong anyway.
+      */
+      data-tts-skip
     >
       {remaining ?? fallback}
     </span>

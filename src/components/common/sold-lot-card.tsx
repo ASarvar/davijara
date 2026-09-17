@@ -72,6 +72,12 @@ export function SoldLotCard({
         href={lot.auctionUrl}
         target="_blank"
         rel="noopener noreferrer"
+        /*
+          Not draggable, so text on the card can be selected. The whole card
+          is one link, and a browser drags a link rather than selecting inside
+          it — which made reading a card aloud nearly impossible to start.
+        */
+        draggable={false}
         className="flex h-full flex-col"
       >
         <div className="relative aspect-[16/9] overflow-hidden">
