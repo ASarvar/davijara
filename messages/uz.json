@@ -33,7 +33,8 @@
     "readAloudVoiceMale": "Erkak ovozi",
     "readAloudPosition": "{current} / {total}",
     "readAloudError": "Ovoz xizmati hozircha javob bermayapti",
-    "readAloudUnavailable": "Ovoz xizmati ulanmagan, qurilmangizda esa bu til uchun ovoz yo'q"
+    "readAloudUnavailable": "Ovoz xizmati ulanmagan, qurilmangizda esa bu til uchun ovoz yo'q",
+    "readAloudSelection": "Belgilanganni o'qish"
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",

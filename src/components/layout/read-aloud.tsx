@@ -44,7 +44,15 @@ import { isTtsLocale, type TtsVoice } from "@/lib/tts/voices";
   lib/tts/azure.ts.
 */
 
-type Chunk = { text: string; el: HTMLElement };
+/*
+  A piece of text to speak, and the block it came from.
+
+  `el` IS NULL FOR A SELECTION. Reading the whole page walks block elements,
+  so each chunk has one to highlight and scroll to; a reader who has selected
+  a phrase has already marked it themselves, and the browser's own selection
+  is a better highlight than anything painted over it.
+*/
+type Chunk = { text: string; el: HTMLElement | null };
 type Status = "idle" | "loading" | "playing" | "paused" | "error";
 
 /*
@@ -94,6 +102,11 @@ function whenVoicesReady(): Promise<void> {
 
 const VOICE_KEY = "davijara-read-aloud-voice";
 const READING_CLASS = "tts-reading";
+/*
+  How much clear space the selection button needs above the selection before it
+  is put there: its own height, plus the sticky header it would cover.
+*/
+const SELECTION_BUTTON_HEADROOM = 120;
 
 /**
  * The blocks of the current page, in the order they are written.
@@ -157,6 +170,12 @@ export function ReadAloud() {
     }
   });
   const [position, setPosition] = useState({ index: 0, total: 0 });
+  const [selection, setSelection] = useState<{
+    text: string;
+    top: number;
+    bottom: number;
+    left: number;
+  } | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const chunksRef = useRef<Chunk[]>([]);
@@ -191,6 +210,76 @@ export function ReadAloud() {
     });
     return () => observer.disconnect();
   }, []);
+
+  /*
+    What the reader has selected, and where it is on the screen.
+
+    ONLY WHILE THE FEATURE IS ON: a button that appeared beside every
+    selection would interrupt copying an address for every visitor, most of
+    whom never asked to be read to.
+
+    Coalesced into a frame, because `selectionchange` fires continuously while
+    a selection is dragged, and re-measured on scroll and resize so the button
+    stays on the words it belongs to.
+  */
+  useEffect(() => {
+    /*
+      Nothing to clear on the way out: with the feature off the component
+      renders null, so a selection remembered here is invisible, and the
+      immediate `read()` below corrects it the moment it is switched back on.
+    */
+    if (!enabled) return;
+
+    let frame = 0;
+    const read = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const sel = window.getSelection();
+        const main = document.querySelector("main");
+        if (!sel || sel.isCollapsed || sel.rangeCount === 0 || !main) {
+          setSelection(null);
+          return;
+        }
+
+        const text = sel.toString().trim();
+        const range = sel.getRangeAt(0);
+        const node =
+          range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+            ? (range.commonAncestorContainer as Element)
+            : range.commonAncestorContainer.parentElement;
+
+        // Inside the page's own content, and not inside the player itself.
+        if (
+          text.length < 2 ||
+          !node ||
+          !main.contains(node) ||
+          node.closest("[data-tts-skip]")
+        ) {
+          setSelection(null);
+          return;
+        }
+
+        const rect = range.getBoundingClientRect();
+        setSelection({
+          text,
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left + rect.width / 2,
+        });
+      });
+    };
+
+    read();
+    document.addEventListener("selectionchange", read);
+    window.addEventListener("scroll", read, { passive: true });
+    window.addEventListener("resize", read);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("selectionchange", read);
+      window.removeEventListener("scroll", read);
+      window.removeEventListener("resize", read);
+    };
+  }, [enabled]);
 
   /*
     Asked once, and only once the reader has turned the feature on — there is
@@ -325,13 +414,16 @@ export function ReadAloud() {
       clearHighlight();
 
       const { el } = chunks[index];
-      el.classList.add(READING_CLASS);
-      el.scrollIntoView({
-        block: "center",
-        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-          ? "auto"
-          : "smooth",
-      });
+      if (el) {
+        el.classList.add(READING_CLASS);
+        el.scrollIntoView({
+          block: "center",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+        });
+      }
 
       /*
         The device's own voice: no request, no cache, no prefetch — the
@@ -412,6 +504,31 @@ export function ReadAloud() {
     }
     void play(0);
   }, [play, releaseAudio]);
+
+  /*
+    The reader's own selection, read on request.
+
+    A BUTTON, NOT A REFLEX. Speaking on selection alone would talk over every
+    accidental double-click and every attempt to copy an address — and the
+    whole feature's first rule is that it never starts by itself. The button
+    appears beside the selection while the feature is switched on, and the bar
+    offers the same action for anyone not using a mouse.
+
+    The selection is chunked like any other text, so a selected page's worth
+    of statute is spoken in order rather than refused for being too long.
+  */
+  const speakSelection = useCallback(() => {
+    const raw = selection?.text.trim();
+    if (!raw) return;
+
+    const pieces = splitIntoChunks(raw);
+    if (pieces.length === 0) return;
+
+    releaseAudio();
+    clearHighlight();
+    chunksRef.current = pieces.map((text) => ({ text, el: null }));
+    void play(0);
+  }, [clearHighlight, play, releaseAudio, selection]);
 
   const toggle = useCallback(() => {
     if (engine === "browser") {
@@ -498,126 +615,188 @@ export function ReadAloud() {
   const offerVoices = engine === "server" || browserVoices(locale).length > 1;
 
   return (
-    /*
-      `data-tts-skip` on the player itself: it is inside no <main>, but the
-      rule is cheap and the day someone moves it is not the day to rediscover
-      why the reading began with the word "Pauza".
-    */
-    <div
-      data-tts-skip
-      data-tone="deep"
-      /* Above the mobile bottom nav, which is itself fixed and 4rem tall. */
-      className="bg-card border-border fixed inset-x-0 bottom-16 z-[900] border-t [box-shadow:var(--shadow-2)] lg:bottom-0"
-    >
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2.5 sm:gap-3">
-        <span className="text-accent-foreground flex items-center gap-2 text-sm font-semibold">
-          <Volume2 aria-hidden="true" className="size-4" />
-          {t("readAloud")}
-        </span>
+    <>
+      {/*
+        The button beside a selection.
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => step(-1)}
-            disabled={status === "idle" || position.index === 0}
-            className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
-          >
-            <SkipBack aria-hidden="true" className="size-4" />
-            <span className="sr-only">{t("readAloudPrev")}</span>
-          </button>
+        `onMouseDown` IS PREVENTED, and without that line this button cannot
+        be clicked at all: pressing anywhere outside a selection collapses it,
+        `selectionchange` fires, and the button unmounts before the click
+        lands on it.
 
-          <button
-            type="button"
-            onClick={toggle}
-            disabled={busy || engine === "none"}
-            className="border-outline bg-accent text-accent-foreground focus-visible:ring-ring rounded-lg border px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
-          >
-            {playing ? (
-              <Pause aria-hidden="true" className="size-4" />
-            ) : (
-              <Play aria-hidden="true" className="size-4" />
-            )}
-            <span className="sr-only">
-              {playing ? t("readAloudPause") : t("readAloudStart")}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => step(1)}
-            disabled={status === "idle" || position.index + 1 >= position.total}
-            className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
-          >
-            <SkipForward aria-hidden="true" className="size-4" />
-            <span className="sr-only">{t("readAloudNext")}</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={stop}
-            disabled={status === "idle"}
-            className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
-          >
-            <Square aria-hidden="true" className="size-4" />
-            <span className="sr-only">{t("readAloudStop")}</span>
-          </button>
-        </div>
-
-        <div
-          className={cn("flex items-center gap-1.5", !offerVoices && "hidden")}
+        Positioned in viewport coordinates because the rectangle it follows is
+        measured that way; clamped so a selection at the very edge of a phone
+        screen does not push it off.
+      */}
+      {selection ? (
+        <button
+          type="button"
+          data-tts-skip
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={speakSelection}
+          style={{
+            /*
+              Above the selection, or below it when the selection starts too
+              near the top of the screen — the header is sticky, and a button
+              pinned to the top of the viewport lands on the navigation.
+            */
+            top:
+              selection.top > SELECTION_BUTTON_HEADROOM
+                ? selection.top - 44
+                : selection.bottom + 8,
+            left: Math.min(
+              Math.max(selection.left, 90),
+              window.innerWidth - 90,
+            ),
+          }}
+          className="border-outline bg-card text-accent-foreground focus-visible:ring-ring fixed z-[950] flex -translate-x-1/2 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold [box-shadow:var(--shadow-2)] focus-visible:ring-2 focus-visible:outline-none"
         >
-          {(
-            [
-              ["female", "readAloudVoiceFemale"],
-              ["male", "readAloudVoiceMale"],
-            ] as const
-          ).map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => chooseVoice(value)}
-              aria-pressed={voice === value}
-              className={cn(
-                "rounded-lg border px-2.5 py-1.5 text-xs transition-colors",
-                voice === value
-                  ? "border-outline bg-accent text-accent-foreground font-semibold"
-                  : "border-border hover:bg-secondary",
-              )}
-            >
-              {t(label)}
-            </button>
-          ))}
-        </div>
+          <Volume2 aria-hidden="true" className="size-3.5" />
+          {t("readAloudSelection")}
+        </button>
+      ) : null}
 
-        {/*
+      {/*
+        `data-tts-skip` on the player itself: it is inside no <main>, but the
+        rule is cheap and the day someone moves it is not the day to rediscover
+        why the reading began with the word "Pauza".
+      */}
+      <div
+        data-tts-skip
+        data-tone="deep"
+        /* Above the mobile bottom nav, which is itself fixed and 4rem tall. */
+        className="bg-card border-border fixed inset-x-0 bottom-16 z-[900] border-t [box-shadow:var(--shadow-2)] lg:bottom-0"
+      >
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2.5 sm:gap-3">
+          <span className="text-accent-foreground flex items-center gap-2 text-sm font-semibold">
+            <Volume2 aria-hidden="true" className="size-4" />
+            {t("readAloud")}
+          </span>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => step(-1)}
+              disabled={status === "idle" || position.index === 0}
+              className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
+            >
+              <SkipBack aria-hidden="true" className="size-4" />
+              <span className="sr-only">{t("readAloudPrev")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={toggle}
+              disabled={busy || engine === "none"}
+              className="border-outline bg-accent text-accent-foreground focus-visible:ring-ring rounded-lg border px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
+            >
+              {playing ? (
+                <Pause aria-hidden="true" className="size-4" />
+              ) : (
+                <Play aria-hidden="true" className="size-4" />
+              )}
+              <span className="sr-only">
+                {playing ? t("readAloudPause") : t("readAloudStart")}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => step(1)}
+              disabled={
+                status === "idle" || position.index + 1 >= position.total
+              }
+              className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
+            >
+              <SkipForward aria-hidden="true" className="size-4" />
+              <span className="sr-only">{t("readAloudNext")}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={stop}
+              disabled={status === "idle"}
+              className="border-border hover:bg-secondary focus-visible:ring-ring rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-40"
+            >
+              <Square aria-hidden="true" className="size-4" />
+              <span className="sr-only">{t("readAloudStop")}</span>
+            </button>
+          </div>
+
+          <div
+            className={cn(
+              "flex items-center gap-1.5",
+              !offerVoices && "hidden",
+            )}
+          >
+            {(
+              [
+                ["female", "readAloudVoiceFemale"],
+                ["male", "readAloudVoiceMale"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => chooseVoice(value)}
+                aria-pressed={voice === value}
+                className={cn(
+                  "rounded-lg border px-2.5 py-1.5 text-xs transition-colors",
+                  voice === value
+                    ? "border-outline bg-accent text-accent-foreground font-semibold"
+                    : "border-border hover:bg-secondary",
+                )}
+              >
+                {t(label)}
+              </button>
+            ))}
+          </div>
+
+          {/*
+          The same action in the bar. A reader selecting with shift+arrows
+          never reaches the floating button without hunting for it; this one
+          is two Tabs from anywhere.
+        */}
+          {selection ? (
+            <button
+              type="button"
+              onClick={speakSelection}
+              className="border-outline bg-accent text-accent-foreground focus-visible:ring-ring rounded-lg border px-2.5 py-1.5 text-xs font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {t("readAloudSelection")}
+            </button>
+          ) : null}
+
+          {/*
           The spoken position, said once rather than on every block: a live
           region that announced "4 / 210" each time a paragraph ended would
           talk over the reading it is describing.
         */}
-        <span aria-live="polite" className="text-muted-foreground text-xs">
-          {engine === "none"
-            ? t("readAloudUnavailable")
-            : status === "error"
-              ? t("readAloudError")
-              : position.total > 0
-                ? t("readAloudPosition", {
-                    current: position.index + 1,
-                    total: position.total,
-                  })
-                : null}
-        </span>
-      </div>
+          <span aria-live="polite" className="text-muted-foreground text-xs">
+            {engine === "none"
+              ? t("readAloudUnavailable")
+              : status === "error"
+                ? t("readAloudError")
+                : position.total > 0
+                  ? t("readAloudPosition", {
+                      current: position.index + 1,
+                      total: position.total,
+                    })
+                  : null}
+          </span>
+        </div>
 
-      {/*
+        {/*
         No <track>: the caption for this audio is the page it was generated
         from, which the reader is looking at.
       */}
-      <audio
-        ref={audioRef}
-        onEnded={() => step(1)}
-        onError={() => setStatus("error")}
-        className="hidden"
-      />
-    </div>
+        <audio
+          ref={audioRef}
+          onEnded={() => step(1)}
+          onError={() => setStatus("error")}
+          className="hidden"
+        />
+      </div>
+    </>
   );
 }

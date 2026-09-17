@@ -30,7 +30,8 @@
     "readAloudVoiceMale": "Мужской голос",
     "readAloudPosition": "{current} / {total}",
     "readAloudError": "Сервис озвучивания сейчас недоступен",
-    "readAloudUnavailable": "Сервис озвучивания не подключён, а в устройстве нет голоса для этого языка"
+    "readAloudUnavailable": "Сервис озвучивания не подключён, а в устройстве нет голоса для этого языка",
+    "readAloudSelection": "Озвучить выделенное"
   },
   "topbar": {
     "accessibility": "Версия для слабовидящих",
