@@ -51,9 +51,10 @@ type Selected = {
   /* `toString()`, only to tell one selection from another. */
   text: string;
   range: Range;
-  top: number;
-  bottom: number;
-  left: number;
+  /* Where the selection ENDS — the last character the pointer reached. */
+  x: number;
+  lineTop: number;
+  lineBottom: number;
 };
 
 /*
@@ -161,11 +162,46 @@ function readableSelection(range: Range): string {
   return text.trim();
 }
 
+/* The button's own box, for keeping it on screen. */
+const BUTTON_WIDTH = 72;
+const BUTTON_HEIGHT = 40;
+const BUTTON_GAP = 6;
+
 /*
-  How much clear space the button needs above the selection before it is put
-  there: its own height, plus the sticky header it would cover.
+  The end of a selection, in viewport coordinates.
+
+  "END" MEANS WHERE THE POINTER STOPPED — the selection's focus — not the
+  later point in the text: a selection dragged upwards ends at its first
+  character. The button appears
+  there, beside the hand that just let go, the way Google Translate's does —
+  not above the middle of a paragraph where the eye has to go looking for it.
+
+  THE CARET AT THAT POINT, not the range's rectangles. A range that wholly
+  contains an element reports that element's box among its rectangles, so on
+  a selected card the "last rectangle" was the card itself and the button
+  landed at its bottom corner, away from the last word. A collapsed range in
+  a text node measures exactly one line. The rectangles remain the fallback
+  for an end that sits between elements, where a caret has no box.
 */
-const BUTTON_HEADROOM = 120;
+function selectionEnd(
+  sel: Selection,
+  range: Range,
+): { x: number; lineTop: number; lineBottom: number } {
+  if (sel.focusNode?.nodeType === Node.TEXT_NODE) {
+    const caret = document.createRange();
+    caret.setStart(sel.focusNode, sel.focusOffset);
+    const rect = caret.getClientRects()[0];
+    if (rect && rect.height > 0) {
+      return { x: rect.left, lineTop: rect.top, lineBottom: rect.bottom };
+    }
+  }
+
+  const rects = [...range.getClientRects()].filter(
+    (rect) => rect.width > 0 && rect.height > 0,
+  );
+  const last = rects.at(-1) ?? range.getBoundingClientRect();
+  return { x: last.right, lineTop: last.top, lineBottom: last.bottom };
+}
 
 export function ReadAloud() {
   const t = useTranslations("common");
@@ -249,13 +285,10 @@ export function ReadAloud() {
           return;
         }
 
-        const rect = range.getBoundingClientRect();
         setSelection({
           text,
           range: range.cloneRange(),
-          top: rect.top,
-          bottom: rect.bottom,
-          left: rect.left + rect.width / 2,
+          ...selectionEnd(sel, range),
         });
       });
     };
@@ -539,16 +572,21 @@ export function ReadAloud() {
           aria-busy={status === "loading"}
           title={label}
           style={{
+            /*
+              Just below the last line, starting where the words stop; above
+              that line instead when there is no room below it.
+            */
             top:
-              selection.top > BUTTON_HEADROOM
-                ? selection.top - 48
-                : selection.bottom + 8,
+              selection.lineBottom + BUTTON_GAP + BUTTON_HEIGHT <=
+              window.innerHeight
+                ? selection.lineBottom + BUTTON_GAP
+                : selection.lineTop - BUTTON_GAP - BUTTON_HEIGHT,
             left: Math.min(
-              Math.max(selection.left, 48),
-              window.innerWidth - 48,
+              Math.max(selection.x + BUTTON_GAP, 8),
+              window.innerWidth - BUTTON_WIDTH - 8,
             ),
           }}
-          className="group border-outline bg-card text-accent-foreground focus-visible:ring-ring fixed z-[950] flex -translate-x-1/2 items-center gap-1.5 rounded-full border py-1 pr-1 pl-2.5 [box-shadow:var(--shadow-2)] focus-visible:ring-2 focus-visible:outline-none"
+          className="group border-outline bg-card text-accent-foreground focus-visible:ring-ring fixed z-[950] flex items-center gap-1.5 rounded-full border py-1 pr-1 pl-2.5 [box-shadow:var(--shadow-2)] focus-visible:ring-2 focus-visible:outline-none"
         >
           <Volume2 aria-hidden="true" className="size-4" />
           <span
