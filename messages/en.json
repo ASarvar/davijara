@@ -31,7 +31,8 @@
     "readAloudPosition": "{current} / {total}",
     "readAloudError": "The speech service is not responding right now",
     "readAloudUnavailable": "No speech service is connected and your device has no voice for this language",
-    "readAloudSelection": "Read the selection"
+    "readAloudSelection": "Read the selection",
+    "readAloudClose": "Turn read-aloud off"
   },
   "topbar": {
     "accessibility": "Accessibility options",

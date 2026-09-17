@@ -30,6 +30,8 @@ export type TtsAudio = {
   audio: Buffer;
   /** What to send back to the browser: providers differ (wav vs mp3). */
   contentType: "audio/mpeg" | "audio/wav";
+  /** True when it came from the cache — the warm-up counts what it paid for. */
+  cached?: boolean;
 };
 
 export type TtsProvider = {

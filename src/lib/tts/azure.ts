@@ -54,6 +54,40 @@ const OUTPUT_FORMAT = "audio-24khz-48kbitrate-mono-mp3";
 */
 const MAX_CHARS = 3000;
 
+/*
+  HOW MANY CALLS MAY BE IN FLIGHT, and why a speech service needs a queue at
+  all: Azure's free F0 tier allows twenty transactions per sixty seconds and
+  says so is not adjustable. Two readers moving through a page at once reach
+  that, the service answers 429, and — before this — the player told them the
+  speech service was not responding.
+
+  So calls are queued two at a time and a 429 is waited out rather than
+  reported. The cache is what keeps this rare: a paragraph is only ever
+  synthesised once, and `npm run tts:warm` synthesises the whole site after a
+  deployment, so a reader normally hits the disk and never the service.
+*/
+const MAX_IN_FLIGHT = 2;
+const RETRY_DELAYS_MS = [1_500, 4_000];
+
+let inFlight = 0;
+const waiting: (() => void)[] = [];
+
+async function withSlot<T>(run: () => Promise<T>): Promise<T> {
+  if (inFlight >= MAX_IN_FLIGHT) {
+    await new Promise<void>((resolve) => waiting.push(resolve));
+  }
+  inFlight += 1;
+  try {
+    return await run();
+  } finally {
+    inFlight -= 1;
+    waiting.shift()?.();
+  }
+}
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 const LOCALE_TAGS: Record<TtsLocale, string> = {
   uz: "uz-UZ",
   ru: "ru-RU",
@@ -99,27 +133,50 @@ async function synthesize({
     `</speak>`;
 
   try {
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Ocp-Apim-Subscription-Key": KEY,
-        "Content-Type": "application/ssml+xml",
-        "X-Microsoft-OutputFormat": OUTPUT_FORMAT,
-        "User-Agent": "davijara.uz",
-      },
-      body: ssml,
-      signal: AbortSignal.timeout(15_000),
-      cache: "no-store",
+    const audio = await withSlot(async () => {
+      for (let attempt = 0; ; attempt += 1) {
+        const res = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Ocp-Apim-Subscription-Key": KEY,
+            "Content-Type": "application/ssml+xml",
+            "X-Microsoft-OutputFormat": OUTPUT_FORMAT,
+            "User-Agent": "davijara.uz",
+          },
+          body: ssml,
+          signal: AbortSignal.timeout(15_000),
+          cache: "no-store",
+        });
+
+        /*
+          429 is the tier's rate limit, not a fault: the same request a moment
+          later succeeds. `Retry-After` is honoured when the service sends one
+          and capped, so a reader waits seconds rather than being told the
+          service is down.
+        */
+        if (res.status === 429 && attempt < RETRY_DELAYS_MS.length) {
+          const header = Number(res.headers.get("retry-after"));
+          const wait = Number.isFinite(header)
+            ? Math.min(header * 1000, 8_000)
+            : RETRY_DELAYS_MS[attempt];
+          console.warn(`[tts] azure rate-limited, waiting ${wait}ms`);
+          await sleep(wait);
+          continue;
+        }
+
+        if (!res.ok) {
+          throw new Error(
+            `Speech service responded ${res.status} ${res.statusText}`,
+          );
+        }
+
+        const bytes = Buffer.from(await res.arrayBuffer());
+        if (bytes.length === 0) {
+          throw new Error("Speech service returned no audio");
+        }
+        return bytes;
+      }
     });
-
-    if (!res.ok) {
-      throw new Error(
-        `Speech service responded ${res.status} ${res.statusText}`,
-      );
-    }
-
-    const audio = Buffer.from(await res.arrayBuffer());
-    if (audio.length === 0) throw new Error("Speech service returned no audio");
 
     const value: TtsAudio = { audio, contentType: "audio/mpeg" };
     await writeCached(key, value);

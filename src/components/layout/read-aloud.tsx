@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
+  Loader2,
   Pause,
   Play,
   Square,
   SkipBack,
   SkipForward,
   Volume2,
+  X,
 } from "lucide-react";
 
 import { usePathname } from "@/i18n/navigation";
@@ -115,6 +117,38 @@ const SELECTION_BUTTON_HEADROOM = 120;
  * would otherwise be read once as itself and once as its child — and so is
  * anything hidden, aria-hidden, or marked `data-tts-skip`.
  */
+/*
+  A block's words, without the ones that are not words.
+
+  NOT `innerText`, which was the first version and was wrong twice over. It
+  includes `aria-hidden` content — the decorative "01", "02" numbering on the
+  privilege cards, which a reader heard read out before every title — and it
+  therefore also disagreed with the server's own extraction, so the warmed
+  cache missed on every card. A clone with those subtrees removed fixes both:
+  the reading is what a screen reader would say, and both sides produce the
+  same string.
+
+  TAGS ARE REPLACED BY SPACES rather than simply dropped, which is the same
+  thing `lib/tts/extract.ts` does on the server and is not cosmetic: a card
+  whose category and title are two sibling elements came out as
+  "Ta'lim muassasalariXususiy o'quv markazlariga…" from plain `textContent`,
+  and that is what would have been spoken for any text the warm-up had not
+  already voiced.
+*/
+function readableText(el: HTMLElement): string {
+  const clone = el.cloneNode(true) as HTMLElement;
+  for (const hidden of clone.querySelectorAll(
+    '[aria-hidden="true"], [data-tts-skip]',
+  )) {
+    hidden.remove();
+  }
+
+  const spaced = clone.innerHTML.replace(/<[^>]+>/g, " ");
+  const decoded =
+    new DOMParser().parseFromString(spaced, "text/html").body.textContent ?? "";
+  return decoded.replace(/\s+/g, " ").trim();
+}
+
 function collectChunks(): Chunk[] {
   const chunks: Chunk[] = [];
 
@@ -135,7 +169,7 @@ function collectChunks(): Chunk[] {
     // vacancy list stay out of the reading.
     if (!el.offsetParent) continue;
 
-    const text = el.innerText?.trim();
+    const text = readableText(el);
     if (!text) continue;
 
     for (const piece of splitIntoChunks(text)) chunks.push({ text: piece, el });
@@ -569,6 +603,23 @@ export function ReadAloud() {
     [play],
   );
 
+  /*
+    Closing the bar turns the whole feature off, rather than hiding a player
+    that is still there — the attribute and the stored preference are what the
+    dialog reads, so a reader who closes the bar finds the switch off when
+    they next open "Maxsus imkoniyatlar", instead of a setting that says on
+    with nothing to show for it.
+  */
+  const close = useCallback(() => {
+    stop();
+    document.documentElement.removeAttribute("data-read-aloud");
+    try {
+      localStorage.setItem("davijara-read-aloud", "off");
+    } catch {
+      // Privacy mode: it closes for this page and is not remembered.
+    }
+  }, [stop]);
+
   const chooseVoice = useCallback(
     (next: TtsVoice) => {
       setVoice(next);
@@ -651,7 +702,11 @@ export function ReadAloud() {
           }}
           className="border-outline bg-card text-accent-foreground focus-visible:ring-ring fixed z-[950] flex -translate-x-1/2 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold [box-shadow:var(--shadow-2)] focus-visible:ring-2 focus-visible:outline-none"
         >
-          <Volume2 aria-hidden="true" className="size-3.5" />
+          {busy ? (
+            <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+          ) : (
+            <Volume2 aria-hidden="true" className="size-3.5" />
+          )}
           {t("readAloudSelection")}
         </button>
       ) : null}
@@ -690,7 +745,9 @@ export function ReadAloud() {
               disabled={busy || engine === "none"}
               className="border-outline bg-accent text-accent-foreground focus-visible:ring-ring rounded-lg border px-3 py-2 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:opacity-60"
             >
-              {playing ? (
+              {busy ? (
+                <Loader2 aria-hidden="true" className="size-4 animate-spin" />
+              ) : playing ? (
                 <Pause aria-hidden="true" className="size-4" />
               ) : (
                 <Play aria-hidden="true" className="size-4" />
@@ -766,6 +823,20 @@ export function ReadAloud() {
               {t("readAloudSelection")}
             </button>
           ) : null}
+
+          {/*
+          Closing is last and set apart, because it does more than it looks:
+          it switches the feature off. A reader who only wants silence has
+          Stop two buttons to the left.
+        */}
+          <button
+            type="button"
+            onClick={close}
+            className="border-border hover:bg-secondary focus-visible:ring-ring ml-auto rounded-lg border p-2 transition-colors focus-visible:ring-2 focus-visible:outline-none"
+          >
+            <X aria-hidden="true" className="size-4" />
+            <span className="sr-only">{t("readAloudClose")}</span>
+          </button>
 
           {/*
           The spoken position, said once rather than on every block: a live

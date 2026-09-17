@@ -34,7 +34,8 @@
     "readAloudPosition": "{current} / {total}",
     "readAloudError": "Ovoz xizmati hozircha javob bermayapti",
     "readAloudUnavailable": "Ovoz xizmati ulanmagan, qurilmangizda esa bu til uchun ovoz yo'q",
-    "readAloudSelection": "Belgilanganni o'qish"
+    "readAloudSelection": "Belgilanganni o'qish",
+    "readAloudClose": "O'qib berishni o'chirish"
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",

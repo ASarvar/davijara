@@ -11,6 +11,7 @@ import {
 } from "node:fs/promises";
 import { join } from "node:path";
 
+import { comparisonForm } from "@/lib/tts/chunks";
 import type { TtsAudio } from "@/lib/tts/provider";
 
 /*
@@ -58,6 +59,13 @@ const TYPES: Record<string, TtsAudio["contentType"]> = {
  * Sardor and by Madina are two different files, and so would be the same text
  * rendered by a different service — switching provider must not serve the old
  * one's audio out of cache.
+ *
+ * THE TEXT IS NORMALISED FIRST (whitespace dropped, case folded), which is
+ * what lets the warm-up fill this cache at all: it reads blocks out of the
+ * page's MARKUP while the reader's browser reads them out of the rendered
+ * DOM, and the two disagree about a line break inside a paragraph or a
+ * heading styled in capitals. Those are the same words and deserve the same
+ * file; anything differing by an actual character still gets its own.
  */
 export function cacheKey(
   provider: string,
@@ -65,7 +73,7 @@ export function cacheKey(
   text: string,
 ): string {
   return createHash("sha256")
-    .update(`${provider}\u0000${voice}\u0000${text}`)
+    .update(`${provider}\u0000${voice}\u0000${comparisonForm(text)}`)
     .digest("hex");
 }
 
@@ -73,7 +81,7 @@ export async function readCached(key: string): Promise<TtsAudio | null> {
   for (const [ext, contentType] of Object.entries(TYPES)) {
     try {
       const audio = await readFile(join(CACHE_DIR, `${key}.${ext}`));
-      return { audio, contentType };
+      return { audio, contentType, cached: true };
     } catch {
       // Not this format; try the next.
     }
