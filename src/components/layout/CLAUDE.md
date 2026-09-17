@@ -47,17 +47,7 @@ icon-only — with `sr-only` text, never an unlabelled icon.
 
 ## Logo lockups
 
-Two files, one component:
-
-| File | Size | Used |
-|---|---|---|
-| `logo-dm-light.svg` | 313×69, 9.9 KB | full wordmark, from the given breakpoint up |
-| `logo-short-light.svg` | 57×69, ~0.6 KB | mark only, below it |
-
-`<Logo from="lg" priority />` in the header (the wordmark only fits once the
-full nav appears at `lg`), `<Logo from="sm" />` in the footer.
-
-It is a `<picture>` with a media-qualified `<source>`, not `next/image`, for
+The component is a `<picture>` with a media-qualified `<source>`, not `next/image`, for
 two reasons: the browser then fetches **only** the matching lockup — rendering
 both and hiding one with CSS would still pull the 9.9 KB wordmark onto phones
 that never show it — and `next/image` does not optimise SVG anyway without

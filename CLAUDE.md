@@ -134,18 +134,8 @@ NOT be derived are in `davijara-data`.
 blocks — reach for those before writing a new one. The full catalogue, the
 native `<select>` trap and the placeholder-SVG rule live in the `davijara-ui`
 skill. `ui/` is shadcn CLI output: do not hand-edit it, and do not put project
-primitives there.
-
-**One documented exception, and it is shaped so a re-add cannot break it
-silently.** `dialog.tsx` and `sheet.tsx` shipped a hardcoded English "Close" as
-the × button's accessible name — spoken text, on a trilingual portal. They now
-take a `closeLabel` prop that still DEFAULTS to `"Close"`, so the files remain
-valid shadcn with no `next-intl` import and no provider requirement; the two
-callers (`accessibility-dialog`, `mobile-nav`) pass `t("close")`. It is a prop
-and not a hook because the admin panel renders outside
-`NextIntlClientProvider`, where a hook in `ui/` would crash the first dialog
-anyone put there. If `shadcn add dialog` ever overwrites these, the prop
-disappears and TypeScript fails at both call sites — which is the point.
+primitives there. The one documented exception is recorded in
+`src/components/ui/CLAUDE.md`.
 
 ## i18n
 
@@ -184,7 +174,7 @@ find. That one is filled in from `/admin/menyu`.
 ## Logo
 
 Always use `components/layout/logo.tsx` — never reference the logo SVGs
-directly. Sizes, the `<picture>` rationale and the favicon note are in
+directly. The `<picture>` rationale and the favicon note are in
 `src/components/layout/CLAUDE.md`.
 
 ## Number formatting
@@ -197,9 +187,7 @@ mismatch waiting to happen. Keep it deterministic.
 
 ## Maps
 
-Both Leaflet maps — the listings map (the `xarita` tab on `/ijaraga-obyektlar`)
-and the office map on `/aloqa` — are built, clustered, and draw real
-coordinates. The basemap is OpenStreetMap's own tile server, and
+The basemap of both Leaflet maps is OpenStreetMap's own tile server, and
 `src/lib/map-tiles.ts` carries the full record of which providers were ruled
 out and why: read that comment before changing the tile source, and get any
 new URL template from the provider's own docs rather than guessing it.
@@ -209,29 +197,15 @@ legacy Google tile scraping.
 
 ## Boshqaruv paneli (`/admin`)
 
-Editors write news and pages here instead of through a git commit. It sits
-**outside `[locale]`** — its own root layout, no locale prefix, Uzbek-only
-chrome, and `admin` is excluded from the proxy matcher so it is not
-locale-redirected. The content it edits is still trilingual.
-
-Everything else — where the pieces live (`src/lib/{db,auth,media}/`,
+Where the pieces live (`src/lib/{db,auth,media}/`,
 `navigation.ts`, `blocks.ts`) and the seven load-bearing rules (`getDb()`
 scoping, per-action guards, `DATA_DIR`, the admin cookie path, the build never
-opening the DB, editable menus, plain-text editor content) — is in the
+opening the DB, editable menus, plain-text editor content) — are in the
 **`davijara-admin` skill**. Load it before touching `src/app/admin/`,
 `src/lib/{db,auth,media}/`, the admin data modules, or panel migrations.
 
-Statutory content is being moved into the panel at the operator's request,
-which is what the audit log's full before/after snapshots are for. Until that
-migration lands, non-negotiable 1 above still applies as written.
-
 ## Still to do
 
-- **Admin panel: complete.** News, images, pages, users, the audit log, the
-  24 privileges, both Markaz documents and the vacancy announcements on
-  `/markaz/bosh-ish-orinlari` are editable — a vacancy is open (on the site)
-  or closed (off it), and a new one starts closed, like a news draft.
-  `content/structure.ts` is the one deliberate exception.
 - Replace the placeholder pages with real content.
 - **Three built sections are not on the homepage**: `services` (light),
   `impact` (deep), `partners` (deep). They render correctly and are left out
