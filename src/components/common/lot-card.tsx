@@ -29,6 +29,7 @@ export function LotCard({
   listing,
   regionName,
   countdown = false,
+  live = false,
   className,
 }: {
   listing: Listing;
@@ -40,9 +41,26 @@ export function LotCard({
    * guarantees that, so a card in the catalogue keeps the plain date.
    */
   countdown?: boolean;
+  /**
+   * The lot is being bid on RIGHT NOW: the card carries a live badge and
+   * points at the bidding room instead of the offer page.
+   *
+   * Only `getLiveAuctionListings` may set this. It is a claim about a room a
+   * citizen can walk into, answered by e-auksion's own current-lots list and
+   * never inferred from a timestamp here — see lib/data/live-auctions.ts for
+   * why that distinction cost a rewrite.
+   */
+  live?: boolean;
   className?: string;
 }) {
   const t = useTranslations("listings");
+  /*
+    The room, when there is one to point at. `liveAuctionUrl` exists for any
+    lot with a number, so the fallback is for the rare lot that has neither
+    and would otherwise render a link to nowhere.
+  */
+  const href =
+    (live ? listing.liveAuctionUrl : undefined) ?? listing.auctionUrl;
 
   return (
     <SurfaceCard
@@ -60,7 +78,7 @@ export function LotCard({
         "Batafsil" button on the homepage returned a 404.
       */}
       <a
-        href={listing.auctionUrl}
+        href={href}
         target="_blank"
         rel="noopener noreferrer"
         /*
@@ -102,6 +120,23 @@ export function LotCard({
           {listing.isMock ? (
             <span className="absolute top-2.5 right-2.5 rounded-full bg-[color:var(--color-navy)]/85 px-2.5 py-0.5 text-xs text-[color:var(--color-gold-light)] backdrop-blur-sm">
               {t("badgeMock")}
+            </span>
+          ) : null}
+
+          {/*
+            The live badge. A WORD AND A DOT, not a colour: in high contrast
+            every ink is white or yellow and the blink is switched off, so a
+            state carried by a green pulse alone would vanish for exactly the
+            readers who most need to know the room is open. The dot is the
+            same pulse the live map pin uses (`lot-live-dot` in globals.css).
+          */}
+          {live ? (
+            <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-navy)]/85 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+              <span
+                aria-hidden="true"
+                className="lot-live-dot size-1.5 rounded-full bg-[color:var(--color-gold-light)]"
+              />
+              {t("badgeLive")}
             </span>
           ) : null}
         </div>
@@ -196,7 +231,23 @@ export function LotCard({
               </span>
             </span>
 
-            {listing.auctionDate ? (
+            {live ? (
+              /*
+                No countdown on a live card, and no date either. The counter
+                would read 00:00:00 or go negative — `auction_date` is when
+                the room OPENED — and the date of a sale happening now is not
+                what a reader needs. What the room does not publish is when
+                it closes, so nothing here pretends to know.
+              */
+              <span className="shrink-0 text-right">
+                <span className="text-muted-foreground block text-xs">
+                  {t("auctionLive")}
+                </span>
+                <span className="font-heading text-accent-foreground block text-sm font-semibold">
+                  {t("auctionLiveAction")}
+                </span>
+              </span>
+            ) : listing.auctionDate ? (
               <span className="shrink-0 text-right">
                 {/*
                   "Savdo boshlanishiga", never "ariza berishga qolgan vaqt".

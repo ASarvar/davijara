@@ -1992,3 +1992,37 @@ figure:has(canvas[data-drawn]) [data-chart-table] {
     animation: none;
   }
 }
+
+/*
+  The live badge's dot, on a lot card whose room is open.
+
+  The same 1.6s cadence as the live map pin, but a fade rather than a colour
+  turnover: at 6px on a photograph there is no second colour that stays
+  legible over both a pale wall and a dark doorway, and the badge already
+  carries the word "JONLI". Motion off and high contrast both stop it — the
+  word is what does the work in either case.
+*/
+.lot-live-dot {
+  animation: lot-live-dot 1.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes lot-live-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+:root[data-contrast="high"] .lot-live-dot {
+  animation: none;
+  background: #ffff00;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lot-live-dot {
+    animation: none;
+  }
+}

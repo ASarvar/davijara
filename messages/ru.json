@@ -159,6 +159,10 @@
     "description": "Запрашиваемая страница не существует или была перемещена.",
     "action": "Вернуться на главную"
   },
+  "liveAuctions": {
+    "title": "Идущие торги",
+    "description": "Объекты, торги по которым идут прямо сейчас. Зал торгов открыт на e-auksion.uz."
+  },
   "auctions": {
     "eyebrow": "ТОРГИ",
     "title": "Ближайшие торги",
@@ -238,7 +242,10 @@
     "badgeMock": "Образец",
     "auctionCountdown": "До начала торгов",
     "auctionDay": "День торгов",
-    "areaValue": "Площадь: {area}"
+    "areaValue": "Площадь: {area}",
+    "badgeLive": "В ЭФИРЕ",
+    "auctionLive": "Торги идут",
+    "auctionLiveAction": "Войти в торги"
   },
   "services": {
     "eyebrow": "Онлайн-услуги",

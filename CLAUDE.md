@@ -220,10 +220,14 @@ opening the DB, editable menus, plain-text editor content) — are in the
   fabricated marketing copy. Publishing invented citizen testimonials on a
   state portal is not acceptable; if real ones are wanted, they need actual
   attributable sources and consent.
-- **Live auction cards.** The legacy countdowns ran off `data-end="7260"` —
-  seconds from page load — so every "JONLI" auction restarted its timer on
-  refresh. Fake live auctions could lead a citizen to believe they can bid on
-  something that does not exist. Build this against real e-auksion.uz data,
-  with server-provided ISO end timestamps so countdowns survive clock skew.
+- **Legacy "JONLI" countdowns.** They ran off `data-end="7260"` — seconds
+  from page load — so every live auction restarted its timer on refresh, and
+  a citizen could be shown a bidding window for something that had closed.
+  The real thing now exists instead: "Jonli savdolar" on the homepage lists
+  the rooms e-auksion's own current-lots endpoint reports as open, and shows
+  no countdown at all, because nothing published says when a room closes. A
+  lot may only be called live on that service's word — never inferred from a
+  timestamp in our own feed, which does not move while an auction runs. See
+  `lib/data/live-auctions.ts`.
 - **Chat FAB.** Inert UI with no backend behind it.
 - Self-host photography and switch listing cards to `next/image`.

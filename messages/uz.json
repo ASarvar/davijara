@@ -164,7 +164,14 @@
     "badgeMock": "Namunaviy",
     "auctionCountdown": "Savdo boshlanishiga",
     "auctionDay": "Savdo kuni",
-    "areaValue": "Maydoni: {area}"
+    "areaValue": "Maydoni: {area}",
+    "badgeLive": "JONLI",
+    "auctionLive": "Savdo ketmoqda",
+    "auctionLiveAction": "Savdoga kirish"
+  },
+  "liveAuctions": {
+    "title": "Jonli savdolar",
+    "description": "Ayni paytda savdosi ketayotgan obyektlar. Savdo xonasi e-auksion.uz da ochiq."
   },
   "auctions": {
     "eyebrow": "SAVDOLAR",

@@ -159,6 +159,10 @@
     "description": "The page you are looking for does not exist or has been moved.",
     "action": "Return to homepage"
   },
+  "liveAuctions": {
+    "title": "Live auctions",
+    "description": "Lots being bid on right now. The bidding room is open on e-auksion.uz."
+  },
   "auctions": {
     "eyebrow": "AUCTIONS",
     "title": "Upcoming auctions",
@@ -238,7 +242,10 @@
     "badgeMock": "Sample",
     "auctionCountdown": "Auction starts in",
     "auctionDay": "Auction day",
-    "areaValue": "Area: {area}"
+    "areaValue": "Area: {area}",
+    "badgeLive": "LIVE",
+    "auctionLive": "Bidding now",
+    "auctionLiveAction": "Join the auction"
   },
   "services": {
     "eyebrow": "Online services",

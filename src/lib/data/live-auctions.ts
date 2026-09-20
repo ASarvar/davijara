@@ -1,5 +1,8 @@
 import "server-only";
 
+import { getListings } from "@/lib/data/listings";
+import type { Listing } from "@/types/content";
+
 /*
   Which lots are being bid on RIGHT NOW.
 
@@ -88,4 +91,42 @@ export async function getLiveAuctionLots(): Promise<string[] | null> {
     );
     return null;
   }
+}
+
+/**
+ * The lots being bid on right now, as full listings.
+ *
+ * TWO SERVICES, EACH ANSWERING WHAT ONLY IT CAN. e-auksion says WHICH lots
+ * are in a room; our own feed says what each lot IS — its title, place, area,
+ * price and photograph. So the list above is used as a filter over the
+ * listings we already hold, and nothing is rendered from the current-lots
+ * rows themselves.
+ *
+ * A LIVE LOT WE DO NOT HOLD IS DROPPED, not half-drawn from the other
+ * service's row. e-auksion runs sales we have no part in — vehicles, movable
+ * property, other agencies' assets — and its row carries a name and a date
+ * but no area, no region slug and no order id, so a card built from one would
+ * be a different, thinner card claiming to be the same thing. Our feed is
+ * also cached for minutes at a time, so a lot listed in the last few minutes
+ * can be missing; it appears on the next revalidation.
+ *
+ * Returns an empty array when nothing is live AND when the list cannot be
+ * read — the caller cannot tell those apart, deliberately: both mean "show no
+ * live auctions", and the alternative is inviting a citizen into a room that
+ * has closed.
+ */
+export async function getLiveAuctionListings(limit = 6): Promise<Listing[]> {
+  const live = await getLiveAuctionLots();
+  if (!live || live.length === 0) return [];
+
+  const wanted = new Set(live);
+  const { listings } = await getListings({});
+
+  return listings
+    .filter(
+      (listing) =>
+        (listing.lotNumber && wanted.has(listing.lotNumber)) ||
+        wanted.has(listing.id),
+    )
+    .slice(0, limit);
 }

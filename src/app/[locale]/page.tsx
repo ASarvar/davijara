@@ -5,6 +5,7 @@ import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsSection } from "@/components/sections/objects-section";
 import { HowItWorks } from "@/components/sections/how-it-works";
+import { LiveAuctions } from "@/components/sections/live-auctions";
 import { UpcomingAuctions } from "@/components/sections/upcoming-auctions";
 import { RecentlySold } from "@/components/sections/recently-sold";
 import { PrivilegesTeaser } from "@/components/sections/privileges-teaser";
@@ -29,6 +30,11 @@ export default async function HomePage({
       Hero             deep   ┐ masthead: hero navy under its own cobalt
       SearchWidget     deep   │ glow, then the navy-mid strip — one block
       ObjectsSection   deep   ┘
+      LiveAuctions     deep   — directly under the map, sharing the tone of
+                              the section above it. It renders nothing
+                              outside the auction rounds, and a section that
+                              alternated would flip the rest of the page
+                              every time it came and went
       HowItWorks       light  (mist)
       UpcomingAuctions deep
       RecentlySold     light  (mist)
@@ -80,6 +86,7 @@ export default async function HomePage({
         <SearchWidget values={sp} nested />
       </Hero>
       <ObjectsSection searchParams={sp} />
+      <LiveAuctions />
       <HowItWorks />
       <UpcomingAuctions searchParams={sp} />
       <RecentlySold />
