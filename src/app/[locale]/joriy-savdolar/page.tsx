@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ActionLink } from "@/components/common/action-link";
+import { AutoRefresh } from "@/components/common/auto-refresh";
 import { LotCard } from "@/components/common/lot-card";
 import { Section } from "@/components/layout/section";
 import type { Locale } from "@/i18n/routing";
@@ -19,12 +20,18 @@ import { formatNumber } from "@/lib/format";
   shared, or a bookmark, must land on something true rather than a 404 — so
   when nothing is open it says so and points at what opens next.
 
-  30 SECONDS, the same window as the upstream list (lib/data/live-auctions.ts).
-  A room closes minutes after it opens; a page cached for the site's usual five
-  minutes would keep inviting citizens into rooms that have shut. The window
-  applies to this route alone — the rest of the site keeps its own.
+  RENDERED PER REQUEST, AND REFRESHED IN PLACE EVERY 30 SECONDS. A room
+  closes minutes after it opens, so a page cached for the site's usual five
+  minutes would keep inviting citizens into rooms that have shut. It was a
+  30-second ISR page first; that serves the stale copy to the first request
+  after the window, so a 30-second refresh could still show a list a minute
+  old. Rendering per request costs little — the upstream list is itself held
+  for 30 seconds (lib/data/live-auctions.ts) and the listings for minutes —
+  and <AutoRefresh> below re-reads it while the reader has the page open.
 */
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
+
+const REFRESH_SECONDS = 30;
 
 export async function generateMetadata({
   params,
@@ -55,6 +62,7 @@ export default async function CurrentAuctionsPage({
 
   return (
     <>
+      <AutoRefresh seconds={REFRESH_SECONDS} />
       <Section tone="deep" className="pb-4">
         <Breadcrumbs items={[{ label: t("pageTitle") }]} />
 

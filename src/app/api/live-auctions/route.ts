@@ -17,11 +17,15 @@ import {
 */
 
 /*
-  The route's own cache, matching the upstream fetch's. Without it a route
-  handler that takes no request parameters can be prerendered once and serve
-  a list of rooms that closed hours ago.
+  DYNAMIC, NOT A 30-SECOND PAGE CACHE. It used to be `revalidate = 30`, and
+  that is stale-while-revalidate: the first request after the window gets the
+  OLD answer while a new one is built — so a reader polling every 30 seconds
+  could be shown a list up to a minute old, and the tab and the strip beside
+  it disagreed (17 against 21 on one screen). The upstream list is still read
+  at most once every 30 seconds — `unstable_cache` in lib/data/live-auctions.ts
+  holds it — so rendering this per request costs e-auksion nothing more.
 */
-export const revalidate = 30;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const lots = await getLiveAuctionLots();
@@ -48,8 +52,13 @@ export async function GET() {
   */
   const listed = (await getLiveAuctionListings()).length;
 
+  /*
+    `no-store` for the browser too: the page polls every 30 seconds
+    (lib/live-auctions-client.ts), and a 30-second browser cache on top would
+    let that poll re-read its own previous answer.
+  */
   return Response.json(
     { lots, listed },
-    { headers: { "Cache-Control": "public, max-age=30" } },
+    { headers: { "Cache-Control": "no-store" } },
   );
 }

@@ -173,7 +173,7 @@
   "liveAuctions": {
     "title": "Jonli savdolar",
     "description": "Ayni paytda savdosi ketayotgan obyektlar. Savdo xonasi e-auksion.uz da ochiq.",
-    "all": "Barcha joriy savdolar ({count})"
+    "all": "Barcha joriy savdolar"
   },
   "currentAuctions": {
     "pageTitle": "Joriy savdolar",

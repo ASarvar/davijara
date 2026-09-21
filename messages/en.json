@@ -163,7 +163,7 @@
   "liveAuctions": {
     "title": "Live auctions",
     "description": "Lots being bid on right now. The bidding room is open on e-auksion.uz.",
-    "all": "All current auctions ({count})"
+    "all": "All current auctions"
   },
   "currentAuctions": {
     "pageTitle": "Current auctions",

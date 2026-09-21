@@ -4,6 +4,11 @@ import { getRegions } from "@/lib/data/catalog";
 import { getLiveAuctionListings } from "@/lib/data/live-auctions";
 import { LIVE_STRIP_LIMIT } from "@/lib/live-auctions-limit";
 import { ActionLink } from "@/components/common/action-link";
+import {
+  LiveCardList,
+  LiveGate,
+  LiveMoreGate,
+} from "@/components/common/live-cards";
 import { LotCard } from "@/components/common/lot-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 
@@ -49,28 +54,46 @@ export async function LiveAuctions() {
 
   if (listings.length === 0) return null;
 
-  const shown = listings.slice(0, LIVE_STRIP_LIMIT);
+  /*
+    Three times the strip's worth of cards is sent, and the browser shows
+    the first six whose rooms are still open (LiveCardList). A room closes
+    in minutes; sending only six would leave the strip thinning to nothing
+    on a page someone left open, while a dozen more rooms were still live.
+    Capped rather than all of them, because every card sent is weight in
+    the homepage payload whether it is ever shown or not.
+  */
+  const pool = listings.slice(0, LIVE_STRIP_LIMIT * 3);
+  const lots = pool.map((listing) => listing.lotNumber);
   const hasMore = listings.length > LIVE_STRIP_LIMIT;
 
   const regionName = (slug: string) =>
     regions.find((r) => r.slug === slug)?.name ?? slug;
 
   return (
-    <Section tone="deep" id="jonli-savdolar" className="scroll-mt-24">
-      <SectionHeader
-        title={t("title")}
-        description={t("description")}
-        action={
-          hasMore ? (
-            <ActionLink href="/joriy-savdolar">
-              {t("all", { count: listings.length })}
-            </ActionLink>
-          ) : null
-        }
-        className="mb-6 sm:mb-8"
-      />
+    /*
+      The whole section goes when its last room closes, heading and all —
+      the same rule as rendering nothing when nothing is live at load.
+    */
+    <LiveGate lots={lots}>
+      <Section tone="deep" id="jonli-savdolar" className="scroll-mt-24">
+        <SectionHeader
+          title={t("title")}
+          description={t("description")}
+          action={
+            /*
+              No count on the link, at the operator's request: it was fixed
+              at the moment the page was built, and sat beside a tab whose
+              count moves every 30 seconds. The link itself follows the live
+              count, so it goes when the menu entry does.
+            */
+            <LiveMoreGate serverHasMore={hasMore}>
+              <ActionLink href="/joriy-savdolar">{t("all")}</ActionLink>
+            </LiveMoreGate>
+          }
+          className="mb-6 sm:mb-8"
+        />
 
-      {/*
+        {/*
         A GRID OF THREE ON A WIDE SCREEN, A SWIPED ROW ON A NARROW ONE. From
         `lg` the cards sit three to a row, so four to six live lots make the
         second row. Below that a grid would stack six cards into a column six
@@ -86,17 +109,22 @@ export async function LiveAuctions() {
         so a scrolled card is not clipped mid-gutter, and `pb-2` leaves the
         scrollbar somewhere to sit without overlapping the cards.
       */}
-      <ul className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0">
-        {shown.map((listing) => (
-          <LotCard
-            key={listing.id}
-            listing={listing}
-            regionName={regionName(listing.region)}
-            live
-            className="w-[17rem] shrink-0 snap-start sm:w-[20rem] lg:w-auto"
-          />
-        ))}
-      </ul>
-    </Section>
+        <LiveCardList
+          lots={lots}
+          limit={LIVE_STRIP_LIMIT}
+          className="-mx-5 flex snap-x snap-mandatory gap-5 overflow-x-auto px-5 pb-2 sm:-mx-8 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0"
+        >
+          {pool.map((listing) => (
+            <LotCard
+              key={listing.id}
+              listing={listing}
+              regionName={regionName(listing.region)}
+              live
+              className="w-[17rem] shrink-0 snap-start sm:w-[20rem] lg:w-auto"
+            />
+          ))}
+        </LiveCardList>
+      </Section>
+    </LiveGate>
   );
 }
