@@ -134,7 +134,7 @@ function currentYear(): number {
  * One decimal, and grouped by `formatFixed` — Uzbek writes 148,8 and 30 032,
  * which is why this does not go near `Intl`. See lib/format.ts.
  */
-function formatLeasedArea(m2: number): { value: string; unit: string } {
+export function formatLeasedArea(m2: number): { value: string; unit: string } {
   if (m2 >= 1_000_000) {
     return { value: formatFixed(m2 / 1_000_000, 1), unit: "mln m²" };
   }
@@ -196,6 +196,16 @@ export async function getHeroStats(
     {
       ...contractsStat,
       value: register ? formatNumber(register.contracts) : contractsStat.value,
+      /*
+        The figure opens the register it counts, narrowed to the same region.
+        Not the district: the hero's tuman is the listings feed's Latin name
+        and the register's is transliterated from Cyrillic, so the two do not
+        always spell a place alike — a carried `tuman` that did not match
+        would open an empty page under a figure that says otherwise.
+      */
+      href: regionSlug
+        ? `/ijara-shartnomalari?hudud=${encodeURIComponent(regionSlug)}`
+        : "/ijara-shartnomalari",
     },
     {
       ...areaStat,

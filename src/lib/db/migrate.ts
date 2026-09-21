@@ -928,6 +928,40 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    version: 14,
+    name: "cadastre names",
+    up: `
+      /*
+        Building names and addresses from the cadastre, for /ijara-shartnomalari.
+
+        The contracts register (list-reg) identifies each leased object only
+        by its cadastre number. The NAME and ADDRESS a citizen recognises come
+        from a second service, one request per number — and the register
+        carries about 17 000 distinct numbers a year. Asking for all of them
+        on every page view is not an option, so each answer is kept here and
+        a page only asks for the numbers it is about to show that are not.
+
+        ONLY THESE TEXT FIELDS ARE KEPT. The cadastre's answer also carries
+        "subjects" — the registered owners, with passport, PINFL and INN.
+        None of that is read, and none of it may ever be added to this table:
+        the building is public, its owner is not the page's business.
+
+        found = 0 records a number the cadastre did not recognise (a malformed
+        register entry such as "23:79:"), so it is not asked about again on
+        every view. Those rows are retried after a day; found rows are
+        refreshed after 90 days, since a building's registered name rarely
+        changes. See lib/data/cadastre.ts.
+      */
+      CREATE TABLE cadastre_objects (
+        cad        TEXT    NOT NULL PRIMARY KEY,
+        found      INTEGER NOT NULL,
+        name       TEXT    NOT NULL DEFAULT '',
+        address    TEXT    NOT NULL DEFAULT '',
+        fetched_at TEXT    NOT NULL
+      );
+    `,
+  },
 ];
 
 export function migrate(db: Database): void {

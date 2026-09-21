@@ -66,6 +66,22 @@ Carried over from the legacy site and resolved as follows:
   page also sends a `zz_md5` field; the endpoint answers identically without
   it and it is not reconstructed.
 
+- **Contract rows and building names (/ijara-shartnomalari).** The register's
+  `list-reg` endpoint returns every contract of one region's year — `region`
+  is REQUIRED there, so the republic is 14 calls (7.4 MB), held in memory an
+  hour (`lib/data/lease-contracts.ts`). Its rows sum to the summary exactly
+  (29 680 on 21.09.2026) — and so does area: 198,9 mln m² by then, both ways.
+  An object is a `cad_number`; there is no name in the register, so names come
+  from the cadastre, one call per number, cached in `cadastre_objects`. The
+  Markaz gateway (`CADDATA_*`, `markaz/cad_data`) needs the HOLDER's STIR as
+  `tin` (2108 otherwise, 2109 without one) and the register sends none, so
+  until the operator adds it the older `otchet.davbaho.uz` service answers
+  instead. **Both responses carry owners' personal data — `hosts[]` (PINFL,
+  birth date, gender) and `subjects[]` (passport, PINFL) — never read, stored
+  or shown**; only the name and address are. The older service's token rides
+  in the query string over plain HTTP, so no URL is ever logged. Dates are typed —
+  three are in the future — so the list orders by `contract_id`, not date.
+
 - **No bid count exists.** Neither service reports how many raises a lot took —
   there is no bid history, participant count or step field anywhere in either
   response. The sold-lot card shows the rise from the start price instead,

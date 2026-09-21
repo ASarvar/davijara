@@ -13,7 +13,6 @@ import {
 } from "@/content/site";
 import { Container } from "./section";
 import { Logo } from "./logo";
-import { SiteTraffic } from "./site-traffic";
 
 export async function Footer() {
   const t = await getTranslations("footer");
@@ -160,12 +159,15 @@ export async function Footer() {
       </Container>
 
       {/*
-        The visitor counter — a full-width navy band. It renders nothing until
-        the server has taken some traffic (getTrafficStats() is null during the
-        build), so on a freshly deployed page this band is absent and the
-        copyright row follows the columns directly.
+        The visitor counter band (<SiteTraffic />) is HIDDEN at the operator's
+        request (21.09.2026) — not removed. The beacon still counts every page
+        view, so putting it back is this one line:
+
+          <SiteTraffic />
+
+        It renders nothing until the server has taken some traffic
+        (getTrafficStats() is null during the build).
       */}
-      <SiteTraffic />
 
       <Container>
         <div className="text-muted-foreground flex flex-col gap-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between">

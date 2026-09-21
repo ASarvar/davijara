@@ -326,6 +326,12 @@ export interface Stat {
    * turn a row of numbers into a row of paragraphs.
    */
   note?: string;
+  /**
+   * Where the figure leads, when there is a page behind it — the contracts
+   * card opens the register it counts (/ijara-shartnomalari). Only the hero's
+   * StatPanel renders it.
+   */
+  href?: string;
 }
 
 export interface Auction {
@@ -359,4 +365,46 @@ export interface FunctionGroup {
   letter: string;
   heading: string;
   items: string[];
+}
+
+/**
+ * One signed lease contract, as the contracts register lists it.
+ * See lib/data/lease-contracts.ts.
+ */
+export interface LeaseContract {
+  /** The register's own row id; rises as contracts are entered. */
+  id: number;
+  /** "31426271184" — unique across the register. */
+  number: string;
+  /** The leased object's cadastre number, as the register wrote it. */
+  cad: string;
+  /** YYYY-MM-DD */
+  date: string;
+  /** So'm, as published. Zero on some contracts; printed, not explained. */
+  sum: number;
+  areaM2: number;
+  /** Latin, e.g. "Qoʻrgʻontepa tumani". */
+  district: string;
+  /** "Auksion" | "Muddat uzaytirilgan" — the register's own wording. */
+  type: string;
+  /** Holder's STIR, when the register sends one — used only to ask the cadastre. */
+  tin?: string;
+}
+
+/** A leased object: every contract that names one cadastre number. */
+export interface LeasedObject {
+  /** "" when the register gave no cadastre number for these contracts. */
+  cad: string;
+  /** Region slug. */
+  region: string;
+  district: string;
+  /** Newest first. */
+  contracts: LeaseContract[];
+  /** Sum of the contracts' areas. */
+  areaM2: number;
+  /** Register id of the newest contract — the list's order. */
+  latestId: number;
+  /** From the cadastre, when it has answered for this number. */
+  name?: string;
+  address?: string;
 }

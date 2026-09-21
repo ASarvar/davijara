@@ -225,6 +225,7 @@ export const mainNav: NavItem[] = [
         when: "manyLiveAuctions",
       },
       { key: "leasedObjects", href: "/sotilgan-obyektlar" },
+      { key: "leaseContracts", href: "/ijara-shartnomalari" },
       { key: "leasePrivileges", href: "/imtiyozlar" },
       { key: "faq", href: "/faoliyat/savollar" },
     ],

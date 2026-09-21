@@ -109,7 +109,8 @@
     "terms": "Foydalanish shartlari",
     "sitemap": "Sayt xaritasi",
     "loginFull": "Shaxsiy kabinetga kirish",
-    "currentAuctions": "Joriy savdolar"
+    "currentAuctions": "Joriy savdolar",
+    "leaseContracts": "Ijara shartnomalari"
   },
   "hero": {
     "statScope": "<strong>{district}</strong> boʻyicha shartnomalar va maydon maʼlumoti registrda yoʻq — <strong>{region}</strong> boʻyicha koʻrsatilmoqda.",
@@ -497,5 +498,34 @@
     "statusExpired": "Qabul muddati tugagan",
     "toggle": "Batafsil",
     "apply": "Hujjatlarni yuborish manzili"
+  },
+  "leaseContracts": {
+    "pageTitle": "Ijara shartnomalari",
+    "metaDescription": "Joriy yilda tuzilgan davlat mulki ijara shartnomalari — obyektlar, shartnomalar soni, ijaraga berilgan maydon va manzil.",
+    "pageLede": "{year}-yilda tuzilgan ijara shartnomalari obyektlar boʻyicha: har bir obyektning shartnomalari soni va ijaraga berilgan maydoni.",
+    "statContracts": "Shartnomalar",
+    "statObjects": "Obyektlar",
+    "statArea": "Ijaraga berilgan maydon",
+    "filterLabel": "Ijara shartnomalarini qidirish",
+    "query": "Kadastr yoki shartnoma raqami",
+    "queryPlaceholder": "Masalan, 17:14:43:02:01:0028",
+    "colObject": "Nomi va kadastr raqami",
+    "colContracts": "Shartnomalar",
+    "colArea": "Ijara maydoni",
+    "address": "Manzil",
+    "noCadastre": "Kadastr raqami koʻrsatilmagan",
+    
+    
+    
+    
+    
+    
+    
+    "found": "Topildi: {objects} ta obyekt, {contracts} ta shartnoma.",
+    "empty": "Tanlangan shartlar boʻyicha shartnoma topilmadi.",
+    "unavailable": "Shartnomalar reyestri hozir javob bermayapti. Birozdan keyin qayta urinib koʻring.",
+    "partial": "{count} ta hudud boʻyicha reyestr javob bermadi — ular roʻyxatda yoʻq.",
+    "pagination": "Sahifalar",
+    "reset": "Tozalash"
   }
 }

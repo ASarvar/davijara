@@ -61,6 +61,8 @@ nano /var/www/davijara/shared/.env
 | `NEXT_PUBLIC_SITE_URL` | `https://davijara.uz` — sub-path yo'q |
 | `NEXT_PUBLIC_BASE_PATH` | **bo'sh qoldiring** — ildizda ishlaydi |
 | `LISTINGS_API_URL`, `API_USER`, `API_PASSWORD` | Auksion lotlari API'si |
+| `CADDATA_BASE_URL`, `CADDATA_USERNAME`, `CADDATA_PASSWORD` | /ijara-shartnomalari: bino nomi va manzili (kadastr shlyuzi, egasining STIR'i bilan) |
+| `CADASTRE_API_URL`, `CADASTRE_API_TOKEN` | Eski kadastr servisi — STIR yo'q obyektlar uchun zaxira. Ikkalasi ham bo'lmasa, nom o'rnida kadastr raqami chiqadi |
 
 ```bash
 chmod 600 /var/www/davijara/shared/.env

@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import type { Stat } from "@/types/content";
 import { AnimatedStatValue } from "@/components/common/animated-stat-value";
 import { Icon } from "@/components/icon";
+import { Link } from "@/i18n/navigation";
 
 /**
  * The hero's four headline figures.
@@ -67,7 +68,9 @@ export function StatPanel({
           data-enter
           style={{ "--enter-delay": 3 + i } as React.CSSProperties}
           className={cn(
-            "group flex flex-col items-center justify-center rounded-xl border border-dashed px-3 py-3 text-center sm:px-4 sm:py-5",
+            "group relative flex flex-col items-center justify-center rounded-xl border border-dashed px-3 py-3 text-center sm:px-4 sm:py-5",
+            stat.href &&
+              "has-[a:focus-visible]:ring-ring has-[a:focus-visible]:ring-2",
             /*
               MOSTLY TRANSPARENT, so the hero's own gradient reads through the
               card — that lightness is the point, and an opaque card would put
@@ -147,16 +150,35 @@ export function StatPanel({
               />
             ) : null}
 
-            <AnimatedStatValue
-              value={stat.value}
-              /*
-                `--ornament`: gold on deep, gold-ink on light, yellow in high
-                contrast. `tabular-nums` so the digits hold their columns
-                while the count-up animation runs — proportional figures
-                reflow on every frame and the number visibly jitters.
-              */
-              className="font-heading text-ornament block text-xl font-extrabold tabular-nums sm:text-2xl"
-            />
+            {/*
+              `--ornament`: gold on deep, gold-ink on light, yellow in high
+              contrast. `tabular-nums` so the digits hold their columns
+              while the count-up animation runs — proportional figures
+              reflow on every frame and the number visibly jitters.
+
+              A card with an `href` is a link across its whole face. The link
+              sits on the FIGURE, so its accessible name is the number, read
+              after the <dt>; its ::after stretches over the card. Wrapping
+              the card in an <a> instead would put a link between the <dl>
+              and its <dt>. The focus ring is drawn on the card (`has-[…]`
+              above), since the figure alone is too small to outline usefully.
+            */}
+            {stat.href ? (
+              <Link
+                href={stat.href}
+                className="outline-none after:absolute after:inset-0 after:rounded-xl"
+              >
+                <AnimatedStatValue
+                  value={stat.value}
+                  className="font-heading text-ornament block text-xl font-extrabold tabular-nums sm:text-2xl"
+                />
+              </Link>
+            ) : (
+              <AnimatedStatValue
+                value={stat.value}
+                className="font-heading text-ornament block text-xl font-extrabold tabular-nums sm:text-2xl"
+              />
+            )}
 
             {stat.unit ? (
               /*
