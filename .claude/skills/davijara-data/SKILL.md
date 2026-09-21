@@ -53,9 +53,18 @@ Carried over from the legacy site and resolved as follows:
   either, and a room closes minutes after it opens. Deriving "live" from the
   auction's own Tashkent day put 48 pins in the live state nationwide on a day
   when exactly 1 rent lot was actually being bid on. `lib/data/live-auctions.ts`
-  therefore reads e-auksion's public `GET /api/front/lots/current?lang=uz` —
-  the list behind its own "Joriy savdolar" block — and a fault there means no
-  lot is marked live, never all of them.
+  therefore reads e-auksion's public `POST /api/front/curlots` with
+  `confiscant_groups_id: 11` — the list behind its own "Lotlar → Joriy
+  savdolar" page — and a fault there means no lot is marked live, never all
+  of them.
+- **`GET /api/front/lots/current` is the WRONG live list.** It looks right —
+  it is e-auksion's own "Joriy savdolar" homepage block — but it carries no
+  rent lots. On 21.09.2026 at 10:05, with 167 of our lots scheduled for 10:00,
+  it listed 8 rooms (seven vehicles and a flat, all confiscated property) and
+  none of ours, while `curlots` for group 11 listed 64, 57 of them ours. Our
+  lots are group 11, category 41 "Davlat mulkini ijaraga berish". The portal's
+  page also sends a `zz_md5` field; the endpoint answers identically without
+  it and it is not reconstructed.
 
 - **No bid count exists.** Neither service reports how many raises a lot took —
   there is no bid history, participant count or step field anywhere in either
