@@ -377,7 +377,16 @@ function FullscreenControl({
         Top-right is the one free corner: zoom sits top-left, attribution
         bottom-right.
       */
-      className="absolute top-3 right-3 z-[1000] flex size-9 items-center justify-center rounded-md border border-[color:var(--color-gold)]/30 bg-[color:var(--color-)] text-[color:var(--color-gold-light)] shadow-md transition-colors duration-200 hover:bg-[color:var(--color-navy-mid)] hover:text-[color:var(--color-gold)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-gold)] focus-visible:outline-none"
+      /*
+        WHITE, like Leaflet's own zoom buttons across the map from it, and
+        pinned to explicit light values for the same reason the popups are:
+        this button sits on a light basemap in every theme, so it must read
+        against streets and fields rather than against the section behind the
+        map. It previously asked for `var(--color-)` — a token that does not
+        exist — so it had no background at all and the icon sat directly on
+        the map.
+      */
+      className="absolute top-3 right-3 z-[1000] flex size-9 items-center justify-center rounded-md border border-[color:var(--color-navy)]/15 bg-white text-[color:var(--color-navy)] shadow-md transition-colors duration-200 hover:bg-[color:var(--color-mist)] hover:text-[color:var(--color-cobalt)] focus-visible:ring-2 focus-visible:ring-[color:var(--color-cobalt)] focus-visible:outline-none"
     >
       {isFullscreen ? (
         <Minimize2 aria-hidden="true" className="size-4" />
