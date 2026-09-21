@@ -89,6 +89,14 @@
     dark; see the surface ladder note at the top of this file.
   */
   --color-navy-raised: #091635;
+  /*
+    The live-auction green — the live map pin's own fill, named so the tab
+    and card marks that echo it cannot drift from it. Used for nothing else on
+    the portal, which is the whole reason it reads as "open now" at a glance.
+    A mark, never a text colour on its own: every live state also carries the
+    word.
+  */
+  --color-live: #0f7a3d;
   --color-gold: #c8a96e;
   --color-gold-light: #e8d5a8;
   --color-slate: #3d4a6b;

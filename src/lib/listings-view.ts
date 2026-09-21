@@ -20,7 +20,25 @@
 
 export const VIEW_KEY = "korinish";
 
-export type ListingsView = "xarita" | "royxat";
+/*
+  `jonli` is the third tab, "Jonli savdolar": the map with only the lots
+  whose bidding room is open. It exists only while something IS open, which
+  the page cannot know on the server (see lib/live-auctions-client.ts) — so a
+  URL asking for it is honoured here and then quietly replaced by the page's
+  default in the explorer if nothing turns out to be live.
+*/
+export type ListingsView = "xarita" | "royxat" | "jonli";
+
+/** Every value the URL may carry, for the places that pass it through. */
+export const LISTINGS_VIEWS: readonly ListingsView[] = [
+  "xarita",
+  "royxat",
+  "jonli",
+];
+
+export function isListingsView(value: unknown): value is ListingsView {
+  return (LISTINGS_VIEWS as readonly unknown[]).includes(value);
+}
 
 /**
  * The open tab.
@@ -43,6 +61,5 @@ export function parseView(
 ): ListingsView {
   const raw = searchParams[VIEW_KEY];
   const value = Array.isArray(raw) ? raw[0] : raw;
-  if (value === "royxat" || value === "xarita") return value;
-  return fallback;
+  return isListingsView(value) ? value : fallback;
 }

@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LayoutList,
   MapPin,
+  Radio,
   TriangleAlert,
 } from "lucide-react";
 
@@ -22,16 +23,19 @@ import { formatArea, formatNumber, formatSom } from "@/lib/format";
 // From lib/listings-view, NOT lib/data/listings — the latter is `server-only`
 // and importing it here pulls the API credentials into the browser bundle.
 import { VIEW_KEY, type ListingsView } from "@/lib/listings-view";
+import { useLiveAuctions } from "@/lib/live-auctions-client";
 import type { Listing, RegionSummary } from "@/types/content";
 
 /*
   Map / list explorer.
 
-  Two views over the SAME filtered set, so the tabs can never disagree:
+  Views over the SAME filtered set, so the tabs can never disagree:
 
     Xarita   every matching lot as a clustered pin
     Ro'yxat  region totals when nothing is filtered, individual lots once a
              search is running
+    Jonli    the matching lots whose bidding room is open right now — a third
+             tab that exists only while at least one is (see liveListings)
 
   That second behaviour is the point: with no query the useful answer is
   "where is there anything at all", which is a per-region count. Once someone
@@ -341,6 +345,31 @@ export function ObjectsExplorer({
     [summaries],
   );
 
+  /*
+    "Jonli savdolar" — the lots on THIS map whose bidding room is open.
+
+    Drawn from the listings the explorer already holds, so the tab follows the
+    reader's search like the other two: narrow the map to one region and the
+    live tab narrows with it, or disappears if nothing there is live.
+
+    THE TAB EXISTS ONLY WHILE SOMETHING IS LIVE. A tab that opens onto an
+    empty map would be a control that answers "nothing" most hours of the
+    day. And a URL that asks for it (`?korinish=jonli`, a bookmark from this
+    morning) when nothing is live lands on the page's default instead —
+    `activeView` below — rather than on a tab that is not there.
+  */
+  const { lots: liveLots } = useLiveAuctions();
+  const liveListings = useMemo(
+    () =>
+      listings.filter(
+        (listing) =>
+          listing.lotNumber != null && liveLots.has(listing.lotNumber),
+      ),
+    [listings, liveLots],
+  );
+  const activeView: ListingsView =
+    view === "jonli" && liveListings.length === 0 ? defaultView : view;
+
   const detailHref = useCallback(
     (listing: Listing) =>
       listing.auctionUrl ?? `/${locale}/ijaraga-obyektlar/${listing.id}`,
@@ -430,7 +459,7 @@ export function ObjectsExplorer({
         jumping to the top on a tab click.
       */}
       <Tabs
-        value={view}
+        value={activeView}
         onValueChange={(next) => {
           const params = new URLSearchParams(searchParams?.toString() ?? "");
           // The page's own default needs no parameter; the other one does.
@@ -452,6 +481,25 @@ export function ObjectsExplorer({
               <LayoutList aria-hidden="true" className="size-4" />
               {showLots ? t("count") : t("regionsTab")}
             </TabsTrigger>
+            {liveListings.length > 0 ? (
+              <TabsTrigger value="jonli" className="gap-1.5">
+                <Radio aria-hidden="true" className="size-4" />
+                {t("liveTab")}
+                {/*
+                  The count is part of the label, not decoration: it says
+                  how many rooms are open before the tab is pressed, and it
+                  is what changes when one closes. The dot is the same pulse
+                  as the live pins and cards (globals.css).
+                */}
+                <span className="bg-secondary inline-flex items-center gap-1 rounded-full px-1.5 text-xs tabular-nums">
+                  <span
+                    aria-hidden="true"
+                    className="lot-live-dot size-1.5 rounded-full bg-[color:var(--color-live)]"
+                  />
+                  {liveListings.length}
+                </span>
+              </TabsTrigger>
+            ) : null}
           </TabsList>
         </div>
 
@@ -491,6 +539,26 @@ export function ObjectsExplorer({
             )}
           </div>
         </TabsContent>
+
+        {/*
+          The same map with only the live lots on it. A second <ListingsMap>
+          rather than a filter on the first: Radix unmounts the inactive tab,
+          so only one Leaflet instance ever exists, and this one fits its view
+          to the live pins alone instead of to the whole country. Every pin
+          here is green — the map draws live state from the same hook.
+        */}
+        {liveListings.length > 0 ? (
+          <TabsContent value="jonli" className="mt-0">
+            <div className="border-border relative isolate h-[26rem] overflow-hidden rounded-md border sm:h-[32rem]">
+              <ListingsMap
+                listings={liveListings}
+                regionName={regionName}
+                detailHref={detailHref}
+                labels={mapLabels}
+              />
+            </div>
+          </TabsContent>
+        ) : null}
 
         <TabsContent value="royxat" className="mt-0">
           {listings.length === 0 ? (

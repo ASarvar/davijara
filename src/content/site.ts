@@ -57,7 +57,10 @@ export const contacts = {
      * To enable: read the exact point off a map and paste it as
      * `{ lat: 41.xxxxxx, lng: 69.xxxxxx }`.
      */
-    coords: { lat: 41.308820, lng: 69.2787344 } as { lat: number; lng: number } | null,
+    coords: { lat: 41.30882, lng: 69.2787344 } as {
+      lat: number;
+      lng: number;
+    } | null,
   },
   /** Reception hours, shown on /aloqa. */
   hours: {
@@ -108,6 +111,15 @@ export interface NavItem {
    * one would just be a dead menu entry.
    */
   clickable?: boolean;
+  /**
+   * A condition the entry is shown under, decided in the browser. Absent (the
+   * default) means always shown.
+   *
+   * `"manyLiveAuctions"`: only while more lots are live than the homepage
+   * strip holds — "Joriy savdolar" under Faoliyat, at the operator's request.
+   * See lib/nav-visibility.ts for why this is not decided on the server.
+   */
+  when?: "manyLiveAuctions";
 }
 
 /** External links keep a literal label; domain names are not translated. */
@@ -128,8 +140,16 @@ export const socialLinks: Array<{
   label: string;
 }> = [
   { platform: "telegram", href: "https://t.me/davijara_uz", label: "Telegram" },
-  { platform: "instagram", href: "https://instagram.com/davijarauz", label: "Instagram" },
-  { platform: "facebook", href: "https://www.facebook.com/davijarauz/", label: "Facebook" },
+  {
+    platform: "instagram",
+    href: "https://instagram.com/davijarauz",
+    label: "Instagram",
+  },
+  {
+    platform: "facebook",
+    href: "https://www.facebook.com/davijarauz/",
+    label: "Facebook",
+  },
 ];
 /**
  * The six institutional sections, in the operator's own order.
@@ -195,6 +215,15 @@ export const mainNav: NavItem[] = [
     clickable: false,
     children: [
       { key: "vacantObjects", href: "/ijaraga-obyektlar" },
+      /*
+        Conditional: present in the tree always, SHOWN only while more than
+        six lots are live (see `when` above and lib/nav-visibility.ts).
+      */
+      {
+        key: "currentAuctions",
+        href: "/joriy-savdolar",
+        when: "manyLiveAuctions",
+      },
       { key: "leasedObjects", href: "/sotilgan-obyektlar" },
       { key: "leasePrivileges", href: "/imtiyozlar" },
       { key: "faq", href: "/faoliyat/savollar" },

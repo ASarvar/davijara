@@ -31,7 +31,7 @@ import {
   MAP_TILE_URL,
 } from "@/lib/map-tiles";
 import { auctionStarted, nextAuctionStart } from "@/lib/auction-phase";
-import { withBasePath } from "@/lib/base-path";
+import { useLiveAuctions } from "@/lib/live-auctions-client";
 import type { Listing } from "@/types/content";
 
 /*
@@ -145,7 +145,7 @@ const escapeHtml = (s: string) => s.replace(/[&<>"]/g, (c) => ESCAPES[c]);
 
 function markerIconFor(
   area: number,
-  /** Bidding room open now — see useLiveLots and lib/data/live-auctions.ts. */
+  /** Bidding room open now — see useLiveAuctions and lib/data/live-auctions.ts. */
   live: boolean,
   /** "Savdo boshlandi", for the screen reader only: the ring is silent. */
   liveLabel: string,
@@ -545,61 +545,9 @@ function FitToListings({ listings }: { listings: Listing[] }) {
   return null;
 }
 
-/*
-  A room turns over in minutes, so the list is re-read on the minute. Cheap:
-  `/api/live-auctions` caches upstream for 30 seconds, and the response is a
-  few dozen lot numbers.
-*/
-const LIVE_POLL_MS = 60_000;
-
-/**
- * Lot numbers whose bidding room is open right now, as e-auksion reports
- * them — see lib/data/live-auctions.ts for why this is asked rather than
- * worked out from the auction date.
- *
- * STARTS EMPTY AND FAILS CLOSED. Nothing is marked live until the first
- * answer arrives, and a failed refresh leaves the previous answer standing
- * rather than clearing it — one bad response should not blink every pin.
- */
-function useLiveLots(): ReadonlySet<string> {
-  const [lots, setLots] = useState<ReadonlySet<string>>(() => new Set());
-
-  useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      try {
-        const res = await fetch(withBasePath("/api/live-auctions"), {
-          cache: "no-store",
-        });
-        // 503 is the route saying "no answer" rather than "nobody is live".
-        if (!res.ok) return;
-        const data: unknown = await res.json();
-        const rows =
-          typeof data === "object" && data !== null && "lots" in data
-            ? (data as { lots: unknown }).lots
-            : null;
-        if (!active || !Array.isArray(rows)) return;
-        setLots(new Set(rows.map(String)));
-      } catch {
-        // Offline, or the reader navigated away mid-flight. Keep what we have.
-      }
-    };
-
-    void load();
-    const id = window.setInterval(() => void load(), LIVE_POLL_MS);
-    return () => {
-      active = false;
-      window.clearInterval(id);
-    };
-  }, []);
-
-  return lots;
-}
-
 /**
  * Which lots' auction moment has already passed — for the countdown caption,
- * and nothing else. Whether bidding is still OPEN is `useLiveLots`' answer.
+ * and nothing else. Whether bidding is still OPEN is `useLiveAuctions`' answer.
  *
  * WAKES AT THE BOUNDARY, NOT ON A TIMER. The catalogue carries ~1 150 pins; a
  * one-minute tick would re-render the whole cluster group 1 440 times a day to
@@ -661,7 +609,8 @@ export function ListingsMap({
     fullscreenExit: string;
   };
 }) {
-  const liveLots = useLiveLots();
+  // Shared with the explorer's live tab and the menu — see the hook.
+  const { lots: liveLots } = useLiveAuctions();
   const started = useStartedAuctions(listings);
   const isLive = (listing: Listing) =>
     listing.lotNumber != null && liveLots.has(listing.lotNumber);

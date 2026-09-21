@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { contacts, type NavItem } from "@/content/site";
 import { activeHref, isSectionActive } from "@/lib/nav-active";
+import { useLiveAuctions } from "@/lib/live-auctions-client";
+import { isNavItemShown } from "@/lib/nav-visibility";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -43,6 +45,8 @@ function navLabel(item: NavItem, t: (key: string) => string): string {
 export function MobileNav({ items }: { items: NavItem[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  // Decides the conditional "Joriy savdolar" entry — lib/nav-visibility.ts.
+  const { listed: liveListed } = useLiveAuctions();
   const t = useTranslations("nav");
   const tc = useTranslations("common");
 
@@ -92,7 +96,9 @@ export function MobileNav({ items }: { items: NavItem[] }) {
         <nav className="flex flex-1 flex-col overflow-y-auto p-2">
           {items.map((item) => {
             const sectionActive = isSectionActive(pathname, item);
-            const children = item.children ?? [];
+            const children = (item.children ?? []).filter((child) =>
+              isNavItemShown(child, liveListed),
+            );
             const currentChild = activeHref(
               pathname,
               children.map((c) => c.href),

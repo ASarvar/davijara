@@ -1,4 +1,7 @@
-import { getLiveAuctionLots } from "@/lib/data/live-auctions";
+import {
+  getLiveAuctionListings,
+  getLiveAuctionLots,
+} from "@/lib/data/live-auctions";
 
 /*
   The open bidding rooms, for the map.
@@ -36,8 +39,17 @@ export async function GET() {
     );
   }
 
+  /*
+    `listed` is how many of those rooms are for lots in OUR feed — the number
+    the homepage strip, the explorer's live tab and the menu entry all decide
+    on. `lots` alone overstates it: e-auksion also runs sales that are not
+    ours. Both calls are cached (30 s upstream, minutes for the feed), so the
+    second costs nothing a reader would notice.
+  */
+  const listed = (await getLiveAuctionListings()).length;
+
   return Response.json(
-    { lots },
+    { lots, listed },
     { headers: { "Cache-Control": "public, max-age=30" } },
   );
 }

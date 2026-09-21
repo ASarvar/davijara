@@ -108,7 +108,8 @@
     "privacy": "Maxfiylik siyosati",
     "terms": "Foydalanish shartlari",
     "sitemap": "Sayt xaritasi",
-    "loginFull": "Shaxsiy kabinetga kirish"
+    "loginFull": "Shaxsiy kabinetga kirish",
+    "currentAuctions": "Joriy savdolar"
   },
   "hero": {
     "statScope": "<strong>{district}</strong> boʻyicha shartnomalar va maydon maʼlumoti registrda yoʻq — <strong>{region}</strong> boʻyicha koʻrsatilmoqda.",
@@ -171,7 +172,16 @@
   },
   "liveAuctions": {
     "title": "Jonli savdolar",
-    "description": "Ayni paytda savdosi ketayotgan obyektlar. Savdo xonasi e-auksion.uz da ochiq."
+    "description": "Ayni paytda savdosi ketayotgan obyektlar. Savdo xonasi e-auksion.uz da ochiq.",
+    "all": "Barcha joriy savdolar ({count})"
+  },
+  "currentAuctions": {
+    "pageTitle": "Joriy savdolar",
+    "metaDescription": "Ayni paytda e-auksion.uz da savdosi ketayotgan davlat mulki obyektlari.",
+    "pageLede": "Ayni paytda {count} ta obyekt bo'yicha savdo ketmoqda. Kartani bossangiz, e-auksion.uz dagi savdo xonasi ochiladi.",
+    "pageEmpty": "Hozir savdosi ketayotgan obyekt yo'q.",
+    "empty": "Jonli savdo boshlanganda obyektlar shu yerda ko'rinadi.",
+    "emptyAction": "Yaqinlashayotgan savdolarni ko'rish"
   },
   "auctions": {
     "eyebrow": "SAVDOLAR",
@@ -428,7 +438,8 @@
     "mockNotice": "Ko'rsatilayotgan obyektlar hozircha <b>namunaviy</b> — ular tizim ishini ko'rsatish uchun yaratilgan va haqiqiy davlat mulki emas. Rasmiy ma'lumot uchun <link>e-auksion.uz</link> saytiga murojaat qiling.",
     "pageLedeFiltered": "Tanlangan shartlar bo'yicha natijalar",
     "showAll": "Yana {n} ta obyekt — barchasini ko'rish",
-    "mapLiveView": "Joriy savdoni koʻrish"
+    "mapLiveView": "Joriy savdoni koʻrish",
+    "liveTab": "Jonli savdolar"
   },
   "calculator": {
     "title": "Ijara kalkulatori",

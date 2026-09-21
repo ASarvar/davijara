@@ -33,7 +33,14 @@ export async function SectionIndexPage({
   const t = await getTranslations("nav");
   const nav = await getNavigation(await getLocale());
   const section = nav.find((item) => item.key === navKey);
-  const children = section?.children ?? [];
+  /*
+    Conditional entries are left out. This page is server-rendered and cached
+    for minutes, and the only condition today — "Joriy savdolar" while more
+    than six lots are live — changes faster than that; the header menu
+    decides it in the browser instead (lib/nav-visibility.ts). The page itself
+    stays reachable from the homepage strip and the header when it applies.
+  */
+  const children = (section?.children ?? []).filter((child) => !child.when);
 
   /*
     A section that does not resolve, or that has nothing under it, renders a

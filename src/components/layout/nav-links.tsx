@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import type { NavItem } from "@/content/site";
 import { activeHref, isSectionActive } from "@/lib/nav-active";
+import { useLiveAuctions } from "@/lib/live-auctions-client";
+import { isNavItemShown } from "@/lib/nav-visibility";
 import { cn } from "@/lib/utils";
 
 /**
@@ -35,6 +37,8 @@ function navLabel(item: NavItem, t: (key: string) => string): string {
 
 export function NavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
+  // Decides the conditional "Joriy savdolar" entry — lib/nav-visibility.ts.
+  const { listed: liveListed } = useLiveAuctions();
   const t = useTranslations("nav");
 
   /*
@@ -77,7 +81,9 @@ export function NavLinks({ items }: { items: NavItem[] }) {
     <ul className="hidden flex-wrap items-center justify-center xl:flex">
       {items.map((item) => {
         const sectionActive = isSectionActive(pathname, item);
-        const children = item.children ?? [];
+        const children = (item.children ?? []).filter((child) =>
+          isNavItemShown(child, liveListed),
+        );
         // Which child, if any, owns the page — resolved across the whole
         // submenu at once so two overlapping entries cannot both light up.
         const currentChild = activeHref(

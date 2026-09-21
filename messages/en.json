@@ -105,7 +105,8 @@
     "privacy": "Privacy policy",
     "terms": "Terms of use",
     "sitemap": "Sitemap",
-    "loginFull": "Sign in to your account"
+    "loginFull": "Sign in to your account",
+    "currentAuctions": "Current auctions"
   },
   "hero": {
     "statScope": "The register has no contracts or area for <strong>{district}</strong> — showing <strong>{region}</strong> instead.",
@@ -161,7 +162,16 @@
   },
   "liveAuctions": {
     "title": "Live auctions",
-    "description": "Lots being bid on right now. The bidding room is open on e-auksion.uz."
+    "description": "Lots being bid on right now. The bidding room is open on e-auksion.uz.",
+    "all": "All current auctions ({count})"
+  },
+  "currentAuctions": {
+    "pageTitle": "Current auctions",
+    "metaDescription": "State property being bid on at e-auksion.uz right now.",
+    "pageLede": "Bidding is open on {count} lots right now. A card opens its bidding room on e-auksion.uz.",
+    "pageEmpty": "No lots are being bid on right now.",
+    "empty": "Lots appear here as soon as bidding opens.",
+    "emptyAction": "See upcoming auctions"
   },
   "auctions": {
     "eyebrow": "AUCTIONS",
@@ -317,7 +327,8 @@
     "mapFullscreenExit": "Exit full screen",
     "mockNotice": "The objects shown are still <b>samples</b> — they were created to demonstrate how the system works and are not real state property. For official information please refer to <link>e-auksion.uz</link>.",
     "showAll": "{count, plural, one {{n} more object} other {{n} more objects}} — view all",
-    "mapLiveView": "Watch the live auction"
+    "mapLiveView": "Watch the live auction",
+    "liveTab": "Live auctions"
   },
   "calculator": {
     "title": "Rent calculator",

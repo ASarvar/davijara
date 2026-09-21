@@ -11,6 +11,7 @@ import {
   parseListingQuery,
   VIEW_KEY,
 } from "@/lib/data/listings";
+import { isListingsView } from "@/lib/listings-view";
 import { RegionDistrictFields } from "./region-district-fields";
 import { AuctionDayField } from "@/components/common/auction-day-field";
 import { Eyebrow } from "@/components/common/eyebrow";
@@ -165,7 +166,7 @@ export async function SearchWidget({
             the page — the homepage opens on the map, the catalogue on the
             list — and a URL that says nothing keeps a clean search.
           */}
-        {current(VIEW_KEY) === "royxat" || current(VIEW_KEY) === "xarita" ? (
+        {isListingsView(current(VIEW_KEY)) ? (
           <input type="hidden" name={VIEW_KEY} value={current(VIEW_KEY)} />
         ) : null}
 

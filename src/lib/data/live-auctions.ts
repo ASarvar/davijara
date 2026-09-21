@@ -115,18 +115,22 @@ export async function getLiveAuctionLots(): Promise<string[] | null> {
  * live auctions", and the alternative is inviting a citizen into a room that
  * has closed.
  */
-export async function getLiveAuctionListings(limit = 6): Promise<Listing[]> {
+export async function getLiveAuctionListings(): Promise<Listing[]> {
   const live = await getLiveAuctionLots();
   if (!live || live.length === 0) return [];
 
   const wanted = new Set(live);
   const { listings } = await getListings({});
 
-  return listings
-    .filter(
-      (listing) =>
-        (listing.lotNumber && wanted.has(listing.lotNumber)) ||
-        wanted.has(listing.id),
-    )
-    .slice(0, limit);
+  /*
+    Every match, uncut. The homepage strip shows the first
+    `LIVE_STRIP_LIMIT` and needs the full count to decide whether to link to
+    /joriy-savdolar; that page shows them all. A cap here would make the count
+    lie to both.
+  */
+  return listings.filter(
+    (listing) =>
+      (listing.lotNumber && wanted.has(listing.lotNumber)) ||
+      wanted.has(listing.id),
+  );
 }

@@ -261,7 +261,7 @@ export { VIEW_KEY, parseView, type ListingsView } from "@/lib/listings-view";
 
 // A re-export does not bring the name into this module's own scope, and
 // `buildFilterQuery` below writes the key.
-import { VIEW_KEY } from "@/lib/listings-view";
+import { VIEW_KEY, isListingsView } from "@/lib/listings-view";
 
 /**
  * The active filters, serialised for a link.
@@ -290,7 +290,7 @@ export function buildFilterQuery(
     URLs stay clean.
   */
   const view = first(searchParams[VIEW_KEY]);
-  if (view === "royxat" || view === "xarita") params.set(VIEW_KEY, view);
+  if (isListingsView(view)) params.set(VIEW_KEY, view);
   return params;
 }
 
