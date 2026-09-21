@@ -86,7 +86,11 @@ export default async function ObjectsPage({
         the homepage panel does not carry — the catalogue is where a date is
         worth combining with region, area and price. See search-widget.tsx.
       */}
-      <SearchWidget action={`/${locale}/ijaraga-obyektlar`} values={sp} auctionDay />
+      <SearchWidget
+        action={`/${locale}/ijaraga-obyektlar`}
+        values={sp}
+        auctionDay
+      />
 
       <Section tone="deep">
         <ObjectsExplorer
@@ -104,7 +108,13 @@ export default async function ObjectsPage({
           filterQuery={filterParams.toString()}
           basePath="/obyektlar"
           emptyLabel={t("emptyFiltered")}
-          view={parseView(sp)}
+          /*
+            THE LIST, not the map, unless the URL says otherwise. Someone who
+            opens the catalogue came to read lots; the map is one tab away and
+            the homepage above still leads with it.
+          */
+          view={parseView(sp, "royxat")}
+          defaultView="royxat"
         />
       </Section>
     </>

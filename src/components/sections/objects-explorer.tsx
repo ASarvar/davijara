@@ -63,12 +63,7 @@ const ListingsMap = dynamic(
   the search dropdown needs; these are deliberately separate keys rather than a
   shared one, because the row has a single truncating line to work with.
 */
-const TYPE_KEYS = [
-  "noturar",
-  "turar",
-  "ishlab-chiqarish",
-  "mamuriy",
-] as const;
+const TYPE_KEYS = ["noturar", "turar", "ishlab-chiqarish", "mamuriy"] as const;
 
 function isTypeKey(v: string): v is (typeof TYPE_KEYS)[number] {
   return (TYPE_KEYS as readonly string[]).includes(v);
@@ -282,6 +277,7 @@ export function ObjectsExplorer({
   filterQuery,
   basePath,
   view = "xarita",
+  defaultView = "xarita",
 }: {
   listings: Listing[];
   summaries: RegionSummary[];
@@ -298,6 +294,12 @@ export function ObjectsExplorer({
    * every submit. See VIEW_KEY in lib/data/listings.ts.
    */
   view?: ListingsView;
+  /**
+   * The tab this page opens on when the URL says nothing — the map on the
+   * homepage, the list in the catalogue. Held here as well as in the page so
+   * the tab handler knows which value it may leave out of the URL.
+   */
+  defaultView?: ListingsView;
   /**
    * What the Ro'yxat tab lists. The homepage shows region totals until a
    * search narrows things down; the full catalogue always lists lots.
@@ -431,8 +433,9 @@ export function ObjectsExplorer({
         value={view}
         onValueChange={(next) => {
           const params = new URLSearchParams(searchParams?.toString() ?? "");
-          if (next === "royxat") params.set(VIEW_KEY, "royxat");
-          else params.delete(VIEW_KEY);
+          // The page's own default needs no parameter; the other one does.
+          if (next === defaultView) params.delete(VIEW_KEY);
+          else params.set(VIEW_KEY, next);
           const qs = params.toString();
           router.replace(qs ? `${pathname}?${qs}` : pathname, {
             scroll: false,

@@ -22,11 +22,27 @@ export const VIEW_KEY = "korinish";
 
 export type ListingsView = "xarita" | "royxat";
 
-/** The open tab, defaulting to the map. */
+/**
+ * The open tab.
+ *
+ * THE DEFAULT IS PER PAGE, which is why it is an argument rather than a
+ * constant here. The homepage's section is a map of the country and opens on
+ * the map; /ijaraga-obyektlar is a catalogue and opens on the list, at the
+ * operator's request — someone who came to browse lots should not have to
+ * press a tab to see any.
+ *
+ * Both values are read back explicitly, so a URL can say "map" on a page
+ * whose default is the list and be believed. Everything that carries the tab
+ * across a navigation — `buildFilterQuery`, the search panel's hidden field,
+ * the explorer's own tab handler — passes the written value through
+ * unchanged and writes nothing when the reader is on the page's default.
+ */
 export function parseView(
   searchParams: Record<string, string | string[] | undefined>,
+  fallback: ListingsView = "xarita",
 ): ListingsView {
   const raw = searchParams[VIEW_KEY];
   const value = Array.isArray(raw) ? raw[0] : raw;
-  return value === "royxat" ? "royxat" : "xarita";
+  if (value === "royxat" || value === "xarita") return value;
+  return fallback;
 }

@@ -259,9 +259,9 @@ export const FILTER_KEYS = [
 */
 export { VIEW_KEY, parseView, type ListingsView } from "@/lib/listings-view";
 
-// A re-export does not bring the names into this module's own scope, and
-// `buildFilterQuery` below uses both.
-import { VIEW_KEY, parseView } from "@/lib/listings-view";
+// A re-export does not bring the name into this module's own scope, and
+// `buildFilterQuery` below writes the key.
+import { VIEW_KEY } from "@/lib/listings-view";
 
 /**
  * The active filters, serialised for a link.
@@ -281,9 +281,16 @@ export function buildFilterQuery(
     const value = first(searchParams[key]);
     if (value && value !== ALL) params.set(key, value);
   }
-  // Only when it differs from the default, so a plain map view stays on a
-  // clean URL rather than carrying `?korinish=xarita` everywhere.
-  if (parseView(searchParams) === "royxat") params.set(VIEW_KEY, "royxat");
+  /*
+    Carried verbatim, and only when it was written. The default differs
+    between the homepage (map) and the catalogue (list), so this cannot
+    decide which value is "the default" and drop it — a reader who opened the
+    map on /ijaraga-obyektlar would be put back on the list by the pager.
+    Nothing is written when the reader is on a page's own default, so those
+    URLs stay clean.
+  */
+  const view = first(searchParams[VIEW_KEY]);
+  if (view === "royxat" || view === "xarita") params.set(VIEW_KEY, view);
   return params;
 }
 

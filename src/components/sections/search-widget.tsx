@@ -160,12 +160,13 @@ export async function SearchWidget({
 
             A GET form sends only its own fields, so without this every search
             dropped `korinish` and the explorer reopened on the map — a reader
-            who had switched to the list was thrown back on each search. Only
-            rendered for the non-default view, so a plain map search keeps a
-            clean URL.
+            who had switched to the list was thrown back on each search. Both
+            values are carried, because which one is the default depends on
+            the page — the homepage opens on the map, the catalogue on the
+            list — and a URL that says nothing keeps a clean search.
           */}
-        {current(VIEW_KEY) === "royxat" ? (
-          <input type="hidden" name={VIEW_KEY} value="royxat" />
+        {current(VIEW_KEY) === "royxat" || current(VIEW_KEY) === "xarita" ? (
+          <input type="hidden" name={VIEW_KEY} value={current(VIEW_KEY)} />
         ) : null}
 
         {/*
