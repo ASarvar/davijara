@@ -2,7 +2,11 @@ import "server-only";
 
 import { regions } from "@/content/regions";
 import { tashkentToday } from "@/lib/format";
-import { getCadastreInfo } from "@/lib/data/cadastre";
+import {
+  getCadastreInfo,
+  warmCadastre,
+  type WarmResult,
+} from "@/lib/data/cadastre";
 import { olderOf, readSnapshot, saveSnapshot } from "@/lib/data/snapshot";
 import type { LeaseContract, LeasedObject } from "@/types/content";
 
@@ -458,6 +462,22 @@ export async function withNames(
         }
       : o;
   });
+}
+
+/**
+ * One step of the nightly warm-up: every object in the republic's register,
+ * in the list's own order — newest first, so the pages readers open most are
+ * the first to be filled. See `warmCadastre` in cadastre.ts.
+ */
+export async function warmNames(budgetMs: number): Promise<WarmResult> {
+  const { objects } = await getLeasedObjects({});
+  return warmCadastre(
+    objects.map((o) => ({
+      cad: o.cad,
+      tin: o.contracts.find((c) => c.tin)?.tin,
+    })),
+    budgetMs,
+  );
 }
 
 /**

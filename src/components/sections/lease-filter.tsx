@@ -21,8 +21,9 @@ import { RegionDistrictFields } from "./region-district-fields";
   result can be linked, bookmarked and reached with the back button, and the
   form works with no JavaScript beyond the region→district pair.
 
-  The number field takes a cadastre number OR a contract number, in whole or
-  in part, with or without the colons — the page compares digits only.
+  The field is labelled "Kadastr raqami" (the operator's wording) but also
+  matches contract numbers, in whole or in part, with or without the colons —
+  the page compares digits only.
   The district list is built from the register itself, so no tuman is
   offered that returns nothing.
 */
@@ -61,7 +62,6 @@ export async function LeaseFilter({ query }: { query: LeaseQuery }) {
               name="q"
               type="search"
               defaultValue={query.q ?? ""}
-              placeholder={tl("queryPlaceholder")}
               autoComplete="off"
               spellCheck={false}
               maxLength={40}

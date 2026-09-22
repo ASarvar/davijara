@@ -184,10 +184,37 @@ export async function getHeroStats(
     generated sample lots must never reach this row, which is why this tests
     for the one excluded source rather than for `=== "api"`.
   */
-  const live: Stat =
-    source === "mock"
+  /*
+    EVERY CARD OPENS THE PAGE IT COUNTS, narrowed to the place the hero is
+    showing:
+
+      open lots          -> /ijaraga-obyektlar   (region + district)
+      signed contracts   -> /ijara-shartnomalari (region only)
+      leased area        -> /ijara-shartnomalari (region only)
+      leased this year   -> /sotilgan-obyektlar  (region + district)
+
+    The two listings pages take the district as the hero has it — both read
+    the same listings feed and its Latin names. The register page takes the
+    region only: its districts are transliterated from Cyrillic, so the two
+    do not always spell a place alike, and a carried `tuman` that did not
+    match would open an empty page under a figure that says otherwise.
+  */
+  const scoped = (path: string, withDistrict: boolean) => {
+    const params = new URLSearchParams();
+    if (regionSlug) params.set("hudud", regionSlug);
+    if (regionSlug && districtName && withDistrict) {
+      params.set("tuman", districtName);
+    }
+    const qs = params.toString();
+    return qs ? `${path}?${qs}` : path;
+  };
+
+  const live: Stat = {
+    ...(source === "mock"
       ? objectsStat
-      : { ...objectsStat, value: formatNumber(listings.length) };
+      : { ...objectsStat, value: formatNumber(listings.length) }),
+    href: scoped("/ijaraga-obyektlar", true),
+  };
 
   const area = register ? formatLeasedArea(register.areaM2) : null;
 
@@ -196,16 +223,7 @@ export async function getHeroStats(
     {
       ...contractsStat,
       value: register ? formatNumber(register.contracts) : contractsStat.value,
-      /*
-        The figure opens the register it counts, narrowed to the same region.
-        Not the district: the hero's tuman is the listings feed's Latin name
-        and the register's is transliterated from Cyrillic, so the two do not
-        always spell a place alike — a carried `tuman` that did not match
-        would open an empty page under a figure that says otherwise.
-      */
-      href: regionSlug
-        ? `/ijara-shartnomalari?hudud=${encodeURIComponent(regionSlug)}`
-        : "/ijara-shartnomalari",
+      href: scoped("/ijara-shartnomalari", false),
     },
     {
       ...areaStat,
@@ -213,11 +231,16 @@ export async function getHeroStats(
       // The unit rides alongside the figure now rather than inside the label.
       // The static fallback is the operator's, and it is in millions.
       unit: area ? area.unit : areaStat.unit,
+      href: scoped("/ijara-shartnomalari", false),
     },
   ];
 
   if (sold != null) {
-    stats.push({ ...soldStat, value: formatNumber(sold.count) });
+    stats.push({
+      ...soldStat,
+      value: formatNumber(sold.count),
+      href: scoped("/sotilgan-obyektlar", true),
+    });
   }
 
   /*

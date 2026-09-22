@@ -41,17 +41,17 @@ export function LeasedObjectsTable({
     >
       <table className="w-full min-w-[44rem] text-sm">
         <thead>
-          <tr className="border-hairline text-muted-foreground border-b text-left text-xs">
-            <th scope="col" className="w-[38%] px-4 py-3 font-medium">
+          <tr className="border-hairline text-heading bg-accent/5 border-b text-left text-xs">
+            <th scope="col" className="w-[38%] px-4 py-3 font-semibold">
               {labels.colObject}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className="px-4 py-3 font-semibold">
               {labels.colAddress}
             </th>
-            <th scope="col" className="w-28 px-4 py-3 text-right font-medium">
+            <th scope="col" className="w-28 px-4 py-3 text-right font-semibold">
               {labels.colContracts}
             </th>
-            <th scope="col" className="w-32 px-4 py-3 text-right font-medium">
+            <th scope="col" className="w-32 px-4 py-3 text-right font-semibold">
               {labels.colArea}
             </th>
           </tr>

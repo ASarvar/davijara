@@ -293,41 +293,84 @@ async function lookupLegacy(
   return name || address ? { name, address } : null;
 }
 
-/**
- * Names and addresses for `queries`, from the cache where known and a
- * service for the rest, within the time budget.
- *
- * A number missing from the result simply has no name yet — the caller shows
- * the cadastre number itself. Never throws.
- */
-export async function getCadastreInfo(
-  queries: CadastreQuery[],
-): Promise<Map<string, CadastreInfo>> {
+/* ── Asking ───────────────────────────────────────────────────────────── */
+
+interface Plan {
+  /** Holder TIN per lookupable number, where one is known. */
+  tins: Map<string, string | undefined>;
+  /** What the cache already knows, fresh or not. */
+  known: Map<string, CadastreInfo>;
+  /** Numbers the cache does not have, or has only past their TTL. */
+  stale: string[];
+}
+
+function plan(queries: CadastreQuery[]): Plan {
   const tins = new Map<string, string | undefined>();
   for (const q of queries) {
     if (!isLookupableCad(q.cad)) continue;
     const tin = q.tin?.trim();
-    if (!tins.get(q.cad))
+    if (!tins.get(q.cad)) {
       tins.set(q.cad, tin && TIN_PATTERN.test(tin) ? tin : undefined);
+    }
   }
-  const wanted = [...tins.keys()];
-  const cached = readCache(wanted);
 
-  const result = new Map<string, CadastreInfo>();
+  const wanted = [...tins.keys()];
+  const cached = new Map<string, Row>();
+  // Chunked: one IN (…) per 500 keeps well under SQLite's variable limit.
+  for (let i = 0; i < wanted.length; i += 500) {
+    for (const [cad, row] of readCache(wanted.slice(i, i + 500))) {
+      cached.set(cad, row);
+    }
+  }
+
+  const known = new Map<string, CadastreInfo>();
   const stale: string[] = [];
   for (const cad of wanted) {
     const row = cached.get(cad);
-    if (row?.found) result.set(cad, { name: row.name, address: row.address });
+    if (row?.found) known.set(cad, { name: row.name, address: row.address });
     if (!row || !isFresh(row)) stale.push(cad);
   }
+  return { tins, known, stale };
+}
 
+interface AskResult {
+  info: Map<string, CadastreInfo>;
+  /** Numbers the service answered for, found or not — now cached. */
+  answered: number;
+  found: number;
+  /** Failure reasons and counts — never a URL; one of them carries a token. */
+  failures: Record<string, number>;
+  /** Stale numbers that could not be asked at all (no TIN, no fallback). */
+  unaskable: number;
+}
+
+/**
+ * Ask the services about `stale`, `concurrency` at a time, until done or
+ * until `budgetMs` runs out. Every answer is cached as it arrives, so work
+ * cut off by the budget is not lost — the next call starts after it.
+ */
+async function ask(
+  stale: string[],
+  tins: Map<string, string | undefined>,
+  { concurrency, budgetMs }: { concurrency: number; budgetMs: number },
+): Promise<AskResult> {
+  const out: AskResult = {
+    info: new Map(),
+    answered: 0,
+    found: 0,
+    failures: {},
+    unaskable: 0,
+  };
   const primary = caddata();
   const fallback = legacy();
-  if (stale.length === 0 || (!primary && !fallback)) return result;
+  if (stale.length === 0) return out;
+  if (!primary && !fallback) {
+    out.unaskable = stale.length;
+    return out;
+  }
 
   const controller = new AbortController();
-  const deadline = setTimeout(() => controller.abort(), BUDGET_MS);
-  const failures = new Map<string, number>();
+  const deadline = setTimeout(() => controller.abort(), budgetMs);
 
   const queue = [...stale];
   const worker = async () => {
@@ -341,29 +384,96 @@ export async function getCadastreInfo(
         } else if (fallback) {
           info = await lookupLegacy(fallback, cad, controller.signal);
         } else {
-          continue; // No TIN and no fallback: nothing can be asked.
+          out.unaskable += 1; // No TIN and no fallback: nothing can be asked.
+          continue;
         }
         writeCache(cad, info);
-        if (info) result.set(cad, info);
+        out.answered += 1;
+        if (info) {
+          out.found += 1;
+          out.info.set(cad, info);
+        }
       } catch (error) {
+        if (controller.signal.aborted) return; // cut off, not a failure
         const reason = error instanceof Error ? error.message : "error";
-        failures.set(reason, (failures.get(reason) ?? 0) + 1);
+        out.failures[reason] = (out.failures[reason] ?? 0) + 1;
       }
     }
   };
 
   try {
-    await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+    await Promise.all(Array.from({ length: concurrency }, worker));
   } finally {
     clearTimeout(deadline);
   }
+  return out;
+}
 
-  if (failures.size > 0) {
-    // Reasons and counts only — never a URL; one of them carries a token.
+/**
+ * Names and addresses for `queries`, from the cache where known and a
+ * service for the rest, within the page's time budget.
+ *
+ * A number missing from the result simply has no name yet — the caller shows
+ * the cadastre number itself. Never throws.
+ */
+export async function getCadastreInfo(
+  queries: CadastreQuery[],
+): Promise<Map<string, CadastreInfo>> {
+  const { tins, known, stale } = plan(queries);
+  const asked = await ask(stale, tins, {
+    concurrency: CONCURRENCY,
+    budgetMs: BUDGET_MS,
+  });
+  for (const [cad, info] of asked.info) known.set(cad, info);
+
+  if (Object.keys(asked.failures).length > 0) {
     console.error(
       `[cadastre] ${stale.length} asked, unanswered:`,
-      Object.fromEntries(failures),
+      asked.failures,
     );
   }
-  return result;
+  return known;
+}
+
+/*
+  THE NIGHTLY WARM-UP. A page asks only about the twenty numbers it shows, so
+  the first reader of every page waited for the cadastre — 8 s for a page
+  nobody had opened. This walks the whole register instead, off-hours, so a
+  reader finds every name already cached. See /api/cadastre/warm and
+  scripts/warm-cadastre.mjs.
+
+  Gentler than a page: fewer requests in flight, because nobody is waiting
+  and the cadastre serves other users. Bounded per call so a single HTTP
+  request never outlives the proxy in front of it; the script calls again
+  until `remaining` reaches zero.
+*/
+const WARM_CONCURRENCY = 4;
+
+export interface WarmResult extends Omit<AskResult, "info"> {
+  /** Lookupable numbers in the register. */
+  total: number;
+  /** Stale before this call. */
+  stale: number;
+  /** Still stale after it. */
+  remaining: number;
+}
+
+export async function warmCadastre(
+  queries: CadastreQuery[],
+  budgetMs: number,
+): Promise<WarmResult> {
+  const { tins, stale } = plan(queries);
+  const asked = await ask(stale, tins, {
+    concurrency: WARM_CONCURRENCY,
+    budgetMs,
+  });
+  return {
+    answered: asked.answered,
+    found: asked.found,
+    failures: asked.failures,
+    unaskable: asked.unaskable,
+    total: tins.size,
+    stale: stale.length,
+    remaining: plan(queries).stale.length,
+  };
 }

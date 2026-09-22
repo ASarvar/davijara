@@ -212,6 +212,39 @@ dagi kalitni kiriting va birinchi administratorni yarating. **Shundan
 so'ng bu sahifa butunlay yopiladi (404)** va `ADMIN_SETUP_TOKEN` ni
 `.env` dan o'chirib tashlash mumkin.
 
+### Kadastr nomlarini tunda yuklash
+
+/ijara-shartnomalari har bir obyekt nomini kadastrdan so'raydi (~17 000 ta).
+Sahifa faqat ko'rsatayotgan 20 tasini so'raydi, shuning uchun hech kim
+ochmagan sahifa birinchi marta ~8 soniyada ochiladi. Tungi skript hammasini
+oldindan keshga yozadi. Birinchi to'liq o'tish ~1 soat, keyingi kechalar esa
+faqat yangi va muddati o'tgan nomlarni so'raydi.
+
+1. `shared/.env` ga token qo'shing (`openssl rand -hex 24`):
+
+   ```
+   CADASTRE_WARM_TOKEN=...
+   ```
+
+   so'ng `systemctl restart davijara` (`.env` o'zgarishi faqat qayta
+   ishga tushirishda o'qiladi).
+
+2. `/etc/cron.d/davijara-cadastre` faylini yarating (`which node` bilan
+   node yo'lini tekshiring):
+
+   ```
+   0 1 * * * root cd /opt/davijara && /usr/bin/node --env-file=/var/www/davijara/shared/.env scripts/warm-cadastre.mjs --base http://[::1]:3001 >> /var/log/davijara-cadastre-warm.log 2>&1
+   ```
+
+   Har kecha 01:00 da ishlaydi, eng ko'pi 5 soat (`--hours`), keyin o'zi
+   to'xtaydi. `root` — chunki `.env` `chmod 600`.
+
+3. Birinchi marta qo'lda ishga tushirib ko'ring:
+
+   ```bash
+   cd /opt/davijara && node --env-file=/var/www/davijara/shared/.env scripts/warm-cadastre.mjs --base http://[::1]:3001
+   ```
+
 ### Zaxira nusxa
 
 Baza ishlab turgan paytda faylni oddiy `cp` bilan nusxalash **xavfli** —
