@@ -65,6 +65,12 @@ Carried over from the legacy site and resolved as follows:
   lots are group 11, category 41 "Davlat mulkini ijaraga berish". The portal's
   page also sends a `zz_md5` field; the endpoint answers identically without
   it and it is not reconstructed.
+- **`curlots` is TODAY's list, not the open rooms.** At 04:33 on 22.09.2026
+  it listed 49 group-11 lots, all `auction_date_str` "22.09.2026 10:00",
+  `lot_statuses_id` 10 — and the site showed all of them as live. A row now
+  counts as live only once its own `auction_date_str` (Tashkent, UTC+5) has
+  passed. Still unmeasured: whether a finished room LEAVES the list before the
+  day ends — check the list and its statuses after 10:00 before relying on it.
 
 - **Contract rows and building names (/ijara-shartnomalari).** The register's
   `list-reg` endpoint returns every contract of one region's year — `region`

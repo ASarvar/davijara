@@ -55,6 +55,17 @@ import type { Listing } from "@/types/content";
   lib/data talks to. It is read server-side all the same: the browser cannot
   reach it across origins, and one cached call serves every reader.
 
+  "JORIY" MEANS TODAY, NOT OPEN. Measured 22.09.2026 at 04:33 Tashkent:
+  `curlots` listed 49 lots, every one with `auction_date_str` "22.09.2026
+  10:00", `lot_statuses_id` 10 and applications closing at 09:00 — five
+  and a half hours before any room opened — and the site showed them all as
+  live. The list is the day's auctions, from before they start. So a row
+  counts as live only once ITS OWN start time, as e-auksion states it in the
+  same row, has passed (`startedOnly` below). The time still comes from
+  e-auksion's answer, never from our feed, and a row whose time cannot be
+  read is not called live. The 21.09 check that first confirmed this list
+  was taken at 10:13, after the start, which is why it looked right then.
+
   A FAULT MEANS "NOBODY IS LIVE", never "everybody is". `null` is returned for
   anything unexpected — a timeout, a non-200, a body that is not the shape
   above — and the caller shows no live state at all. Marking an auction as
@@ -88,8 +99,30 @@ const REVALIDATE_SECONDS = 30;
 type CurlotsResponse = {
   totalRows?: number;
   totalPages?: number;
-  rows?: { id?: number | string; lot_number?: string | number }[];
+  rows?: {
+    id?: number | string;
+    lot_number?: string | number;
+    auction_date_str?: string;
+  }[];
 };
+
+/** e-auksion's "DD.MM.YYYY HH:mm", Tashkent time, as epoch ms; null if unreadable. */
+function parseStart(raw: unknown): number | null {
+  const m = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/.exec(
+    String(raw ?? "").trim(),
+  );
+  if (!m) return null;
+  const [, d, mo, y, h, mi] = m.map(Number);
+  // Tashkent is UTC+5 all year — no daylight saving.
+  const ms = Date.UTC(y, mo - 1, d, h - 5, mi);
+  return Number.isFinite(ms) ? ms : null;
+}
+
+interface CurrentLot {
+  lot: string;
+  /** When e-auksion says the auction starts; null if it gave no readable time. */
+  startsAt: number | null;
+}
 
 function curlotsBody(page: number): string {
   return JSON.stringify({
@@ -127,8 +160,8 @@ function curlotsBody(page: number): string {
   written into the cache as "nothing is live" for the next 30 seconds.
 */
 const fetchLiveRentLots = unstable_cache(
-  async (): Promise<string[]> => {
-    const lots = new Set<string>();
+  async (): Promise<CurrentLot[]> => {
+    const lots = new Map<string, CurrentLot>();
 
     for (let page = 1; page <= MAX_PAGES; page++) {
       const res = await fetch(CURLOTS_URL, {
@@ -156,18 +189,34 @@ const fetchLiveRentLots = unstable_cache(
       */
       for (const row of json.rows) {
         const raw = String(row.lot_number ?? row.id ?? "").trim();
-        if (/^\d{1,18}$/.test(raw)) lots.add(raw);
+        if (/^\d{1,18}$/.test(raw)) {
+          lots.set(raw, {
+            lot: raw,
+            startsAt: parseStart(row.auction_date_str),
+          });
+        }
       }
 
       const totalPages = Number(json.totalPages ?? 1);
       if (!Number.isFinite(totalPages) || page >= totalPages) break;
     }
 
-    return [...lots];
+    return [...lots.values()];
   },
   ["live-rent-lots"],
   { revalidate: REVALIDATE_SECONDS },
 );
+
+/**
+ * The day's lots whose start time has come. Filtered on every read, not
+ * inside the 30-second cache, so a room turns live at its own minute rather
+ * than up to half a minute later.
+ */
+function startedOnly(lots: CurrentLot[], now = Date.now()): string[] {
+  return lots
+    .filter((l) => l.startsAt != null && l.startsAt <= now)
+    .map((l) => l.lot);
+}
 
 /**
  * Lot numbers whose bidding room is open, or `null` if the list cannot be
@@ -176,7 +225,7 @@ const fetchLiveRentLots = unstable_cache(
  */
 export async function getLiveAuctionLots(): Promise<string[] | null> {
   try {
-    return await fetchLiveRentLots();
+    return startedOnly(await fetchLiveRentLots());
   } catch (error) {
     console.warn(
       "[live-auctions] current lots unavailable:",
