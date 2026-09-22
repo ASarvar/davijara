@@ -24,7 +24,7 @@ import { Container } from "@/components/layout/section";
  * The legacy version was four bare `<select>` elements — not wrapped in a
  * form — beside a button with no handler. Nothing was submittable.
  *
- * This is a real GET form targeting /obyektlar, so results stay addressable
+ * This is a real GET form targeting /ijaraga-obyektlar, so results stay addressable
  * as ?hudud=&tuman=&maydon=&narx=&savdo= and a search can be linked and
  * indexed. The
  * dropdowns are shadcn's `Select` (Radix, client JS) rather than native
@@ -38,7 +38,7 @@ export async function SearchWidget({
   /**
    * Where the form submits. Defaults to the homepage's own explorer anchor, so
    * a search filters the map and region list directly below the panel instead
-   * of navigating away. /obyektlar passes its own path to filter in place.
+   * of navigating away. /ijaraga-obyektlar passes its own path to filter in place.
    */
   action,
   /**
@@ -54,7 +54,7 @@ export async function SearchWidget({
    * four fields is what it has always been; a reader thinking about dates is
    * offered the chips on "Yaqinlashayotgan savdolar" instead. The catalogue is
    * where a date is worth combining with region, area and price, so
-   * /obyektlar turns it on.
+   * /ijaraga-obyektlar turns it on.
    */
   auctionDay = false,
   /**
@@ -66,7 +66,7 @@ export async function SearchWidget({
    * horizontal seam across the top of the page and split a single idea —
    * "here is the state of things, now search it" — into two slabs.
    *
-   * /obyektlar keeps the band: there the panel IS a distinct control strip
+   * /ijaraga-obyektlar keeps the band: there the panel IS a distinct control strip
    * between the page heading and the results, and it needs its own surface to
    * say so.
    */

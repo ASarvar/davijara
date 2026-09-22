@@ -48,7 +48,7 @@ export async function ObjectsSection({
         Heading only. The description repeated what the tabs underneath it
         already demonstrate, and the "Barcha obyektlar" link duplicated the
         one the explorer itself renders under the results — two links to
-        /obyektlar within a screen of each other, both at the operator's
+        /ijaraga-obyektlar within a screen of each other, both at the operator's
         request removed.
       */}
       <SectionHeader title={t("title")} 
@@ -57,7 +57,7 @@ export async function ObjectsSection({
       {/*
         The homepage is a summary. With no search it shows region totals; once
         a search is running it shows the first 9 lots and hands the rest to
-        /obyektlar rather than paginating in place. The map always receives the
+        /ijaraga-obyektlar rather than paginating in place. The map always receives the
         whole matching set — paginating pins would hide objects the user
         explicitly filtered for.
       */}

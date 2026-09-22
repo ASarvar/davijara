@@ -962,6 +962,77 @@ const migrations: Migration[] = [
       );
     `,
   },
+  {
+    version: 15,
+    name: "privileges: operator list of 22.09.2026",
+    /*
+      No schema change — the whole of this migration is its data step.
+    */
+    up: `SELECT 1;`,
+    /*
+      Replace the privileges with the operator's list of 22.09.2026
+      (Imtiyozlar.xlsx, 29 rows): seven added, two removed because the list
+      no longer carries them (PF-87, the 90% rural women's-employment
+      privilege, and VM-132, rural school kitchens), the other 22
+      re-transcribed from the list — several of their citations
+      change with it (PQ-239 is now its 3-band, PQ-87 / PQ-376 / PF-6208 /
+      VM-834 fill bases the old records gave as "Tegishli hukumat qarorlari
+      asosida" or had wrong). The text is src/content/privileges.ts, whose
+      header records the few mechanical changes made to the cells.
+
+      THROUGH THE AUDIT LOG, as CLAUDE.md non-negotiable 1 requires of any
+      write to this table: one entry with the COMPLETE list before and after,
+      so whatever the table held — including any edit made in the panel since
+      the last deploy — can be read back and restored from /admin/audit. The
+      entry is written with SQL here rather than through audit(), which opens
+      its own connection; this runs inside the migration's transaction, so
+      the replacement and its record land together or not at all.
+
+      On a fresh install migration 5 has already seeded this same list from
+      the same module, and this replaces it with itself — harmless, and the
+      audit entry then shows identical before and after.
+    */
+    seed(db) {
+      const select = db.prepare(
+        `SELECT id, position, category, tag, title, description, subject,
+                duration, legal_basis, updated_at, updated_by
+           FROM privileges ORDER BY position, id`,
+      );
+      const before = select.all();
+
+      db.prepare("DELETE FROM privileges").run();
+      const insert = db.prepare(
+        `INSERT INTO privileges
+           (position, category, tag, title, description, subject, duration, legal_basis)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      );
+      legacyPrivileges.forEach((privilege, index) => {
+        insert.run(
+          index + 1,
+          privilege.category,
+          privilege.tag,
+          privilege.title,
+          privilege.description,
+          privilege.subject,
+          privilege.duration,
+          privilege.legalBasis,
+        );
+      });
+      const after = select.all();
+
+      db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, ?, 'update', 'privilege', NULL, ?, ?, ?)`,
+      ).run(
+        new Date().toISOString(),
+        "migratsiya",
+        `Imtiyozlar roʻyxati operatorning 22.09.2026 dagi roʻyxati (Imtiyozlar.xlsx) boʻyicha yangilandi: ${before.length} ta → ${after.length} ta`,
+        JSON.stringify(before),
+        JSON.stringify(after),
+      );
+    },
+  },
 ];
 
 export function migrate(db: Database): void {

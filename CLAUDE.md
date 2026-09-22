@@ -76,7 +76,7 @@ reasoning there is the record of what already went wrong once.
 ## Non-negotiables
 
 **1. Statutory content is verbatim — and most of it now lives in the
-database.** The 24 rent privileges (PQ-239, PF-93, VM-626 …) and the two
+database.** The rent privileges (PQ-239, PF-93, VM-626 …) and the two
 Markaz documents (`about`, `duties`) were moved out of `src/content/` by
 migrations 5 and 6 at the operator's request. Those modules stay on disk as
 the seeds' source AND as the runtime fallback — `getAbout()` renders them if

@@ -322,7 +322,7 @@ export function ObjectsExplorer({
    * every request to this page.
    */
   filterQuery?: string;
-  /** Route the pager links at, e.g. "/obyektlar". */
+  /** Route the pager links at, e.g. "/ijaraga-obyektlar". */
   basePath?: string;
 }) {
   const t = useTranslations("objects");

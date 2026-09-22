@@ -90,7 +90,7 @@ Filtering and search state belong in the **URL**, not React state. The
 privileges filter is a set of links to real routes (`/imtiyozlar/it`), not a
 click handler — so each view is linkable, back-button-correct, statically
 prerendered, and crawlable. The homepage search is a real GET form targeting
-`/obyektlar`, so results stay addressable as
+`/ijaraga-obyektlar`, so results stay addressable as
 `?hudud=&tuman=&maydon=&narx=&savdo=` and a search can be linked and indexed.
 `FILTER_KEYS` in `lib/data/listings.ts` is the single list of those keys —
 every link that has to survive a filter (the pager, "Barcha obyektlar", the
@@ -131,7 +131,7 @@ exists so pressing Qidirish on the homepage does not silently clear a window
 the reader just chose.
 
 `SearchWidget` renders the calendar **only** when passed `auctionDay` —
-/obyektlar does, the homepage does not; that panel stays the four fields it has
+/ijaraga-obyektlar does, the homepage does not; that panel stays the four fields it has
 always been. The calendar is the one client component in the panel (a popover
 with a month cursor is the act of choosing, not the filter itself), and it
 greys out every day with no lots, from `getAuctionDays()` scoped to the rest of

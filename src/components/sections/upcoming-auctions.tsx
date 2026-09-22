@@ -49,7 +49,7 @@ const ANCHOR = "yaqinlashayotgan-savdolar";
  * not applied here: this is a national overview device, and a reader narrowing
  * the map to one tuman is searching, not asking the country's auction calendar
  * to shrink with them. Following "Barcha obyektlar" carries the window to
- * /obyektlar, where the dropdown exists and it does filter the catalogue.
+ * /ijaraga-obyektlar, where the dropdown exists and it does filter the catalogue.
  *
  * CLAUDE.md listed live auction cards under "deliberately not ported", and
  * the reason was specific: the legacy countdowns ran off `data-end="7260"`,

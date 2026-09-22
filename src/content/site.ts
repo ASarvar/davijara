@@ -160,7 +160,7 @@ export const socialLinks: Array<{
  * used any other ministry site meets the structure they already know.
  *
  * WHAT THAT COSTS, recorded here so it is a decision rather than an accident:
- * the catalogue (`/obyektlar`) is the portal's primary service and it now sits
+ * the catalogue (`/ijaraga-obyektlar`) is the portal's primary service and it now sits
  * one level down, under "Faoliyat". The homepage search panel is therefore the
  * main way in and must stay above the fold; if that panel ever moves, this
  * trade needs revisiting.

@@ -66,7 +66,7 @@ export async function PrivilegeList({ items }: { items: Privilege[] }) {
             </AccordionTrigger>
 
             <AccordionContent className="pl-13">
-              <p className="text-muted-foreground text-sm text-pretty">
+              <p className="text-muted-foreground text-sm text-pretty whitespace-pre-line">
                 {item.description}
               </p>
 

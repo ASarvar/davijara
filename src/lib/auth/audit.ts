@@ -7,7 +7,7 @@ import type { SessionUser } from "./session";
   The audit log.
 
   WHY IT STORES WHOLE OBJECTS. The operator chose to make the statutory
-  content — the 24 rent privileges with their `legalBasis` citations, the org
+  content — the rent privileges with their `legalBasis` citations, the org
   chart from the director's order, the Markaz's establishment text and its
   statutory duties — editable from the admin panel. Those were previously only
   changeable through a reviewed git diff. This table is what replaces that

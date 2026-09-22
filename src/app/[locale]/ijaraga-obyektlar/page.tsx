@@ -106,7 +106,7 @@ export default async function ObjectsPage({
           // as much as scans comfortably before the pager is wanted.
           perPage={12}
           filterQuery={filterParams.toString()}
-          basePath="/obyektlar"
+          basePath="/ijaraga-obyektlar"
           emptyLabel={t("emptyFiltered")}
           /*
             THE LIST, not the map, unless the URL says otherwise. Someone who

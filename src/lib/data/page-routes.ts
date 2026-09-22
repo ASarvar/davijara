@@ -140,6 +140,7 @@ export function routeForNavKey(navKey: string): PageRoute | undefined {
 */
 const RESERVED_FIRST_SEGMENTS = new Set([
   "obyektlar",
+  "ijaraga-obyektlar",
   "sotilgan-obyektlar",
   "ijara-shartnomalari",
   "joriy-savdolar",

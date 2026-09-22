@@ -15,9 +15,9 @@ import { setRequestLocale } from "next-intl/server";
   │                                                                          │
   │ Next resolves static segments before dynamic ones and a catch-all last,  │
   │ so this file only ever runs for a URL that matched nothing else. It      │
-  │ cannot shadow /obyektlar, /imtiyozlar, the 26 section pages, or anything │
-  │ added later — which is what makes it safe to let an editor choose a      │
-  │ path at all.                                                             │
+  │ cannot shadow /ijaraga-obyektlar, /imtiyozlar, the 26 section pages, or  │
+  │ anything added later — which is what makes it safe to let an editor      │
+  │ choose a path at all.                                                    │
   │                                                                          │
   │ The other half of that safety is in page-routes.ts: the panel refuses a  │
   │ path whose first segment belongs to a real route, because such a page    │

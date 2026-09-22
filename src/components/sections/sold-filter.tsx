@@ -17,7 +17,7 @@ import { Container } from "@/components/layout/section";
 import { RegionDistrictFields } from "./region-district-fields";
 
 /*
-  The sold-results filter — the counterpart to SearchWidget on /obyektlar, and
+  The sold-results filter — the counterpart to SearchWidget on /ijaraga-obyektlar, and
   deliberately not the same component.
 
   A catalogue filter and a results filter answer different questions. Area and
