@@ -14,7 +14,10 @@ import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
 // Migration 13 only — the announcement supplied with the vacancies feature.
-import { vacancySeeds } from "@/content/vacancy-announcements";
+import {
+  vacancySeeds,
+  vacancySeedsV16,
+} from "@/content/vacancy-announcements";
 import { tashkentToday } from "@/lib/format";
 // Migration 9 only — read there for why a data-fix migration reads this.
 import uzMessages from "../../../messages/uz.json";
@@ -1031,6 +1034,53 @@ const migrations: Migration[] = [
         JSON.stringify(before),
         JSON.stringify(after),
       );
+    },
+  },
+  {
+    version: 16,
+    name: "vacancy: Surxondaryo, 24.09.2026",
+    up: `SELECT 1;`,
+    /*
+      The operator's second announcement, added the way migration 13 added
+      the first — 'open' only while its deadline is ahead, by the same rule.
+      Unlike 13, it also writes a 'create' entry to the audit log: this table
+      has had one for every panel write since it existed, and a row that
+      appeared without one would be the only unexplained change in it.
+    */
+    seed(db) {
+      const today = tashkentToday();
+      const now = new Date().toISOString();
+      const insert = db.prepare(
+        `INSERT INTO vacancies
+           (status, title, unit, deadline, test_date, email, blocks, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      );
+      const log = db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, ?, 'create', 'vacancy', ?, ?, NULL, ?)`,
+      );
+      for (const v of vacancySeedsV16) {
+        const status = v.deadline >= today ? "open" : "closed";
+        const { lastInsertRowid } = insert.run(
+          status,
+          v.title,
+          v.unit,
+          v.deadline,
+          v.testDate,
+          v.email,
+          JSON.stringify(v.blocks),
+          now,
+        );
+        const id = Number(lastInsertRowid);
+        log.run(
+          now,
+          "migratsiya",
+          String(id),
+          `Vakansiya yaratildi: ${v.title}`,
+          JSON.stringify({ id, status, ...v }),
+        );
+      }
     },
   },
 ];
