@@ -275,6 +275,9 @@
     "title": "Frequently asked questions",
     "eyebrow": "Questions and answers"
   },
+  "documentDrafts": {
+    "fileMeta": "PDF · {size} KB"
+  },
   "minRates": {
     "empty": "Documents by region have not been published yet."
   },

@@ -467,6 +467,9 @@
     "title": "Koʻp soʻraladigan savollar",
     "eyebrow": "Savollar va javoblar"
   },
+  "documentDrafts": {
+    "fileMeta": "PDF · {size} KB"
+  },
   "minRates": {
     "pageLede": "Davlat mulkidan foydalanganlik uchun ijara toʻlovining eng kam stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar 2026-yil",
     "empty": "Hududlar boʻyicha hujjatlar hozircha kiritilmagan."
