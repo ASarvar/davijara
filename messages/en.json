@@ -278,6 +278,10 @@
   "documentDrafts": {
     "fileMeta": "PDF · {size} KB"
   },
+  "siteMap": {
+    "general": "General",
+    "lede": "{sections} sections, {pages} pages"
+  },
   "minRates": {
     "empty": "Documents by region have not been published yet."
   },

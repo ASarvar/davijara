@@ -14,10 +14,9 @@ import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
 // Migration 13 only — the announcement supplied with the vacancies feature.
-import {
-  vacancySeeds,
-  vacancySeedsV16,
-} from "@/content/vacancy-announcements";
+import { vacancySeeds, vacancySeedsV16 } from "@/content/vacancy-announcements";
+// Migration 17 only — draft texts for the two footer legal pages.
+import { legalDrafts } from "@/content/legal-drafts";
 import { tashkentToday } from "@/lib/format";
 // Migration 9 only — read there for why a data-fix migration reads this.
 import uzMessages from "../../../messages/uz.json";
@@ -1079,6 +1078,65 @@ const migrations: Migration[] = [
           String(id),
           `Vakansiya yaratildi: ${v.title}`,
           JSON.stringify({ id, status, ...v }),
+        );
+      }
+    },
+  },
+  {
+    version: 17,
+    name: "legal pages: draft texts",
+    up: `SELECT 1;`,
+    /*
+      Maxfiylik siyosati and Foydalanish shartlari, written into the panel
+      as DRAFTS — see content/legal-drafts.ts for why they are not published
+      here and what every claim in them was checked against.
+
+      A page an editor has already started for either route is LEFT ALONE:
+      the row is skipped if the path or the nav key is taken, so this can
+      never overwrite someone's work. Each insert gets a 'create' entry in
+      the audit log, like a page saved from the panel.
+    */
+    seed(db) {
+      const now = new Date().toISOString();
+      const taken = db.prepare(
+        "SELECT 1 FROM pages WHERE path = ? OR nav_key = ?",
+      );
+      const insertPage = db.prepare(
+        `INSERT INTO pages (path, nav_key, status, created_at)
+         VALUES (?, ?, 'draft', ?)`,
+      );
+      const insertText = db.prepare(
+        `INSERT INTO page_translations (page_id, locale, title, description, blocks)
+         VALUES (?, 'uz', '', ?, ?)`,
+      );
+      const log = db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, ?, 'create', 'page', ?, ?, NULL, ?)`,
+      );
+      for (const draft of legalDrafts) {
+        if (taken.get(draft.path, draft.navKey)) continue;
+        const { lastInsertRowid } = insertPage.run(
+          draft.path,
+          draft.navKey,
+          now,
+        );
+        const id = Number(lastInsertRowid);
+        insertText.run(id, draft.description, JSON.stringify(draft.blocks));
+        log.run(
+          now,
+          "migratsiya",
+          String(id),
+          `Sahifa yaratildi (qoralama): /${draft.path}`,
+          JSON.stringify({
+            id,
+            path: draft.path,
+            navKey: draft.navKey,
+            status: "draft",
+            translations: {
+              uz: { description: draft.description, blocks: draft.blocks },
+            },
+          }),
         );
       }
     },

@@ -278,6 +278,10 @@
   "documentDrafts": {
     "fileMeta": "PDF · {size} КБ"
   },
+  "siteMap": {
+    "general": "Общее",
+    "lede": "Разделов: {sections}, страниц: {pages}"
+  },
   "minRates": {
     "empty": "Документы по регионам пока не внесены."
   },

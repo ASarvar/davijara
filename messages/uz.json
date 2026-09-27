@@ -470,6 +470,10 @@
   "documentDrafts": {
     "fileMeta": "PDF · {size} KB"
   },
+  "siteMap": {
+    "general": "Umumiy",
+    "lede": "{sections} ta boʻlim, {pages} ta sahifa"
+  },
   "minRates": {
     "pageLede": "Davlat mulkidan foydalanganlik uchun ijara toʻlovining eng kam stavkalarini tasdiqlash toʻgʻrisida maʼlumotlar 2026-yil",
     "empty": "Hududlar boʻyicha hujjatlar hozircha kiritilmagan."
