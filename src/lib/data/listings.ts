@@ -413,6 +413,12 @@ interface ApiLot {
   sold_price?: string | null;
   order_status?: string;
   lot_status?: string;
+  /**
+   * e-auksion's own category id — 41 "Davlat mulkini ijaraga berish", 7
+   * "Avtotransport / Yengil", and so on. Added to this feed in October 2026;
+   * older snapshots do not carry it. See isPropertyLease.
+   */
+  category_id?: number | string | null;
   district_name?: string;
   region_title?: string;
   /** Decimal strings, WGS84. */
@@ -525,7 +531,60 @@ const UZ_BOUNDS = {
   maxLng: 73.7,
 } as const;
 
+/*
+  REAL ESTATE ONLY. The feed is meant to carry leases of state property, but
+  it also returns the odd vehicle sale: on 07.10.2026 seven open lots were
+  cars ("Cobalt", "NEXIA-3", "Chevrolet Lacetti"), and e-auksion files the
+  first of them, 25975420, under "Avtotransport → Yengil", not under rent at
+  all. A car shown as a vacant state building is simply wrong.
+
+  BY CATEGORY, now that the feed sends one. The operator added `category_id`
+  at our request, and on 08.10.2026 it took seven values across the year:
+
+    41   Davlat mulkini ijaraga berish                        (group 11)
+    105  Mikromarkazlar uchun davlat mulkini ijaraga berish   (group 11/28)
+    108  …telekommunikatsiya operatorlariga ijaraga berish    (group 11)
+    109  Madaniy meros obyektlarini hunarmandlarga ijaraga…   (group 11)
+    111  Suv havzasini ijaraga berish                         (group 29)
+    174  Suv havzalari … yer uchastkalarini ijaraga berish    (group 29)
+    7    Avtotransport / Yengil                               (group 2)
+
+  So the rule EXCLUDES vehicles rather than allowing 41 alone: "only 41"
+  would have dropped 72 open lots that are genuine leases (108 and 109).
+  And it excludes the WHOLE "Avtotransport" group, not just 7 — the ids
+  below are that group's categories as e-auksion's own dictionary lists them
+  (get-confiscant-categories?cgroup_id=2), so a truck or a bus is caught the
+  day one appears, not after a citizen has seen it.
+
+  NO CATEGORY → the rental-area test. Snapshots saved before the field
+  existed do not carry it, and a lease always has an area while a vehicle
+  has none: on 07.10.2026 the lots without `rent_area` were exactly the cars
+  (7 of 1 569 open, 9 of 5 466 auctioned in 2026). Matching names
+  ("Cobalt", "avtomobil") was never an option — it misses the next model and
+  catches buildings of the "Avtomobil yoʻllari bosh boshqarmasi".
+
+  Applied to the open catalogue (mapApiLot) and to the year's results
+  (fetchSoldYear) alike, so a car is neither offered nor counted as leased.
+*/
+const VEHICLE_CATEGORY_IDS = new Set([
+  7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 66, 79, 100, 141,
+]);
+
+function isPropertyLease(lot: ApiLot): boolean {
+  const category = Number(lot.category_id);
+  if (
+    lot.category_id != null &&
+    lot.category_id !== "" &&
+    Number.isFinite(category)
+  ) {
+    return !VEHICLE_CATEGORY_IDS.has(category);
+  }
+  return Number(lot.rent_area) > 0;
+}
+
 function mapApiLot(lot: ApiLot, regionSlug: string): Listing | null {
+  if (!isPropertyLease(lot)) return null;
+
   const lat = Number(lot.lat);
   const lng = Number(lot.lng);
   // A lot with no usable coordinates cannot go on the map; skip it rather
@@ -1072,6 +1131,8 @@ export const fetchSoldYear = unstable_cache(
     // cosmetic: a repeated id is a repeated card.
     const seenIds = new Set<string>();
     for (const lot of json.data ?? []) {
+      // Vehicles are not leases — see isPropertyLease.
+      if (!isPropertyLease(lot)) continue;
       if (!lot.auction_date) continue;
       const at = new Date(lot.auction_date).getTime();
       if (!Number.isFinite(at)) continue;
