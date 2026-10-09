@@ -4,6 +4,7 @@ import type { Locale } from "@/i18n/routing";
 import { Hero } from "@/components/sections/hero";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsSection } from "@/components/sections/objects-section";
+import { parseMarket } from "@/lib/listings-view";
 import { HowItWorks } from "@/components/sections/how-it-works";
 import { LiveAuctions } from "@/components/sections/live-auctions";
 import { UpcomingAuctions } from "@/components/sections/upcoming-auctions";
@@ -83,7 +84,7 @@ export default async function HomePage({
         hero — this page decides what the masthead holds.
       */}
       <Hero searchParams={sp}>
-        <SearchWidget values={sp} nested />
+        <SearchWidget values={sp} nested market={parseMarket(sp)} />
       </Hero>
       <ObjectsSection searchParams={sp} />
       <LiveAuctions />

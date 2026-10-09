@@ -7,7 +7,6 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
-  Landmark,
   LayoutList,
   MapPin,
   Radio,
@@ -22,7 +21,11 @@ import { LotCard } from "@/components/common/lot-card";
 import { formatArea, formatNumber, formatSom } from "@/lib/format";
 // From lib/listings-view, NOT lib/data/listings — the latter is `server-only`
 // and importing it here pulls the API credentials into the browser bundle.
-import { VIEW_KEY, type ListingsView } from "@/lib/listings-view";
+import {
+  VIEW_KEY,
+  type ListingsMarket,
+  type ListingsView,
+} from "@/lib/listings-view";
 import { useLiveAuctions } from "@/lib/live-auctions-client";
 import type { Listing, RegionSummary } from "@/types/content";
 
@@ -85,13 +88,20 @@ function isTypeKey(v: string): v is (typeof TYPE_KEYS)[number] {
   no image to put in it. Fixed-width, right-aligned metric columns line the
   numbers up, which is what makes the set scannable.
 */
-function RegionRow({ summary }: { summary: RegionSummary }) {
+function RegionRow({
+  summary,
+  market,
+}: {
+  summary: RegionSummary;
+  market: ListingsMarket;
+}) {
   const t = useTranslations("objects");
+  const sale = market === "xususiylashtirish";
 
   return (
     <li data-reveal="left">
       <Link
-        href={`/ijaraga-obyektlar?hudud=${summary.slug}`}
+        href={`${sale ? "/xususiylashtirish" : "/ijaraga-obyektlar"}?hudud=${summary.slug}`}
         className="group hover:bg-secondary/60 focus-visible:ring-ring flex flex-col gap-3 px-4 py-3.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:-outline-offset-2 focus-visible:outline-none sm:flex-row sm:items-center sm:gap-6"
       >
         <div className="flex min-w-0 flex-1 items-start gap-2.5">
@@ -142,7 +152,8 @@ function RegionRow({ summary }: { summary: RegionSummary }) {
           </div>
           <div className="sm:w-36 sm:text-right">
             <dt className="text-muted-foreground text-xs">
-              {t("averagePrice")}
+              {/* A sale's figure is a starting price, never a yearly rent. */}
+              {sale ? t("averageStartPrice") : t("averagePrice")}
             </dt>
             <dd className="text-accent-foreground mt-0.5 text-sm font-semibold">
               {formatSom(summary.avgPrice)}
@@ -281,8 +292,7 @@ export function ObjectsExplorer({
   basePath,
   view = "xarita",
   defaultView = "xarita",
-  privatization = [],
-  privatizationHref,
+  market = "ijara",
 }: {
   listings: Listing[];
   summaries: RegionSummary[];
@@ -328,13 +338,13 @@ export function ObjectsExplorer({
   /** Route the pager links at, e.g. "/ijaraga-obyektlar". */
   basePath?: string;
   /**
-   * Privatization lots for the "Xususiylashtirish" tab — homepage only.
-   * A separate map, never mixed into `listings`: a sale and a lease are
-   * different offers. The tab exists only when this is non-empty.
+   * Which offer `listings` holds — leases, or privatization sales. The set
+   * itself is chosen by the page (MARKET_KEY in lib/listings-view.ts); this
+   * only adjusts what is said about it: where a region row links, and that a
+   * sale's price is a starting price rather than a yearly rent. The two are
+   * never mixed in one set.
    */
-  privatization?: Listing[];
-  /** Where that tab's "see all" link goes, filters carried. */
-  privatizationHref?: string;
+  market?: ListingsMarket;
 }) {
   const t = useTranslations("objects");
   const empty = emptyLabel ?? t("empty");
@@ -377,10 +387,7 @@ export function ObjectsExplorer({
     [listings, liveLots],
   );
   const activeView: ListingsView =
-    (view === "jonli" && liveListings.length === 0) ||
-    (view === "sotuv" && privatization.length === 0)
-      ? defaultView
-      : view;
+    view === "jonli" && liveListings.length === 0 ? defaultView : view;
 
   const detailHref = useCallback(
     (listing: Listing) =>
@@ -479,7 +486,13 @@ export function ObjectsExplorer({
         }}
       >
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <TabsList>
+          {/*
+            Wraps rather than overflows: with the live tab on an auction day
+            the row can be wider than a 375px phone, and the list's fixed h-8
+            would push it past the viewport edge (measured: 16px of
+            horizontal scroll on the homepage).
+          */}
+          <TabsList className="max-w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto [&>*]:min-h-7">
             <TabsTrigger value="xarita" className="gap-1.5">
               <MapPin aria-hidden="true" className="size-4" />
               {t("mapTab")}
@@ -504,15 +517,6 @@ export function ObjectsExplorer({
                     className="lot-live-dot size-1.5 rounded-full bg-[color:var(--color-live)]"
                   />
                   {liveListings.length}
-                </span>
-              </TabsTrigger>
-            ) : null}
-            {privatization.length > 0 ? (
-              <TabsTrigger value="sotuv" className="gap-1.5">
-                <Landmark aria-hidden="true" className="size-4" />
-                {t("saleTab")}
-                <span className="bg-secondary rounded-full px-1.5 text-xs tabular-nums">
-                  {formatNumber(privatization.length)}
                 </span>
               </TabsTrigger>
             ) : null}
@@ -576,39 +580,6 @@ export function ObjectsExplorer({
           </TabsContent>
         ) : null}
 
-        {/*
-          Privatization — SALES, on a map of their own. Separate from the
-          lease map rather than more pins on it, at the operator's request:
-          a reader looking for a room to rent should not have to sort out
-          buildings for sale, and the other way round. Pins here have their
-          own shape (listings-map.tsx), and the region filter above applies;
-          the rent-only filters (area band, price band) do not — see
-          lib/data/privatization.ts.
-        */}
-        {privatization.length > 0 ? (
-          <TabsContent value="sotuv" className="mt-0">
-            <div className="border-border relative isolate h-[26rem] overflow-hidden rounded-md border sm:h-[32rem]">
-              <ListingsMap
-                listings={privatization}
-                regionName={regionName}
-                detailHref={detailHref}
-                labels={mapLabels}
-              />
-            </div>
-            {privatizationHref ? (
-              <p className="mt-4 text-center">
-                <Link
-                  href={privatizationHref}
-                  className="border-outline text-accent-foreground hover:bg-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors duration-200"
-                >
-                  {t("saleAll")}
-                  <ChevronRight aria-hidden="true" className="size-4" />
-                </Link>
-              </p>
-            ) : null}
-          </TabsContent>
-        ) : null}
-
         <TabsContent value="royxat" className="mt-0">
           {listings.length === 0 ? (
             <p className="border-border text-muted-foreground rounded-lg border border-dashed py-12 text-center text-sm">
@@ -658,7 +629,11 @@ export function ObjectsExplorer({
           ) : (
             <ul className="border-border divide-border divide-y overflow-hidden rounded-xl border">
               {summaries.map((summary) => (
-                <RegionRow key={summary.slug} summary={summary} />
+                <RegionRow
+                  key={summary.slug}
+                  summary={summary}
+                  market={market}
+                />
               ))}
             </ul>
           )}

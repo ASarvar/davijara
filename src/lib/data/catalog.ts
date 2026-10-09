@@ -17,6 +17,7 @@ import {
   getSoldCount,
 } from "@/lib/data/listings";
 import { getRentContracts } from "@/lib/data/rent-contracts";
+import { getPrivatizationListings } from "@/lib/data/privatization";
 import { olderOf } from "@/lib/data/snapshot";
 import { formatFixed, TASHKENT_OFFSET_MS } from "@/lib/format";
 import type {
@@ -169,14 +170,15 @@ export async function getHeroStats(
   regionSlug?: string,
   districtName?: string,
 ): Promise<HeroStatsResult> {
-  const [objectsStat, contractsStat, areaStat, soldStat] = heroStats;
+  const [objectsStat, contractsStat, areaStat, soldStat, saleStat] = heroStats;
   const year = currentYear();
 
-  const [{ listings, source, asOf: listingsAsOf }, sold, register] =
+  const [{ listings, source, asOf: listingsAsOf }, sold, register, sales] =
     await Promise.all([
       getLiveListings({ region: regionSlug, district: districtName }),
       getSoldCount(year, regionSlug, districtName),
       getRentContracts(year, regionSlug, districtName),
+      getPrivatizationListings({ region: regionSlug, district: districtName }),
     ]);
 
   /*
@@ -218,6 +220,23 @@ export async function getHeroStats(
 
   const area = register ? formatLeasedArea(register.areaM2) : null;
 
+  /*
+    The privatization lots on offer, beside the lease lots on offer. Shown
+    only when the source answered (live or stored): unconfigured means the
+    site has no sale section at all, and a failure with nothing stored would
+    print "0" over a section that may hold hundreds.
+  */
+  const saleCard: Stat[] =
+    sales.configured && !sales.unavailable
+      ? [
+          {
+            ...saleStat,
+            value: formatNumber(sales.listings.length),
+            href: scoped("/xususiylashtirish", true),
+          },
+        ]
+      : [];
+
   const stats: Stat[] = [
     live,
     {
@@ -243,6 +262,9 @@ export async function getHeroStats(
     });
   }
 
+  // Last in the row, after every lease figure (operator, 09.10.2026).
+  stats.push(...saleCard);
+
   /*
     ONE DATE FOR THE ROW, and it is the oldest of whichever cards fell back.
     Three services feed these four cards and they fail independently, so a
@@ -258,6 +280,7 @@ export async function getHeroStats(
     source === "snapshot" ? listingsAsOf : undefined,
     sold?.asOf,
     register?.asOf,
+    sales.asOf,
   ].reduce<string | undefined>((oldest, ts) => olderOf(oldest, ts), undefined);
 
   return {

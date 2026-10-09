@@ -114,6 +114,7 @@ export function LotCard({
             photo={listing.image}
             orderId={listing.isMock ? undefined : listing.orderId}
             region={listing.region}
+            sale={listing.kind === "privatization"}
             className="h-full w-full"
           />
 

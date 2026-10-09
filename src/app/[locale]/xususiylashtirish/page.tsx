@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import {
+  buildFilterQuery,
   parseListingQuery,
   parsePage,
   parseView,
@@ -12,16 +13,17 @@ import {
 import { getPrivatizationListings } from "@/lib/data/privatization";
 import { Section } from "@/components/layout/section";
 import { ObjectsExplorer } from "@/components/sections/objects-explorer";
-import { PrivatizationFilter } from "@/components/sections/privatization-filter";
+import { SearchWidget } from "@/components/sections/search-widget";
 
 /*
   Xususiylashtirishga taklif etilayotgan obyektlar — state property offered
   for SALE, kept apart from the lease catalogue at /ijaraga-obyektlar.
 
-  The same explorer as the catalogue (list, map, pager), fed with the
-  privatization lots instead: every card carries a "Xususiylashtirish" badge
-  and every pin the sale shape, so a page reached from a search engine still
-  says what it is. Where the data comes from, and which lots count as offered,
+  The same page as the catalogue — the same search panel (with the calendar),
+  the same explorer (list, map, pager) — fed with the privatization lots
+  instead, at the operator's request: one portal, two offers, read the same
+  way. Every card carries a "Xususiylashtirish" badge and every pin is the
+  bronze one, so a page reached from a search engine still says what it is. Where the data comes from, and which lots count as offered,
   is lib/data/privatization.ts.
 
   Dynamic per request: the offered set depends on the clock (a lot leaves the
@@ -61,15 +63,12 @@ export default async function PrivatizationPage({
   ]);
 
   const sp = await searchParams;
-  // Only the place filters apply here — see PrivatizationFilter.
-  const { region, district } = parseListingQuery(sp);
   const page = parsePage(sp);
-  const { listings } = await getPrivatizationListings({ region, district });
+  const { listings } = await getPrivatizationListings(parseListingQuery(sp));
   const summaries = summariseByRegion(listings);
 
-  const filterParams = new URLSearchParams();
-  if (region) filterParams.set("hudud", region);
-  if (region && district) filterParams.set("tuman", district);
+  // Same helper as the catalogue's pager, so the two cannot drift apart.
+  const filterParams = buildFilterQuery(sp);
 
   return (
     <>
@@ -91,7 +90,12 @@ export default async function PrivatizationPage({
         </p>
       </Section>
 
-      <PrivatizationFilter region={region} district={district} />
+      <SearchWidget
+        action={`/${locale}/xususiylashtirish`}
+        values={sp}
+        auctionDay
+        market="xususiylashtirish"
+      />
 
       <Section tone="deep">
         <ObjectsExplorer
@@ -104,6 +108,7 @@ export default async function PrivatizationPage({
           filterQuery={filterParams.toString()}
           basePath="/xususiylashtirish"
           emptyLabel={t("empty")}
+          market="xususiylashtirish"
           view={parseView(sp, "royxat")}
           defaultView="royxat"
         />

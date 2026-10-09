@@ -10,6 +10,7 @@ import {
   getUpcomingAuctionCounts,
   getUpcomingAuctions,
 } from "@/lib/data/listings";
+import { getPrivatizationListings } from "@/lib/data/privatization";
 import { cn } from "@/lib/utils";
 import { CardRotator } from "@/components/common/card-rotator";
 import { LotCard } from "@/components/common/lot-card";
@@ -68,10 +69,19 @@ export async function UpcomingAuctions({
   const tw = await getTranslations("auctionWindow");
   const activeWindow = activeAuctionWindow(searchParams);
 
+  /*
+    Leases AND privatization sales, in one pool ordered by auction time
+    (operator, 09.10.2026). Mixed here where the map keeps them apart because
+    this is a calendar — "what is auctioned next" — and every sale card says
+    so in words ("Xususiylashtirish" on the photo, "Boshlang'ich narx" over
+    the price). Only lots still OFFERED: the sale set is already cut at its
+    auction time (privatization.ts), the same instant this strip drops a lot.
+  */
+  const sales = (await getPrivatizationListings()).listings;
   const [{ listings }, regions, counts] = await Promise.all([
-    getUpcomingAuctions(12, activeWindow),
+    getUpcomingAuctions(12, activeWindow, sales),
     getRegions(),
-    getUpcomingAuctionCounts(),
+    getUpcomingAuctionCounts(sales),
   ]);
 
   /*

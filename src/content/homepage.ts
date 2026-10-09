@@ -1,10 +1,4 @@
-import type {
-  DocItem,
-  Listing,
-  Service,
-  Stat,
-  Step,
-} from "@/types/content";
+import type { DocItem, Listing, Service, Stat, Step } from "@/types/content";
 
 /*
   Homepage content, lifted out of legacy/index.html.
@@ -61,6 +55,18 @@ export const heroStats: Stat[] = [
     label: "Ijaraga berilgan obyektlar",
     icon: "Handshake",
   },
+  /*
+    Privatization lots on offer now (lib/data/privatization.ts) — the LAST
+    card in the row, after the lease figures, at the operator's request
+    (09.10.2026); `getHeroStats` appends it. Like the card above
+    it has no static figure: it is counted every time, and dropped when the
+    source cannot answer.
+  */
+  {
+    value: "",
+    label: "Xususiylashtirishga taklif etilayotgan obyektlar",
+    icon: "Landmark",
+  },
 ];
 
 export const impactStats: Stat[] = [
@@ -81,7 +87,8 @@ export const steps: Step[] = [
   {
     number: "02",
     title: "Auksionda qatnashing",
-    description: "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting va gʻolib bo‘ling",
+    description:
+      "«E-auksion» savdo platformasida onlayn savdoda ishtirok eting va gʻolib bo‘ling",
     icon: "Gavel",
   },
   {
@@ -94,8 +101,7 @@ export const steps: Step[] = [
   {
     number: "04",
     title: "Toʻlovni amalga oshiring",
-    description:
-      "Ijara toʻlovlarini elektron toʻlov tizimlari orqali toʻlang",
+    description: "Ijara toʻlovlarini elektron toʻlov tizimlari orqali toʻlang",
     icon: "CircleCheck",
   },
 ];

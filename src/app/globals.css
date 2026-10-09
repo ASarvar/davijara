@@ -1926,6 +1926,15 @@ figure:has(canvas[data-drawn]) [data-chart-table] {
   background: #0f7a3d;
 }
 
+/* A privatization lot's tab takes its pin's bronze (--color-gold-ink, white
+   on it 5.6:1), so tab and pin read as one mark — a navy tab over a bronze
+   pin looked like a lease label on the wrong pin. A live sale's tab is not
+   matched here: `.listing-marker-live` drops the sale pin's markup, and the
+   live tab's green comes from its own class. */
+.listing-marker-sale:not(.listing-marker-live) .listing-marker-label {
+  background: var(--color-gold-ink);
+}
+
 /* The state in words, for the screen reader Leaflet hands the marker to. */
 .listing-marker-sr {
   position: absolute;

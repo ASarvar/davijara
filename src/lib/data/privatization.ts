@@ -3,7 +3,8 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { readSnapshot, saveSnapshot } from "@/lib/data/snapshot";
-import type { Listing } from "@/types/content";
+import { auctionDay } from "@/lib/data/listings";
+import type { Listing, ListingQuery } from "@/types/content";
 
 /*
   Xususiylashtirishga taklif etilayotgan obyektlar — state property offered
@@ -45,10 +46,9 @@ import type { Listing } from "@/types/content";
   error.
 
   NO PERSONAL DATA arrives: the endpoint selects object and lot fields only.
-  NO PHOTOGRAPHS for now: lot-images.ts reads photos through the Markaz's
-  regional order accounts, and a privatization order is filed under the
-  Agency's account, so the lookup would fail for every one of these lots —
-  `orderId` is left unset and the card shows its placeholder.
+  PHOTOGRAPHS come by `orderId`, through a different service from the lease
+  lots': a privatization order is filed under the Agency's account, which the
+  regional order accounts cannot see — see getSaleLotImage in lot-images.ts.
 */
 
 interface ApiObject {
@@ -103,6 +103,23 @@ const inUzbekistan = (lat: number, lng: number) =>
 const positive = (n: number | null | undefined): number | undefined =>
   typeof n === "number" && Number.isFinite(n) && n > 0 ? n : undefined;
 
+/*
+  The dashboard spells a CITY five ways — "Samarqand", "Guliston sh.",
+  "Buxoro shahar", "Nukus shaxar", "Jizzax shahri" (09.10.2026) — where the
+  listings feed always writes "<name> shahri". A city named differently from
+  the lease side never matched a `?tuman=` carried from the search panel or
+  the hero: Samarqand shahri counted 0 sale lots against 11 on the
+  dashboard. Every name that is not a "tumani" is a city in this data, so
+  each is brought to the feed's form; a district keeps its own name.
+*/
+function cityForm(name: string | null | undefined): string | undefined {
+  const n = name?.trim();
+  if (!n) return undefined;
+  if (/\stumani$/i.test(n)) return n;
+  const base = n.replace(/\s+(shahri|shahar|shaxar|sh\.)$/i, "").trim();
+  return `${base} shahri`;
+}
+
 /**
  * One dashboard object as a Listing, or null if it cannot be placed or named.
  * Status and date are NOT judged here — this is what is cached and snapshot,
@@ -123,7 +140,7 @@ function toListing(o: ApiObject): Listing | null {
     title: o.name?.trim() || lotNumber,
     region,
     address: o.address?.trim() ?? "",
-    district: o.districtName?.trim() || undefined,
+    district: cityForm(o.districtName),
     /*
       The lot's own area first — that is what is on sale. A building's floor
       area next, and the land plot only for an object that IS land: printing a
@@ -140,6 +157,7 @@ function toListing(o: ApiObject): Listing | null {
     lat,
     lng,
     lotNumber,
+    orderId: o.lot?.orderId != null ? String(o.lot.orderId) : undefined,
     auctionUrl: `https://e-auksion.uz/lot-view?lot_id=${encodeURIComponent(lotNumber)}`,
   };
 }
@@ -161,7 +179,9 @@ export function isOffered(listing: Listing, now = Date.now()): boolean {
 */
 function offeredClock(): number {
   const pinned =
-    process.env.NODE_ENV !== "production" ? process.env.PRIVATIZATION_AS_OF : undefined;
+    process.env.NODE_ENV !== "production"
+      ? process.env.PRIVATIZATION_AS_OF
+      : undefined;
   const at = pinned ? Date.parse(pinned) : NaN;
   return Number.isFinite(at) ? at : Date.now();
 }
@@ -204,14 +224,12 @@ const fetchAll = unstable_cache(
     saveSnapshot(SNAPSHOT_KEY, mapped);
     return mapped;
   },
-  ["privatization-all"],
+  // v3: listings carry `orderId` (v2) and city names in the feed's form
+  // (v3). A new key per shape change, so a deploy does not serve ten minutes
+  // of cached lots in the old one.
+  ["privatization-all-v3"],
   { revalidate: 600, tags: ["privatization"] },
 );
-
-export interface PrivatizationQuery {
-  region?: string;
-  district?: string;
-}
 
 export interface PrivatizationResult {
   listings: Listing[];
@@ -219,6 +237,12 @@ export interface PrivatizationResult {
   asOf?: string;
   /** False when the endpoint is not configured — the UI then shows nothing. */
   configured: boolean;
+  /**
+   * True when the endpoint failed AND no stored answer exists, so `listings`
+   * is empty for want of data rather than because nothing is on offer. A
+   * count must not be printed from that — see getHeroStats.
+   */
+  unavailable?: boolean;
 }
 
 const norm = (s: string) =>
@@ -230,14 +254,16 @@ const norm = (s: string) =>
 
 /**
  * The privatization lots open for applications, soonest auction first,
- * narrowed to a region and district when given.
+ * narrowed by the same search as the lease catalogue.
  *
- * Only `hudud` and `tuman` apply. The catalogue's other filters do not carry
- * over: `narx` is a yearly RENT band, and a sale price measured against it
- * would sort a 500-million building in among 2-million rooms.
+ * `hudud`, `tuman`, `maydon`, `narx` and `savdo` all apply. `narx` is read as
+ * the sale's STARTING price here — the search panel offers sale-sized bands
+ * when it is drawn for this page (search-widget.tsx, `market`), so a lease
+ * band never meets a sale price. `tur` does not apply: no object type is
+ * published for these lots.
  */
 export async function getPrivatizationListings(
-  query: PrivatizationQuery = {},
+  query: ListingQuery = {},
 ): Promise<PrivatizationResult> {
   const configured = Boolean(
     process.env.PRIVATIZATION_API_URL && process.env.PRIVATIZATION_API_TOKEN,
@@ -254,19 +280,82 @@ export async function getPrivatizationListings(
       error instanceof Error ? error.message : error,
     );
     const snap = readSnapshot<Listing[]>(SNAPSHOT_KEY);
-    all = snap?.data ?? [];
-    asOf = snap?.fetchedAt;
+    if (!snap) return { listings: [], configured, unavailable: true };
+    all = snap.data;
+    asOf = snap.fetchedAt;
   }
 
   const now = offeredClock();
   const district = query.district ? norm(query.district) : undefined;
   const listings = all
     .filter((l) => isOffered(l, now))
-    .filter((l) => !query.region || l.region === query.region)
-    .filter((l) => !district || (l.district && norm(l.district) === district))
+    .filter((l) => matches(l, query, district))
     .sort((a, b) => (a.auctionDate ?? "").localeCompare(b.auctionDate ?? ""));
 
   return { listings, asOf, configured };
+}
+
+/**
+ * Every privatization lot the dashboard returned, offered or not — for
+ * matching against e-auksion's live list (live-auctions.ts), where a lot has
+ * to be found AFTER its auction time, the moment `isOffered` lets it go.
+ * Not for display on its own: most of these are not on offer.
+ */
+export async function getAllPrivatizationListings(): Promise<Listing[]> {
+  if (
+    !process.env.PRIVATIZATION_API_URL ||
+    !process.env.PRIVATIZATION_API_TOKEN
+  ) {
+    return [];
+  }
+  try {
+    return await fetchAll();
+  } catch {
+    return readSnapshot<Listing[]>(SNAPSHOT_KEY)?.data ?? [];
+  }
+}
+
+function matches(
+  l: Listing,
+  q: ListingQuery,
+  district: string | undefined,
+): boolean {
+  if (q.region && l.region !== q.region) return false;
+  if (district && (!l.district || norm(l.district) !== district)) return false;
+  if (q.minArea != null && l.area < q.minArea) return false;
+  if (q.maxArea != null && l.area > q.maxArea) return false;
+  // A lot with no published price is outside every price band, as in the
+  // lease catalogue.
+  if (q.minPrice != null && l.pricePerYear < q.minPrice) return false;
+  if (q.maxPrice != null && l.pricePerYear > q.maxPrice) return false;
+  if (q.auctionDate) {
+    const at = l.auctionDate ? Date.parse(l.auctionDate) : NaN;
+    if (!Number.isFinite(at) || auctionDay(at) !== q.auctionDate) return false;
+  }
+  return true;
+}
+
+/**
+ * The days the "Savdo kuni" calendar may offer on /xususiylashtirish, scoped
+ * to the rest of the search — the sale counterpart of getAuctionDays.
+ */
+export async function getPrivatizationAuctionDays(
+  query: ListingQuery = {},
+): Promise<Array<{ date: string; count: number }>> {
+  const { listings } = await getPrivatizationListings({
+    ...query,
+    auctionDate: undefined,
+  });
+  const counts = new Map<string, number>();
+  for (const l of listings) {
+    const at = l.auctionDate ? Date.parse(l.auctionDate) : NaN;
+    if (!Number.isFinite(at)) continue;
+    const day = auctionDay(at);
+    counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 /**

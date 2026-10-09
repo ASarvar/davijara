@@ -3,6 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { getListings } from "@/lib/data/listings";
+import { getAllPrivatizationListings } from "@/lib/data/privatization";
 import type { Listing } from "@/types/content";
 
 /*
@@ -44,6 +45,13 @@ import type { Listing } from "@/types/content";
   mostly sales we have no part in — and a lot that is not ours is dropped by
   the listings match below anyway.
 
+  GROUP 5, "Davlat aktivlari", is asked as well (09.10.2026): the
+  privatization lots on /xususiylashtirish are auctioned there, and the
+  operator asked for them in "Jonli savdolar" beside the leases. Same
+  endpoint, same body, one more group — and the same rule that a row we do
+  not hold is dropped, which matters more here: group 5 also sells assets
+  held outside the Markaz, and those are not ours to show.
+
   `zz_md5` IS NOT SENT. The portal's page adds it to the body; the endpoint
   answers identically without it, and working out how it is derived would be
   reverse-engineering the site's own checks, which this module does not do.
@@ -79,6 +87,11 @@ const CURLOTS_URL =
 
 /** e-auksion's "Davlat mulkini ijaraga berish" group. */
 const RENT_GROUP_ID = 11;
+
+/** e-auksion's "Davlat aktivlari" group — where the privatization lots sit. */
+const SALE_GROUP_ID = 5;
+
+const GROUP_IDS = [RENT_GROUP_ID, SALE_GROUP_ID];
 
 /*
   100 per page, which the endpoint accepts (its own page asks for 12): the 64
@@ -124,10 +137,10 @@ interface CurrentLot {
   startsAt: number | null;
 }
 
-function curlotsBody(page: number): string {
+function curlotsBody(group: number, page: number): string {
   return JSON.stringify({
     sort_type: 3,
-    confiscant_groups_id: RENT_GROUP_ID,
+    confiscant_groups_id: group,
     confiscant_categories_id: null,
     regions_id: null,
     areas_id: null,
@@ -159,51 +172,58 @@ function curlotsBody(page: number): string {
   A failure THROWS instead of returning an empty answer, so an outage is never
   written into the cache as "nothing is live" for the next 30 seconds.
 */
-const fetchLiveRentLots = unstable_cache(
+const fetchLiveLots = unstable_cache(
   async (): Promise<CurrentLot[]> => {
     const lots = new Map<string, CurrentLot>();
 
-    for (let page = 1; page <= MAX_PAGES; page++) {
-      const res = await fetch(CURLOTS_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: curlotsBody(page),
-        signal: AbortSignal.timeout(8_000),
-        cache: "no-store",
-      });
-      if (!res.ok) throw new Error(`curlots responded ${res.status}`);
+    /*
+      One group after another, and a failure in EITHER throws: half a list
+      cached as the whole would hide every live lot of the other kind for the
+      next 30 seconds while looking like a quiet morning.
+    */
+    for (const group of GROUP_IDS) {
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const res = await fetch(CURLOTS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: curlotsBody(group, page),
+          signal: AbortSignal.timeout(8_000),
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`curlots responded ${res.status}`);
 
-      const json = (await res.json()) as CurlotsResponse;
-      if (!Array.isArray(json.rows)) {
-        throw new Error("curlots response carried no rows array");
-      }
+        const json = (await res.json()) as CurlotsResponse;
+        if (!Array.isArray(json.rows)) {
+          throw new Error("curlots response carried no rows array");
+        }
 
-      /*
+        /*
         `lot_number` is what our own listings carry, and `id` repeats it in
         the responses seen so far — kept as a fallback, but neither is trusted
         to be a number: anything that is not a plain lot id is dropped rather
         than passed to the browser.
       */
-      for (const row of json.rows) {
-        const raw = String(row.lot_number ?? row.id ?? "").trim();
-        if (/^\d{1,18}$/.test(raw)) {
-          lots.set(raw, {
-            lot: raw,
-            startsAt: parseStart(row.auction_date_str),
-          });
+        for (const row of json.rows) {
+          const raw = String(row.lot_number ?? row.id ?? "").trim();
+          if (/^\d{1,18}$/.test(raw)) {
+            lots.set(raw, {
+              lot: raw,
+              startsAt: parseStart(row.auction_date_str),
+            });
+          }
         }
-      }
 
-      const totalPages = Number(json.totalPages ?? 1);
-      if (!Number.isFinite(totalPages) || page >= totalPages) break;
+        const totalPages = Number(json.totalPages ?? 1);
+        if (!Number.isFinite(totalPages) || page >= totalPages) break;
+      }
     }
 
     return [...lots.values()];
   },
-  ["live-rent-lots"],
+  ["live-lots-rent-sale"],
   { revalidate: REVALIDATE_SECONDS },
 );
 
@@ -225,7 +245,7 @@ function startedOnly(lots: CurrentLot[], now = Date.now()): string[] {
  */
 export async function getLiveAuctionLots(): Promise<string[] | null> {
   try {
-    return startedOnly(await fetchLiveRentLots());
+    return startedOnly(await fetchLiveLots());
   } catch (error) {
     console.warn(
       "[live-auctions] current lots unavailable:",
@@ -262,7 +282,16 @@ export async function getLiveAuctionListings(): Promise<Listing[]> {
   if (!live || live.length === 0) return [];
 
   const wanted = new Set(live);
-  const { listings } = await getListings({});
+  /*
+    The sale lots UNFILTERED by "still offered": that test drops a lot the
+    moment its auction time passes, which is exactly when it goes live. Here
+    e-auksion's list is the authority, as it is for the leases.
+  */
+  const [{ listings: leases }, sales] = await Promise.all([
+    getListings({}),
+    getAllPrivatizationListings(),
+  ]);
+  const listings = [...leases, ...sales];
 
   /*
     Every match, uncut. The homepage strip shows the first

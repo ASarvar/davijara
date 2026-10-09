@@ -1,5 +1,9 @@
 import { regions } from "@/content/regions";
-import { getLotImage, LotImageUnavailable } from "@/lib/data/lot-images";
+import {
+  getLotImage,
+  getSaleLotImage,
+  LotImageUnavailable,
+} from "@/lib/data/lot-images";
 
 /*
   One lot's photograph, for the browser.
@@ -19,6 +23,9 @@ export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const order = params.get("order");
   const regionSlug = params.get("region");
+  // A privatization lot: looked up through the asset gateway, which needs no
+  // region account — see getSaleLotImage.
+  const sale = params.get("kind") === "sale";
 
   /*
     Digits only, and bounded.
@@ -45,7 +52,7 @@ export async function GET(request: Request) {
     a request can reach.
   */
   const region = regions.find((r) => r.slug === regionSlug);
-  if (!region) {
+  if (!sale && !region) {
     return Response.json({ image: null }, { status: 400 });
   }
 
@@ -65,7 +72,9 @@ export async function GET(request: Request) {
   */
   let image: string | null;
   try {
-    image = await getLotImage(order, region.apiId);
+    image = sale
+      ? await getSaleLotImage(order)
+      : await getLotImage(order, region!.apiId);
   } catch (error) {
     /*
       TWO KINDS OF 503, and the difference is what keeps the site navigable

@@ -51,9 +51,16 @@ import type { Listing } from "@/types/content";
   terms. That is not restored.
 */
 
-/** Uzbekistan, framed to fit the whole country — the empty-results view. */
+/** Uzbekistan, framed to fit the whole country — the first paint. */
 const COUNTRY_CENTER: [number, number] = [41.3775, 64.5853];
 const COUNTRY_ZOOM = 5.6;
+
+/*
+  The country's own extent, south-west to north-east (Termiz's latitude to
+  the Ustyurt's, the Aral shore to the Fergana valley's eastern tip). A
+  national view is framed on THIS, not on the pins — see FitToListings.
+*/
+const COUNTRY_BOUNDS = L.latLngBounds([37.18, 55.99], [45.59, 73.15]);
 
 /*
   Bounds for the fit-to-pins zoom in `FitToListings`.
@@ -107,20 +114,33 @@ const PIN_SVG_LIVE = `
     </svg>`;
 
 /*
-  A privatization lot — a SALE, on the homepage's "Xususiylashtirish" map.
+  A privatization lot — a SALE, on the homepage's "Xususiylashtirish" map and
+  on /xususiylashtirish.
 
-  A DIFFERENT SHAPE, not only a different colour: the head is a rounded
-  square where the lease pin's is a circle. Colour alone fails the readers who
-  most need the distinction (high contrast turns every ink white, and a
-  colour-blind reader cannot rely on burgundy vs navy), while the outline
-  survives both. Same box, same tip, same anchor as the other pins, so the
-  point on the map is the same kind of point.
+  THE LEASE PIN'S OUTLINE, in BRONZE: same shape, size and anchor, the body — `--color-gold-ink`, #7d6229, the palette's own dark gold. Emerald
+  was tried first and did not sit in a navy-and-gold portal (operator,
+  09.10.2026); bronze is the theme's own colour, reads as the rent pin's
+  warm counterpart, and is far from both the navy lease pin and the live
+  green, so the three never blur. White on it is 5.6:1, which the cluster
+  count needs, and it holds up on the basemap's sand-coloured desert where a
+  light gold would vanish. The edge is white and the core a pale cream
+  (#f3e6c4) rather than the lease pin's gold: gold on bronze is 2:1 and the
+  pin read as one muddy blot.
+
+  The two offers are on different maps (the Ijara | Xususiylashtirish
+  switch), so the pin does not have to tell them apart by shape, and one
+  shape keeps them reading as one portal's pins.
+
+  A sale lot whose room is open takes the LIVE pin like any other — green,
+  with the white core turning over and the ring.
 */
+const SALE_FILL = "#7d6229";
+
 const PIN_SVG_SALE = `
     <svg viewBox="0 0 24 32" width="26" height="34" aria-hidden="true">
-      <path d="M4 0h16a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4h-4.5L12 32l-3.5-10H4a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z"
-            fill="#7a1f3d" stroke="#ffffff" stroke-width="1.5"/>
-      <rect x="7.5" y="6.5" width="9" height="9" rx="1.5" fill="#ffffff"/>
+      <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z"
+            fill="${SALE_FILL}" stroke="#ffffff" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="4.5" fill="#f3e6c4"/>
     </svg>`;
 
 /*
@@ -166,14 +186,14 @@ function markerIconFor(
   live: boolean,
   /** "Savdo boshlandi", for the screen reader only: the ring is silent. */
   liveLabel: string,
-  /** A privatization (sale) lot — its own pin shape, never live here. */
+  /** A privatization (sale) lot — the bronze pin, or the live one. */
   sale = false,
 ): L.DivIcon {
   // Upstream sends 0 for a lot with no area recorded; a "0 m²" tab would be
   // noise on the map and a claim we cannot make.
   const label = area > 0 ? formatArea(area) : "";
 
-  if (sale) {
+  if (sale && !live) {
     const key = `sale:${label}`;
     const cached = markerIcons.get(key);
     if (cached) return cached;
@@ -196,7 +216,7 @@ function markerIconFor(
     keying on area alone would serve a Russian reader Uzbek markup after a
     locale switch.
   */
-  const key = live ? `live:${liveLabel}:${label}` : label;
+  const key = live ? `live:${sale ? "sale:" : ""}${liveLabel}:${label}` : label;
   const cached = markerIcons.get(key);
   if (cached) return cached;
 
@@ -220,7 +240,10 @@ function markerIconFor(
     place than an upcoming one.
   */
   const icon = L.divIcon({
-    className: live ? "listing-marker listing-marker-live" : "listing-marker",
+    // A live sale keeps its sale class, so its cluster stays bronze.
+    className: live
+      ? `listing-marker listing-marker-live${sale ? " listing-marker-sale" : ""}`
+      : "listing-marker",
     html: live ? `${tab}${state}${PIN_SVG_LIVE}` : `${tab}${PIN_SVG}`,
     iconSize: [26, 34],
     iconAnchor: [13, 34],
@@ -250,9 +273,9 @@ function clusterIcon(cluster: {
     marker.options.icon?.options.className?.includes("listing-marker-live"),
   );
   /*
-    A sale map's bubble takes the sale pin's shape and colour — a rounded
-    square, not a circle — so the cluster says what its pins are before it is
-    opened. The two kinds never share a map, so there is no mixed bubble.
+    A sale map's bubble takes the sale pin's colour, so the cluster says what
+    its pins are before it is opened. The two kinds never share a map, so
+    there is no mixed bubble.
   */
   const sale =
     children.length > 0 &&
@@ -265,9 +288,9 @@ function clusterIcon(cluster: {
       <div style="
         width:${size}px;height:${size}px;
         display:flex;align-items:center;justify-content:center;
-        border-radius:${sale ? "10px" : "9999px"};
-        background:${sale ? "#7a1f3d" : "#1a3a7c"};
-        border:2px solid ${live ? "#0f7a3d" : sale ? "#ffffff" : "#c8a96e"};
+        border-radius:9999px;
+        background:${sale ? SALE_FILL : "#1a3a7c"};
+        border:2px solid ${live ? "#0f7a3d" : sale ? "#e8d5a8" : "#c8a96e"};
         color:${live || sale ? "#ffffff" : "#e8d5a8"};
         font-size:${count < 100 ? 13 : 12}px;
         font-weight:600;
@@ -542,6 +565,15 @@ function ModifierWheelZoom({ hint }: { hint: string }) {
  * Refits the viewport whenever the filtered set changes, so filtering to one
  * region zooms to that region instead of leaving the reader on the whole
  * country hunting for pins.
+ *
+ * A NATIONAL SET IS FRAMED ON THE COUNTRY, NOT ON ITS PINS. Fitting the pins
+ * gave every set its own frame: the lease map and the privatization map
+ * opened at different centres and zooms, because their outermost lots sit in
+ * different places, and the reader saw the country jump when switching
+ * between them (operator, 09.10.2026). So whenever the lots span more than
+ * one region — or there are none — the view is Uzbekistan's own bounds,
+ * centred, at whatever zoom fits them in this box. Only a set inside ONE
+ * region (a region or district search) is fitted to its pins.
  */
 function FitToListings({ listings }: { listings: Listing[] }) {
   const map = useMap();
@@ -563,8 +595,12 @@ function FitToListings({ listings }: { listings: Listing[] }) {
 
     map.invalidateSize({ animate: false });
 
-    if (listings.length === 0) {
-      map.setView(COUNTRY_CENTER, COUNTRY_ZOOM, { animate });
+    const regions = new Set(listings.map((l) => l.region));
+    if (regions.size !== 1) {
+      // Fractional, unclamped: the frame is the country, and MIN_FIT_ZOOM
+      // exists for pin spreads, not for this.
+      const zoom = map.getBoundsZoom(COUNTRY_BOUNDS, false, L.point(8, 8));
+      map.setView(COUNTRY_BOUNDS.getCenter(), zoom, { animate, duration: 0.6 });
       return;
     }
 
@@ -660,14 +696,11 @@ export function ListingsMap({
   const { lots: liveLots } = useLiveAuctions();
   const started = useStartedAuctions(listings);
   /*
-    A sale is never shown as live: the live list is read for e-auksion's RENT
-    group only (lib/data/live-auctions.ts), so it has no answer for these lots,
-    and the rule there is that live is e-auksion's word, never ours.
+    e-auksion's word, for leases and sales alike: the live list now reads its
+    privatization group as well as the rent one (lib/data/live-auctions.ts).
   */
   const isLive = (listing: Listing) =>
-    listing.kind !== "privatization" &&
-    listing.lotNumber != null &&
-    liveLots.has(listing.lotNumber);
+    listing.lotNumber != null && liveLots.has(listing.lotNumber);
 
   return (
     <MapContainer
@@ -681,6 +714,13 @@ export function ListingsMap({
         moment lib/map-tiles.ts's fallback went from "wrong URL" to "no URL".
       */
       maxZoom={MAP_TILE_MAX_ZOOM}
+      /*
+        Quarter steps, so the country frame (FitToListings) can be the zoom
+        that actually fits. With Leaflet's default whole-number snap, a 32rem
+        box landed on zoom 5 — Uzbekistan a third of the frame — because 6
+        overflowed it by a few pixels. The +/- buttons still step by 1.
+      */
+      zoomSnap={0.25}
       // Scroll-zoom off: the map sits mid-page, and hijacking the wheel traps
       // someone who is only trying to scroll past it.
       scrollWheelZoom={false}
@@ -789,6 +829,7 @@ export function ListingsMap({
                     <LotImage
                       orderId={listing.isMock ? undefined : listing.orderId}
                       region={listing.region}
+                      sale={listing.kind === "privatization"}
                       eager
                       className="block aspect-[16/10] w-full sm:aspect-auto sm:h-full sm:min-h-[10.5rem]"
                     />

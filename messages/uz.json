@@ -122,9 +122,10 @@
       "second": "shaffof",
       "third": "onlayn"
     },
-    "statsTitle": "Davlat mulkini ijaraga berish maʼlumotlari"
+    "statsTitle": "Davlat mulki obyektlari maʼlumotlari"
   },
   "search": {
+    "startPrice": "Boshlangʻich narx",
     "label": "Ijara obyektini qidirish",
     "region": "Hudud",
     "district": "Tuman / shahar",
@@ -146,6 +147,7 @@
     }
   },
   "map": {
+    "saleTitle": "Xususiylashtirishga taklif etilayotgan obyektlar xaritada",
     "eyebrow": "Xarita",
     "title": "Ijaraga taklif etilayotgan obyektlar xaritada"
   },
@@ -406,8 +408,10 @@
     "mapPending": "Xarita tayyorlanmoqda — obyektning aniq joylashuvi tasdiqlangach qoʻshiladi."
   },
   "objects": {
-    "saleTab": "Xususiylashtirish",
-    "saleAll": "Barcha xususiylashtirish obyektlari",
+    "marketLabel": "Taklif turi",
+    "marketLease": "Ijara",
+    "marketSale": "Xususiylashtirish",
+    "averageStartPrice": "Oʻrtacha boshlangʻich narx",
     "mapStartPrice": "Boshlangʻich narx",
     "metaDescription": "Boʻsh davlat mulki obyektlarini hudud, tur, maydon va narx boʻyicha qidiring — xarita va hududlar kesimida.",
     "count": "Obyektlar",

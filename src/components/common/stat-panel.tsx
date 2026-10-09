@@ -42,7 +42,17 @@ export function StatPanel({
   return (
     <dl
       className={cn(
-        "grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4",
+        "grid grid-cols-2 gap-3 sm:gap-4",
+        /*
+          As many columns as cards, up to five, on one row from `lg`: the
+          row is four or five cards depending on which sources answered
+          (catalog.ts drops a card rather than print a figure it does not
+          have), and a fixed four put a fifth card alone on a second row.
+          Below `lg`, an odd last card spans both columns instead of leaving
+          a hole beside it.
+        */
+        stats.length >= 5 ? "lg:grid-cols-5" : "lg:grid-cols-4",
+        "[&>*:last-child:nth-child(odd)]:col-span-2 lg:[&>*:last-child:nth-child(odd)]:col-span-1",
         className,
       )}
     >

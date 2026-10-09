@@ -74,14 +74,19 @@ const inFlight = new Map<string, Promise<string | null>>();
  */
 class Permanent extends Error {}
 
-function lookup(orderId: string, region: string): Promise<string | null> {
-  const key = `${orderId}|${region}`;
+function lookup(
+  orderId: string,
+  region: string,
+  sale: boolean,
+): Promise<string | null> {
+  const key = `${orderId}|${region}|${sale ? "sale" : "rent"}`;
   const existing = inFlight.get(key);
   if (existing) return existing;
 
   const request = fetch(
     withBasePath(
-      `/api/lot-image?order=${encodeURIComponent(orderId)}&region=${encodeURIComponent(region)}`,
+      `/api/lot-image?order=${encodeURIComponent(orderId)}&region=${encodeURIComponent(region)}` +
+        (sale ? "&kind=sale" : ""),
     ),
   )
     .then(async (res) => {
@@ -109,8 +114,7 @@ function lookup(orderId: string, region: string): Promise<string | null> {
           A 4xx is settled for the other reason — our own route rejected the
           arguments, and the second request would carry the same ones.
         */
-        throw json.retry === false ||
-          (res.status >= 400 && res.status < 500)
+        throw json.retry === false || (res.status >= 400 && res.status < 500)
           ? new Permanent(message)
           : new Error(message);
       }
@@ -198,6 +202,7 @@ export function LotImage({
   photo,
   orderId,
   region,
+  sale = false,
   eager = false,
   zoom = "slow",
   sizes = "(max-width: 640px) 90vw, 380px",
@@ -229,6 +234,12 @@ export function LotImage({
    * how the server learns which account to use.
    */
   region?: string;
+  /**
+   * A privatization lot. Its order is filed under the Agency, not a regional
+   * office, so the server looks it up through a different service — see
+   * getSaleLotImage in lib/data/lot-images.ts.
+   */
+  sale?: boolean;
   /**
    * Skip the visibility check and fetch immediately. For the map popup, which
    * only exists once the reader has opened it — waiting for an intersection
@@ -284,7 +295,11 @@ export function LotImage({
     hold in the same commit, so the stale photo is never painted even once.
   */
   const [shownFor, setShownFor] = useState<string | undefined>(undefined);
-  const key = photo ?? (orderId && region ? `${orderId}|${region}` : undefined);
+  const key =
+    photo ??
+    (orderId && region
+      ? `${orderId}|${region}${sale ? "|sale" : ""}`
+      : undefined);
   if (shownFor !== key) {
     setShownFor(key);
     setSrc(photo ?? null);
@@ -325,7 +340,7 @@ export function LotImage({
     const load = async () => {
       for (let tries = 0; tries < LOOKUP_TRIES; tries++) {
         try {
-          const image = await lookup(orderId, region);
+          const image = await lookup(orderId, region, sale);
           if (!cancelled && image) setSrc(image);
           return;
         } catch (error) {
@@ -425,7 +440,7 @@ export function LotImage({
       cancelled = true;
       for (const observer of observers) observer.disconnect();
     };
-  }, [photo, orderId, region, eager]);
+  }, [photo, orderId, region, sale, eager]);
 
   /*
     The retry timer belongs to the component, not to the callback that set it.

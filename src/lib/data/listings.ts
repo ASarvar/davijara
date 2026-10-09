@@ -894,7 +894,7 @@ function upcomingLots(listings: Listing[], now: number): UpcomingLot[] {
 }
 
 /** The Tashkent calendar day an auction falls on, as "YYYY-MM-DD". */
-function auctionDay(at: number): string {
+export function auctionDay(at: number): string {
   return new Date(at + TASHKENT_OFFSET_MS).toISOString().slice(0, 10);
 }
 
@@ -952,14 +952,28 @@ export async function getUpcomingAuctions(
    * rather than parsed bounds so the range grammar stays inside this module.
    */
   window?: string | null,
+  /**
+   * Lots from outside this feed to put in the same pool — the privatization
+   * lots (lib/data/privatization.ts), passed in by the caller rather than
+   * imported here, because that module already imports this one. Windowed by
+   * the same filter as the feed's own lots.
+   */
+  extra: Listing[] = [],
 ): Promise<ListingsResult> {
   const [minDays, maxDays] = window
     ? parseRange(window)
     : [undefined, undefined];
   const windowed = minDays != null || maxDays != null;
-  const { listings, source, asOf } = await getListings(
-    windowed ? { minDaysToAuction: minDays, maxDaysToAuction: maxDays } : {},
-  );
+  const windowQuery = { minDaysToAuction: minDays, maxDaysToAuction: maxDays };
+  const {
+    listings: feed,
+    source,
+    asOf,
+  } = await getListings(windowed ? windowQuery : {});
+  const listings = [
+    ...feed,
+    ...(windowed ? filterListings(extra, windowQuery) : extra),
+  ];
 
   const now = Date.now();
   const pool = upcomingLots(listings, now);
@@ -1011,10 +1025,14 @@ export async function getUpcomingAuctions(
  * extra passes over an array already in memory — no additional upstream
  * request.
  */
-export async function getUpcomingAuctionCounts(): Promise<{
+export async function getUpcomingAuctionCounts(
+  /** Same as `getUpcomingAuctions`' `extra` — counted with the feed's lots. */
+  extra: Listing[] = [],
+): Promise<{
   byWindow: Record<string, number>;
 }> {
-  const { listings } = await getListings();
+  const { listings: feed } = await getListings();
+  const listings = [...feed, ...extra];
 
   const byWindow: Record<string, number> = {};
   for (const window of AUCTION_WINDOWS) {

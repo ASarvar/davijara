@@ -11,12 +11,47 @@ import {
   parseListingQuery,
   VIEW_KEY,
 } from "@/lib/data/listings";
-import { isListingsView } from "@/lib/listings-view";
+import {
+  getPrivatizationAuctionDays,
+  getPrivatizationDistrictsByRegion,
+} from "@/lib/data/privatization";
+import {
+  isListingsView,
+  MARKET_KEY,
+  type ListingsMarket,
+} from "@/lib/listings-view";
 import { RegionDistrictFields } from "./region-district-fields";
 import { AuctionDayField } from "@/components/common/auction-day-field";
 import { Eyebrow } from "@/components/common/eyebrow";
 import { ALL_VALUE, SelectField } from "@/components/common/select-field";
 import { Container } from "@/components/layout/section";
+
+/*
+  The bands for a SALE, from the privatization lots themselves (09.10.2026,
+  546 priced, 556 with an area): starting price quartiles 538 mln / 1,4 mlrd /
+  4,5 mlrd with a tail past 13 mlrd; area quartiles 275 / 605 / 1 355 m².
+
+  The lease bands could not be reused: a sale's starting price is a building's
+  value, not a year's rent, so "100 mln+" — the lease panel's top band — holds
+  nearly every sale lot, and "0-10 m²" holds none. Values are in the same
+  grammar (`narx` in millions of so'm, `maydon` in m²), so parseListingQuery
+  reads them unchanged.
+*/
+const SALE_AREA_BANDS = [
+  { value: "0-200", label: "0 — 200" },
+  { value: "200-500", label: "200 — 500" },
+  { value: "500-1500", label: "500 — 1500" },
+  { value: "1500-5000", label: "1500 — 5000" },
+  { value: "5000-", label: "5000+" },
+];
+
+const SALE_PRICE_BANDS = [
+  { value: "0-500", label: "0 — 500 mln" },
+  { value: "500-1500", label: "500 mln — 1,5 mlrd" },
+  { value: "1500-5000", label: "1,5 — 5 mlrd" },
+  { value: "5000-15000", label: "5 — 15 mlrd" },
+  { value: "15000-", label: "15 mlrd+" },
+];
 
 /**
  * Object search.
@@ -71,14 +106,25 @@ export async function SearchWidget({
    * say so.
    */
   nested = false,
+  /**
+   * Which offer the panel searches. `xususiylashtirish` swaps in the sale
+   * bands above, the districts and auction days of the sale lots, and the
+   * "Boshlang'ich narx" label — so /xususiylashtirish and the homepage's
+   * Xususiylashtirish switch get the same panel as the lease catalogue,
+   * filled with numbers that fit a sale.
+   */
+  market = "ijara",
 }: {
   action?: string;
   values?: Record<string, string | string[] | undefined>;
   auctionDay?: boolean;
   nested?: boolean;
+  market?: ListingsMarket;
 } = {}) {
+  const sale = market === "xususiylashtirish";
   const t = await getTranslations("search");
   const td = await getTranslations("auctionDay");
+  const tp = await getTranslations("privatization");
   const locale = await getLocale();
   const regions = await getRegionOptions();
 
@@ -92,7 +138,9 @@ export async function SearchWidget({
   // The whole region→district map, so the tuman dropdown can narrow the
   // instant a region is picked rather than after a submit. Reads through the
   // same cached per-region fetches the results do.
-  const districtsByRegion = await getDistrictsByRegion();
+  const districtsByRegion = sale
+    ? await getPrivatizationDistrictsByRegion()
+    : await getDistrictsByRegion();
 
   /*
     The days the calendar may offer, scoped to the rest of the active search —
@@ -101,7 +149,9 @@ export async function SearchWidget({
     pays nothing for a control it does not show.
   */
   const auctionDays = auctionDay
-    ? await getAuctionDays(parseListingQuery(values ?? {}))
+    ? sale
+      ? await getPrivatizationAuctionDays(parseListingQuery(values ?? {}))
+      : await getAuctionDays(parseListingQuery(values ?? {}))
     : [];
 
   /*
@@ -121,7 +171,7 @@ export async function SearchWidget({
       {/* sr-only, not deleted: this is the panel's accessible
           name, and the eyebrow style is what the operator asked to drop. */}
       <Eyebrow as="h2" className="sr-only">
-        {t("label")}
+        {sale ? tp("filterLabel") : t("label")}
       </Eyebrow>
 
       {/*
@@ -171,6 +221,15 @@ export async function SearchWidget({
         ) : null}
 
         {/*
+            The homepage's Ijara | Xususiylashtirish switch, carried through a
+            search for the same reason as the tab. Only on the homepage (no
+            `action`): /xususiylashtirish IS the sale page and needs no flag.
+          */}
+        {sale && !action ? (
+          <input type="hidden" name={MARKET_KEY} value={market} />
+        ) : null}
+
+        {/*
             Hudud + Tuman are one coupled control — picking a region has to
             narrow the district list immediately, so they live in a small
             client island together. See region-district-fields.tsx.
@@ -212,18 +271,22 @@ export async function SearchWidget({
             */
           options={[
             { value: ALL_VALUE, label: t("anyArea") },
-            { value: "0-10", label: "0 — 10" },
-            { value: "10-50", label: "10 — 50" },
-            { value: "50-200", label: "50 — 200" },
-            { value: "200-1000", label: "200 — 1000" },
-            { value: "1000-", label: "1000+" },
+            ...(sale
+              ? SALE_AREA_BANDS
+              : [
+                  { value: "0-10", label: "0 — 10" },
+                  { value: "10-50", label: "10 — 50" },
+                  { value: "50-200", label: "50 — 200" },
+                  { value: "200-1000", label: "200 — 1000" },
+                  { value: "1000-", label: "1000+" },
+                ]),
           ]}
         />
 
         <SelectField
           id="narx"
           name="narx"
-          label={t("price")}
+          label={sale ? t("startPrice") : t("price")}
           defaultValue={current("narx")}
           /*
               Also from the live quartiles. "10 mln+" used to collect 39% of
@@ -232,11 +295,15 @@ export async function SearchWidget({
             */
           options={[
             { value: ALL_VALUE, label: t("anyPrice") },
-            { value: "0-1", label: "0 — 1 mln" },
-            { value: "1-5", label: "1 — 5 mln" },
-            { value: "5-20", label: "5 — 20 mln" },
-            { value: "20-100", label: "20 — 100 mln" },
-            { value: "100-", label: "100 mln+" },
+            ...(sale
+              ? SALE_PRICE_BANDS
+              : [
+                  { value: "0-1", label: "0 — 1 mln" },
+                  { value: "1-5", label: "1 — 5 mln" },
+                  { value: "5-20", label: "5 — 20 mln" },
+                  { value: "20-100", label: "20 — 100 mln" },
+                  { value: "100-", label: "100 mln+" },
+                ]),
           ]}
         />
 

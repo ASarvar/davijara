@@ -238,39 +238,51 @@ export class LotImageUnavailable extends Error {
 const BREAKER_THRESHOLD = 4;
 const BREAKER_COOLDOWN_MS = 30_000;
 
-let consecutiveFaults = 0;
-let openedAt = 0;
+/*
+  One breaker PER SERVICE. The lease photos come from the order service
+  (10.190.4.122) and the sale photos from the asset gateway (10.190.5.2) —
+  one of them being down says nothing about the other, so they must not share
+  a fault count.
+*/
+function createBreaker(service: string) {
+  let consecutiveFaults = 0;
+  let openedAt = 0;
 
-/** True when the call should be skipped entirely. */
-function breakerIsOpen(): boolean {
-  if (consecutiveFaults < BREAKER_THRESHOLD) return false;
-  if (Date.now() - openedAt >= BREAKER_COOLDOWN_MS) {
-    // Half-open: this caller becomes the probe. Re-stamping the clock is what
-    // keeps the other callers blocked while it is in flight.
-    openedAt = Date.now();
-    return false;
-  }
-  return true;
+  return {
+    /** True when the call should be skipped entirely. */
+    isOpen(): boolean {
+      if (consecutiveFaults < BREAKER_THRESHOLD) return false;
+      if (Date.now() - openedAt >= BREAKER_COOLDOWN_MS) {
+        // Half-open: this caller becomes the probe. Re-stamping the clock is
+        // what keeps the other callers blocked while it is in flight.
+        openedAt = Date.now();
+        return false;
+      }
+      return true;
+    },
+
+    fault(): void {
+      consecutiveFaults++;
+      if (consecutiveFaults === BREAKER_THRESHOLD) {
+        openedAt = Date.now();
+        console.warn(
+          `[lot-images] ${BREAKER_THRESHOLD} consecutive faults - pausing calls ` +
+            `to ${service} for ${BREAKER_COOLDOWN_MS / 1000}s.`,
+        );
+      }
+    },
+
+    /** Any answer at all means the service is up; the count resets on success. */
+    success(): void {
+      if (consecutiveFaults >= BREAKER_THRESHOLD) {
+        console.warn(`[lot-images] ${service} answered again - resuming.`);
+      }
+      consecutiveFaults = 0;
+    },
+  };
 }
 
-function recordFault(): void {
-  consecutiveFaults++;
-  if (consecutiveFaults === BREAKER_THRESHOLD) {
-    openedAt = Date.now();
-    console.warn(
-      `[lot-images] ${BREAKER_THRESHOLD} consecutive faults - pausing calls ` +
-        `to the order service for ${BREAKER_COOLDOWN_MS / 1000}s.`,
-    );
-  }
-}
-
-/** Any answer at all means the service is up; the count resets on success. */
-function recordSuccess(): void {
-  if (consecutiveFaults >= BREAKER_THRESHOLD) {
-    console.warn("[lot-images] order service answered again - resuming.");
-  }
-  consecutiveFaults = 0;
-}
+const orderBreaker = createBreaker("the order service");
 
 async function fetchLotImage(
   orderId: string,
@@ -295,7 +307,7 @@ async function fetchLotImage(
     write a day's worth of empty answers over every lot the readers happened
     to scroll past while it lasted.
   */
-  if (breakerIsOpen()) {
+  if (orderBreaker.isOpen()) {
     throw new LotImageUnavailable("order service paused", true);
   }
 
@@ -324,7 +336,7 @@ async function fetchLotImage(
     });
     if (!res.ok) {
       warn(apiId, orderId, `HTTP ${res.status}`);
-      recordFault();
+      orderBreaker.fault();
       throw new LotImageUnavailable(`HTTP ${res.status}`);
     }
 
@@ -356,7 +368,7 @@ async function fetchLotImage(
     */
     const NO_SUCH_ORDER = 27;
     if (json.result_code === NO_SUCH_ORDER) {
-      recordSuccess();
+      orderBreaker.success();
       return null;
     }
 
@@ -366,7 +378,7 @@ async function fetchLotImage(
         orderId,
         `result_code ${json.result_code}: ${json.result_msg}`,
       );
-      recordFault();
+      orderBreaker.fault();
       throw new LotImageUnavailable(`result_code ${json.result_code}`);
     }
 
@@ -384,7 +396,7 @@ async function fetchLotImage(
     */
     if (!json.orders?.length) {
       warn(apiId, orderId, "no order in response");
-      recordFault();
+      orderBreaker.fault();
       throw new LotImageUnavailable("no order in response");
     }
 
@@ -394,7 +406,7 @@ async function fetchLotImage(
       photograph" is a fact about this lot and is cached as one, rather than
       something worth asking again.
     */
-    recordSuccess();
+    orderBreaker.success();
     const picked = pickMainImage(images);
     if (!picked && images?.length) {
       warn(apiId, orderId, `${images.length} image(s), none usable`);
@@ -405,7 +417,7 @@ async function fetchLotImage(
     // Network unreachable, timeout, malformed JSON — we never got an answer,
     // so we must not manufacture one.
     warn(apiId, orderId, error instanceof Error ? error.name : "unknown error");
-    recordFault();
+    orderBreaker.fault();
     throw new LotImageUnavailable(
       error instanceof Error ? error.name : "unknown error",
     );
@@ -450,3 +462,96 @@ export const getLotImage = unstable_cache(fetchLotImage, ["lot-image"], {
   revalidate: 86_400,
   tags: ["lot-images"],
 });
+
+/* ── Privatization (sale) lots ────────────────────────────────────────── */
+
+/*
+  A SALE lot's photograph comes from a different service, because the one
+  above cannot see it. The order service answers under a territorial office's
+  account, and a privatization order is filed under the Agency's — so every
+  sale lot came back "not one of mine" (27) and showed the placeholder.
+
+  The asset gateway's order lookup (the dashboard's "API 4") returns the same
+  order — `images[]` included, same media.e-auksion.uz URLs — for rent and
+  sale alike:
+
+    GET <AUCTION_ORDER_API_URL>?order=<order_id>     HTTP Basic
+    → { httpcode, group_name, result: { result_code, result_msg, order: {
+        images: [ { image, is_main, image_position … } ], … } } }
+
+  Verified 09.10.2026 on three privatization orders: 6, 12 and 11 photographs.
+  The credentials are the CADDATA pair (the gateway uses one account for both
+  endpoints). `result_code` means what it means above: 0 the order, 27 no such
+  order — an answer, cached as one.
+
+  ⚠️ The response also carries the balance holder's and the winner's PERSONAL
+  DATA (details[], winner_*). Only `images` is read; nothing else is typed,
+  logged or returned.
+*/
+interface SaleOrderApiResponse {
+  result?: {
+    result_code?: number;
+    result_msg?: string;
+    order?: { images?: OrderApiImage[] } | null;
+  };
+}
+
+const saleBreaker = createBreaker("the asset gateway");
+
+async function fetchSaleLotImage(orderId: string): Promise<string | null> {
+  // Unconfigured is a settled state, not a blip — same as the lease lookup.
+  const base = process.env.AUCTION_ORDER_API_URL;
+  const username = process.env.CADDATA_USERNAME;
+  const password = process.env.CADDATA_PASSWORD;
+  if (!base || !username || !password) return null;
+
+  if (saleBreaker.isOpen()) {
+    throw new LotImageUnavailable("asset gateway paused", true);
+  }
+
+  const fail = (reason: string): never => {
+    console.warn(`[lot-images] sale order ${orderId}: ${reason}`);
+    saleBreaker.fault();
+    throw new LotImageUnavailable(reason);
+  };
+
+  let json: SaleOrderApiResponse;
+  try {
+    const url = new URL(base);
+    url.searchParams.set("order", orderId);
+    const res = await fetch(url, {
+      headers: {
+        Authorization:
+          "Basic " + Buffer.from(`${username}:${password}`).toString("base64"),
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(10_000),
+      cache: "no-store",
+    });
+    if (!res.ok) return fail(`HTTP ${res.status}`);
+    json = (await res.json()) as SaleOrderApiResponse;
+  } catch (error) {
+    if (error instanceof LotImageUnavailable) throw error;
+    return fail(error instanceof Error ? error.name : "unknown error");
+  }
+
+  const code = json.result?.result_code;
+  if (code === 27) {
+    saleBreaker.success();
+    return null;
+  }
+  if (code !== 0) return fail(`result_code ${code}`);
+
+  saleBreaker.success();
+  return pickMainImage(json.result?.order?.images);
+}
+
+/**
+ * A privatization lot's primary photograph, or null when it has none.
+ * Same contract and lifetime as `getLotImage`: faults throw, answers cache.
+ */
+export const getSaleLotImage = unstable_cache(
+  fetchSaleLotImage,
+  ["sale-lot-image"],
+  { revalidate: 86_400, tags: ["lot-images"] },
+);

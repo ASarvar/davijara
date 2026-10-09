@@ -9,7 +9,9 @@ import {
   withFilters,
 } from "@/lib/data/listings";
 import { getPrivatizationListings } from "@/lib/data/privatization";
+import { parseMarket } from "@/lib/listings-view";
 import { Section, SectionHeader } from "@/components/layout/section";
+import { MarketSwitch } from "./market-switch";
 import { ObjectsExplorer } from "./objects-explorer";
 
 /**
@@ -21,6 +23,11 @@ import { ObjectsExplorer } from "./objects-explorer";
  * browser is sent only the matching records.
  *
  * With no parameters, every lot is returned — the "show everything" default.
+ *
+ * TWO OFFERS, ONE EXPLORER. `?bolim=xususiylashtirish` (MarketSwitch) swaps
+ * the lease lots for the privatization lots; the tabs, map, region list and
+ * search panel then work on the sales exactly as they do on the leases. The
+ * two are never mixed in one set.
  */
 export async function ObjectsSection({
   searchParams,
@@ -29,22 +36,21 @@ export async function ObjectsSection({
 }) {
   const t = await getTranslations("map");
   const query = parseListingQuery(searchParams);
+  const market = parseMarket(searchParams);
+  const sale = market === "xususiylashtirish";
 
   /*
-    Leases and sales side by side but never mixed: the sale lots go to their
-    own tab. Only the place filters reach them — see getPrivatizationListings.
+    Both sets are read, the shown one under the whole search and the other
+    under its PLACE only — which is exactly what MarketSwitch carries across,
+    so the count on the other button is the number the reader lands on.
   */
-  const [{ listings, hasMock, asOf }, privatization] = await Promise.all([
-    getListings(query),
-    getPrivatizationListings({
-      region: query.region,
-      district: query.district,
-    }),
+  const placeOnly = { region: query.region, district: query.district };
+  const [lease, privatization] = await Promise.all([
+    getListings(sale ? placeOnly : query),
+    getPrivatizationListings(sale ? query : placeOnly),
   ]);
-  const saleParams = new URLSearchParams();
-  if (query.region) saleParams.set("hudud", query.region);
-  if (query.region && query.district) saleParams.set("tuman", query.district);
-  const saleQs = saleParams.toString();
+
+  const listings = sale ? privatization.listings : lease.listings;
   const summaries = summariseByRegion(listings);
 
   /*
@@ -55,7 +61,10 @@ export async function ObjectsSection({
 
     `withFilters` is the single place that knows which keys those are.
   */
-  const moreHref = withFilters("/ijaraga-obyektlar", searchParams);
+  const moreHref = withFilters(
+    sale ? "/xususiylashtirish" : "/ijaraga-obyektlar",
+    searchParams,
+  );
 
   return (
     <Section tone="deep" id="obyektlar-xarita" className="scroll-mt-24">
@@ -66,28 +75,38 @@ export async function ObjectsSection({
         /ijaraga-obyektlar within a screen of each other, both at the operator's
         request removed.
       */}
-      <SectionHeader title={t("title")} />
+      <SectionHeader title={sale ? t("saleTitle") : t("title")} />
+
+      {/* Hidden when the sale source is not configured: a switch to a set
+          that can never hold anything is a dead control. */}
+      {privatization.configured ? (
+        <MarketSwitch
+          market={market}
+          counts={{
+            ijara: lease.listings.length,
+            xususiylashtirish: privatization.listings.length,
+          }}
+          searchParams={searchParams}
+        />
+      ) : null}
 
       {/*
         The homepage is a summary. With no search it shows region totals; once
         a search is running it shows the first 9 lots and hands the rest to
-        /ijaraga-obyektlar rather than paginating in place. The map always receives the
-        whole matching set — paginating pins would hide objects the user
+        the catalogue rather than paginating in place. The map always receives
+        the whole matching set — paginating pins would hide objects the user
         explicitly filtered for.
       */}
       <ObjectsExplorer
         listings={listings}
         summaries={summaries}
-        hasMock={hasMock}
-        asOf={asOf}
+        hasMock={sale ? false : lease.hasMock}
+        asOf={sale ? privatization.asOf : lease.asOf}
         showLots={!isEmptyQuery(query)}
         perPage={9}
         moreHref={moreHref}
         view={parseView(searchParams)}
-        privatization={privatization.listings}
-        privatizationHref={
-          saleQs ? `/xususiylashtirish?${saleQs}` : "/xususiylashtirish"
-        }
+        market={market}
       />
     </Section>
   );

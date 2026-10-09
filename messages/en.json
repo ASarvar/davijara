@@ -119,9 +119,10 @@
       "second": "transparent",
       "third": "online"
     },
-    "statsTitle": "State property leasing data"
+    "statsTitle": "State property data"
   },
   "search": {
+    "startPrice": "Starting price",
     "label": "Search for a rental object",
     "region": "Region",
     "district": "District / city",
@@ -233,6 +234,7 @@
     "description": "The single portal for leasing state-owned property: search vacant objects, E-auksion auctions, lease privileges and online contract registration."
   },
   "map": {
+    "saleTitle": "Property offered for privatization, on the map",
     "eyebrow": "Map",
     "title": "Objects offered for lease, on the map"
   },
@@ -302,8 +304,10 @@
     "file": "File {n}"
   },
   "objects": {
-    "saleTab": "Privatization",
-    "saleAll": "All privatization lots",
+    "marketLabel": "Type of offer",
+    "marketLease": "Lease",
+    "marketSale": "Privatization",
+    "averageStartPrice": "Average starting price",
     "mapStartPrice": "Starting price",
     "metaDescription": "Search vacant state property by region, type, area and price — on the map and by region.",
     "count": "Objects",
