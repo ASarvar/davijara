@@ -153,6 +153,19 @@ export function isOffered(listing: Listing, now = Date.now()): boolean {
   return Number.isFinite(at) && at > now;
 }
 
+/*
+  Development only: PRIVATIZATION_AS_OF pins the clock `isOffered` reads, so
+  the page can be reviewed against a dashboard whose statuses are days old.
+  Ignored in production, where an auction that has passed must never be
+  shown as open.
+*/
+function offeredClock(): number {
+  const pinned =
+    process.env.NODE_ENV !== "production" ? process.env.PRIVATIZATION_AS_OF : undefined;
+  const at = pinned ? Date.parse(pinned) : NaN;
+  return Number.isFinite(at) ? at : Date.now();
+}
+
 const SNAPSHOT_KEY = "privatization:all";
 
 /*
@@ -245,7 +258,7 @@ export async function getPrivatizationListings(
     asOf = snap?.fetchedAt;
   }
 
-  const now = Date.now();
+  const now = offeredClock();
   const district = query.district ? norm(query.district) : undefined;
   const listings = all
     .filter((l) => isOffered(l, now))
