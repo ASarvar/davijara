@@ -107,6 +107,23 @@ const PIN_SVG_LIVE = `
     </svg>`;
 
 /*
+  A privatization lot — a SALE, on the homepage's "Xususiylashtirish" map.
+
+  A DIFFERENT SHAPE, not only a different colour: the head is a rounded
+  square where the lease pin's is a circle. Colour alone fails the readers who
+  most need the distinction (high contrast turns every ink white, and a
+  colour-blind reader cannot rely on burgundy vs navy), while the outline
+  survives both. Same box, same tip, same anchor as the other pins, so the
+  point on the map is the same kind of point.
+*/
+const PIN_SVG_SALE = `
+    <svg viewBox="0 0 24 32" width="26" height="34" aria-hidden="true">
+      <path d="M4 0h16a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4h-4.5L12 32l-3.5-10H4a4 4 0 0 1-4-4V4a4 4 0 0 1 4-4z"
+            fill="#7a1f3d" stroke="#ffffff" stroke-width="1.5"/>
+      <rect x="7.5" y="6.5" width="9" height="9" rx="1.5" fill="#ffffff"/>
+    </svg>`;
+
+/*
   The pin, with the lot's floor area on a tab above it.
 
   THE PIN ITSELF IS UNTOUCHED, and so is every number Leaflet positions it by
@@ -149,10 +166,29 @@ function markerIconFor(
   live: boolean,
   /** "Savdo boshlandi", for the screen reader only: the ring is silent. */
   liveLabel: string,
+  /** A privatization (sale) lot — its own pin shape, never live here. */
+  sale = false,
 ): L.DivIcon {
   // Upstream sends 0 for a lot with no area recorded; a "0 m²" tab would be
   // noise on the map and a claim we cannot make.
   const label = area > 0 ? formatArea(area) : "";
+
+  if (sale) {
+    const key = `sale:${label}`;
+    const cached = markerIcons.get(key);
+    if (cached) return cached;
+    const icon = L.divIcon({
+      className: "listing-marker listing-marker-sale",
+      html:
+        (label ? `<span class="listing-marker-label">${label}</span>` : "") +
+        PIN_SVG_SALE,
+      iconSize: [26, 34],
+      iconAnchor: [13, 34],
+      popupAnchor: [0, -34],
+    });
+    markerIcons.set(key, icon);
+    return icon;
+  }
 
   /*
     The cache key carries the live flag AND the label text: the same 60 m² lot
@@ -209,10 +245,19 @@ function clusterIcon(cluster: {
 }) {
   const count = cluster.getChildCount();
   const size = count < 10 ? 34 : count < 100 ? 42 : 50;
-  const live = cluster
-    .getAllChildMarkers()
-    .some((marker) =>
-      marker.options.icon?.options.className?.includes("listing-marker-live"),
+  const children = cluster.getAllChildMarkers();
+  const live = children.some((marker) =>
+    marker.options.icon?.options.className?.includes("listing-marker-live"),
+  );
+  /*
+    A sale map's bubble takes the sale pin's shape and colour — a rounded
+    square, not a circle — so the cluster says what its pins are before it is
+    opened. The two kinds never share a map, so there is no mixed bubble.
+  */
+  const sale =
+    children.length > 0 &&
+    children.every((marker) =>
+      marker.options.icon?.options.className?.includes("listing-marker-sale"),
     );
 
   return L.divIcon({
@@ -220,10 +265,10 @@ function clusterIcon(cluster: {
       <div style="
         width:${size}px;height:${size}px;
         display:flex;align-items:center;justify-content:center;
-        border-radius:9999px;
-        background:#1a3a7c;
-        border:2px solid ${live ? "#0f7a3d" : "#c8a96e"};
-        color:${live ? "#ffffff" : "#e8d5a8"};
+        border-radius:${sale ? "10px" : "9999px"};
+        background:${sale ? "#7a1f3d" : "#1a3a7c"};
+        border:2px solid ${live ? "#0f7a3d" : sale ? "#ffffff" : "#c8a96e"};
+        color:${live || sale ? "#ffffff" : "#e8d5a8"};
         font-size:${count < 100 ? 13 : 12}px;
         font-weight:600;
         box-shadow:0 2px 12px rgba(7,16,43,.35);
@@ -607,13 +652,22 @@ export function ListingsMap({
     liveView: string;
     fullscreenEnter: string;
     fullscreenExit: string;
+    /** "Boshlang'ich narx" — printed over a SALE lot's price only. */
+    startPrice?: string;
   };
 }) {
   // Shared with the explorer's live tab and the menu — see the hook.
   const { lots: liveLots } = useLiveAuctions();
   const started = useStartedAuctions(listings);
+  /*
+    A sale is never shown as live: the live list is read for e-auksion's RENT
+    group only (lib/data/live-auctions.ts), so it has no answer for these lots,
+    and the rule there is that live is e-auksion's word, never ours.
+  */
   const isLive = (listing: Listing) =>
-    listing.lotNumber != null && liveLots.has(listing.lotNumber);
+    listing.kind !== "privatization" &&
+    listing.lotNumber != null &&
+    liveLots.has(listing.lotNumber);
 
   return (
     <MapContainer
@@ -683,6 +737,7 @@ export function ListingsMap({
               listing.area,
               isLive(listing),
               labels.auctionStarted,
+              listing.kind === "privatization",
             )}
           >
             <Popup>
@@ -760,9 +815,22 @@ export function ListingsMap({
                     dropped by the time it reached the DOM (see lot-card.tsx
                     for the same bug, found there first).
                   */}
-                  <span className="mt-1.5 block text-sm font-semibold text-[#7d6229]">
-                    {`${formatNumber(listing.pricePerYear)} so'm`}
-                  </span>
+                  {/* A sale's figure is a starting price, not a yearly rent,
+                      and says so — see Listing.kind. */}
+                  {/* No price at all rather than "0 so'm" — a lot the source
+                      sent without one has no figure we can state. */}
+                  {listing.pricePerYear > 0 ? (
+                    <span className="mt-1.5 block">
+                      {listing.kind === "privatization" && labels.startPrice ? (
+                        <span className="block text-xs text-[#3d4a6b]">
+                          {labels.startPrice}
+                        </span>
+                      ) : null}
+                      <span className="block text-sm font-semibold text-[#7d6229]">
+                        {`${formatNumber(listing.pricePerYear)} so'm`}
+                      </span>
+                    </span>
+                  ) : null}
 
                   {listing.lotNumber ? (
                     <span className="mt-0.5 block text-xs text-[#3d4a6b]">

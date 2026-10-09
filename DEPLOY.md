@@ -63,6 +63,7 @@ nano /var/www/davijara/shared/.env
 | `LISTINGS_API_URL`, `API_USER`, `API_PASSWORD` | Auksion lotlari API'si |
 | `CADDATA_BASE_URL`, `CADDATA_USERNAME`, `CADDATA_PASSWORD` | /ijara-shartnomalari: bino nomi va manzili (kadastr shlyuzi, egasining STIR'i bilan) |
 | `CADASTRE_API_URL`, `CADASTRE_API_TOKEN` | Eski kadastr servisi — STIR yo'q obyektlar uchun zaxira. Ikkalasi ham bo'lmasa, nom o'rnida kadastr raqami chiqadi |
+| `PRIVATIZATION_API_URL`, `PRIVATIZATION_API_TOKEN` | /xususiylashtirish va bosh sahifadagi "Xususiylashtirish" tabi. Manba — monitoring dashboard (`/obyektlar`): `http://127.0.0.1:3000/obyektlar/api/davijara/privatization`. Token dashboard'ning `.env.production` dagi `DAVIJARA_API_TOKEN` bilan **bir xil**. Bo'lmasa — tab ham, sahifa ham bo'sh |
 
 ```bash
 chmod 600 /var/www/davijara/shared/.env

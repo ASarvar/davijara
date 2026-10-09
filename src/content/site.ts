@@ -226,6 +226,8 @@ export const mainNav: NavItem[] = [
       },
       { key: "leasedObjects", href: "/sotilgan-obyektlar" },
       { key: "leaseContracts", href: "/ijara-shartnomalari" },
+      // Sales, not leases — kept in Faoliyat because the operator runs both.
+      { key: "privatization", href: "/xususiylashtirish" },
       { key: "leasePrivileges", href: "/imtiyozlar" },
       { key: "faq", href: "/faoliyat/savollar" },
     ],

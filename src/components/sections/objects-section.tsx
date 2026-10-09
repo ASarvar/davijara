@@ -8,6 +8,7 @@ import {
   summariseByRegion,
   withFilters,
 } from "@/lib/data/listings";
+import { getPrivatizationListings } from "@/lib/data/privatization";
 import { Section, SectionHeader } from "@/components/layout/section";
 import { ObjectsExplorer } from "./objects-explorer";
 
@@ -29,7 +30,21 @@ export async function ObjectsSection({
   const t = await getTranslations("map");
   const query = parseListingQuery(searchParams);
 
-  const { listings, hasMock, asOf } = await getListings(query);
+  /*
+    Leases and sales side by side but never mixed: the sale lots go to their
+    own tab. Only the place filters reach them — see getPrivatizationListings.
+  */
+  const [{ listings, hasMock, asOf }, privatization] = await Promise.all([
+    getListings(query),
+    getPrivatizationListings({
+      region: query.region,
+      district: query.district,
+    }),
+  ]);
+  const saleParams = new URLSearchParams();
+  if (query.region) saleParams.set("hudud", query.region);
+  if (query.region && query.district) saleParams.set("tuman", query.district);
+  const saleQs = saleParams.toString();
   const summaries = summariseByRegion(listings);
 
   /*
@@ -51,8 +66,7 @@ export async function ObjectsSection({
         /ijaraga-obyektlar within a screen of each other, both at the operator's
         request removed.
       */}
-      <SectionHeader title={t("title")} 
-      />
+      <SectionHeader title={t("title")} />
 
       {/*
         The homepage is a summary. With no search it shows region totals; once
@@ -70,6 +84,10 @@ export async function ObjectsSection({
         perPage={9}
         moreHref={moreHref}
         view={parseView(searchParams)}
+        privatization={privatization.listings}
+        privatizationHref={
+          saleQs ? `/xususiylashtirish?${saleQs}` : "/xususiylashtirish"
+        }
       />
     </Section>
   );

@@ -124,6 +124,19 @@ export function LotCard({
           ) : null}
 
           {/*
+            A SALE, said in words on the photo — the price under it reads the
+            same as a lease's starting price, and a reader skimming a grid must
+            not take a building for sale for a room to rent. Navy on the photo
+            like the mock badge, so it reads in every theme; the word carries
+            it in high contrast.
+          */}
+          {listing.kind === "privatization" ? (
+            <span className="absolute top-2.5 left-2.5 rounded-full bg-[color:var(--color-navy)]/85 px-2.5 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              {t("badgeSale")}
+            </span>
+          ) : null}
+
+          {/*
             The live badge. A WORD AND A DOT, not a colour: in high contrast
             every ink is white or yellow and the blink is switched off, so a
             state carried by a green pulse alone would vanish for exactly the
@@ -222,14 +235,20 @@ export function LotCard({
             string in JS sidesteps JSX's whitespace rules entirely.
           */}
           <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-4">
-            <span>
-              <span className="text-muted-foreground block text-xs">
-                {t("startPrice")}
+            {/* No "0 so'm": a lot sent without a price states none. The
+                empty span keeps the date on the right edge. */}
+            {listing.pricePerYear > 0 ? (
+              <span>
+                <span className="text-muted-foreground block text-xs">
+                  {t("startPrice")}
+                </span>
+                <span className="font-heading text-accent-foreground block text-xl font-semibold">
+                  {`${formatNumber(listing.pricePerYear)} so'm`}
+                </span>
               </span>
-              <span className="font-heading text-accent-foreground block text-xl font-semibold">
-                {`${formatNumber(listing.pricePerYear)} so'm`}
-              </span>
-            </span>
+            ) : (
+              <span />
+            )}
 
             {live ? (
               /*

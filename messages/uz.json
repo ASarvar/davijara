@@ -61,6 +61,7 @@
     "readAloudVoiceMale": "Erkak ovozi"
   },
   "nav": {
+    "privatization": "Xususiylashtirishga taklif etilayotgan obyektlar",
     "home": "Bosh sahifa",
     "objects": "Ijara obyektlari",
     "auction": "E-auksion",
@@ -155,6 +156,7 @@
     "action": "Batafsil yo'riqnoma"
   },
   "listings": {
+    "badgeSale": "Xususiylashtirish",
     "eyebrow": "Dolzarb takliflar",
     "title": "Yangi qo'yilgan obyektlar",
     "action": "Barcha obyektlar",
@@ -404,6 +406,9 @@
     "mapPending": "Xarita tayyorlanmoqda — obyektning aniq joylashuvi tasdiqlangach qoʻshiladi."
   },
   "objects": {
+    "saleTab": "Xususiylashtirish",
+    "saleAll": "Barcha xususiylashtirish obyektlari",
+    "mapStartPrice": "Boshlangʻich narx",
     "metaDescription": "Boʻsh davlat mulki obyektlarini hudud, tur, maydon va narx boʻyicha qidiring — xarita va hududlar kesimida.",
     "count": "Obyektlar",
     "totalArea": "Umumiy maydon",
@@ -505,6 +510,12 @@
     "statusExpired": "Qabul muddati tugagan",
     "toggle": "Batafsil",
     "apply": "Hujjatlarni yuborish manzili"
+  },
+  "privatization": {
+    "metaDescription": "Markaz balansidagi, e-auksion.uz orqali xususiylashtirishga qoʻyilgan va arizalar qabul qilinayotgan davlat mulki obyektlari.",
+    "pageLede": "Markaz balansidagi davlat mulki obyektlari — e-auksion.uz orqali xususiylashtirishga qoʻyilgan va hozir arizalar qabul qilinayotgan lotlar. Ijaraga beriladigan obyektlar alohida boʻlimda.",
+    "empty": "Hozir bu yerda xususiylashtirishga taklif etilayotgan obyekt yoʻq.",
+    "filterLabel": "Xususiylashtirish obyektlarini qidirish"
   },
   "leaseContracts": {
     "pageTitle": "Ijara shartnomalari",

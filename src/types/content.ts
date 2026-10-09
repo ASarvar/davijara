@@ -29,6 +29,14 @@ export type ListingType = "noturar" | "turar" | "ishlab-chiqarish" | "mamuriy";
 
 export interface Listing {
   id: string;
+  /**
+   * What is being auctioned. Absent means a LEASE — every lot this type
+   * carried before privatization arrived, so no existing record changes.
+   * "privatization" is a SALE of the object (lib/data/privatization.ts), and
+   * then `pricePerYear` is the starting SALE price, not a yearly rent: every
+   * place that prints a price branches on this field for its label.
+   */
+  kind?: "privatization";
   title: string;
   /** Region slug, matches Region.slug. */
   region: string;
@@ -45,7 +53,11 @@ export interface Listing {
   district?: string;
   /** Square metres. */
   area: number;
-  /** Annual rent in so'm. */
+  /**
+   * Annual rent in so'm — or, for `kind: "privatization"`, the starting sale
+   * price. One field so region totals and price filters work over either set;
+   * the LABEL is what differs, never the arithmetic.
+   */
   pricePerYear: number;
   /** ISO 8601 auction date, server-provided so no client clock is involved. */
   auctionDate?: string;

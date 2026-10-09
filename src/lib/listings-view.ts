@@ -26,14 +26,21 @@ export const VIEW_KEY = "korinish";
   the page cannot know on the server (see lib/live-auctions-client.ts) — so a
   URL asking for it is honoured here and then quietly replaced by the page's
   default in the explorer if nothing turns out to be live.
+
+  `sotuv` is the homepage's fourth tab: the PRIVATIZATION lots on a map of
+  their own (lib/data/privatization.ts). A separate map rather than more pins
+  on the lease map, because a sale and a lease are different offers and the
+  operator asked for them apart. Like `jonli`, it falls back to the default
+  when there is nothing to show.
 */
-export type ListingsView = "xarita" | "royxat" | "jonli";
+export type ListingsView = "xarita" | "royxat" | "jonli" | "sotuv";
 
 /** Every value the URL may carry, for the places that pass it through. */
 export const LISTINGS_VIEWS: readonly ListingsView[] = [
   "xarita",
   "royxat",
   "jonli",
+  "sotuv",
 ];
 
 export function isListingsView(value: unknown): value is ListingsView {

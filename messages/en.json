@@ -58,6 +58,7 @@
     "readAloudVoiceMale": "Male voice"
   },
   "nav": {
+    "privatization": "Property offered for privatization",
     "home": "Home",
     "objects": "Rental objects",
     "auction": "E-auction",
@@ -242,6 +243,7 @@
     "action": "Full guide"
   },
   "listings": {
+    "badgeSale": "Privatization",
     "eyebrow": "Current offers",
     "title": "Newly listed objects",
     "action": "All objects",
@@ -300,6 +302,9 @@
     "file": "File {n}"
   },
   "objects": {
+    "saleTab": "Privatization",
+    "saleAll": "All privatization lots",
+    "mapStartPrice": "Starting price",
     "metaDescription": "Search vacant state property by region, type, area and price — on the map and by region.",
     "count": "Objects",
     "totalArea": "Total area",
@@ -498,6 +503,12 @@
     "statusExpired": "Application period has ended",
     "toggle": "Details",
     "apply": "Send documents to"
+  },
+  "privatization": {
+    "metaDescription": "State property on the Centre’s balance offered for privatization through e-auksion.uz and currently accepting applications.",
+    "pageLede": "State property on the Centre’s balance offered for privatization through e-auksion.uz, currently accepting applications. Property for lease is listed separately.",
+    "empty": "No property here is currently offered for privatization.",
+    "filterLabel": "Search privatization lots"
   },
   "leaseContracts": {
     "pageTitle": "Lease contracts",

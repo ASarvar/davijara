@@ -98,3 +98,18 @@ Carried over from the legacy site and resolved as follows:
 - **Listing photos** — the legacy page showed one hotlinked image on all three
   cards. Cards render a branded placeholder until real self-hosted photography
   exists; `aspect-video` reserves the box so adding images causes no shift.
+
+- **Privatization lots come from the monitoring dashboard, not e-auksion.**
+  `lib/data/privatization.ts` reads `/obyektlar/api/davijara/privatization`
+  (token `x-davijara-token`), which the dashboard builds from its own API 3
+  (cadastre → lot) and API 4 (order → details) walk over the Markaz's balance.
+  The Markaz's `get-order` accounts (`ORDER_API_INN_*`) list RENT orders only —
+  measured 09.10.2026, Samarqand: 5 316 orders, none of them a sale — because a
+  privatization order sits under the Agency's regional account. Scope is
+  therefore Markaz-balance objects, not all of e-auksion group 5.
+  The dashboard's `hasPrivatizationLot` is NOT "open": of 631 flagged objects
+  488 read "Mol-mulk (obyekt) sotilmadi". "Offered" = status taking
+  applications (or "Савдода") AND auction time still ahead, judged here.
+  The listings feed's `category_id` (added 10.2026) is how vehicles are kept
+  out of the lease catalogue: the whole e-auksion "Avtotransport" group, not
+  just 7 — see `isPropertyLease`.

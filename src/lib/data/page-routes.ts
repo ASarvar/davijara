@@ -143,6 +143,7 @@ const RESERVED_FIRST_SEGMENTS = new Set([
   "ijaraga-obyektlar",
   "sotilgan-obyektlar",
   "ijara-shartnomalari",
+  "xususiylashtirish",
   "joriy-savdolar",
   "statistika",
   "eng-kam-stavkalar",

@@ -7,6 +7,7 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
+  Landmark,
   LayoutList,
   MapPin,
   Radio,
@@ -280,6 +281,8 @@ export function ObjectsExplorer({
   basePath,
   view = "xarita",
   defaultView = "xarita",
+  privatization = [],
+  privatizationHref,
 }: {
   listings: Listing[];
   summaries: RegionSummary[];
@@ -324,6 +327,14 @@ export function ObjectsExplorer({
   filterQuery?: string;
   /** Route the pager links at, e.g. "/ijaraga-obyektlar". */
   basePath?: string;
+  /**
+   * Privatization lots for the "Xususiylashtirish" tab — homepage only.
+   * A separate map, never mixed into `listings`: a sale and a lease are
+   * different offers. The tab exists only when this is non-empty.
+   */
+  privatization?: Listing[];
+  /** Where that tab's "see all" link goes, filters carried. */
+  privatizationHref?: string;
 }) {
   const t = useTranslations("objects");
   const empty = emptyLabel ?? t("empty");
@@ -366,7 +377,10 @@ export function ObjectsExplorer({
     [listings, liveLots],
   );
   const activeView: ListingsView =
-    view === "jonli" && liveListings.length === 0 ? defaultView : view;
+    (view === "jonli" && liveListings.length === 0) ||
+    (view === "sotuv" && privatization.length === 0)
+      ? defaultView
+      : view;
 
   const detailHref = useCallback(
     (listing: Listing) =>
@@ -392,6 +406,7 @@ export function ObjectsExplorer({
       fullscreenEnter: t("mapFullscreenEnter"),
       fullscreenExit: t("mapFullscreenExit"),
       liveView: t("mapLiveView"),
+      startPrice: t("mapStartPrice"),
     }),
     [t],
   );
@@ -492,6 +507,15 @@ export function ObjectsExplorer({
                 </span>
               </TabsTrigger>
             ) : null}
+            {privatization.length > 0 ? (
+              <TabsTrigger value="sotuv" className="gap-1.5">
+                <Landmark aria-hidden="true" className="size-4" />
+                {t("saleTab")}
+                <span className="bg-secondary rounded-full px-1.5 text-xs tabular-nums">
+                  {formatNumber(privatization.length)}
+                </span>
+              </TabsTrigger>
+            ) : null}
           </TabsList>
         </div>
 
@@ -549,6 +573,39 @@ export function ObjectsExplorer({
                 labels={mapLabels}
               />
             </div>
+          </TabsContent>
+        ) : null}
+
+        {/*
+          Privatization — SALES, on a map of their own. Separate from the
+          lease map rather than more pins on it, at the operator's request:
+          a reader looking for a room to rent should not have to sort out
+          buildings for sale, and the other way round. Pins here have their
+          own shape (listings-map.tsx), and the region filter above applies;
+          the rent-only filters (area band, price band) do not — see
+          lib/data/privatization.ts.
+        */}
+        {privatization.length > 0 ? (
+          <TabsContent value="sotuv" className="mt-0">
+            <div className="border-border relative isolate h-[26rem] overflow-hidden rounded-md border sm:h-[32rem]">
+              <ListingsMap
+                listings={privatization}
+                regionName={regionName}
+                detailHref={detailHref}
+                labels={mapLabels}
+              />
+            </div>
+            {privatizationHref ? (
+              <p className="mt-4 text-center">
+                <Link
+                  href={privatizationHref}
+                  className="border-outline text-accent-foreground hover:bg-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors duration-200"
+                >
+                  {t("saleAll")}
+                  <ChevronRight aria-hidden="true" className="size-4" />
+                </Link>
+              </p>
+            ) : null}
           </TabsContent>
         ) : null}
 
