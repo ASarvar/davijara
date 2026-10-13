@@ -13,8 +13,13 @@ import { news as legacyNews } from "@/content/news";
 import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
-// Migration 13 only — the announcement supplied with the vacancies feature.
-import { vacancySeeds, vacancySeedsV16 } from "@/content/vacancy-announcements";
+// Migrations 13, 16 and 18 — the operator's vacancy announcements.
+import {
+  vacancySeeds,
+  vacancySeedsV16,
+  vacancySeedsV18,
+  type VacancySeed,
+} from "@/content/vacancy-announcements";
 // Migration 17 only — draft texts for the two footer legal pages.
 import { legalDrafts } from "@/content/legal-drafts";
 import { tashkentToday } from "@/lib/format";
@@ -1047,39 +1052,7 @@ const migrations: Migration[] = [
       appeared without one would be the only unexplained change in it.
     */
     seed(db) {
-      const today = tashkentToday();
-      const now = new Date().toISOString();
-      const insert = db.prepare(
-        `INSERT INTO vacancies
-           (status, title, unit, deadline, test_date, email, blocks, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      );
-      const log = db.prepare(
-        `INSERT INTO audit_log
-           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
-         VALUES (?, NULL, ?, 'create', 'vacancy', ?, ?, NULL, ?)`,
-      );
-      for (const v of vacancySeedsV16) {
-        const status = v.deadline >= today ? "open" : "closed";
-        const { lastInsertRowid } = insert.run(
-          status,
-          v.title,
-          v.unit,
-          v.deadline,
-          v.testDate,
-          v.email,
-          JSON.stringify(v.blocks),
-          now,
-        );
-        const id = Number(lastInsertRowid);
-        log.run(
-          now,
-          "migratsiya",
-          String(id),
-          `Vakansiya yaratildi: ${v.title}`,
-          JSON.stringify({ id, status, ...v }),
-        );
-      }
+      seedVacancies(db, vacancySeedsV16);
     },
   },
   {
@@ -1141,7 +1114,63 @@ const migrations: Migration[] = [
       }
     },
   },
+  {
+    version: 18,
+    name: "vacancy: Surxondaryo, 12.10.2026",
+    up: `SELECT 1;`,
+    /*
+      The Surxondaryo post announced again with new dates, as a NEW row:
+      the 24.09 row is the record of that competition and stays as it is —
+      closing it is an editor's act from /admin/vakansiyalar, like any other.
+    */
+    seed(db) {
+      seedVacancies(db, vacancySeedsV18);
+    },
+  },
 ];
+
+/*
+  Inserts operator-supplied announcements (migrations 16 and 18) — 'open'
+  only while the deadline is ahead, by migration 13's rule, and each with a
+  'create' entry in the audit log: that table has one for every panel write
+  since it existed, and a row that appeared without one would be the only
+  unexplained change in it.
+*/
+function seedVacancies(db: Database, seeds: VacancySeed[]): void {
+  const today = tashkentToday();
+  const now = new Date().toISOString();
+  const insert = db.prepare(
+    `INSERT INTO vacancies
+       (status, title, unit, deadline, test_date, email, blocks, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const log = db.prepare(
+    `INSERT INTO audit_log
+       (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+     VALUES (?, NULL, ?, 'create', 'vacancy', ?, ?, NULL, ?)`,
+  );
+  for (const v of seeds) {
+    const status = v.deadline >= today ? "open" : "closed";
+    const { lastInsertRowid } = insert.run(
+      status,
+      v.title,
+      v.unit,
+      v.deadline,
+      v.testDate,
+      v.email,
+      JSON.stringify(v.blocks),
+      now,
+    );
+    const id = Number(lastInsertRowid);
+    log.run(
+      now,
+      "migratsiya",
+      String(id),
+      `Vakansiya yaratildi: ${v.title}`,
+      JSON.stringify({ id, status, ...v }),
+    );
+  }
+}
 
 export function migrate(db: Database): void {
   const current = (db.pragma("user_version", { simple: true }) as number) ?? 0;
