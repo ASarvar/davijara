@@ -125,6 +125,13 @@
     "statsTitle": "Davlat mulki obyektlari maʼlumotlari"
   },
   "search": {
+    "saleBands": {
+      "b1": "0 — 500 mln",
+      "b2": "500 mln — 1,5 mlrd",
+      "b3": "1,5 — 5 mlrd",
+      "b4": "5 — 15 mlrd",
+      "b5": "15 mlrd+"
+    },
     "startPrice": "Boshlangʻich narx",
     "label": "Ijara obyektini qidirish",
     "region": "Hudud",

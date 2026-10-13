@@ -78,6 +78,14 @@ export function parseView(
 */
 export const MARKET_KEY = "bolim";
 
+/**
+ * The PLACE half of a search — what survives a switch between the two
+ * offers (MarketSwitch). The area, price and day bands are drawn per offer,
+ * so they do not cross over. Here rather than in lib/data/listings.ts
+ * because the switch's links are built where a client import must be safe.
+ */
+export const PLACE_KEYS = ["hudud", "tuman"] as const;
+
 export type ListingsMarket = "ijara" | "xususiylashtirish";
 
 export function parseMarket(

@@ -3,7 +3,12 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { formatNumber } from "@/lib/format";
-import { MARKET_KEY, type ListingsMarket } from "@/lib/listings-view";
+import {
+  MARKET_KEY,
+  PLACE_KEYS,
+  VIEW_KEY,
+  type ListingsMarket,
+} from "@/lib/listings-view";
 import { cn } from "@/lib/utils";
 
 /*
@@ -45,7 +50,9 @@ export async function MarketSwitch({
 
   const hrefFor = (target: ListingsMarket) => {
     const params = new URLSearchParams();
-    for (const key of ["hudud", "tuman", "korinish"]) {
+    // Named constants, not hand-listed strings: hand-listing these is what
+    // once dropped `tuman` from every pager link (see FILTER_KEYS).
+    for (const key of [...PLACE_KEYS, VIEW_KEY]) {
       const value = first(key);
       if (value) params.set(key, value);
     }

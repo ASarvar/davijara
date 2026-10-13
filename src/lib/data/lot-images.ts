@@ -499,11 +499,20 @@ interface SaleOrderApiResponse {
 const saleBreaker = createBreaker("the asset gateway");
 
 async function fetchSaleLotImage(orderId: string): Promise<string | null> {
-  // Unconfigured is a settled state, not a blip — same as the lease lookup.
+  /*
+    Unconfigured THROWS (as "paused", so the browser does not retry) rather
+    than answering null. A null is cached for a day, and an operator who adds
+    the variable and restarts the service keeps the same cache — every lot
+    viewed before would show its placeholder until the day ran out. A throw
+    is never cached, so the photographs appear on the first request after the
+    restart.
+  */
   const base = process.env.AUCTION_ORDER_API_URL;
   const username = process.env.CADDATA_USERNAME;
   const password = process.env.CADDATA_PASSWORD;
-  if (!base || !username || !password) return null;
+  if (!base || !username || !password) {
+    throw new LotImageUnavailable("asset gateway not configured", true);
+  }
 
   if (saleBreaker.isOpen()) {
     throw new LotImageUnavailable("asset gateway paused", true);

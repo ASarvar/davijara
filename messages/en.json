@@ -122,6 +122,13 @@
     "statsTitle": "State property data"
   },
   "search": {
+    "saleBands": {
+      "b1": "0 — 500 mln",
+      "b2": "500 mln — 1.5 bn",
+      "b3": "1.5 — 5 bn",
+      "b4": "5 — 15 bn",
+      "b5": "15 bn+"
+    },
     "startPrice": "Starting price",
     "label": "Search for a rental object",
     "region": "Region",

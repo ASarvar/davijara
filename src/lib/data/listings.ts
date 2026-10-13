@@ -956,23 +956,23 @@ export async function getUpcomingAuctions(
    * Lots from outside this feed to put in the same pool — the privatization
    * lots (lib/data/privatization.ts), passed in by the caller rather than
    * imported here, because that module already imports this one. Windowed by
-   * the same filter as the feed's own lots.
+   * the same filter as the feed's own lots. A promise is accepted so the
+   * caller need not wait for it before this function's own fetch starts.
    */
-  extra: Listing[] = [],
+  extra: Listing[] | Promise<Listing[]> = [],
 ): Promise<ListingsResult> {
   const [minDays, maxDays] = window
     ? parseRange(window)
     : [undefined, undefined];
   const windowed = minDays != null || maxDays != null;
   const windowQuery = { minDaysToAuction: minDays, maxDaysToAuction: maxDays };
-  const {
-    listings: feed,
-    source,
-    asOf,
-  } = await getListings(windowed ? windowQuery : {});
+  const [{ listings: feed, source, asOf }, extraLots] = await Promise.all([
+    getListings(windowed ? windowQuery : {}),
+    extra,
+  ]);
   const listings = [
     ...feed,
-    ...(windowed ? filterListings(extra, windowQuery) : extra),
+    ...(windowed ? filterListings(extraLots, windowQuery) : extraLots),
   ];
 
   const now = Date.now();
@@ -1027,12 +1027,15 @@ export async function getUpcomingAuctions(
  */
 export async function getUpcomingAuctionCounts(
   /** Same as `getUpcomingAuctions`' `extra` — counted with the feed's lots. */
-  extra: Listing[] = [],
+  extra: Listing[] | Promise<Listing[]> = [],
 ): Promise<{
   byWindow: Record<string, number>;
 }> {
-  const { listings: feed } = await getListings();
-  const listings = [...feed, ...extra];
+  const [{ listings: feed }, extraLots] = await Promise.all([
+    getListings(),
+    extra,
+  ]);
+  const listings = [...feed, ...extraLots];
 
   const byWindow: Record<string, number> = {};
   for (const window of AUCTION_WINDOWS) {

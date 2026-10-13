@@ -561,6 +561,26 @@ function ModifierWheelZoom({ hint }: { hint: string }) {
   );
 }
 
+/*
+  The WHOLE-NUMBER zoom that frames the country in this box.
+
+  Not a fractional one: between levels Leaflet draws the nearest level's
+  tiles scaled, and the basemap's borders and labels go soft — on the map
+  that is this section's main content. So the exact fit is computed (with the
+  snap lifted for the one call) and then rounded DOWN, unless the next level
+  is within 0.15 of it: that much overshoot is about the padding, so taking
+  the closer level crops nothing that matters.
+*/
+function countryZoom(map: L.Map): number {
+  const snap = map.options.zoomSnap;
+  map.options.zoomSnap = 0;
+  const exact = map.getBoundsZoom(COUNTRY_BOUNDS, false, L.point(8, 8));
+  map.options.zoomSnap = snap;
+  return exact - Math.floor(exact) > 0.85
+    ? Math.ceil(exact)
+    : Math.floor(exact);
+}
+
 /**
  * Refits the viewport whenever the filtered set changes, so filtering to one
  * region zooms to that region instead of leaving the reader on the whole
@@ -597,10 +617,10 @@ function FitToListings({ listings }: { listings: Listing[] }) {
 
     const regions = new Set(listings.map((l) => l.region));
     if (regions.size !== 1) {
-      // Fractional, unclamped: the frame is the country, and MIN_FIT_ZOOM
-      // exists for pin spreads, not for this.
-      const zoom = map.getBoundsZoom(COUNTRY_BOUNDS, false, L.point(8, 8));
-      map.setView(COUNTRY_BOUNDS.getCenter(), zoom, { animate, duration: 0.6 });
+      map.setView(COUNTRY_BOUNDS.getCenter(), countryZoom(map), {
+        animate,
+        duration: 0.6,
+      });
       return;
     }
 
@@ -714,13 +734,6 @@ export function ListingsMap({
         moment lib/map-tiles.ts's fallback went from "wrong URL" to "no URL".
       */
       maxZoom={MAP_TILE_MAX_ZOOM}
-      /*
-        Quarter steps, so the country frame (FitToListings) can be the zoom
-        that actually fits. With Leaflet's default whole-number snap, a 32rem
-        box landed on zoom 5 — Uzbekistan a third of the frame — because 6
-        overflowed it by a few pixels. The +/- buttons still step by 1.
-      */
-      zoomSnap={0.25}
       // Scroll-zoom off: the map sits mid-page, and hijacking the wheel traps
       // someone who is only trying to scroll past it.
       scrollWheelZoom={false}

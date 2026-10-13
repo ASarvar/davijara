@@ -3,7 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { readSnapshot, saveSnapshot } from "@/lib/data/snapshot";
-import { auctionDay } from "@/lib/data/listings";
+import { auctionDay, getDistrictsByRegion } from "@/lib/data/listings";
 import type { Listing, ListingQuery } from "@/types/content";
 
 /*
@@ -21,8 +21,12 @@ import type { Listing, ListingQuery } from "@/types/content";
         lat, lng, lot: { lotNumber, startPrice, auctionDate, lotStatus … } } ] }
 
   Re-walking API 3 for tens of thousands of cadastres here would duplicate that
-  work and let the two systems disagree. In production the URL is the
-  dashboard's container on the host, http://127.0.0.1:3000/obyektlar/api/…
+  work and let the two systems disagree. In production the URL is the PUBLIC
+  one, https://davijara.uz/obyektlar/api/… — the dashboard is a container on
+  the edge box (markazsrv) and this app runs on `markaz`, where
+  127.0.0.1:3000 is a different application. That loopback address was the
+  first value written into DEPLOY.md and left the sale section at 0 after
+  the 09.10.2026 deploy.
 
   SCOPE, stated because it is narrower than e-auksion's: these are the
   privatization lots of objects on the MARKAZ's balance. e-auksion's group 5
@@ -109,15 +113,30 @@ const positive = (n: number | null | undefined): number | undefined =>
   listings feed always writes "<name> shahri". A city named differently from
   the lease side never matched a `?tuman=` carried from the search panel or
   the hero: Samarqand shahri counted 0 sale lots against 11 on the
-  dashboard. Every name that is not a "tumani" is a city in this data, so
-  each is brought to the feed's form; a district keeps its own name.
+  dashboard.
+
+  So a name is brought to the LEASE FEED'S OWN SPELLING when the feed has
+  that city in the same region — the feed is the source of truth for what a
+  place is called on this site. Failing that, only an explicit city suffix
+  ("sh.", "shahar", "shaxar") is rewritten to "shahri"; a bare name the feed
+  does not know ("Yunusobod", "Oqdaryo t.") is left exactly as the dashboard
+  wrote it rather than turned into a city that may not exist. A "tumani"
+  name is never touched.
 */
-function cityForm(name: string | null | undefined): string | undefined {
-  const n = name?.trim();
+const CITY_SUFFIX = /\s+(shahri|shahar|shaxar|sh\.)$/i;
+
+function placeName(
+  raw: string | null | undefined,
+  leaseNames: Map<string, string> | undefined,
+): string | undefined {
+  const n = raw?.trim();
   if (!n) return undefined;
   if (/\stumani$/i.test(n)) return n;
-  const base = n.replace(/\s+(shahri|shahar|shaxar|sh\.)$/i, "").trim();
-  return `${base} shahri`;
+  const base = n.replace(CITY_SUFFIX, "").trim();
+  const city = `${base} shahri`;
+  const known = leaseNames?.get(norm(city));
+  if (known) return known;
+  return base !== n ? city : n;
 }
 
 /**
@@ -125,7 +144,11 @@ function cityForm(name: string | null | undefined): string | undefined {
  * Status and date are NOT judged here — this is what is cached and snapshot,
  * and "open" depends on the clock at read time (see `isOffered`).
  */
-function toListing(o: ApiObject): Listing | null {
+function toListing(
+  o: ApiObject,
+  /** The lease feed's district names for each region, keyed by `norm()`. */
+  leaseNames: Record<string, Map<string, string>>,
+): Listing | null {
   const region = o.regionCode ? REGION_BY_CODE[o.regionCode] : undefined;
   const lat = Number(o.lat);
   const lng = Number(o.lng);
@@ -140,7 +163,7 @@ function toListing(o: ApiObject): Listing | null {
     title: o.name?.trim() || lotNumber,
     region,
     address: o.address?.trim() ?? "",
-    district: cityForm(o.districtName),
+    district: placeName(o.districtName, leaseNames[region]),
     /*
       The lot's own area first — that is what is on sale. A building's floor
       area next, and the land plot only for an object that IS land: printing a
@@ -186,7 +209,15 @@ function offeredClock(): number {
   return Number.isFinite(at) ? at : Date.now();
 }
 
-const SNAPSHOT_KEY = "privatization:all";
+/*
+  The shape of a stored Listing, in BOTH the cache key and the snapshot key.
+  Bumped whenever toListing changes what it writes (v2 `orderId`, v3 city
+  names, v4 names taken from the lease feed): the cache would otherwise serve
+  ten minutes of the old shape after a deploy, and the snapshot — the outage
+  fallback — would serve it until the next successful fetch.
+*/
+const SHAPE = "v4";
+const SNAPSHOT_KEY = `privatization:all:${SHAPE}`;
 
 /*
   Ten minutes. The dashboard's own statuses move on its sync schedule, not by
@@ -214,20 +245,33 @@ const fetchAll = unstable_cache(
       throw new Error("privatization API returned no objects array");
     }
 
+    /*
+      The lease feed's district names, for placeName. Its fetches are cached
+      per region already; if the feed cannot answer, names fall back to the
+      suffix rule alone rather than failing this source too.
+    */
+    const leaseNames: Record<string, Map<string, string>> = {};
+    try {
+      for (const [slug, names] of Object.entries(
+        await getDistrictsByRegion(),
+      )) {
+        leaseNames[slug] = new Map(names.map((d) => [norm(d), d]));
+      }
+    } catch {
+      // Suffix rule only — see placeName.
+    }
+
     // One object can surface under two cadastres (new and old); key on the lot.
     const byLot = new Map<string, Listing>();
     for (const o of json.objects) {
-      const listing = toListing(o);
+      const listing = toListing(o, leaseNames);
       if (listing) byLot.set(listing.id, listing);
     }
     const mapped = [...byLot.values()];
     saveSnapshot(SNAPSHOT_KEY, mapped);
     return mapped;
   },
-  // v3: listings carry `orderId` (v2) and city names in the feed's form
-  // (v3). A new key per shape change, so a deploy does not serve ten minutes
-  // of cached lots in the old one.
-  ["privatization-all-v3"],
+  [`privatization-all-${SHAPE}`],
   { revalidate: 600, tags: ["privatization"] },
 );
 
@@ -243,6 +287,35 @@ export interface PrivatizationResult {
    * count must not be printed from that — see getHeroStats.
    */
   unavailable?: boolean;
+}
+
+const isConfigured = () =>
+  Boolean(
+    process.env.PRIVATIZATION_API_URL && process.env.PRIVATIZATION_API_TOKEN,
+  );
+
+/**
+ * Every lot the dashboard holds: live, or its last stored answer when the
+ * endpoint fails, or `unavailable` when there is neither. The one place that
+ * fallback is written — both readers below go through it.
+ */
+async function loadAll(): Promise<{
+  all: Listing[];
+  asOf?: string;
+  unavailable?: boolean;
+}> {
+  try {
+    return { all: await fetchAll() };
+  } catch (error) {
+    console.warn(
+      "[privatization] endpoint unavailable:",
+      error instanceof Error ? error.message : error,
+    );
+    const snap = readSnapshot<Listing[]>(SNAPSHOT_KEY);
+    return snap
+      ? { all: snap.data, asOf: snap.fetchedAt }
+      : { all: [], unavailable: true };
+  }
 }
 
 const norm = (s: string) =>
@@ -265,25 +338,11 @@ const norm = (s: string) =>
 export async function getPrivatizationListings(
   query: ListingQuery = {},
 ): Promise<PrivatizationResult> {
-  const configured = Boolean(
-    process.env.PRIVATIZATION_API_URL && process.env.PRIVATIZATION_API_TOKEN,
-  );
+  const configured = isConfigured();
   if (!configured) return { listings: [], configured };
 
-  let all: Listing[];
-  let asOf: string | undefined;
-  try {
-    all = await fetchAll();
-  } catch (error) {
-    console.warn(
-      "[privatization] endpoint unavailable:",
-      error instanceof Error ? error.message : error,
-    );
-    const snap = readSnapshot<Listing[]>(SNAPSHOT_KEY);
-    if (!snap) return { listings: [], configured, unavailable: true };
-    all = snap.data;
-    asOf = snap.fetchedAt;
-  }
+  const { all, asOf, unavailable } = await loadAll();
+  if (unavailable) return { listings: [], configured, unavailable };
 
   const now = offeredClock();
   const district = query.district ? norm(query.district) : undefined;
@@ -302,17 +361,8 @@ export async function getPrivatizationListings(
  * Not for display on its own: most of these are not on offer.
  */
 export async function getAllPrivatizationListings(): Promise<Listing[]> {
-  if (
-    !process.env.PRIVATIZATION_API_URL ||
-    !process.env.PRIVATIZATION_API_TOKEN
-  ) {
-    return [];
-  }
-  try {
-    return await fetchAll();
-  } catch {
-    return readSnapshot<Listing[]>(SNAPSHOT_KEY)?.data ?? [];
-  }
+  if (!isConfigured()) return [];
+  return (await loadAll()).all;
 }
 
 function matches(

@@ -45,13 +45,18 @@ const SALE_AREA_BANDS = [
   { value: "5000-", label: "5000+" },
 ];
 
+/*
+  Values only; the labels are in messages/ (`search.saleBands.b1`…`b5`),
+  because "mln"/"mlrd" are words — Russian reads them "млн"/"млрд". The lease
+  bands' labels predate that rule and still sit in the markup below.
+*/
 const SALE_PRICE_BANDS = [
-  { value: "0-500", label: "0 — 500 mln" },
-  { value: "500-1500", label: "500 mln — 1,5 mlrd" },
-  { value: "1500-5000", label: "1,5 — 5 mlrd" },
-  { value: "5000-15000", label: "5 — 15 mlrd" },
-  { value: "15000-", label: "15 mlrd+" },
-];
+  { value: "0-500", key: "b1" },
+  { value: "500-1500", key: "b2" },
+  { value: "1500-5000", key: "b3" },
+  { value: "5000-15000", key: "b4" },
+  { value: "15000-", key: "b5" },
+] as const;
 
 /**
  * Object search.
@@ -296,7 +301,10 @@ export async function SearchWidget({
           options={[
             { value: ALL_VALUE, label: t("anyPrice") },
             ...(sale
-              ? SALE_PRICE_BANDS
+              ? SALE_PRICE_BANDS.map((b) => ({
+                  value: b.value,
+                  label: t(`saleBands.${b.key}`),
+                }))
               : [
                   { value: "0-1", label: "0 — 1 mln" },
                   { value: "1-5", label: "1 — 5 mln" },

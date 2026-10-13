@@ -11,6 +11,7 @@ import {
   getUpcomingAuctions,
 } from "@/lib/data/listings";
 import { getPrivatizationListings } from "@/lib/data/privatization";
+import { MARKET_KEY, parseMarket } from "@/lib/listings-view";
 import { cn } from "@/lib/utils";
 import { CardRotator } from "@/components/common/card-rotator";
 import { LotCard } from "@/components/common/lot-card";
@@ -77,7 +78,9 @@ export async function UpcomingAuctions({
     the price). Only lots still OFFERED: the sale set is already cut at its
     auction time (privatization.ts), the same instant this strip drops a lot.
   */
-  const sales = (await getPrivatizationListings()).listings;
+  // Started, not awaited: both calls below take the promise and read it
+  // alongside their own fetch, so nothing here runs in series.
+  const sales = getPrivatizationListings().then((r) => r.listings);
   const [{ listings }, regions, counts] = await Promise.all([
     getUpcomingAuctions(12, activeWindow, sales),
     getRegions(),
@@ -106,6 +109,13 @@ export async function UpcomingAuctions({
   */
   const chipHref = (value: string | null) => {
     const params = buildFilterQuery(searchParams);
+    /*
+      The map's Ijara | Xususiylashtirish choice rides along too. It is not a
+      filter, so buildFilterQuery leaves it out — and a chip that dropped it
+      reloaded the map above on the leases while the reader was on the sales.
+    */
+    const market = parseMarket(searchParams);
+    if (market !== "ijara") params.set(MARKET_KEY, market);
     if (value == null) params.delete(AUCTION_WINDOW_KEY);
     else params.set(AUCTION_WINDOW_KEY, value);
     const qs = params.toString();

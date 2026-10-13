@@ -172,58 +172,60 @@ function curlotsBody(group: number, page: number): string {
   A failure THROWS instead of returning an empty answer, so an outage is never
   written into the cache as "nothing is live" for the next 30 seconds.
 */
-const fetchLiveLots = unstable_cache(
-  async (): Promise<CurrentLot[]> => {
+const fetchGroupLots = unstable_cache(
+  /*
+    ONE CACHE ENTRY PER GROUP (the group is the argument, so it is part of the
+    key). Rent and sale used to be read in one call that threw if either
+    failed — so an outage on the sale group blanked every live LEASE room as
+    well, which had never depended on it. Now each group stands alone: a
+    group that fails is reported as unknown, the other still answers. A
+    failure still THROWS rather than returning [], so it is never cached as
+    "nothing is live" for the next 30 seconds.
+  */
+  async (group: number): Promise<CurrentLot[]> => {
     const lots = new Map<string, CurrentLot>();
 
-    /*
-      One group after another, and a failure in EITHER throws: half a list
-      cached as the whole would hide every live lot of the other kind for the
-      next 30 seconds while looking like a quiet morning.
-    */
-    for (const group of GROUP_IDS) {
-      for (let page = 1; page <= MAX_PAGES; page++) {
-        const res = await fetch(CURLOTS_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: curlotsBody(group, page),
-          signal: AbortSignal.timeout(8_000),
-          cache: "no-store",
-        });
-        if (!res.ok) throw new Error(`curlots responded ${res.status}`);
+    for (let page = 1; page <= MAX_PAGES; page++) {
+      const res = await fetch(CURLOTS_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: curlotsBody(group, page),
+        signal: AbortSignal.timeout(8_000),
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error(`curlots responded ${res.status}`);
 
-        const json = (await res.json()) as CurlotsResponse;
-        if (!Array.isArray(json.rows)) {
-          throw new Error("curlots response carried no rows array");
-        }
+      const json = (await res.json()) as CurlotsResponse;
+      if (!Array.isArray(json.rows)) {
+        throw new Error("curlots response carried no rows array");
+      }
 
-        /*
+      /*
         `lot_number` is what our own listings carry, and `id` repeats it in
         the responses seen so far — kept as a fallback, but neither is trusted
         to be a number: anything that is not a plain lot id is dropped rather
         than passed to the browser.
       */
-        for (const row of json.rows) {
-          const raw = String(row.lot_number ?? row.id ?? "").trim();
-          if (/^\d{1,18}$/.test(raw)) {
-            lots.set(raw, {
-              lot: raw,
-              startsAt: parseStart(row.auction_date_str),
-            });
-          }
+      for (const row of json.rows) {
+        const raw = String(row.lot_number ?? row.id ?? "").trim();
+        if (/^\d{1,18}$/.test(raw)) {
+          lots.set(raw, {
+            lot: raw,
+            startsAt: parseStart(row.auction_date_str),
+          });
         }
-
-        const totalPages = Number(json.totalPages ?? 1);
-        if (!Number.isFinite(totalPages) || page >= totalPages) break;
       }
+
+      const totalPages = Number(json.totalPages ?? 1);
+      if (!Number.isFinite(totalPages) || page >= totalPages) break;
     }
 
     return [...lots.values()];
   },
-  ["live-lots-rent-sale"],
+  ["live-lots-group"],
   { revalidate: REVALIDATE_SECONDS },
 );
 
@@ -244,15 +246,30 @@ function startedOnly(lots: CurrentLot[], now = Date.now()): string[] {
  * about a lot already comes from our own feed.
  */
 export async function getLiveAuctionLots(): Promise<string[] | null> {
-  try {
-    return startedOnly(await fetchLiveLots());
-  } catch (error) {
-    console.warn(
-      "[live-auctions] current lots unavailable:",
-      error instanceof Error ? error.message : error,
-    );
-    return null;
-  }
+  /*
+    Each group on its own (see fetchGroupLots). Only when NO group answered
+    is the whole list unknown — the route then says 503 and the page keeps
+    what it last knew. One failed group just contributes nothing: its rooms
+    are shown as not live, the safe direction, while the other group's rooms
+    still are.
+  */
+  const results = await Promise.allSettled(
+    GROUP_IDS.map((group) => fetchGroupLots(group)),
+  );
+  const lots: CurrentLot[] = [];
+  let answered = 0;
+  results.forEach((result, i) => {
+    if (result.status === "fulfilled") {
+      answered++;
+      lots.push(...result.value);
+    } else {
+      console.warn(
+        `[live-auctions] group ${GROUP_IDS[i]} unavailable:`,
+        result.reason instanceof Error ? result.reason.message : result.reason,
+      );
+    }
+  });
+  return answered > 0 ? startedOnly(lots) : null;
 }
 
 /**
