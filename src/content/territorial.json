@@ -14,7 +14,7 @@
   },
   "andijon": {
     "region": "Andijon viloyati",
-    "fullName": "Yuldashev Xurshidbek Baxodirovich",
+    "fullName": "Vakant",
     "title": "Hududiy boshqarma boshligʻi",
     "address": "170100, Andijon shahri, A.Navoiy koʻchasi, 126-uy",
     "lat": 40.78148697932435,
@@ -23,7 +23,7 @@
     "email": "andijon_markaz@davaktiv.uz",
     "receptionHours": "Dushanba-Juma",
     "appeals": null,
-    "photo": "/hududiy-boshqarmalar/andijon.jpeg"
+    "photo": null
   },
   "buxoro": {
     "region": "Buxoro viloyati",

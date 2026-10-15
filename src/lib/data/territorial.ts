@@ -41,6 +41,12 @@ import territorialData from "@/content/territorial.json";
   address-text Google Maps search is kept as the fallback in code for a
   future region added without one.
 
+  VACANT POSTS (operator, 2026-10-15, for Andijon's head): `fullName` is
+  "Vakant" and `photo` is null, the way workers.json marks the vacant deputy
+  director — the card stays, because the office, its phone, e-mail and
+  address still serve citizens; only the person is gone. The former head's
+  photo was deleted from public/ rather than left reachable by URL.
+
   This unit is drawn OUTSIDE the central apparatus on the org chart itself
   (a dashed box — see structure.ts) — it is not part of workers.ts's list.
 */
