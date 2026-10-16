@@ -9,6 +9,7 @@ import { SurfaceCard } from "@/components/common/surface-card";
 import { SocialLinks } from "@/components/layout/social-links";
 import { Section } from "@/components/layout/section";
 import { OfficeMapPanel } from "@/components/map/office-map-panel";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -17,7 +18,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "contact" });
-  return { title: t("title"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/aloqa"),
+    title: t("title"),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function Page({

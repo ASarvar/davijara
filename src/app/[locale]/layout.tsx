@@ -71,18 +71,17 @@ export async function generateMetadata({
       template: `%s — ${site.name}`,
     },
     description: t("description"),
-    alternates: {
-      canonical: `/${locale}`,
-      // hreflang alternates — absent from the legacy site entirely.
-      languages: Object.fromEntries(
-        routing.locales.map((l) => [l, `/${l}`]),
-      ) as Record<string, string>,
-    },
+    /*
+      No `alternates` and no `openGraph.url` here: both are per-PAGE values,
+      and a layout cannot see the pathname, so whatever it declared was
+      inherited by every page. It declared `/${locale}`, which made all 47
+      inner pages canonicalise to the home page. Each page now sets its own
+      through `localeAlternates()` (lib/seo.ts).
+    */
     openGraph: {
       type: "website",
       siteName: site.name,
       locale,
-      url: `/${locale}`,
       title: t("title"),
       description: t("description"),
     },

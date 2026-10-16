@@ -9,6 +9,7 @@ import { SurfaceCard } from "@/components/common/surface-card";
 import { Section } from "@/components/layout/section";
 import { getNavigation } from "@/lib/data/navigation";
 import type { NavItem } from "@/content/site";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Sayt xaritasi — every page of the portal on one screen.
@@ -42,7 +43,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/sayt-xaritasi"),
+    title: t(NAV_KEY),
+  };
 }
 
 /** Footer pages, keyed by their `nav` message. */

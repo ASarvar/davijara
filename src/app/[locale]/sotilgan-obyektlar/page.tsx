@@ -16,6 +16,7 @@ import { formatDate, formatNumber } from "@/lib/format";
 import { SoldLotCard } from "@/components/common/sold-lot-card";
 import { Section } from "@/components/layout/section";
 import { SoldFilter } from "@/components/sections/sold-filter";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -24,7 +25,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "sold" });
-  return { title: t("pageTitle"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/sotilgan-obyektlar"),
+    title: t("pageTitle"),
+    description: t("metaDescription"),
+  };
 }
 
 /** Four rows of three at the widest grid, as on /obyektlar. */

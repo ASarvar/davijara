@@ -18,6 +18,7 @@ import { LotImage } from "@/components/common/lot-image";
 import { StatList } from "@/components/common/stat-list";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -26,7 +27,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "stats" });
-  return { title: t("title"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/statistika"),
+    title: t("title"),
+    description: t("metaDescription"),
+  };
 }
 
 const MONTHS = [

@@ -9,6 +9,7 @@ import { IconTile } from "@/components/common/icon-tile";
 import { Button } from "@/components/ui/button";
 import { getMinRates } from "@/lib/data/min-rates";
 import { withBasePath } from "@/lib/base-path";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Eng kam stavkalar — one downloadable PDF per region: the document
@@ -53,7 +54,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
-  return { title: tNav(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/eng-kam-stavkalar"),
+    title: tNav(NAV_KEY),
+  };
 }
 
 export default async function MinRatesPage({

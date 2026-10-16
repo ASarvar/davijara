@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 
@@ -12,6 +13,17 @@ import { RecentlySold } from "@/components/sections/recently-sold";
 import { PrivilegesTeaser } from "@/components/sections/privileges-teaser";
 import { NewsAndDocs } from "@/components/sections/news-and-docs";
 import { Faq } from "@/components/sections/faq";
+import { localeAlternates } from "@/lib/seo";
+
+// Title and description come from the layout; only the URL is the page's own.
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale) };
+}
 
 export default async function HomePage({
   params,

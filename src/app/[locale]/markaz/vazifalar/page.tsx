@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import { getDuties } from "@/lib/data/duties";
 import { Section } from "@/components/layout/section";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Vazifa va funksiyalar — the Centre's duties and functions.
@@ -33,7 +34,11 @@ export async function generateMetadata({
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "duties" }),
   ]);
-  return { title: tNav(NAV_KEY), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/markaz/vazifalar"),
+    title: tNav(NAV_KEY),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function DutiesPage({
@@ -52,7 +57,12 @@ export default async function DutiesPage({
 
   return (
     <Section tone="deep">
-      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+      <Breadcrumbs
+        items={[
+          { label: tNav("centre"), href: "/markaz" },
+          { label: tNav(NAV_KEY) },
+        ]}
+      />
 
       <div className="mx-auto max-w-3xl">
         {/*

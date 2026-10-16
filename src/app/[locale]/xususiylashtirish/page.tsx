@@ -14,6 +14,7 @@ import { getPrivatizationListings } from "@/lib/data/privatization";
 import { Section } from "@/components/layout/section";
 import { ObjectsExplorer } from "@/components/sections/objects-explorer";
 import { SearchWidget } from "@/components/sections/search-widget";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Xususiylashtirishga taklif etilayotgan obyektlar — state property offered
@@ -45,7 +46,11 @@ export async function generateMetadata({
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "privatization" }),
   ]);
-  return { title: tNav(NAV_KEY), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/xususiylashtirish"),
+    title: tNav(NAV_KEY),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function PrivatizationPage({

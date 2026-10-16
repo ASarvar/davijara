@@ -30,6 +30,7 @@ import {
   getOpenDataForPeriod,
 } from "@/lib/data/open-data";
 import { withBasePath } from "@/lib/base-path";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Ochiq maʼlumotlar — one quarter's worth of the Centre's nine budget-
@@ -56,7 +57,10 @@ const NAV_KEY = "openData";
 export const revalidate = 300;
 
 /** categoryId -> the icon that leads its row. Direct lucide imports — no registry entry needed here. */
-const CATEGORY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const CATEGORY_ICONS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   "smeta-ijrosi": Calculator,
   "veb-sayt-3299": Globe,
   balans: Scale,
@@ -75,7 +79,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
-  return { title: tNav(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/malumotlar/ochiq-malumotlar"),
+    title: tNav(NAV_KEY),
+  };
 }
 
 export default async function OpenDataPage({
@@ -144,9 +151,7 @@ export default async function OpenDataPage({
 
         {entries.length === 0 ? (
           <p className="border-hairline text-muted-foreground mt-8 rounded-md border border-dashed px-4 py-6 text-center text-sm text-pretty">
-            {periods.length === 0
-              ? t("empty")
-              : t("emptyPeriod")}
+            {periods.length === 0 ? t("empty") : t("emptyPeriod")}
           </p>
         ) : (
           <div className="mt-8 space-y-3">

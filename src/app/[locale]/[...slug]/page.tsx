@@ -6,6 +6,7 @@ import { getPageByPath } from "@/lib/data/pages";
 import { BlockContent } from "@/components/common/block-content";
 import { Section } from "@/components/layout/section";
 import { setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Pages invented in the admin panel, at paths no route file covers.
@@ -52,6 +53,7 @@ export async function generateMetadata({
   if (!page) return {};
 
   return {
+    alternates: localeAlternates(locale, `/${slug.join("/")}`),
     title: page.title,
     description: page.description || undefined,
   };

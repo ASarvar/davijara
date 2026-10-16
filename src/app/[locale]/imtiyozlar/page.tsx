@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
 import { PrivilegesView } from "@/components/sections/privileges-view";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -12,6 +13,7 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "privileges" });
   return {
+    alternates: localeAlternates(locale, "/imtiyozlar"),
     title: t("pageTitle"),
     description: t("pageDescription"),
   };

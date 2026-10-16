@@ -9,6 +9,7 @@ import { SurfaceCard } from "@/components/common/surface-card";
 import { getTerritorialOffices } from "@/lib/data/territorial";
 import { formatNumber } from "@/lib/format";
 import { mediaSrc } from "@/lib/media/src";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Hududiy boshqarmalar — the 14 territorial administrations, one card per
@@ -32,7 +33,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
-  return { title: tNav(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/markaz/hududiy-boshqarmalar"),
+    title: tNav(NAV_KEY),
+  };
 }
 
 export default async function TerritorialPage({
@@ -52,7 +56,12 @@ export default async function TerritorialPage({
 
   return (
     <Section tone="deep">
-      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+      <Breadcrumbs
+        items={[
+          { label: tNav("centre"), href: "/markaz" },
+          { label: tNav(NAV_KEY) },
+        ]}
+      />
 
       <div className="mx-auto mb-20">
         <h1
@@ -100,7 +109,7 @@ export default async function TerritorialPage({
                       alt=""
                       width={60}
                       height={60}
-                      className="w-[81px] h-[108px] shrink-0 rounded-xs object-cover"
+                      className="h-[108px] w-[81px] shrink-0 rounded-xs object-cover"
                     />
                   ) : (
                     <span

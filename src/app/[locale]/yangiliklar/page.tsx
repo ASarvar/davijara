@@ -8,6 +8,7 @@ import { NEWS_PER_PAGE, getNews } from "@/lib/data/news";
 import { parsePage } from "@/lib/data/listings";
 import { NewsCard } from "@/components/common/news-card";
 import { Section } from "@/components/layout/section";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Markaz yangiliklari — the press centre's own feed.
@@ -40,7 +41,11 @@ export async function generateMetadata({
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "news" }),
   ]);
-  return { title: tNav("newsCentre"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/yangiliklar"),
+    title: tNav("newsCentre"),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function NewsPage({

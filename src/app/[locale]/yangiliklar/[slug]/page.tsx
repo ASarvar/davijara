@@ -12,6 +12,7 @@ import { BlockContent } from "@/components/common/block-content";
 import { ImagePlaceholder } from "@/components/common/placeholder/image-placeholder";
 import { NewsAside } from "@/components/sections/news-aside";
 import { Section } from "@/components/layout/section";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   A single news item.
@@ -60,6 +61,7 @@ export async function generateMetadata({
   if (!article) return {};
 
   return {
+    alternates: localeAlternates(locale, `/yangiliklar/${slug}`),
     title: article.title,
     description: article.excerpt,
     openGraph: {
@@ -99,7 +101,9 @@ export default async function ArticlePage({
         wraps the crumb trail to three lines on a phone to tell the reader
         something the page is about to shout.
       */}
-      <Breadcrumbs items={[{ label: tNav("newsCentre"), href: "/yangiliklar" }]} />
+      <Breadcrumbs
+        items={[{ label: tNav("newsCentre"), href: "/yangiliklar" }]}
+      />
 
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-12">
         <article>

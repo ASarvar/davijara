@@ -10,6 +10,7 @@ import type { Locale } from "@/i18n/routing";
 import { getRegions } from "@/lib/data/catalog";
 import { getLiveAuctionListings } from "@/lib/data/live-auctions";
 import { formatNumber } from "@/lib/format";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   "Joriy savdolar" — every lot whose bidding room is open right now.
@@ -40,7 +41,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "currentAuctions" });
-  return { title: t("pageTitle"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/joriy-savdolar"),
+    title: t("pageTitle"),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function CurrentAuctionsPage({

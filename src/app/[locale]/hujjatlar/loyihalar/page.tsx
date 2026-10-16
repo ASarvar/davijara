@@ -13,6 +13,7 @@ import { withBasePath } from "@/lib/base-path";
 import { getDocumentDrafts } from "@/lib/data/document-drafts";
 import { getPageByNavKey } from "@/lib/data/pages";
 import { formatDate, formatNumber } from "@/lib/format";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   The page's name lives in `messages/*.json` under `nav`, exactly once, and
@@ -36,7 +37,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/hujjatlar/loyihalar"),
+    title: t(NAV_KEY),
+  };
 }
 
 /*

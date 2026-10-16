@@ -15,6 +15,7 @@ import {
 import { Section } from "@/components/layout/section";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsExplorer } from "@/components/sections/objects-explorer";
+import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -23,7 +24,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "objects" });
-  return { title: t("title"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/ijaraga-obyektlar"),
+    title: t("title"),
+    description: t("metaDescription"),
+  };
 }
 
 /**

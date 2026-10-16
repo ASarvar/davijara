@@ -5,6 +5,7 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
 import { getAppealSources } from "@/lib/data/appeals-stats";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Murojaatlar — per-channel appeal/complaint counts (see
@@ -24,7 +25,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/ochiq-malumotlar/murojaatlar"),
+    title: t(NAV_KEY),
+  };
 }
 
 export default async function AppealsPage({
@@ -45,7 +49,7 @@ export default async function AppealsPage({
     <Section tone="deep">
       <Breadcrumbs items={[{ label: tNav(NAV_KEY) }]} />
 
-      <div className="mx-auto max-w-4xl mb-20">
+      <div className="mx-auto mb-20 max-w-4xl">
         <h1
           data-split
           className="font-heading text-center text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"
@@ -96,7 +100,10 @@ export default async function AppealsPage({
               </thead>
               <tbody>
                 {sources.map((row, i) => (
-                  <tr key={row.source} className="border-hairline border-b last:border-0">
+                  <tr
+                    key={row.source}
+                    className="border-hairline border-b last:border-0"
+                  >
                     <td className="text-muted-foreground px-8 py-2">{i + 1}</td>
                     <td className="px-3 py-2 text-pretty">{row.source}</td>
                     <td className="px-3 py-2 text-center tabular-nums">

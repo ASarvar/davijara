@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
 import { VacancyList } from "@/components/sections/vacancy-list";
 import { getOpenVacancies, getVacancyInfo } from "@/lib/data/vacancies";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Bo'sh ish o'rinlari — the statutory hiring-conditions table plus the
@@ -30,7 +31,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/markaz/bosh-ish-orinlari"),
+    title: t(NAV_KEY),
+  };
 }
 
 export default async function VacanciesPage({

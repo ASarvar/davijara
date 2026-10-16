@@ -20,6 +20,7 @@ import {
 } from "@/lib/data/lease-contracts";
 import { parsePage } from "@/lib/data/listings";
 import { formatNumber } from "@/lib/format";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   "Ijara shartnomalari" — every lease contract signed this year, by object.
@@ -54,7 +55,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "leaseContracts" });
-  return { title: t("pageTitle"), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/ijara-shartnomalari"),
+    title: t("pageTitle"),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function LeaseContractsPage({
@@ -149,7 +154,6 @@ export default async function LeaseContractsPage({
         {nothingAtAll ? null : (
           <StatPanel stats={stats} className="mt-8 lg:grid-cols-3" />
         )}
-
       </Section>
 
       <LeaseFilter query={query} />

@@ -12,6 +12,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { sections, closingStatement } from "@/content/anticorruption";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Korrupsiyaga qarshi kurashish — the Centre's anti-corruption disclosure.
@@ -38,7 +39,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
-  return { title: tNav(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/markaz/korrupsiyaga-qarshi"),
+    title: tNav(NAV_KEY),
+  };
 }
 
 export default async function AnticorruptionPage({
@@ -53,9 +57,14 @@ export default async function AnticorruptionPage({
 
   return (
     <Section tone="deep">
-      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+      <Breadcrumbs
+        items={[
+          { label: tNav("centre"), href: "/markaz" },
+          { label: tNav(NAV_KEY) },
+        ]}
+      />
 
-      <div className="mx-auto ">
+      <div className="mx-auto">
         <h1
           data-split
           className="font-heading text-center text-2xl font-semibold text-balance sm:text-3xl lg:text-4xl"

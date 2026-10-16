@@ -8,6 +8,7 @@ import { Section } from "@/components/layout/section";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { getWorkers, WORKERS_EMAIL } from "@/lib/data/workers";
 import { mediaSrc } from "@/lib/media/src";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Markaziy apparat — the central apparatus staff directory: one card per
@@ -31,7 +32,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
-  return { title: tNav(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/markaz/markaziy-apparat"),
+    title: tNav(NAV_KEY),
+  };
 }
 
 export default async function WorkersPage({
@@ -50,7 +54,12 @@ export default async function WorkersPage({
 
   return (
     <Section tone="deep">
-      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+      <Breadcrumbs
+        items={[
+          { label: tNav("centre"), href: "/markaz" },
+          { label: tNav(NAV_KEY) },
+        ]}
+      />
 
       <div className="mx-auto mb-20">
         <h1

@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import { getAbout } from "@/lib/data/about";
 import { formatDate } from "@/lib/format";
 import { Section } from "@/components/layout/section";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Markaz haqida — establishment and official naming.
@@ -33,7 +34,11 @@ export async function generateMetadata({
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "about" }),
   ]);
-  return { title: tNav(NAV_KEY), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/markaz"),
+    title: tNav(NAV_KEY),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function AboutPage({
@@ -53,7 +58,12 @@ export default async function AboutPage({
 
   return (
     <Section tone="deep">
-      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+      <Breadcrumbs
+        items={[
+          { label: tNav("centre"), href: "/markaz" },
+          { label: tNav(NAV_KEY) },
+        ]}
+      />
 
       <div className="mx-auto max-w-3xl">
         {/*

@@ -8,6 +8,7 @@ import { Section } from "@/components/layout/section";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { getLeadership, LEADERSHIP_EMAIL } from "@/lib/data/leadership";
 import { mediaSrc } from "@/lib/media/src";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Rahbariyat — the Director and the two deputies, filled in from the panel
@@ -34,7 +35,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
-  return { title: tNav(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/markaz/rahbariyat"),
+    title: tNav(NAV_KEY),
+  };
 }
 
 export default async function LeadershipPage({
@@ -53,7 +57,12 @@ export default async function LeadershipPage({
 
   return (
     <Section tone="deep">
-      <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+      <Breadcrumbs
+        items={[
+          { label: tNav("centre"), href: "/markaz" },
+          { label: tNav(NAV_KEY) },
+        ]}
+      />
 
       <div className="mx-auto mb-20">
         <h1

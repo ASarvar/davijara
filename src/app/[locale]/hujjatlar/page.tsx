@@ -8,6 +8,7 @@ import { Section } from "@/components/layout/section";
 import { IconTile } from "@/components/common/icon-tile";
 import { Button } from "@/components/ui/button";
 import { getLegalDocuments } from "@/lib/data/legal-documents";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Hujjatlar — "Sohaga doir normativ-huquqiy hujjatlar roʻyxati", the
@@ -30,7 +31,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/hujjatlar"),
+    title: t(NAV_KEY),
+  };
 }
 
 export default async function DocumentsPage({
@@ -90,7 +94,11 @@ export default async function DocumentsPage({
                 <div className="flex shrink-0 flex-wrap justify-end gap-2">
                   {doc.links.map((link, i) => (
                     <Button key={i} asChild variant="outline" size="sm">
-                      <a href={link.href} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <ExternalLink aria-hidden="true" />
                         {link.label ?? tCommon("view")}
                       </a>

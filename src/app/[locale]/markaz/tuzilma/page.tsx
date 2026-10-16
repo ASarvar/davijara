@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import { getOrgStructure } from "@/lib/data/structure";
 import { OrgChart } from "@/components/sections/org-chart";
 import { Section } from "@/components/layout/section";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   Tashkiliy tuzilma — the central apparatus structure.
@@ -34,7 +35,11 @@ export async function generateMetadata({
     getTranslations({ locale, namespace: "nav" }),
     getTranslations({ locale, namespace: "structure" }),
   ]);
-  return { title: tNav(NAV_KEY), description: t("metaDescription") };
+  return {
+    alternates: localeAlternates(locale, "/markaz/tuzilma"),
+    title: tNav(NAV_KEY),
+    description: t("metaDescription"),
+  };
 }
 
 export default async function StructurePage({
@@ -51,7 +56,12 @@ export default async function StructurePage({
   return (
     <>
       <Section tone="deep" className="pb-6">
-        <Breadcrumbs items={[{ label: tNav("centre"), href: "/markaz" }, { label: tNav(NAV_KEY) }]} />
+        <Breadcrumbs
+          items={[
+            { label: tNav("centre"), href: "/markaz" },
+            { label: tNav(NAV_KEY) },
+          ]}
+        />
 
         {/*
           Centred, unlike its siblings on the other five pages — the operator

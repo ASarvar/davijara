@@ -8,6 +8,7 @@ import {
   isPrivilegeCategory,
 } from "@/lib/data/privileges";
 import { PrivilegesView } from "@/components/sections/privileges-view";
+import { localeAlternates } from "@/lib/seo";
 
 /** All four categories x three locales, prerendered at build time. */
 export function generateStaticParams() {
@@ -28,6 +29,7 @@ export async function generateMetadata({
   if (!category) return { title: t("pageTitle") };
 
   return {
+    alternates: localeAlternates(locale, `/imtiyozlar/${kategoriya}`),
     title: `${category.label} — ${t("title")}`,
     description: t("pageDescription"),
   };

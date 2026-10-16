@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
 import { PlaceholderPage } from "@/components/layout/placeholder-page";
+import { localeAlternates } from "@/lib/seo";
 
 /*
   The page's name lives in `messages/*.json` under `nav`, exactly once, and
@@ -26,7 +27,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t(NAV_KEY) };
+  return {
+    alternates: localeAlternates(locale, "/yangiliklar/media"),
+    title: t(NAV_KEY),
+  };
 }
 
 export default async function Page({
