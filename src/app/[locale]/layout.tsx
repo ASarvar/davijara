@@ -101,13 +101,23 @@ export async function generateMetadata({
       icon: [
         { url: withBasePath("/favicon.ico"), sizes: "any" },
         /*
-          The short mark, not the wordmark. A 4.5:1 lockup letterboxes down to
-          a few unreadable pixels in a browser tab; the mark is near-square and
-          stays legible at 16px.
+          The short mark, not the wordmark — a 4.5:1 lockup letterboxes down to
+          a few unreadable pixels at 16px — and drawn on a NAVY TILE. The first
+          version used logo-short-light.svg as is: a white mark on nothing,
+          invisible on a light browser tab and on Google's light results page,
+          and 57x69 where Google requires a square favicon. favicon.ico (16/32/
+          48), icon-192.png and apple-touch-icon.png are rendered from
+          public/icon.svg; regenerate them together if the mark changes.
         */
-        { url: withBasePath("/logo-short-light.svg"), type: "image/svg+xml" },
+        { url: withBasePath("/icon.svg"), type: "image/svg+xml" },
+        {
+          url: withBasePath("/icon-192.png"),
+          type: "image/png",
+          sizes: "192x192",
+        },
       ],
-      apple: withBasePath("/logo-short-light.svg"),
+      // iOS ignores SVG here; it needs a PNG, and draws its own rounded mask.
+      apple: withBasePath("/apple-touch-icon.png"),
     },
     robots: { index: true, follow: true },
     /*
