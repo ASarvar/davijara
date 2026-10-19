@@ -153,6 +153,12 @@ export interface ListingQuery {
    */
   auctionDate?: string;
   /**
+   * The day the lot was published on e-auksion, "YYYY-MM-DD" — the
+   * catalogue's "Eʼlon qilingan sana" field (`?elon=`). Leases only: the
+   * sale lots come from a source with no such date.
+   */
+  publishedDate?: string;
+  /**
    * How far ahead the auction opens, in days from now — exclusive lower
    * bound, inclusive upper. `{ min: 3, max: 5 }` is "more than 3 days away
    * and no more than 5", so the offered windows tile the calendar without

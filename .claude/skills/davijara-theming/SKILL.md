@@ -45,11 +45,16 @@ which draw the section rules, the header edge and every card hover. Cobalt's
 tint uses a lower alpha than gold's (0.12 / 0.14 / 0.38 against 0.18 / 0.18 /
 0.45) because it is a far darker ink at the same opacity.
 
-**Gold survives on a budget, and it is spelled `--ornament`.** Three places,
-none of them clickable: the rotating word in the hero `<h1>`, the three hero
-figures, and the Qidirish button (which keeps `--color-gold` as a background —
-the page's one primary action is where a warm mass belongs). Never reach for
-`--ornament` for anything a reader clicks; that is `--accent`'s job.
+**Gold survives on a budget, and it is spelled `--ornament`.** Two places,
+neither of them clickable: the rotating word in the hero `<h1>` and the hero
+figures. Never reach for `--ornament` for anything a reader clicks; that is
+`--accent`'s job.
+
+**The Qidirish button is COBALT** (`--color-cobalt` ground, `--color-mist-pale`
+ink), on every search band. It was gold until the operator changed the
+catalogue's on 21.08.2026; the sold-results and contract-register panels kept
+gold for two months because each carried its own copy of the button. All
+three now render `components/common/filter-actions.tsx` — change it there.
 
 The measured ladder:
 

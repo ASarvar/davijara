@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { withBasePath } from "@/lib/base-path";
@@ -13,7 +12,8 @@ import {
 import { AuctionDayField } from "@/components/common/auction-day-field";
 import { ALL_VALUE } from "@/components/common/select-field";
 import { Eyebrow } from "@/components/common/eyebrow";
-import { Container } from "@/components/layout/section";
+import { FilterActions } from "@/components/common/filter-actions";
+import { FilterBand } from "@/components/common/filter-band";
 import { RegionDistrictFields } from "./region-district-fields";
 
 /*
@@ -59,77 +59,77 @@ export async function SoldFilter({
   };
 
   return (
-    <section data-tone="deep" className="bg-band border-hairline border-y">
-      <Container className="py-16">
-        {/* sr-only, not deleted: this is the panel's accessible
+    <FilterBand
+      id="filter-sold"
+      activeCount={
+        [query.region, query.district, query.from, query.to].filter(Boolean)
+          .length
+      }
+    >
+      {/* sr-only, not deleted: this is the panel's accessible
           name, and the eyebrow style is what the operator asked to drop. */}
-        <Eyebrow as="h2" className="sr-only">
-          {ts("filterLabel")}
-        </Eyebrow>
+      <Eyebrow as="h2" className="sr-only">
+        {ts("filterLabel")}
+      </Eyebrow>
 
-        <form
-          action={withBasePath(`/${locale}/sotilgan-obyektlar`)}
-          method="get"
-          className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
-        >
-          {/*
+      <form
+        action={withBasePath(`/${locale}/sotilgan-obyektlar`)}
+        method="get"
+        className="grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))_auto]"
+      >
+        {/*
             The district list here is built from lots that actually SOLD, not
             from the catalogue's open ones — see getSoldDistrictsByRegion. A
             tuman with nothing sold this year would otherwise sit in the
             dropdown returning zero results.
           */}
-          <RegionDistrictFields
-            regions={regions}
-            districtsByRegion={districtsByRegion}
-            initialRegion={query.region ?? ALL_VALUE}
-            initialDistrict={query.district ?? ALL_VALUE}
-            labels={{
-              region: t("region"),
-              anyRegion: t("anyRegion"),
-              district: t("district"),
-              anyDistrict: t("anyDistrict"),
-              regionFirst: t("regionFirst"),
-            }}
-          />
+        <RegionDistrictFields
+          regions={regions}
+          districtsByRegion={districtsByRegion}
+          initialRegion={query.region ?? ALL_VALUE}
+          initialDistrict={query.district ?? ALL_VALUE}
+          labels={{
+            region: t("region"),
+            anyRegion: t("anyRegion"),
+            district: t("district"),
+            anyDistrict: t("anyDistrict"),
+            regionFirst: t("regionFirst"),
+          }}
+        />
 
-          {/*
+        {/*
             Two calendars rather than one, and both grey out the days that
             produced no sale — so a range can only ever be drawn across days
             that have something in them. `parseSoldQuery` swaps them if they
             are picked the wrong way round.
           */}
-          <AuctionDayField
-            id="dan"
-            name={SOLD_FROM_KEY}
-            label={ts("dateFrom")}
-            value={query.from}
-            days={days}
-            labels={dayLabels}
-          />
+        <AuctionDayField
+          id="dan"
+          name={SOLD_FROM_KEY}
+          label={ts("dateFrom")}
+          value={query.from}
+          days={days}
+          labels={dayLabels}
+        />
 
-          <AuctionDayField
-            id="gacha"
-            name={SOLD_TO_KEY}
-            label={ts("dateTo")}
-            value={query.to}
-            days={days}
-            labels={dayLabels}
-          />
+        <AuctionDayField
+          id="gacha"
+          name={SOLD_TO_KEY}
+          label={ts("dateTo")}
+          value={query.to}
+          days={days}
+          labels={dayLabels}
+        />
 
-          <div className="flex items-end">
-            <button
-              type="submit"
-              className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-gold)] px-6 text-sm font-semibold text-[color:var(--color-navy)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
-            >
-              <Search
-                aria-hidden="true"
-                className="size-4 transition-transform duration-200 group-hover:scale-110"
-              />
-              {t("submit")}
-            </button>
-          </div>
-        </form>
-      </Container>
-    </section>
+        <FilterActions
+          compact
+          resetHref={
+            query.region || query.district || query.from || query.to
+              ? withBasePath(`/${locale}/sotilgan-obyektlar`)
+              : undefined
+          }
+        />
+      </form>
+    </FilterBand>
   );
 }

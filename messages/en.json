@@ -139,6 +139,25 @@
     "area": "Area, m²",
     "price": "Price (annual)",
     "submit": "Search",
+    "reset": "Reset",
+    "publishedDate": "Published on",
+    "sort": "Sort by",
+    "sorts": {
+      "sana": "Auction date: soonest",
+      "arzon": "Price: low to high",
+      "qimmat": "Price: high to low",
+      "katta": "Area: largest first",
+      "kichik": "Area: smallest first"
+    },
+    "filters": "Filters",
+    "activeCount": "{count} filters selected",
+    "leaseBands": {
+      "b1": "0 — 1 mln",
+      "b2": "1 — 5 mln",
+      "b3": "5 — 20 mln",
+      "b4": "20 — 100 mln",
+      "b5": "100 mln+"
+    },
     "anyRegion": "All regions",
     "anyType": "All types",
     "anyArea": "Any area",

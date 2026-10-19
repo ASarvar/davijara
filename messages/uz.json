@@ -142,6 +142,25 @@
     "area": "Maydon, m²",
     "price": "Narx (yillik)",
     "submit": "Qidirish",
+    "reset": "Tozalash",
+    "publishedDate": "Eʼlon qilingan sana",
+    "sort": "Saralash",
+    "sorts": {
+      "sana": "Savdo sanasi: yaqinlari",
+      "arzon": "Narx: arzonidan",
+      "qimmat": "Narx: qimmatidan",
+      "katta": "Maydon: kattasidan",
+      "kichik": "Maydon: kichigidan"
+    },
+    "filters": "Filtrlar",
+    "activeCount": "{count} ta filtr tanlangan",
+    "leaseBands": {
+      "b1": "0 — 1 mln",
+      "b2": "1 — 5 mln",
+      "b3": "5 — 20 mln",
+      "b4": "20 — 100 mln",
+      "b5": "100 mln+"
+    },
     "anyRegion": "Barcha hududlar",
     "anyType": "Barcha turlar",
     "anyArea": "Har qanday maydon",

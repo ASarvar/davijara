@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { Popover as PopoverPrimitive } from "radix-ui";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 
@@ -29,9 +30,12 @@ import { cn } from "@/lib/utils";
   input below, as `?savdo=2026-08-27`, so the RESULT stays linkable, indexable
   and back-button-correct exactly like every other filter here.
 
-  Selecting does not submit. The rest of the panel waits for Qidirish and so
-  does this, so a reader can set a region, an area and a date before asking for
-  anything — and so e-auksion's behaviour carries over unchanged.
+  Picking a day SUBMITS the panel (operator, 19.10.2026: search should start
+  without pressing Qidirish). It sends the whole form, so whatever else is
+  already set — region, area, the other calendar — goes with it. Clearing the
+  day submits too, or the results would go on showing a date the field no
+  longer does. The other fields still wait for Qidirish: a select is often
+  changed several times in a row, a calendar click is one deliberate choice.
 */
 
 export interface AuctionDayLabels {
@@ -96,6 +100,21 @@ export function AuctionDayField({
 }) {
   const [selected, setSelected] = useState<string | null>(value ?? null);
   const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  /*
+    `flushSync` because the day leaves through the hidden input below, which
+    only renders on the next commit — submitting straight after `setSelected`
+    would send the PREVIOUS day. The popover is portalled out of the form, so
+    the form is found from this field's own wrapper, which stays inside it.
+  */
+  const choose = (date: string | null) => {
+    flushSync(() => {
+      setSelected(date);
+      setOpen(false);
+    });
+    rootRef.current?.closest("form")?.requestSubmit();
+  };
 
   const countByDay = new Map(days.map((d) => [d.date, d.count]));
   const firstDay = days[0]?.date;
@@ -126,7 +145,7 @@ export function AuctionDayField({
   const total = daysInMonth(year, month);
 
   return (
-    <div className={cn("min-w-0", className)}>
+    <div ref={rootRef} className={cn("min-w-0", className)}>
       <label
         htmlFor={id}
         className="text-muted-foreground mb-1.5 block text-sm"
@@ -233,10 +252,7 @@ export function AuctionDayField({
                         ? formatDate(date)
                         : `${formatDate(date)} — ${labels.lots.replace("{count}", String(count))}`
                     }
-                    onClick={() => {
-                      setSelected(date);
-                      setOpen(false);
-                    }}
+                    onClick={() => choose(date)}
                     className={cn(
                       "relative flex size-9 flex-col items-center justify-center rounded text-sm transition-colors",
                       /*
@@ -279,10 +295,7 @@ export function AuctionDayField({
             {selected ? (
               <button
                 type="button"
-                onClick={() => {
-                  setSelected(null);
-                  setOpen(false);
-                }}
+                onClick={() => choose(null)}
                 className="border-hairline text-muted-foreground hover:text-foreground mt-2 flex w-full items-center justify-center gap-1.5 rounded border-t pt-2 text-xs"
               >
                 <X aria-hidden="true" className="size-3" />

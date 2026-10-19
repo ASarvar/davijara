@@ -3,7 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
-import { TASHKENT_OFFSET_MS } from "@/lib/format";
+import { TASHKENT_OFFSET_MS, tashkentToday } from "@/lib/format";
 import { regions } from "@/content/regions";
 import { featuredListings } from "@/content/homepage";
 import { mockListings } from "@/content/listings-mock";
@@ -83,6 +83,14 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export const AUCTION_DAY_KEY = "savdo";
 
 /**
+ * URL key for "Eʼlon qilingan sana" — the day a lot was PUBLISHED on
+ * e-auksion, as opposed to `savdo`, the day its auction runs. ISO, like
+ * `savdo`. See `fetchPublicationDays` for where the date comes from: the
+ * feed carries no such field on a lot.
+ */
+export const PUBLISHED_DAY_KEY = "elon";
+
+/**
  * URL key for the day WINDOW — the homepage strip's chips.
  *
  * A separate key from `savdo` on purpose. The two answer different questions
@@ -146,7 +154,17 @@ export function activeAuctionWindow(
 export function parseAuctionDay(
   searchParams: Record<string, string | string[] | undefined>,
 ): string | undefined {
-  const value = first(searchParams[AUCTION_DAY_KEY]);
+  return parseIsoDay(first(searchParams[AUCTION_DAY_KEY]));
+}
+
+/** `?elon=` → ISO day, by the same rules as `?savdo=`. */
+export function parsePublishedDay(
+  searchParams: Record<string, string | string[] | undefined>,
+): string | undefined {
+  return parseIsoDay(first(searchParams[PUBLISHED_DAY_KEY]));
+}
+
+function parseIsoDay(value: string | undefined): string | undefined {
   if (!value || value === ALL) return undefined;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return undefined;
 
@@ -167,6 +185,25 @@ function auctionAt(listing: Listing): number | null {
   if (!listing.auctionDate) return null;
   const t = new Date(listing.auctionDate).getTime();
   return Number.isFinite(t) ? t : null;
+}
+
+/**
+ * Whether a lot's area or price falls in a band picked from the search panel:
+ * `(min, max]` — lower bound EXCLUSIVE, upper inclusive, like `muddat`.
+ *
+ * Both-inclusive was what shipped, and the bands share their edges ("0 — 10",
+ * "10 — 50"), so a lot of exactly 10 m² was in two bands at once: summed over
+ * the five lease area bands the catalogue came to 1 671 lots out of 1 606
+ * (19.10.2026). Half-open, every lot is in exactly one band.
+ *
+ * The exclusive lower bound does a second job: a lot with no published area
+ * or price is carried as 0 and is now in NO band — "0 — 10 m²" used to collect
+ * every sale lot whose size the dashboard did not know.
+ */
+export function inBand(value: number, min?: number, max?: number): boolean {
+  if (min != null && !(value > min)) return false;
+  if (max != null && value > max) return false;
+  return true;
 }
 
 /**
@@ -210,6 +247,7 @@ export function parseListingQuery(
     minPrice: minPriceM != null ? minPriceM * 1_000_000 : undefined,
     maxPrice: maxPriceM != null ? maxPriceM * 1_000_000 : undefined,
     auctionDate: parseAuctionDay(searchParams),
+    publishedDate: parsePublishedDay(searchParams),
     /*
       Never read from the URL here. The day window is the upcoming-auctions
       strip's own filter under its own key, and `getUpcomingAuctions` sets
@@ -238,6 +276,7 @@ export const FILTER_KEYS = [
   "maydon",
   "narx",
   AUCTION_DAY_KEY,
+  PUBLISHED_DAY_KEY,
 ] as const;
 
 /*
@@ -261,7 +300,13 @@ export { VIEW_KEY, parseView, type ListingsView } from "@/lib/listings-view";
 
 // A re-export does not bring the name into this module's own scope, and
 // `buildFilterQuery` below writes the key.
-import { VIEW_KEY, isListingsView } from "@/lib/listings-view";
+import {
+  VIEW_KEY,
+  SORT_KEY,
+  isListingsView,
+  parseSort,
+  type ListingsSort,
+} from "@/lib/listings-view";
 
 /**
  * The active filters, serialised for a link.
@@ -291,7 +336,43 @@ export function buildFilterQuery(
   */
   const view = first(searchParams[VIEW_KEY]);
   if (isListingsView(view)) params.set(VIEW_KEY, view);
+  // The order, too, and only when it is not the default.
+  const sort = parseSort(searchParams);
+  if (sort !== "sana") params.set(SORT_KEY, sort);
   return params;
+}
+
+/**
+ * The catalogue in the order Saralash asked for (SORT_KEY).
+ *
+ * A lot with no published price or area is carried as 0, and goes LAST in
+ * either direction of that sort — "cheapest first" opening on a page of lots
+ * whose price nobody published would put the least useful results at the
+ * top. Same for a lot with no auction date under the date order. Ties keep
+ * the incoming order (Array.prototype.sort is stable).
+ */
+export function sortListings(
+  listings: Listing[],
+  sort: ListingsSort,
+): Listing[] {
+  const known = (v: number) => v > 0;
+  const by =
+    (value: (l: Listing) => number, dir: 1 | -1) =>
+    (a: Listing, b: Listing) => {
+      const va = value(a);
+      const vb = value(b);
+      if (!known(va) || !known(vb))
+        return Number(!known(va)) - Number(!known(vb));
+      return (va - vb) * dir;
+    };
+  const compare = {
+    sana: by((l) => auctionAt(l) ?? 0, 1),
+    arzon: by((l) => l.pricePerYear, 1),
+    qimmat: by((l) => l.pricePerYear, -1),
+    katta: by((l) => l.area, -1),
+    kichik: by((l) => l.area, 1),
+  }[sort];
+  return [...listings].sort(compare);
 }
 
 /** `basePath` with the active filters appended, if there are any. */
@@ -341,10 +422,8 @@ function filterListings(listings: Listing[], q: ListingQuery): Listing[] {
     if (q.region && l.region !== q.region) return false;
     if (q.district && l.district !== q.district) return false;
     if (q.type && l.type !== q.type) return false;
-    if (q.minArea != null && l.area < q.minArea) return false;
-    if (q.maxArea != null && l.area > q.maxArea) return false;
-    if (q.minPrice != null && l.pricePerYear < q.minPrice) return false;
-    if (q.maxPrice != null && l.pricePerYear > q.maxPrice) return false;
+    if (!inBand(l.area, q.minArea, q.maxArea)) return false;
+    if (!inBand(l.pricePerYear, q.minPrice, q.maxPrice)) return false;
     if (q.auctionDate) {
       const at = auctionAt(l);
       // Compared as a Tashkent calendar day, not as an instant: an auction at
@@ -714,6 +793,197 @@ const fetchRegion = unstable_cache(
   { revalidate: 300, tags: ["listings"] },
 );
 
+/* ── Publication day ──────────────────────────────────────────────────── */
+
+/*
+  When each lot was PUBLISHED — the "Eʼlon qilingan sana" field.
+
+  THE FEED HAS NO SUCH FIELD on a lot (checked 19.10.2026: order_id,
+  lot_number, auction_date, name, rent_area, start_price, sold_price,
+  order_status, lot_status, category_id, district_name, region_title, lat,
+  lng). What it has is the request's own `adate`/`bdate`, which bound the
+  publication date (point 3 above). So the date is recovered by asking:
+  narrow the window until each lot falls in a single day.
+
+  Verified to be exact before it was built on: for one region, fourteen
+  one-day requests returned 10+0+14+20+0+0+88+3+6+7+9+7+0+0 = 164 lots, the
+  same 164 the fourteen-day request returned, with no lot in two days. A lot
+  has one publication day and these requests find it.
+
+  BISECTION, because the open lots cluster: a region's 58-170 active lots
+  were published on 8-12 distinct days, so halving the window and dropping
+  every empty half resolves a region in ~40-50 requests (~1-2 s) instead of
+  one per day of the 180-day window. Cached per region for half an hour —
+  a lot published today appears in the calendar within that — and every
+  request goes through `publicationLimit`, so a cold cache across fourteen
+  regions is at most eight requests at a time against the service.
+*/
+const PUBLICATION_CONCURRENCY = 8;
+let publicationActive = 0;
+const publicationQueue: Array<() => void> = [];
+
+async function publicationLimit<T>(task: () => Promise<T>): Promise<T> {
+  if (publicationActive >= PUBLICATION_CONCURRENCY) {
+    await new Promise<void>((resolve) => publicationQueue.push(resolve));
+  }
+  publicationActive++;
+  try {
+    return await task();
+  } finally {
+    publicationActive--;
+    publicationQueue.shift()?.();
+  }
+}
+
+/** Lot numbers published between two days, inclusive. */
+async function fetchPublishedBetween(
+  apiId: number,
+  from: string,
+  to: string,
+): Promise<string[]> {
+  const base = process.env.LISTINGS_API_URL;
+  const user = process.env.API_USER;
+  const password = process.env.API_PASSWORD;
+  if (!base) return [];
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (user && password) {
+    headers.Authorization = `Basic ${Buffer.from(`${user}:${password}`).toString("base64")}`;
+  }
+
+  return publicationLimit(async () => {
+    const res = await fetch(base, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        region: apiId,
+        adate: from,
+        bdate: to,
+        lot_status: "active",
+      }),
+      signal: AbortSignal.timeout(15_000),
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(`Listings API responded ${res.status}`);
+    const json = (await res.json()) as ApiResponse;
+    if (!json.success) {
+      throw new Error(json.message ?? `Region ${apiId} returned success:false`);
+    }
+    return (
+      (json.data ?? [])
+        // Untrimmed, as the catalogue's own `lotNumber` is — the index is
+        // looked up with that value.
+        .map((lot) => lot.lot_number)
+        .filter((n): n is string => Boolean(n))
+    );
+  });
+}
+
+function addDays(day: string, n: number): string {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Lot number → publication day (ISO), for one region's open lots. */
+const fetchPublicationDays = unstable_cache(
+  async (apiId: number): Promise<Record<string, string>> => {
+    const days: Record<string, string> = {};
+    const today = tashkentToday();
+
+    const resolve = async (from: string, to: string): Promise<void> => {
+      const lots = await fetchPublishedBetween(apiId, from, to);
+      if (lots.length === 0) return;
+      if (from === to) {
+        for (const lot of lots) days[lot] = from;
+        return;
+      }
+      const span = Math.round(
+        (Date.parse(to) - Date.parse(from)) / (24 * 60 * 60 * 1000),
+      );
+      const mid = addDays(from, Math.floor(span / 2));
+      await Promise.all([resolve(from, mid), resolve(addDays(mid, 1), to)]);
+    };
+
+    await resolve(addDays(today, -WINDOW_DAYS), today);
+    return days;
+  },
+  ["listing-publication-days"],
+  { revalidate: 1800, tags: ["listings"] },
+);
+
+/**
+ * Publication days for the lots of the regions in play. A region whose index
+ * cannot be built contributes nothing — its lots then match no "Eʼlon
+ * qilingan sana" and offer no day in the calendar, which is the honest
+ * answer, rather than failing the catalogue around them.
+ */
+async function publicationIndex(
+  regionSlug?: string,
+): Promise<Map<string, string>> {
+  const wanted = regionSlug
+    ? regions.filter((r) => r.slug === regionSlug)
+    : regions;
+  const settled = await Promise.allSettled(
+    wanted.map((r) => fetchPublicationDays(r.apiId)),
+  );
+  const index = new Map<string, string>();
+  for (const [i, result] of settled.entries()) {
+    if (result.status === "fulfilled") {
+      for (const [lot, day] of Object.entries(result.value)) {
+        index.set(lot, day);
+      }
+    } else {
+      console.warn(
+        `[listings] publication days unavailable for ${wanted[i].slug}:`,
+        result.reason,
+      );
+    }
+  }
+  return index;
+}
+
+/** Narrows to the lots published on `day`, when one is asked for. */
+async function filterByPublished(
+  listings: Listing[],
+  day: string | undefined,
+): Promise<Listing[]> {
+  if (!day || listings.length === 0) return listings;
+  const regionsInPlay = new Set(listings.map((l) => l.region));
+  const index = await publicationIndex(
+    regionsInPlay.size === 1 ? [...regionsInPlay][0] : undefined,
+  );
+  return listings.filter(
+    (l) => l.lotNumber != null && index.get(l.lotNumber) === day,
+  );
+}
+
+/**
+ * The days the "Eʼlon qilingan sana" calendar may offer, with a lot count
+ * each — scoped to the rest of the active search, like `getAuctionDays`.
+ */
+export async function getPublishedDays(
+  query: ListingQuery = {},
+): Promise<Array<{ date: string; count: number }>> {
+  const { listings } = await getListings({
+    ...query,
+    publishedDate: undefined,
+  });
+  if (listings.length === 0) return [];
+  const index = await publicationIndex(query.region);
+
+  const counts = new Map<string, number>();
+  for (const listing of listings) {
+    const day = listing.lotNumber ? index.get(listing.lotNumber) : undefined;
+    if (day) counts.set(day, (counts.get(day) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([date, count]) => ({ date, count }))
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
 /* ── Lot status ───────────────────────────────────────────────────────── */
 
 /*
@@ -855,7 +1125,10 @@ export async function getListings(
       reportUnknownStatuses(listings);
       const open = listings.filter(isOpenForApplications);
       return {
-        listings: filterListings(open, query),
+        listings: await filterByPublished(
+          filterListings(open, query),
+          query.publishedDate,
+        ),
         hasMock: false,
         source: asOf ? "snapshot" : "api",
         asOf,
@@ -868,7 +1141,10 @@ export async function getListings(
     for state property is better served by the fallback set plus a visible
     notice than by an error screen.
   */
-  const listings = filterListings(fallbackListings, query);
+  // The sample set has no publication dates, so a day asks for nothing.
+  const listings = query.publishedDate
+    ? []
+    : filterListings(fallbackListings, query);
   return {
     listings,
     hasMock: listings.some((l) => l.isMock),

@@ -1,4 +1,3 @@
-import { Search } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { withBasePath } from "@/lib/base-path";
@@ -6,9 +5,12 @@ import { getRegionOptions } from "@/lib/data/catalog";
 import {
   AUCTION_DAY_KEY,
   AUCTION_WINDOW_KEY,
+  FILTER_KEYS,
   getAuctionDays,
   getDistrictsByRegion,
+  getPublishedDays,
   parseListingQuery,
+  PUBLISHED_DAY_KEY,
   VIEW_KEY,
 } from "@/lib/data/listings";
 import {
@@ -17,14 +19,18 @@ import {
 } from "@/lib/data/privatization";
 import {
   isListingsView,
+  LISTINGS_SORTS,
   MARKET_KEY,
+  parseSort,
+  SORT_KEY,
   type ListingsMarket,
 } from "@/lib/listings-view";
 import { RegionDistrictFields } from "./region-district-fields";
 import { AuctionDayField } from "@/components/common/auction-day-field";
 import { Eyebrow } from "@/components/common/eyebrow";
+import { FilterActions } from "@/components/common/filter-actions";
+import { FilterBand } from "@/components/common/filter-band";
 import { ALL_VALUE, SelectField } from "@/components/common/select-field";
-import { Container } from "@/components/layout/section";
 
 /*
   The bands for a SALE, from the privatization lots themselves (09.10.2026,
@@ -47,8 +53,7 @@ const SALE_AREA_BANDS = [
 
 /*
   Values only; the labels are in messages/ (`search.saleBands.b1`…`b5`),
-  because "mln"/"mlrd" are words — Russian reads them "млн"/"млрд". The lease
-  bands' labels predate that rule and still sit in the markup below.
+  because "mln"/"mlrd" are words — Russian reads them "млн"/"млрд".
 */
 const SALE_PRICE_BANDS = [
   { value: "0-500", key: "b1" },
@@ -56,6 +61,19 @@ const SALE_PRICE_BANDS = [
   { value: "1500-5000", key: "b3" },
   { value: "5000-15000", key: "b4" },
   { value: "15000-", key: "b5" },
+] as const;
+
+/*
+  The lease price bands, in millions of so'm a year. Labels in messages/
+  (`search.leaseBands`) for the same reason as the sale's: they used to sit in
+  the markup as "1 — 5 mln", and /ru printed "mln" where it says "млн".
+*/
+const LEASE_PRICE_BANDS = [
+  { value: "0-1", key: "b1" },
+  { value: "1-5", key: "b2" },
+  { value: "5-20", key: "b3" },
+  { value: "20-100", key: "b4" },
+  { value: "100-", key: "b5" },
 ] as const;
 
 /**
@@ -153,11 +171,32 @@ export async function SearchWidget({
     Only fetched for the variant that renders the calendar; the homepage panel
     pays nothing for a control it does not show.
   */
-  const auctionDays = auctionDay
-    ? sale
-      ? await getPrivatizationAuctionDays(parseListingQuery(values ?? {}))
-      : await getAuctionDays(parseListingQuery(values ?? {}))
-    : [];
+  /*
+    "Eʼlon qilingan sana" — leases only. The sale lots come from the
+    dashboard, which carries no publication date, so the field would offer a
+    calendar of nothing. Fetched alongside the auction days; both scope to
+    the rest of the search the same way.
+  */
+  const published = auctionDay && !sale;
+  const query = parseListingQuery(values ?? {});
+  const [auctionDays, publishedDays] = await Promise.all([
+    auctionDay
+      ? sale
+        ? getPrivatizationAuctionDays(query)
+        : getAuctionDays(query)
+      : Promise.resolve([]),
+    published ? getPublishedDays(query) : Promise.resolve([]),
+  ]);
+  const dayLabels = {
+    placeholder: td("placeholder"),
+    clear: td("clear"),
+    months: td.raw("months") as string[],
+    weekdays: td.raw("weekdays") as string[],
+    // `raw`, not `td("lots")`: the {count} is substituted in the browser once
+    // a day is known, so ICU must not try to resolve it here — there is no
+    // value to give it yet.
+    lots: td.raw("lots") as string,
+  };
 
   /*
     `bg-band` + `border-hairline`, not `bg-navy-mid` + `border-border`: raw
@@ -171,6 +210,30 @@ export async function SearchWidget({
     were two copies of this markup for about ten minutes and that is exactly
     how the two rows of a form start disagreeing about their gap.
   */
+  /*
+    Where Tozalash goes: this page with no filter on it, but with what is NOT
+    a filter kept — the open tab, the homepage's market, the upcoming strip's
+    day window — so clearing a search does not also switch the view.
+  */
+  const sort = values ? parseSort(values) : "sana";
+  const filtered = FILTER_KEYS.some((key) => current(key) !== ALL_VALUE);
+  const resetHref = (() => {
+    if (!filtered) return undefined;
+    const keep = new URLSearchParams();
+    if (isListingsView(current(VIEW_KEY)))
+      keep.set(VIEW_KEY, current(VIEW_KEY));
+    if (sale && !action) keep.set(MARKET_KEY, market);
+    // The order is not a filter either.
+    if (sort !== "sana") keep.set(SORT_KEY, sort);
+    if (current(AUCTION_WINDOW_KEY) !== ALL_VALUE)
+      keep.set(AUCTION_WINDOW_KEY, current(AUCTION_WINDOW_KEY));
+    const qs = keep.toString();
+    const path = action ?? `/${locale}`;
+    return withBasePath(
+      `${path}${qs ? `?${qs}` : ""}${action ? "" : "#obyektlar-xarita"}`,
+    );
+  })();
+
   const panel = (
     <>
       {/* sr-only, not deleted: this is the panel's accessible
@@ -193,15 +256,14 @@ export async function SearchWidget({
         action={withBasePath(action ?? `/${locale}#obyektlar-xarita`)}
         method="get"
         /*
-            ONE grid, four field columns wide, in both variants — so the
-            top row is byte-for-byte the layout it has always been and "Savdo
-            kuni" simply wraps onto a second row beneath Hudud.
+            ONE grid, four field columns wide, so "Savdo kuni" and
+            Saralash wrap onto a second row exactly under Hudud and Tuman, and
+            the actions take the rest of that row. A separate grid for the
+            second row would have sized its columns against a different total
+            and left the two rows visibly out of step.
 
-            That leaves columns 2-4 of the second row empty, and they are meant
-            to be: the next filters go there, at exactly the width of the ones
-            above them. A separate grid for the second row would have sized its
-            columns against a different total and left the two rows visibly out
-            of step.
+            The homepage variant has no second row, so its button keeps the
+            trailing `auto` column beside the four fields.
 
             Five fields in ONE row was tried and does not fit at any viewport
             width: the container caps at 1200px, so five plus the button is
@@ -209,7 +271,11 @@ export async function SearchWidget({
             text in the 144px box that leaves — clipped mid-word, with
             `text-overflow: clip` not even leaving an ellipsis to signal it.
           */
-        className="grid gap-3 md:grid-cols-2 lg:grid-cols-[repeat(4,1fr)_auto]"
+        className={
+          auctionDay
+            ? "grid gap-3 md:grid-cols-2 lg:grid-cols-4"
+            : "grid gap-3 md:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))_auto]"
+        }
       >
         {/*
             Carries the open tab through the submit.
@@ -305,13 +371,10 @@ export async function SearchWidget({
                   value: b.value,
                   label: t(`saleBands.${b.key}`),
                 }))
-              : [
-                  { value: "0-1", label: "0 — 1 mln" },
-                  { value: "1-5", label: "1 — 5 mln" },
-                  { value: "5-20", label: "5 — 20 mln" },
-                  { value: "20-100", label: "20 — 100 mln" },
-                  { value: "100-", label: "100 mln+" },
-                ]),
+              : LEASE_PRICE_BANDS.map((b) => ({
+                  value: b.value,
+                  label: t(`leaseBands.${b.key}`),
+                }))),
           ]}
         />
 
@@ -340,16 +403,7 @@ export async function SearchWidget({
                  row 2 puts it under Hudud, with the reserved columns to its
                  right. */
             className="lg:col-start-1 lg:row-start-2"
-            labels={{
-              placeholder: td("placeholder"),
-              clear: td("clear"),
-              months: td.raw("months") as string[],
-              weekdays: td.raw("weekdays") as string[],
-              // `raw`, not `td("lots")`: the {count} is substituted in the
-              // browser once a day is known, so ICU must not try to resolve
-              // it here — there is no value to give it yet.
-              lots: td.raw("lots") as string,
-            }}
+            labels={dayLabels}
           />
         ) : (
           /*
@@ -370,31 +424,71 @@ export async function SearchWidget({
           )
         )}
 
-        {/* Pinned to the last column, and to the second ROW when the
-              calendar is there — otherwise it would follow "Savdo kuni"
-              straight into column 2 and sit in the middle of the space the
-              next filters are reserved for. */}
-        <div
+        {/*
+            Eʼlon qilingan sana — when the lot was PUBLISHED, beside the day
+            its auction runs. The same calendar, greying out every day on
+            which nothing still open was published. See getPublishedDays.
+          */}
+        {published ? (
+          <AuctionDayField
+            id={PUBLISHED_DAY_KEY}
+            name={PUBLISHED_DAY_KEY}
+            label={t("publishedDate")}
+            value={
+              current(PUBLISHED_DAY_KEY) === ALL_VALUE
+                ? undefined
+                : current(PUBLISHED_DAY_KEY)
+            }
+            days={publishedDays}
+            className="lg:col-start-2 lg:row-start-2"
+            labels={dayLabels}
+          />
+        ) : null}
+
+        {/*
+            Saralash — the first of the second-row columns that were held
+            for "the next filters". With the calendar only: that is the
+            catalogue variant, the one with a list long enough to order. On
+            the homepage the order is carried rather than offered, like the
+            open tab, so a search from there does not reset it.
+          */}
+        {auctionDay ? (
+          <SelectField
+            id={SORT_KEY}
+            name={SORT_KEY}
+            label={t("sort")}
+            defaultValue={sort}
+            className={
+              published
+                ? "lg:col-start-3 lg:row-start-2"
+                : "lg:col-start-2 lg:row-start-2"
+            }
+            options={LISTINGS_SORTS.map((value) => ({
+              value,
+              label: t(`sorts.${value}`),
+            }))}
+          />
+        ) : sort !== "sana" ? (
+          <input type="hidden" name={SORT_KEY} value={sort} />
+        ) : null}
+
+        {/* With the calendar: columns 3-4 of the second row, right-aligned,
+              so the four fields above run the full width whatever is here.
+              It used to sit in a fifth `auto` column, which Tozalash widened
+              — shrinking every field in row one whenever a filter was set.
+              Without it (the homepage) the trailing column stays, held at
+              one width by `compact`. */}
+        <FilterActions
+          resetHref={resetHref}
+          compact={!auctionDay}
           className={
-            auctionDay
-              ? "flex items-end lg:col-start-5 lg:row-start-2"
-              : "flex items-end"
+            published
+              ? "md:col-span-2 md:justify-end lg:col-span-1 lg:col-start-4 lg:row-start-2"
+              : auctionDay
+                ? "md:col-span-2 md:justify-end lg:col-start-3 lg:row-start-2"
+                : undefined
           }
-        >
-          <button
-            type="submit"
-            /* `active:scale` because the transition already declared
-                 `transform` but nothing ever changed it — the button animated
-                 opacity only and felt inert on press. */
-            className="focus-visible:ring-ring group inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-[color:var(--color-cobalt)] px-6 text-sm font-semibold text-[color:var(--color-mist-pale)] transition-[opacity,transform] duration-200 ease-out hover:opacity-90 focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] lg:w-auto"
-          >
-            <Search
-              aria-hidden="true"
-              className="size-4 transition-transform duration-200 group-hover:scale-110"
-            />
-            {t("submit")}
-          </button>
-        </div>
+        />
       </form>
     </>
   );
@@ -408,8 +502,13 @@ export async function SearchWidget({
   if (nested) return <div className="mt-12">{panel}</div>;
 
   return (
-    <section data-tone="deep" className="bg-band border-hairline border-y">
-      <Container className="py-16">{panel}</Container>
-    </section>
+    <FilterBand
+      id={sale ? "filter-sale" : "filter-lease"}
+      activeCount={
+        FILTER_KEYS.filter((key) => current(key) !== ALL_VALUE).length
+      }
+    >
+      {panel}
+    </FilterBand>
   );
 }

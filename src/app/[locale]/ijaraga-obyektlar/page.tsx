@@ -10,8 +10,10 @@ import {
   parseListingQuery,
   parsePage,
   parseView,
+  sortListings,
   summariseByRegion,
 } from "@/lib/data/listings";
+import { parseSort } from "@/lib/listings-view";
 import { Section } from "@/components/layout/section";
 import { SearchWidget } from "@/components/sections/search-widget";
 import { ObjectsExplorer } from "@/components/sections/objects-explorer";
@@ -49,7 +51,11 @@ export default async function ObjectsPage({
   const sp = await searchParams;
   const query = parseListingQuery(sp);
   const page = parsePage(sp);
-  const { listings, hasMock, asOf } = await getListings(query);
+  const result = await getListings(query);
+  const { hasMock, asOf } = result;
+  // Saralash orders the list and the pager; the map and region totals do not
+  // care about order.
+  const listings = sortListings(result.listings, parseSort(sp));
   const summaries = summariseByRegion(listings);
 
   /*

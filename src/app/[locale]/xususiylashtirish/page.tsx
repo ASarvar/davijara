@@ -8,8 +8,10 @@ import {
   parseListingQuery,
   parsePage,
   parseView,
+  sortListings,
   summariseByRegion,
 } from "@/lib/data/listings";
+import { parseSort } from "@/lib/listings-view";
 import { getPrivatizationListings } from "@/lib/data/privatization";
 import { Section } from "@/components/layout/section";
 import { ObjectsExplorer } from "@/components/sections/objects-explorer";
@@ -69,7 +71,10 @@ export default async function PrivatizationPage({
 
   const sp = await searchParams;
   const page = parsePage(sp);
-  const { listings } = await getPrivatizationListings(parseListingQuery(sp));
+  const { listings: offered } = await getPrivatizationListings(
+    parseListingQuery(sp),
+  );
+  const listings = sortListings(offered, parseSort(sp));
   const summaries = summariseByRegion(listings);
 
   // Same helper as the catalogue's pager, so the two cannot drift apart.

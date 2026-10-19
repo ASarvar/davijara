@@ -3,7 +3,7 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { readSnapshot, saveSnapshot } from "@/lib/data/snapshot";
-import { auctionDay, getDistrictsByRegion } from "@/lib/data/listings";
+import { auctionDay, getDistrictsByRegion, inBand } from "@/lib/data/listings";
 import type { Listing, ListingQuery } from "@/types/content";
 
 /*
@@ -372,12 +372,10 @@ function matches(
 ): boolean {
   if (q.region && l.region !== q.region) return false;
   if (district && (!l.district || norm(l.district) !== district)) return false;
-  if (q.minArea != null && l.area < q.minArea) return false;
-  if (q.maxArea != null && l.area > q.maxArea) return false;
-  // A lot with no published price is outside every price band, as in the
-  // lease catalogue.
-  if (q.minPrice != null && l.pricePerYear < q.minPrice) return false;
-  if (q.maxPrice != null && l.pricePerYear > q.maxPrice) return false;
+  // The catalogue's own band rule, so a sale and a lease are cut the same
+  // way: one band per lot, none for a lot with no published area or price.
+  if (!inBand(l.area, q.minArea, q.maxArea)) return false;
+  if (!inBand(l.pricePerYear, q.minPrice, q.maxPrice)) return false;
   if (q.auctionDate) {
     const at = l.auctionDate ? Date.parse(l.auctionDate) : NaN;
     if (!Number.isFinite(at) || auctionDay(at) !== q.auctionDate) return false;

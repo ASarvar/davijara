@@ -6,7 +6,7 @@ import {
   SOLD_FROM_KEY,
   SOLD_TO_KEY,
 } from "@/lib/data/listings";
-import { MARKET_KEY, VIEW_KEY } from "@/lib/listings-view";
+import { MARKET_KEY, SORT_KEY, VIEW_KEY } from "@/lib/listings-view";
 
 /*
   robots.txt — a Route Handler rather than app/robots.ts, for ONE directive:
@@ -36,6 +36,7 @@ const VIEW_PARAMS = [
   AUCTION_WINDOW_KEY,
   VIEW_KEY,
   MARKET_KEY,
+  SORT_KEY,
   SOLD_FROM_KEY,
   SOLD_TO_KEY,
   "sahifa", // pager, objects-explorer + catalogue

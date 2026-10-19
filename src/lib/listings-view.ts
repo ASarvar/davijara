@@ -95,3 +95,38 @@ export function parseMarket(
   const value = Array.isArray(raw) ? raw[0] : raw;
   return value === "xususiylashtirish" ? "xususiylashtirish" : "ijara";
 }
+
+/*
+  The catalogue's sort order — `?tartib=`, the Saralash field on
+  /ijaraga-obyektlar and /xususiylashtirish.
+
+  NOT a filter: it changes the order, never the set, so it is not in
+  FILTER_KEYS and Tozalash keeps it, like the open tab. `buildFilterQuery`
+  carries it through the pager so page 2 is page 2 of the same order.
+
+  The default (no parameter) is the auction date, soonest first — the lots a
+  reader can still act on soonest. It is spelled out as an option rather than
+  left as "unsorted", because the lease feed's own order is whatever the
+  service happened to return.
+*/
+export const SORT_KEY = "tartib";
+
+export const LISTINGS_SORTS = [
+  "sana",
+  "arzon",
+  "qimmat",
+  "katta",
+  "kichik",
+] as const;
+
+export type ListingsSort = (typeof LISTINGS_SORTS)[number];
+
+export function parseSort(
+  searchParams: Record<string, string | string[] | undefined>,
+): ListingsSort {
+  const raw = searchParams[SORT_KEY];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return (LISTINGS_SORTS as readonly string[]).includes(value ?? "")
+    ? (value as ListingsSort)
+    : "sana";
+}

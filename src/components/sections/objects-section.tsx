@@ -5,11 +5,12 @@ import {
   isEmptyQuery,
   parseListingQuery,
   parseView,
+  sortListings,
   summariseByRegion,
   withFilters,
 } from "@/lib/data/listings";
 import { getPrivatizationListings } from "@/lib/data/privatization";
-import { parseMarket } from "@/lib/listings-view";
+import { parseMarket, parseSort } from "@/lib/listings-view";
 import { Section, SectionHeader } from "@/components/layout/section";
 import { MarketSwitch } from "./market-switch";
 import { ObjectsExplorer } from "./objects-explorer";
@@ -50,7 +51,12 @@ export async function ObjectsSection({
     getPrivatizationListings(sale ? query : placeOnly),
   ]);
 
-  const listings = sale ? privatization.listings : lease.listings;
+  // Same order as the catalogue the "more" link opens, so the first nine
+  // here are the first nine there.
+  const listings = sortListings(
+    sale ? privatization.listings : lease.listings,
+    parseSort(searchParams),
+  );
   const summaries = summariseByRegion(listings);
 
   /*
