@@ -99,6 +99,7 @@ export default async function ObjectsPage({
 
       <Section tone="deep">
         <ObjectsExplorer
+          showCount
           listings={listings}
           summaries={summaries}
           hasMock={hasMock}

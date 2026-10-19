@@ -228,13 +228,12 @@
     "prev": "Previous",
     "next": "Next",
     "pageTitle": "Leased objects",
-    "pageLede": "{count} objects leased at auction so far this year, each with its opening and final price.",
+    "pageLede": "Objects leased at auction this year, with opening and final prices",
     "pageEmpty": "No leased objects match the selected filters.",
     "pagination": "Pages",
     "filterLabel": "Filter leased objects",
     "dateFrom": "From",
-    "dateTo": "To",
-    "pageLedeRange": "{count} objects leased at auction between {from} and {to}."
+    "dateTo": "To"
   },
   "meta": {
     "title": "Davijara.uz — the single portal for leasing state property",
@@ -335,6 +334,7 @@
     "mostly": "Mostly: {type}",
     "inDistricts": "{count, plural, one {In {n} district or city} other {In {n} districts and cities}}",
     "countValue": "{count}",
+    "resultCount": "Found: <b>{count}</b> objects",
     "types": {
       "noturar": "Non-residential",
       "turar": "Residential",
@@ -517,7 +517,7 @@
   },
   "privatization": {
     "metaDescription": "State property on the Centre’s balance offered for privatization through e-auksion.uz and currently accepting applications.",
-    "pageLede": "State property on the Centre’s balance offered for privatization through e-auksion.uz, currently accepting applications. Property for lease is listed separately.",
+    "pageLede": "Privatization lots from the Centre’s balance currently accepting applications",
     "empty": "No property here is currently offered for privatization.",
     "filterLabel": "Search privatization lots"
   },

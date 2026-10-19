@@ -293,6 +293,7 @@ export function ObjectsExplorer({
   view = "xarita",
   defaultView = "xarita",
   market = "ijara",
+  showCount = false,
 }: {
   listings: Listing[];
   summaries: RegionSummary[];
@@ -345,6 +346,13 @@ export function ObjectsExplorer({
    * never mixed in one set.
    */
   market?: ListingsMarket;
+  /**
+   * Print "Topildi: N ta obyekt" beside the tabs — the size of the whole
+   * filtered set, not of the page shown. The catalogue pages ask for it; the
+   * homepage does not, because its Ijara | Xususiylashtirish switch already
+   * carries the same figure on each side.
+   */
+  showCount?: boolean;
 }) {
   const t = useTranslations("objects");
   const empty = emptyLabel ?? t("empty");
@@ -521,6 +529,18 @@ export function ObjectsExplorer({
               </TabsTrigger>
             ) : null}
           </TabsList>
+          {showCount ? (
+            <p className="text-muted-foreground text-sm">
+              {t.rich("resultCount", {
+                count: formatNumber(listings.length),
+                b: (chunks) => (
+                  <strong className="text-foreground font-semibold tabular-nums">
+                    {chunks}
+                  </strong>
+                ),
+              })}
+            </p>
+          ) : null}
         </div>
 
         <TabsContent value="xarita" className="mt-0">

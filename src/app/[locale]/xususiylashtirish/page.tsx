@@ -104,6 +104,7 @@ export default async function PrivatizationPage({
 
       <Section tone="deep">
         <ObjectsExplorer
+          showCount
           listings={listings}
           summaries={summaries}
           hasMock={false}

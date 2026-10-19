@@ -334,13 +334,12 @@
     "prev": "Oldingi",
     "next": "Keyingi",
     "pageTitle": "Ijaraga berilgan obyektlar",
-    "pageLede": "Joriy yilda savdolarda ijaraga berilgan {count} ta obyekt. Har biri uchun boshlangʻich va yakuniy narx koʻrsatilgan.",
+    "pageLede": "Joriy yil savdolarida ijaraga berilgan obyektlar — boshlangʻich va yakuniy narxi bilan",
     "pageEmpty": "Tanlangan shartlar boʻyicha ijaraga berilgan obyekt topilmadi.",
     "pagination": "Sahifalar",
     "filterLabel": "Ijaraga berilgan obyektlarni saralash",
     "dateFrom": "Sanadan",
     "dateTo": "Sanagacha",
-    "pageLedeRange": "{from} — {to} oraligʻidagi savdolarda ijaraga berilgan {count} ta obyekt.",
     "metaDescription": "Joriy yilda savdolarda ijaraga berilgan davlat mulki obyektlari — boshlangʻich va yakuniy narx bilan."
   },
   "stats": {
@@ -438,6 +437,7 @@
     "mostly": "Asosan: {type}",
     "inDistricts": "{n} ta tuman va shaharda",
     "countValue": "{count} ta",
+    "resultCount": "Topildi: <b>{count}</b> ta obyekt",
     "types": {
       "noturar": "Noturar joy",
       "turar": "Turar joy",
@@ -524,7 +524,7 @@
   },
   "privatization": {
     "metaDescription": "Markaz balansidagi, e-auksion.uz orqali xususiylashtirishga qoʻyilgan va arizalar qabul qilinayotgan davlat mulki obyektlari.",
-    "pageLede": "Markaz balansidagi davlat mulki obyektlari — e-auksion.uz orqali xususiylashtirishga qoʻyilgan va hozir arizalar qabul qilinayotgan lotlar. Ijaraga beriladigan obyektlar alohida boʻlimda.",
+    "pageLede": "Markaz balansidagi, hozir arizalar qabul qilinayotgan xususiylashtirish lotlari",
     "empty": "Hozir bu yerda xususiylashtirishga taklif etilayotgan obyekt yoʻq.",
     "filterLabel": "Xususiylashtirish obyektlarini qidirish"
   },

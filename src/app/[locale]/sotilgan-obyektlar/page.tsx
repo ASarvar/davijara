@@ -12,7 +12,7 @@ import {
   SOLD_FROM_KEY,
   SOLD_TO_KEY,
 } from "@/lib/data/listings";
-import { formatDate, formatNumber } from "@/lib/format";
+import { formatNumber } from "@/lib/format";
 import { SoldLotCard } from "@/components/common/sold-lot-card";
 import { Section } from "@/components/layout/section";
 import { SoldFilter } from "@/components/sections/sold-filter";
@@ -68,7 +68,11 @@ export default async function SoldObjectsPage({
   setRequestLocale(locale as Locale);
 
   const sp = await searchParams;
-  const t = await getTranslations("sold");
+  const [t, tObjects] = await Promise.all([
+    getTranslations("sold"),
+    // The result line is the catalogue's own message, so the two read alike.
+    getTranslations("objects"),
+  ]);
 
   const query = parseSoldQuery(sp);
   const [lots, regions] = await Promise.all([getSoldLots(query), getRegions()]);
@@ -118,20 +122,12 @@ export default async function SoldObjectsPage({
           className="text-muted-foreground mt-4 max-w-2xl text-sm text-pretty"
         >
           {/*
-            The count first, because it is the answer to "how much of this is
-            there". The range is only spelled out when the reader chose one —
-            unfiltered, the page is simply the year, and saying so beats
-            printing two dates they did not ask for.
+            A fixed subtitle, like every other page's. The count it used to
+            open with moved down to the results, beside the filter that
+            changes it — it read as a statement about the year even when a
+            filter had narrowed it (operator, 19.10.2026).
           */}
-          {lots.length === 0
-            ? t("pageEmpty")
-            : query.from || query.to
-              ? t("pageLedeRange", {
-                  count: formatNumber(lots.length),
-                  from: formatDate(lots[lots.length - 1].auctionDate),
-                  to: formatDate(lots[0].auctionDate),
-                })
-              : t("pageLede", { count: formatNumber(lots.length) })}
+          {t("pageLede")}
         </p>
       </Section>
 
@@ -140,6 +136,16 @@ export default async function SoldObjectsPage({
       <Section tone="deep">
         {shown.length > 0 ? (
           <>
+            <p className="text-muted-foreground mb-5 text-sm">
+              {tObjects.rich("resultCount", {
+                count: formatNumber(lots.length),
+                b: (chunks) => (
+                  <strong className="text-foreground font-semibold tabular-nums">
+                    {chunks}
+                  </strong>
+                ),
+              })}
+            </p>
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {shown.map((lot) => (
                 <SoldLotCard
