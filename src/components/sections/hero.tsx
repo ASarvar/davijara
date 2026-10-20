@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getHeroStats, getRegions } from "@/lib/data/catalog";
 import { parseListingQuery } from "@/lib/data/listings";
+import { StaleNotice } from "@/components/common/stale-notice";
 import { StatPanel } from "@/components/common/stat-panel";
 import { Container } from "@/components/layout/section";
 
@@ -38,7 +39,7 @@ export async function Hero({
 } = {}) {
   const t = await getTranslations("hero");
   const { region, district } = parseListingQuery(searchParams);
-  const [{ stats, year, contractsWidened }, regions] = await Promise.all([
+  const [{ stats, year, contractsWidened, asOf }, regions] = await Promise.all([
     getHeroStats(region, district),
     region ? getRegions() : Promise.resolve([]),
   ]);
@@ -127,30 +128,36 @@ export async function Hero({
           {t("titleLead")} {t("rotator.third")}
         </h1>
 
-        <div>
-          {/*
+        {/*
+          No figure from any source, live or stored — a server that has never
+          once reached them. The heading alone, over nothing, would be an empty
+          promise, so the whole block goes.
+        */}
+        {stats.length > 0 ? (
+          <div>
+            {/*
             `data-enter` moved off this wrapper and onto the heading row and
             each card separately. Nested on the wrapper it composed with the
             cards' own transforms, so every card travelled twice as far as
             intended; separate elements let the row and the four cards
             cascade instead.
           */}
-          <div
-            data-enter
-            style={{ "--enter-delay": 2 } as React.CSSProperties}
-            className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"
-          >
-            {/*
+            <div
+              data-enter
+              style={{ "--enter-delay": 2 } as React.CSSProperties}
+              className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"
+            >
+              {/*
               h2, not h1. The page's own <h1> is the sr-only line above — this
               names the figures beneath it, which is a section of the page
               rather than its subject. Two h1s, or an h1 here and none above,
               would both misdescribe the document to a screen reader.
             */}
-            <h2 className="font-heading text-xl font-semibold sm:text-2xl">
-              {t("statsTitle")}
-            </h2>
+              <h2 className="font-heading text-xl font-semibold sm:text-2xl">
+                {t("statsTitle")}
+              </h2>
 
-            {/*
+              {/*
               THE PERIOD, ONCE. All four cards count the same year, and it
               used to be repeated inside three of the four labels. Printed
               here it says the same thing in one place and leaves the labels
@@ -161,32 +168,41 @@ export async function Hero({
               `getHeroStats` rather than being hardcoded, so that swap is a
               control, not a data change.
             */}
-            <p className="text-muted-foreground text-sm font-medium tabular-nums">
-              {year}-yil
-            </p>
-          </div>
+              <p className="text-muted-foreground text-sm font-medium tabular-nums">
+                {year}-yil
+              </p>
+            </div>
 
-          <StatPanel stats={stats} />
+            <StatPanel stats={stats} />
 
-          {/*
+            {/*
             Only when the register could not resolve the district — which is
             the only state in which the row can be misread. Everywhere else all
             four cards describe the same place and the line would be noise.
           */}
-          {contractsWidened && district ? (
-            <p className="text-muted-foreground mt-4 text-xs">
-              {t.rich("statScope", {
-                district,
-                region: regionName ?? "",
-                strong: (chunks) => (
-                  <span className="text-foreground font-semibold">
-                    {chunks}
-                  </span>
-                ),
-              })}
-            </p>
-          ) : null}
-        </div>
+            {contractsWidened && district ? (
+              <p className="text-muted-foreground mt-4 text-xs">
+                {t.rich("statScope", {
+                  district,
+                  region: regionName ?? "",
+                  strong: (chunks) => (
+                    <span className="text-foreground font-semibold">
+                      {chunks}
+                    </span>
+                  ),
+                })}
+              </p>
+            ) : null}
+
+            {/*
+            Any card showing a STORED figure dates the row — the oldest such
+            figure, see getHeroStats. Not optional: a stored count in the place
+            a live one sits claims something about today unless it says when
+            it was true (lib/data/snapshot.ts).
+          */}
+            {asOf ? <StaleNotice asOf={asOf} className="mt-4" /> : null}
+          </div>
+        ) : null}
 
         {children}
       </Container>

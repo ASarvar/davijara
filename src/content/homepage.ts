@@ -11,45 +11,40 @@ import type { DocItem, Listing, Service, Stat, Step } from "@/types/content";
 
 /*
   THE YEAR IS NOT IN THESE LABELS ANY MORE. It is printed once, beside the
-  section heading, because all four cards count the same year and repeating
-  it four times said nothing the heading could not say once. `getHeroStats`
+  section heading, because every card counts the same year and repeating it
+  in each label said nothing the heading could not say once. `getHeroStats`
   returns that year for the heading to use.
+
+  NO CARD CARRIES A FIGURE HERE. Every value is counted from a live service by
+  `getHeroStats`, which falls back to the last figure it saw (dated on the
+  page) and otherwise drops the card. The first three used to hold the
+  operator's typed totals — 1 390+, 28 075 and 145,9 mln m² — as a last
+  resort, and those were printed undated under the current year long after
+  the register had moved past them (30 419 and 199,2 by 20.10.2026).
 */
 export const heroStats: Stat[] = [
   {
-    value: "1 390+",
+    value: "",
     label: "Ijaraga berilayotgan obyektlar",
     icon: "Building2",
   },
   {
-    value: "28 075",
+    value: "",
     label: "Tuzilgan ijara shartnomalari",
     icon: "FileText",
   },
   /*
     The unit is a FIELD, not part of the label, because the scale of this
-    figure changes by three orders of magnitude between the republic (148,8
+    figure changes by three orders of magnitude between the republic (199,2
     mln m²) and a single tuman (30,0 ming m²). Pinned to "mln m²" the card read
-    "0" for most districts. The static value below is the operator's, in
-    millions; the live path picks the unit to match the number — see
-    `formatLeasedArea`.
+    "0" for most districts; `formatLeasedArea` picks the unit to match the
+    number.
   */
   {
-    value: "145,9",
+    value: "",
     label: "Ijaraga berilgan maydon",
-    unit: "mln m²",
     icon: "LandPlot",
   },
-  /*
-    The only card here with no static figure: its value is computed from the
-    live service every time (see `getSoldCount`), so there is nothing verified
-    to fall back to and `getHeroStats` drops the card entirely when the
-    service cannot answer.
-
-    Unlike the two above — operator-reported totals for 2026 specifically,
-    replaced by hand when 2027's arrive — this one recounts itself from the
-    live service every year.
-  */
   {
     value: "",
     label: "Ijaraga berilgan obyektlar",
@@ -58,9 +53,7 @@ export const heroStats: Stat[] = [
   /*
     Privatization lots on offer now (lib/data/privatization.ts) — the LAST
     card in the row, after the lease figures, at the operator's request
-    (09.10.2026); `getHeroStats` appends it. Like the card above
-    it has no static figure: it is counted every time, and dropped when the
-    source cannot answer.
+    (09.10.2026).
   */
   {
     value: "",

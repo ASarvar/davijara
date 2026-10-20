@@ -3,7 +3,12 @@ import "server-only";
 import { unstable_cache } from "next/cache";
 
 import { regions } from "@/content/regions";
-import { readSnapshot, saveSnapshot, snapshotKeys } from "@/lib/data/snapshot";
+import {
+  implausibleDrop,
+  readSnapshot,
+  saveSnapshot,
+  snapshotKeys,
+} from "@/lib/data/snapshot";
 
 /*
   Signed lease contracts and leased area, from the operator's own register.
@@ -281,6 +286,22 @@ const fetchRegister = unstable_cache(
       the moment the register went down — the one case `widened` exists to
       report honestly.
     */
+    /*
+      `contracts_count` is a year-to-date total and only grows, so an answer a
+      tenth below the stored one is a truncated register, not a change — see
+      implausibleDrop.
+    */
+    const fault = implausibleDrop(
+      snapshotKeys.register(apiId, year),
+      num(json.summary?.contracts_count),
+      (stored) => {
+        const count = (stored as ApiResponse | null)?.summary?.contracts_count;
+        return count != null ? num(count) : undefined;
+      },
+      { floor: 0.9 },
+    );
+    if (fault) throw new Error(fault);
+
     saveSnapshot(snapshotKeys.register(apiId, year), json);
     return json;
   },
@@ -292,10 +313,10 @@ const fetchRegister = unstable_cache(
  * Signed contracts and leased area for the republic, a region, or a district.
  *
  * Null only when the service is not configured, or when it fails AND has never
- * answered successfully — the hero then keeps the operator's verified static
- * figures rather than showing nothing. That fallback is why this returns null
- * instead of throwing: an unreachable register should cost the page two live
- * numbers, not the whole row.
+ * answered successfully — the hero then shows the last figures it saw, or
+ * drops the two cards. That fallback is why this returns null instead of
+ * throwing: an unreachable register should cost the page two live numbers,
+ * not the whole row.
  *
  * When the live call fails but a snapshot exists, the snapshot's real figures
  * are returned with `asOf` set, and the hero prints that date. See snapshot.ts
@@ -328,7 +349,7 @@ export async function getRentContracts(
     /*
       The last real answer for this exact scope. `summary` is what every branch
       below reads, so a row without one predates a shape change and is treated
-      as absent — the caller drops to the static figures rather than throwing
+      as absent — the caller drops to its own fallback rather than throwing
       on a field that is no longer there.
     */
     const snap = readSnapshot<ApiResponse>(snapshotKeys.register(apiId, year));

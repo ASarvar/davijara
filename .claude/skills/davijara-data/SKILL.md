@@ -19,9 +19,14 @@ Carried over from the legacy site and resolved as follows:
   `?hudud=` and `?tuman=`. Open lots and lots sold this year
   (`sold_price > 0`) come from the listings feed; signed contracts and leased
   area come from `RENT_CONTRACTS_API_URL`, a second service whose `region` is
-  optional (omit it for the republic). Each degrades on its own: the first two
-  fall back to the verified static figures, and the sold card is dropped rather
-  than shown empty because nobody has published that number.
+  optional (omit it for the republic). Each card degrades on its own: live,
+  else the most recent stored figure for that card and place (dated on the
+  page by StaleNotice), else the card is hidden. There are NO static fallback
+  figures any more — the operator's typed 28 075 / 145,9 were printed undated
+  under 2026 long after the register passed them (operator, 20.10.2026). An
+  upstream answer that says `success` but falls implausibly (empty region,
+  year-to-date total down >10%) is refused by `implausibleDrop` in
+  `snapshot.ts` and treated as an outage.
   **Do not derive a leased-AREA figure from the listings feed's `rent_area`.**
   Summed over 2026 it gives 161 mln m², with one region alone contributing 150
   mln from 266 lots (~564 000 m² each) — the field is not comparable across lot

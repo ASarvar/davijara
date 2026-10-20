@@ -8,6 +8,7 @@ import { regions } from "@/content/regions";
 import { featuredListings } from "@/content/homepage";
 import { mockListings } from "@/content/listings-mock";
 import {
+  implausibleDrop,
   olderOf,
   readSnapshot,
   saveSnapshot,
@@ -785,6 +786,16 @@ const fetchRegion = unstable_cache(
       is gone. Inside `unstable_cache`, so it costs one write per revalidation
       window rather than one per render.
     */
+    // An empty answer from a region that had lots is a fault, not a fact —
+    // see implausibleDrop. Thrown before the snapshot is touched.
+    const fault = implausibleDrop(
+      snapshotKeys.listingsRegion(slug),
+      mapped.length,
+      (stored) => (Array.isArray(stored) ? stored.length : undefined),
+      { floor: 0.01 },
+    );
+    if (fault) throw new Error(fault);
+
     saveSnapshot(snapshotKeys.listingsRegion(slug), mapped);
 
     return mapped;
@@ -1062,6 +1073,13 @@ export interface ListingsResult {
   source: "api" | "snapshot" | "mock";
   /** When the snapshot was taken — ISO, and only set for `source: "snapshot"`. */
   asOf?: string;
+  /**
+   * True when at least one region failed with nothing stored, so `listings`
+   * is missing that region entirely. The records shown are still real and the
+   * map may show them; a COUNT must not be printed from them, because it
+   * would state thirteen regions' total as the country's. See getHeroStats.
+   */
+  incomplete?: boolean;
 }
 
 export async function getListings(
@@ -1132,6 +1150,7 @@ export async function getListings(
         hasMock: false,
         source: asOf ? "snapshot" : "api",
         asOf,
+        incomplete: failed.length > 0,
       };
     }
   }
@@ -1496,6 +1515,19 @@ export const fetchSoldYear = unstable_cache(
       });
     }
     const answer = { total: sold, pending, unsold, byDistrict, sales };
+
+    // A year-to-date total only grows; a fall of a tenth is a short answer.
+    const fault = implausibleDrop(
+      snapshotKeys.soldYear(apiId, year),
+      sold,
+      (stored) => {
+        const total = (stored as { total?: unknown } | null)?.total;
+        return typeof total === "number" ? total : undefined;
+      },
+      { floor: 0.9 },
+    );
+    if (fault) throw new Error(fault);
+
     // The region's last-known-good sold year. Same reasoning as fetchRegion's.
     saveSnapshot(snapshotKeys.soldYear(apiId, year), answer);
     return answer;

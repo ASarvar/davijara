@@ -18,7 +18,12 @@ import {
 } from "@/lib/data/listings";
 import { getRentContracts } from "@/lib/data/rent-contracts";
 import { getPrivatizationListings } from "@/lib/data/privatization";
-import { olderOf } from "@/lib/data/snapshot";
+import {
+  olderOf,
+  readSnapshot,
+  saveIfChanged,
+  snapshotKeys,
+} from "@/lib/data/snapshot";
 import { formatFixed, TASHKENT_OFFSET_MS } from "@/lib/format";
 import type {
   DocItem,
@@ -86,24 +91,29 @@ export async function getSteps(): Promise<Step[]> {
 }
 
 /*
-  All four hero cards are LIVE, and each narrows to whatever the search panel
+  All five hero cards are LIVE, and each narrows to whatever the search panel
   has selected — republic, region, or district.
 
     1. open lots                    listings feed
     2. signed contracts             rent-contracts register
     3. leased area (mln m²)         rent-contracts register
     4. lots sold this year          listings feed, `sold_price > 0`
+    5. privatization lots on offer  the monitoring dashboard
 
-  EVERY ONE OF THEM DEGRADES SEPARATELY, and that is deliberate: three
+  EVERY ONE OF THEM DEGRADES SEPARATELY, and that is deliberate: four
   different upstream calls back this row and one being unreachable must not
-  blank the other two.
+  blank the others. Each card walks the same chain — see `latestFigure`:
 
-  - Cards 1 falls back to the verified static "1 390+" (`getLiveListings`
-    reports `source: "mock"` when the feed is unreachable, so a count from
-    sample data never reaches the page).
-  - Cards 2 and 3 fall back to the operator's static 28 075 / 145,9.
-  - Card 4 has no static twin — nobody has published that figure — so it is
-    dropped rather than shown empty.
+    live  ->  the most recent stored figure for this place  ->  hidden
+
+  and whenever a stored figure is used, the hero prints its date.
+
+  There is no static step any more. The operator's typed totals (1 390+,
+  28 075, 145,9 mln m²) used to be the last resort, printed undated under the
+  current year's heading — by October 2026 the register stood at 30 419 and
+  199,2, so that "fallback" was a wrong figure presented as today's. A hidden
+  card says less, but nothing false (operator, 20.10.2026: the figures must
+  always be right, and the latest ones during an outage).
 
   The register cannot resolve every district: it identifies them by a code the
   listings feed does not carry, so the two are matched by name (see
@@ -166,26 +176,166 @@ export interface HeroStatsResult {
   asOf?: string;
 }
 
+/** A card's figure, and — when it is not live — the moment it was. */
+interface Figure<T> {
+  data: T;
+  asOf?: string;
+}
+
+interface RegisterFigure {
+  contracts: number;
+  areaM2: number;
+  widened: boolean;
+}
+
+const isCount = (d: unknown): d is number =>
+  typeof d === "number" && Number.isFinite(d) && d >= 0;
+
+const isRegisterFigure = (d: unknown): d is RegisterFigure =>
+  typeof d === "object" &&
+  d !== null &&
+  isCount((d as RegisterFigure).contracts) &&
+  isCount((d as RegisterFigure).areaM2) &&
+  typeof (d as RegisterFigure).widened === "boolean";
+
+/**
+ * How long the hero waits for any one source before using its stored figure.
+ *
+ * The homepage renders this row on every request, and the slowest source sets
+ * the time to first byte: a cold register call for the republic is ~2.8s, the
+ * sold year is fourteen requests with a 20-second timeout each, and a hung
+ * service would hold the whole page for that long. Past the deadline the card
+ * takes its last figure, dated — and the abandoned request runs on and fills
+ * the cache, so the next reader gets the live one.
+ */
+const HERO_DEADLINE_MS = 6_000;
+
+async function within<T>(work: Promise<T>, ms: number): Promise<T | undefined> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<undefined>((resolve) => {
+    timer = setTimeout(() => resolve(undefined), ms);
+  });
+  try {
+    // A source that throws is a source that did not answer: same branch.
+    return await Promise.race([work.catch(() => undefined), deadline]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * The figure a card should show: live when it is, else the more recent of
+ * the two stored ones.
+ *
+ * TWO STORES, and why the hero keeps its own. The sources' snapshots are the
+ * RECORDS a figure is counted from — 150KB to 2.7MB a region — so they are
+ * written at most every six hours (SNAPSHOT_MIN_INTERVAL_MS). A card falling
+ * back on those after a restart showed a figure up to six hours older than
+ * the one on screen a minute before. The figure itself is a number, so it is
+ * kept as well, per card and per place, and written whenever it moves — see
+ * `saveIfChanged` for why "moves" and not "every render". Whichever store is
+ * newer wins.
+ *
+ * `candidate` is the source's own answer: live (no `asOf`), from its
+ * snapshot (`asOf` set), or null when it has nothing it can stand behind.
+ */
+function latestFigure<T>(
+  card: string,
+  scope: string,
+  candidate: Figure<T> | null,
+  valid: (d: unknown) => d is T,
+): Figure<T> | null {
+  const key = snapshotKeys.heroFigure(card, scope);
+  if (candidate && !candidate.asOf) {
+    saveIfChanged(key, candidate.data);
+    return candidate;
+  }
+  const stored = readSnapshot<unknown>(key);
+  if (!stored || !valid(stored.data)) return candidate;
+  if (candidate?.asOf && candidate.asOf >= stored.fetchedAt) return candidate;
+  return { data: stored.data, asOf: stored.fetchedAt };
+}
+
 export async function getHeroStats(
   regionSlug?: string,
   districtName?: string,
 ): Promise<HeroStatsResult> {
   const [objectsStat, contractsStat, areaStat, soldStat, saleStat] = heroStats;
   const year = currentYear();
+  /*
+    The place the row describes, and the year: the year-to-date figures
+    restart on 1 January, and December's must not stand in for January's.
+  */
+  const district = regionSlug ? districtName : undefined;
+  const scope = `${year}:${regionSlug ?? "all"}:${district ?? ""}`;
 
-  const [{ listings, source, asOf: listingsAsOf }, sold, register, sales] =
-    await Promise.all([
+  const [lease, sold, register, sales] = await Promise.all([
+    within(
       getLiveListings({ region: regionSlug, district: districtName }),
-      getSoldCount(year, regionSlug, districtName),
-      getRentContracts(year, regionSlug, districtName),
+      HERO_DEADLINE_MS,
+    ),
+    within(getSoldCount(year, regionSlug, districtName), HERO_DEADLINE_MS),
+    within(getRentContracts(year, regionSlug, districtName), HERO_DEADLINE_MS),
+    within(
       getPrivatizationListings({ region: regionSlug, district: districtName }),
-    ]);
+      HERO_DEADLINE_MS,
+    ),
+  ]);
 
   /*
-    `snapshot` counts as a real figure and `mock` does not — a count taken over
-    generated sample lots must never reach this row, which is why this tests
-    for the one excluded source rather than for `=== "api"`.
+    `mock` is never a figure — a count over generated sample lots must not
+    reach this row — and neither is `incomplete`: a region that failed with
+    nothing stored is missing from the sum, and thirteen regions' total is not
+    the country's.
   */
+  const objects = latestFigure(
+    "objects",
+    scope,
+    lease && lease.source !== "mock" && !lease.incomplete
+      ? {
+          data: lease.listings.length,
+          asOf: lease.source === "snapshot" ? lease.asOf : undefined,
+        }
+      : null,
+    isCount,
+  );
+  const contracts = latestFigure(
+    "register",
+    scope,
+    register
+      ? {
+          data: {
+            contracts: register.contracts,
+            areaM2: register.areaM2,
+            widened: register.widened,
+          },
+          asOf: register.asOf,
+        }
+      : null,
+    isRegisterFigure,
+  );
+  const soldFigure = latestFigure(
+    "sold",
+    scope,
+    sold ? { data: sold.count, asOf: sold.asOf } : null,
+    isCount,
+  );
+  /*
+    Unconfigured means the site has no sale section at all, so no card — not
+    even a stored one. Unavailable is an outage, and walks the chain.
+  */
+  const sale =
+    sales && !sales.configured
+      ? null
+      : latestFigure(
+          "sale",
+          scope,
+          sales && !sales.unavailable
+            ? { data: sales.listings.length, asOf: sales.asOf }
+            : null,
+          isCount,
+        );
+
   /*
     EVERY CARD OPENS THE PAGE IT COUNTS, narrowed to the place the hero is
     showing:
@@ -194,12 +344,13 @@ export async function getHeroStats(
       signed contracts   -> /ijara-shartnomalari (region only)
       leased area        -> /ijara-shartnomalari (region only)
       leased this year   -> /sotilgan-obyektlar  (region + district)
+      privatization      -> /xususiylashtirish   (region + district)
 
-    The two listings pages take the district as the hero has it — both read
-    the same listings feed and its Latin names. The register page takes the
-    region only: its districts are transliterated from Cyrillic, so the two
-    do not always spell a place alike, and a carried `tuman` that did not
-    match would open an empty page under a figure that says otherwise.
+    The listings pages take the district as the hero has it — they read the
+    same feed and its Latin names. The register page takes the region only:
+    its districts are transliterated from Cyrillic, so the two do not always
+    spell a place alike, and a carried `tuman` that did not match would open
+    an empty page under a figure that says otherwise.
   */
   const scoped = (path: string, withDistrict: boolean) => {
     const params = new URLSearchParams();
@@ -211,82 +362,62 @@ export async function getHeroStats(
     return qs ? `${path}?${qs}` : path;
   };
 
-  const live: Stat = {
-    ...(source === "mock"
-      ? objectsStat
-      : { ...objectsStat, value: formatNumber(listings.length) }),
-    href: scoped("/ijaraga-obyektlar", true),
-  };
-
-  const area = register ? formatLeasedArea(register.areaM2) : null;
-
-  /*
-    The privatization lots on offer, beside the lease lots on offer. Shown
-    only when the source answered (live or stored): unconfigured means the
-    site has no sale section at all, and a failure with nothing stored would
-    print "0" over a section that may hold hundreds.
-  */
-  const saleCard: Stat[] =
-    sales.configured && !sales.unavailable
-      ? [
-          {
-            ...saleStat,
-            value: formatNumber(sales.listings.length),
-            href: scoped("/xususiylashtirish", true),
-          },
-        ]
-      : [];
-
-  const stats: Stat[] = [
-    live,
-    {
-      ...contractsStat,
-      value: register ? formatNumber(register.contracts) : contractsStat.value,
-      href: scoped("/ijara-shartnomalari", false),
-    },
-    {
-      ...areaStat,
-      value: area ? area.value : areaStat.value,
-      // The unit rides alongside the figure now rather than inside the label.
-      // The static fallback is the operator's, and it is in millions.
-      unit: area ? area.unit : areaStat.unit,
-      href: scoped("/ijara-shartnomalari", false),
-    },
-  ];
-
-  if (sold != null) {
+  const stats: Stat[] = [];
+  if (objects) {
+    stats.push({
+      ...objectsStat,
+      value: formatNumber(objects.data),
+      href: scoped("/ijaraga-obyektlar", true),
+    });
+  }
+  if (contracts) {
+    const area = formatLeasedArea(contracts.data.areaM2);
+    stats.push(
+      {
+        ...contractsStat,
+        value: formatNumber(contracts.data.contracts),
+        href: scoped("/ijara-shartnomalari", false),
+      },
+      {
+        ...areaStat,
+        // The unit rides alongside the figure rather than inside the label.
+        value: area.value,
+        unit: area.unit,
+        href: scoped("/ijara-shartnomalari", false),
+      },
+    );
+  }
+  if (soldFigure) {
     stats.push({
       ...soldStat,
-      value: formatNumber(sold.count),
+      value: formatNumber(soldFigure.data),
       href: scoped("/sotilgan-obyektlar", true),
     });
   }
-
   // Last in the row, after every lease figure (operator, 09.10.2026).
-  stats.push(...saleCard);
+  if (sale) {
+    stats.push({
+      ...saleStat,
+      value: formatNumber(sale.data),
+      href: scoped("/xususiylashtirish", true),
+    });
+  }
 
   /*
     ONE DATE FOR THE ROW, and it is the oldest of whichever cards fell back.
-    Three services feed these four cards and they fail independently, so a
-    row can be part live and part stored. Dating it by the freshest part would
-    put a current timestamp over a figure that is a day old; the oldest is the
-    only claim every card on screen actually supports.
-
-    `source: "mock"` contributes no date on purpose — the sample set is not an
-    observation of anything, so it has no "as of". That card keeps the
-    operator's static figure and the row's date describes the rest.
+    Four sources feed these cards and they fail independently, so a row can
+    be part live and part stored. Dating it by the freshest part would put a
+    current timestamp over a figure that is a day old; the oldest is the only
+    claim every card on screen actually supports.
   */
-  const asOf = [
-    source === "snapshot" ? listingsAsOf : undefined,
-    sold?.asOf,
-    register?.asOf,
-    sales.asOf,
-  ].reduce<string | undefined>((oldest, ts) => olderOf(oldest, ts), undefined);
+  const asOf = [objects, contracts, soldFigure, sale].reduce<
+    string | undefined
+  >((oldest, figure) => olderOf(oldest, figure?.asOf), undefined);
 
   return {
     stats,
     year,
-    contractsWidened: register?.widened ?? false,
+    contractsWidened: contracts?.data.widened ?? false,
     asOf,
   };
 }

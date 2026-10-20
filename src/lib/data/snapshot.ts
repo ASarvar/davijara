@@ -58,6 +58,11 @@ export const snapshotKeys = {
   listingsRegion: (slug: string) => `listings:region:${slug}`,
   soldYear: (apiId: number, year: number) => `listings:sold:${apiId}:${year}`,
   register: (apiId: number, year: number) => `register:${apiId}:${year}`,
+  /**
+   * One hero card's FIGURE for one place — the number itself, not the
+   * records it was counted from. See `getHeroStats` and `saveIfChanged`.
+   */
+  heroFigure: (card: string, scope: string) => `hero:${card}:${scope}`,
 } as const;
 
 /**
@@ -187,4 +192,95 @@ export function olderOf(
   if (!a) return b;
   if (!b) return a;
   return a < b ? a : b;
+}
+
+/**
+ * Record `data` under `key` only when it differs from what is stored.
+ *
+ * For SMALL payloads — a hero figure is a number or three — where comparing
+ * costs nothing, and where the six-hour throttle above would make the
+ * fallback hours older than the page a reader saw a minute before the outage.
+ *
+ * WHY "CHANGED" AND NOT "EVERY TIME". The caller cannot tell a live answer
+ * from a stale one: while a service is down, `unstable_cache` keeps handing
+ * back its last entry as if nothing were wrong (it swallows the failed
+ * revalidation — see next/dist/server/web/spec-extension/unstable-cache.js).
+ * Rewriting on every render would stamp that frozen figure with a fresh time
+ * for as long as the outage lasted, and the page would later print it as
+ * "as of" a moment the service never confirmed it. Writing only on change
+ * keeps the stamp at the moment the figure was last SEEN to move: never later
+ * than the truth, at worst earlier — which understates freshness, the honest
+ * direction to err in.
+ */
+export function saveIfChanged(key: string, data: unknown): void {
+  try {
+    const db = getDb();
+    const next = JSON.stringify(data);
+    const existing = db
+      .prepare("SELECT data FROM api_snapshot WHERE key = ?")
+      .get(key) as { data: string } | undefined;
+    if (existing?.data === next) return;
+    db.prepare(
+      `INSERT INTO api_snapshot (key, data, fetched_at) VALUES (?, ?, ?)
+         ON CONFLICT(key) DO UPDATE SET data = excluded.data,
+                                        fetched_at = excluded.fetched_at`,
+    ).run(key, next, new Date().toISOString());
+  } catch (error) {
+    console.error(
+      "[snapshot] save failed",
+      key,
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+/**
+ * How long a stored answer may veto a new one. See `implausibleDrop`.
+ */
+const PLAUSIBILITY_WINDOW_MS = 48 * 60 * 60 * 1000;
+
+/**
+ * A description of the problem when a fresh answer has fallen below `floor`
+ * times the stored one for the same scope, else null.
+ *
+ * WHAT IT CATCHES: a service that answers `success: true` with an empty or
+ * truncated list — the failure the existing checks cannot see, because the
+ * status code and the `success` flag both say all is well. Taken at face
+ * value, a region would drop to 0 lots on the map and its "0" would become the
+ * new last-known-good, poisoning the very fallback that exists for outages.
+ * Callers THROW on a non-null result, which routes the answer down the same
+ * path as an unreachable service: the cached or stored figure, dated.
+ *
+ * The floor is the caller's, because what counts as implausible depends on
+ * what is counted. A year-to-date total (contracts signed, lots sold) only
+ * grows, so a 10% fall is a fault: floor 0.9. A list of OPEN lots legitimately
+ * halves in an hour — 373 privatization lots fell to 109 at 10:20 on
+ * 20.10.2026, when a sitting closed — so there only "empty" is a fault:
+ * floor 0.01, with `minPrevious` keeping a region that really had two lots
+ * from being held hostage by them.
+ *
+ * SELF-HEALING: a stored answer older than two days vetoes nothing. The guard
+ * never updates the snapshot it compares against, so a fall that is real — a
+ * register corrected downward — is accepted two days after it first appeared
+ * instead of being refused for ever.
+ *
+ * Like the rest of this module it never throws: a snapshot that cannot be read
+ * vetoes nothing.
+ */
+export function implausibleDrop(
+  key: string,
+  fresh: number,
+  measure: (stored: unknown) => number | undefined,
+  { floor, minPrevious = 10 }: { floor: number; minPrevious?: number },
+): string | null {
+  const stored = readSnapshot<unknown>(key);
+  if (!stored) return null;
+  const age = Date.now() - Date.parse(stored.fetchedAt);
+  if (!(age >= 0 && age < PLAUSIBILITY_WINDOW_MS)) return null;
+
+  const previous = measure(stored.data);
+  if (previous == null || !Number.isFinite(previous)) return null;
+  if (previous < minPrevious || fresh >= previous * floor) return null;
+
+  return `${key}: ${fresh} against ${previous} stored at ${stored.fetchedAt} — treated as a fault`;
 }

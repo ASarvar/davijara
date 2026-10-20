@@ -2,7 +2,11 @@ import "server-only";
 
 import { unstable_cache } from "next/cache";
 
-import { readSnapshot, saveSnapshot } from "@/lib/data/snapshot";
+import {
+  implausibleDrop,
+  readSnapshot,
+  saveSnapshot,
+} from "@/lib/data/snapshot";
 import { auctionDay, getDistrictsByRegion, inBand } from "@/lib/data/listings";
 import type { Listing, ListingQuery } from "@/types/content";
 
@@ -268,6 +272,20 @@ const fetchAll = unstable_cache(
       if (listing) byLot.set(listing.id, listing);
     }
     const mapped = [...byLot.values()];
+
+    /*
+      Only EMPTY is a fault here. The list is of open lots and falls by
+      hundreds when a sitting closes (373 to 109 at 10:20 on 20.10.2026), so
+      any milder floor would refuse the dashboard's correct answer.
+    */
+    const fault = implausibleDrop(
+      SNAPSHOT_KEY,
+      mapped.length,
+      (stored) => (Array.isArray(stored) ? stored.length : undefined),
+      { floor: 0.01 },
+    );
+    if (fault) throw new Error(fault);
+
     saveSnapshot(SNAPSHOT_KEY, mapped);
     return mapped;
   },
