@@ -31,13 +31,14 @@ export const homeBanner: {
   href?: string;
 } = {
   /*
-    2460 × 340 (7,24:1). Named without a `-desktop` suffix because it is
-    currently the only file; adding `mobile` later does not require renaming
-    it.
+    1280 × 176 (7,27:1) — 21 October, Oʻzbek tili bayrami (operator,
+    21.10.2026). A NEW NAME for each artwork rather than overwriting the old
+    file, so no browser or proxy that cached the previous one can go on
+    showing it under an unchanged URL.
   */
-  desktop: "/banner.jpg",
+  desktop: "/banner-ozbek-tili.jpg",
   mobile: null,
-  alt: "Oʻzbekiston Respublikasi Davlat bayrogʻi va «35 YIL» yozuvi. Shior: «Yagona Vatan, yagona xalq boʻlib, birgalikda yangi hayot va porloq kelajak yaratamiz!»",
+  alt: "Shahar manzarasi fonida yozuv: «21-oktabr — Oʻzbek tili bayrami muborak boʻlsin!»",
 };
 
 /**
@@ -48,4 +49,4 @@ export const homeBanner: {
  * jumps down by the banner's height the moment it decodes. Update both
  * numbers together whenever the artwork is replaced.
  */
-export const BANNER_SIZE = { width: 2460, height: 340 } as const;
+export const BANNER_SIZE = { width: 1280, height: 176 } as const;
