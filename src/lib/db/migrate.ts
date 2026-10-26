@@ -9,7 +9,7 @@ import type { Database } from "better-sqlite3";
   inlining the records: a seed that quotes its source module is checkable
   against it, and a seed that re-types 5 records is not.
 */
-import { news as legacyNews } from "@/content/news";
+import { news as legacyNews, newsSeedV19 } from "@/content/news";
 import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
@@ -23,6 +23,7 @@ import {
 // Migration 17 only — draft texts for the two footer legal pages.
 import { legalDrafts } from "@/content/legal-drafts";
 import { tashkentToday } from "@/lib/format";
+import { blocksSchema } from "@/types/blocks";
 // Migration 9 only — read there for why a data-fix migration reads this.
 import uzMessages from "../../../messages/uz.json";
 import ruMessages from "../../../messages/ru.json";
@@ -694,8 +695,14 @@ const migrations: Migration[] = [
       if (!old || clash) return;
 
       const nav = uzMessages.nav as Record<string, string | undefined>;
-      const navRu = (ruMessages.nav ?? {}) as Record<string, string | undefined>;
-      const navEn = (enMessages.nav ?? {}) as Record<string, string | undefined>;
+      const navRu = (ruMessages.nav ?? {}) as Record<
+        string,
+        string | undefined
+      >;
+      const navEn = (enMessages.nav ?? {}) as Record<
+        string,
+        string | undefined
+      >;
 
       db.prepare(
         "UPDATE menu_sections SET key = ?, label_uz = ?, label_ru = ?, label_en = ? WHERE key = ?",
@@ -1125,6 +1132,54 @@ const migrations: Migration[] = [
     */
     seed(db) {
       seedVacancies(db, vacancySeedsV18);
+    },
+  },
+  {
+    version: 19,
+    name: "news: VM 563, ijara tartibiga oʻzgartirishlar, 26.10.2026",
+    up: `SELECT 1;`,
+    /*
+      An operator-supplied news item (content/news.ts has its source note),
+      inserted the way the panel would: a published row, its Uzbek text, and
+      an audit entry with the full after-snapshot, so the record of who
+      published what does not start with a gap.
+
+      SKIPPED if the slug is already taken — an editor may have entered the
+      same item by hand before this deploy, and a UNIQUE violation here
+      would stop the migration and with it the site. The blocks are checked
+      against the panel's own schema first, so a malformed seed fails loudly
+      at this point rather than rendering as an empty article.
+    */
+    seed(db) {
+      const item = newsSeedV19;
+      const taken = db
+        .prepare("SELECT 1 FROM news WHERE slug = ?")
+        .get(item.slug);
+      if (taken) return;
+
+      const blocks = JSON.stringify(blocksSchema.parse(item.blocks));
+      const now = new Date().toISOString();
+      const { lastInsertRowid } = db
+        .prepare(
+          `INSERT INTO news (slug, category, status, published_at, image, created_at, updated_at)
+           VALUES (?, ?, 'published', ?, ?, ?, ?)`,
+        )
+        .run(item.slug, item.category, item.publishedAt, item.image, now, now);
+      const id = Number(lastInsertRowid);
+      db.prepare(
+        `INSERT INTO news_translations (news_id, locale, title, excerpt, blocks)
+         VALUES (?, 'uz', ?, ?, ?)`,
+      ).run(id, item.title, item.excerpt, blocks);
+      db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, 'migratsiya', 'create', 'news', ?, ?, NULL, ?)`,
+      ).run(
+        now,
+        String(id),
+        `Yangilik yaratildi: ${item.title}`,
+        JSON.stringify({ id, ...item, status: "published" }),
+      );
     },
   },
 ];

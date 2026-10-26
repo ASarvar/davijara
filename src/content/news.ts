@@ -1,4 +1,5 @@
-import type { NewsItem } from "@/types/content";
+import type { Block } from "@/types/blocks";
+import type { NewsCategory, NewsItem } from "@/types/content";
 
 /*
   Markaz yangiliklari — the press-centre store.
@@ -122,3 +123,60 @@ export const news: NewsItem[] = [
     ],
   },
 ];
+
+/*
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │ VM 563 — added by migration 19, not by the array above.                  │
+  │                                                                          │
+  │ SOURCE: "Документ Microsoft Word 563.docx", supplied by the operator     │
+  │ 26.10.2026 for Markaz yangiliklari, with its infographic. The document  │
+  │ is in Uzbek CYRILLIC; this site publishes Latin Uzbek, so the text was   │
+  │ converted letter by letter by the 1995 alphabet's rules (е→ye at a word  │
+  │ start or after a vowel/ъ, ц→s/ts, ъ before е dropped: объект→obyekt,     │
+  │ ў/ғ→oʻ/gʻ) — a change of SCRIPT, not of a single word.                   │
+  │                                                                          │
+  │ The INFOGRAPHIC was Cyrillic and 3:2 too, and the operator asked for it  │
+  │ in Latin at this site's 16:9 (26.10.2026). It was rebuilt at 1600×900:  │
+  │ the photo column is the supplied photo with the decree prop's three     │
+  │ Cyrillic lines repainted in Latin ("№ 563" and the emblem untouched);   │
+  │ the panel is set in the site's own Inter/Roboto with lucide icons, and  │
+  │ its text is the same transliteration as below, bold where the supplied  │
+  │ infographic was bold.                                                   │
+  │                                                                          │
+  │ The four changes are an ORDERED list because the operator's own         │
+  │ infographic numbers them 1-4; the document sets them as plain           │
+  │ paragraphs. The intro is the excerpt, which the article page prints as  │
+  │ its lead. Category "obyektlar" is this file's choice — the five slugs   │
+  │ have no "legislation" topic — and an editor can change it in the panel. │
+  └──────────────────────────────────────────────────────────────────────────┘
+*/
+export const newsSeedV19: {
+  slug: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+  category: NewsCategory;
+  image: string;
+  blocks: Block[];
+} = {
+  slug: "vm-563-ijara-tartibiga-ozgartirishlar",
+  title:
+    "Davlat mulkini ijaraga berish tartibiga kiritilgan oʻzgartirish va qoʻshimchalar",
+  excerpt:
+    "Vazirlar Mahkamasining 2023 yil 14 dekabrdagi 660-son qarori bilan tasdiqlangan davlat mulkini ijaraga berish toʻgʻrisidagi Nizomga Vazirlar Mahkamasining 2026 yil 13 oktyabrdagi 563-son qarori 1-ilovasining 38-bandi bilan quyidagi oʻzgartirish va qoʻshimchalar kiritildi:",
+  publishedAt: "2026-10-26",
+  category: "obyektlar",
+  image: "/yangiliklar/vm-563-ijara-tartibi.jpg",
+  blocks: [
+    {
+      type: "list",
+      ordered: true,
+      items: [
+        "Ijara shartnomasi shartlarini, shu jumladan ijara toʻlovlarini ketma-ket uch va undan ortiq marta bajarmagan ijarachilar bir yil muddatga davlat mulkini ijaraga berish boʻyicha auksion savdolarida ishtirok etishdan chetlatiladi.",
+        "Chetlatilgan ijarachilar reyestri «online-ijara.uz» axborot tizimida yuritiladi va «E-auksion» elektron savdo platformasiga integratsiya qilinadi.",
+        "Ijarachi reyestrga kiritilgan sanadan boshlab 12 oy oʻtgach, reyestrdan avtomatik ravishda chiqariladi.",
+        "Yuqori texnologiyali mahsulotlar yaratuvchi tadbirkorlik subyektlariga maydoni 10 ming kvadrat metrgacha boʻlgan davlat mulki obyektlarini 5 yil muddatga toʻgʻridan-toʻgʻri bepul foydalanishga berish, shartnoma shartlari bajarilgan taqdirda esa baholangan qiymatda toʻgʻridan-toʻgʻri sotish imkoniyati belgilandi.",
+      ],
+    },
+  ],
+};
