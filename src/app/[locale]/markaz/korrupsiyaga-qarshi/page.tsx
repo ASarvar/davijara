@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Quote } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
@@ -11,7 +12,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { sections, closingStatement } from "@/content/anticorruption";
+import {
+  closingStatement,
+  directorAppeal,
+  sections,
+} from "@/content/anticorruption";
 import { localeAlternates } from "@/lib/seo";
 
 /*
@@ -71,6 +76,81 @@ export default async function AnticorruptionPage({
         >
           {tNav(NAV_KEY)}
         </h1>
+
+        {/*
+          THE DIRECTOR'S APPEAL, first — before the thirteen sections, because
+          it is the one part of the page addressed to the reader, and signed.
+          Open, not folded into the accordion: a letter hidden behind a row
+          title reads as one more policy item. Set as a letter on the card
+          layer — title block centred as the source centres it, signature
+          split left/right as the source's tab stop splits it — and in the
+          same border-hairline + rounded-md language as the list below it.
+
+          No portrait, deliberately: the leadership page's photo belongs to
+          whoever is director when it is rendered, and this text is signed by
+          one person on one date.
+        */}
+        <section
+          aria-labelledby="director-appeal"
+          data-reveal="up"
+          className="border-hairline bg-card mt-8 rounded-md border px-5 py-7 [box-shadow:var(--shadow-1)] sm:px-10 sm:py-10"
+        >
+          <header className="text-center">
+            <IconTile size="sm" aria-hidden="true" className="mx-auto">
+              <Quote className="size-4" />
+            </IconTile>
+            <p className="text-accent-foreground mt-4 text-xs font-semibold tracking-wide text-balance">
+              {directorAppeal.heading}
+            </p>
+            <h2
+              id="director-appeal"
+              className="font-heading mx-auto mt-3 max-w-2xl text-lg font-semibold text-balance sm:text-xl"
+            >
+              {/*
+                Line by line, as the source breaks it — "MUROJAATI" on a line
+                of its own (operator, 26.10.2026). Each line is a block that
+                still wraps on its own, so a phone gets the source's breaks
+                plus whatever its width needs, never a line cut mid-phrase.
+              */}
+              {directorAppeal.titleLines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </h2>
+          </header>
+
+          <div className="border-hairline mx-auto mt-6 max-w-3xl space-y-3 border-t pt-6 text-sm text-pretty sm:text-base">
+            {directorAppeal.blocks.map((block, i) =>
+              block.kind === "list" ? (
+                <ul
+                  key={i}
+                  className="marker:text-accent-foreground list-disc space-y-1.5 pl-5"
+                >
+                  {block.items.map((item, j) => (
+                    <li key={j}>{item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p
+                  key={i}
+                  className={
+                    block.emphasis
+                      ? "text-foreground font-semibold"
+                      : "text-muted-foreground"
+                  }
+                >
+                  {block.text}
+                </p>
+              ),
+            )}
+
+            <p className="text-foreground flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 pt-4 font-semibold">
+              <span>{directorAppeal.signature.closing}</span>
+              <span>{directorAppeal.signature.name}</span>
+            </p>
+          </div>
+        </section>
 
         {/*
           ONE bordered, divided list — not a stack of individually-rounded

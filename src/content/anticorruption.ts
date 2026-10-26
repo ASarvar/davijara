@@ -254,3 +254,121 @@ export const sections: AnticorruptionSection[] = [
 /** The document's closing line — bold in the source, rendered as a banner. */
 export const closingStatement =
   "Korrupsiyaga befarq boʻlmang! Korrupsiya haqida xabar bering!";
+
+/*
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │ THE DIRECTOR'S APPEAL. SOURCE: "7.1.1 И.Халпаев мурожаати.docx",          │
+  │ supplied by the operator 26.10.2026 for this page. Transcribed verbatim, │
+  │ by script from the document's own XML rather than retyped, so no word   │
+  │ was dropped or changed — with three exceptions the operator confirmed   │
+  │ the same day: "Davlat mulk" → "Davlat mulki" in the two title lines (the │
+  │ registered name), "obʼektlarini" → "obyektlarini" (the site's spelling), │
+  │ and "Ilhom" kept as the CORRECT spelling of the director's name — the   │
+  │ leadership page's "Ilxom" was the one changed (content/workers.json).    │
+  │                                                                          │
+  │ Typographic edits only, by the same rules as the note at the top of this │
+  │ file: runs of spaces Word inserted to justify lines collapsed to one;    │
+  │ the curly mark after o/g became ʻ, the one inside a word became ʼ. Bold  │
+  │ paragraphs in the source are `emphasis`; its bulleted list is `list`.    │
+  └──────────────────────────────────────────────────────────────────────────┘
+*/
+export type AppealBlock =
+  | { kind: "paragraph"; text: string; emphasis?: boolean }
+  | { kind: "list"; items: string[] };
+
+export const directorAppeal: {
+  /** The document's first line, set in capitals in the source. */
+  heading: string;
+  /** The centred title block, line by line as the source breaks it. */
+  titleLines: string[];
+  blocks: AppealBlock[];
+  signature: { closing: string; name: string };
+} = {
+  heading:
+    "DAVLAT MULKI OBYEKTLARIDAN SAMARALI FOYDALANISH MARKAZI DIREKTORINING MUROJAATI",
+  titleLines: [
+    "Davlat mulki obyektlaridan samarali foydalanish markazi direktori",
+    "Xalpayev Ilhom Islomovichning korrupsiyaga qarshi kurashish",
+    "boʻyicha jamoatchilik va tizim xodimlariga",
+    "MUROJAATI",
+  ],
+  blocks: [
+    {
+      kind: "paragraph",
+      text: "Qadrli yurtdoshlar, hurmatli hamkasblar!",
+      emphasis: true,
+    },
+    {
+      kind: "paragraph",
+      text: "Yurtimizda tadbirkorlikni rivojlantirish, ish oʻrnini yaratish, investitsiyalarni jalb qilish, innovatsiya va eksportni koʻpaytirish eng asosiy yoʻnalishlar etib belgilangan.",
+    },
+    {
+      kind: "paragraph",
+      text: "Davlat mulki obyektlaridan samarali foydalanish markazimiz tomonidan tadbirkorlik subyektlarini doimo qoʻllab-quvvatlash, ularga ishlab chiqarish va xizmatlar koʻrsatish maqsadida davlat mulki boʻlgan obyektlarini ijaraga berishda bizga katta masʼuliyat yuklatilgan.",
+    },
+    {
+      kind: "paragraph",
+      text: "Markazimiz faoliyati halollik, shaffoflik va javobgarlik tamoyillariga tayanadi. Biz korrupsiyaga nisbatan “toqatsizlik” siyosatini yuritamiz va bu — faqat shior emas, balki kundalik ish uslubimizdir.",
+    },
+    {
+      kind: "paragraph",
+      text: "Davlat boshqaruvining koʻplab tarmoqlari qatorida Markaz tizimida korrupsiyaning oldini olish, faoliyatni raqamlashtirish, ochiqlikni taʼminlash borasida bir qator ishlar amalga oshirildi.",
+    },
+    {
+      kind: "paragraph",
+      text: "Xususan, oʻtgan qisqa vaqt mobaynida:",
+    },
+    {
+      kind: "paragraph",
+      text: "davlat koʻchmas mulk obyektlarini xususiy sektorga auksion orqali ijaraga berish, ijaradan tushumlarni avtomat taqsimlash, ijara tushumlarini undirishni oʻz ichiga olgan tizim joriy etildi.",
+    },
+    {
+      kind: "paragraph",
+      text: "Markaz tizimida korrupsiyaga qarshi kurashish boʻyicha masʼul boʻlim faoliyati yoʻlga qoʻyilib, korrupsiyaviy holatlar tizimli ravishda oʻrganilib, bunday holatlarni keltirib chiqaruvchi sabab va shart-sharoitlarni bartaraf etish yuzasidan aniq choralar koʻrilmoqda;",
+    },
+    {
+      kind: "paragraph",
+      text: "Shu bilan birga, xodimlar oʻrtasida halollik va ochiqlik tamoyillarini mustahkamlashga qaratilgan tushuntirish va profilaktik ishlar muntazam amalga oshirilmoqda.",
+    },
+    {
+      kind: "paragraph",
+      text: "Taʼkidlash joizki, Markaz tizimida “korrupsiyadan holi” muhitni yaratish, byurokratiya va manfaatlar toʻqnashuvi holatlariga batamom chek qoʻyish boʻyicha amaliy harakatlarni izchil davom ettiramiz.",
+      emphasis: true,
+    },
+    {
+      kind: "paragraph",
+      text: "Aziz yurtdoshlar, sohaning fidoyi zahmatkashlari!",
+      emphasis: true,
+    },
+    {
+      kind: "paragraph",
+      text: "Halollik — bizning eng katta kuchimiz, shaffoflik — bizning ish uslubimiz, ishonch — bizning eng katta kapitalimiz!",
+    },
+    {
+      kind: "paragraph",
+      text: "Har bir qadam ortida xalq manfaati turishi kerak, har bir harakatimiz — masʼuliyat, har bir jarayon — ochiq va adolatli boʻlishi shart!",
+    },
+    {
+      kind: "paragraph",
+      text: "Men sizlarni:",
+    },
+    {
+      kind: "list",
+      items: [
+        "manfaatlar toʻqnashuviga yoʻl qoʻymaslikka;",
+        "har qanday noqonuniy taʼsirni rad etishga;",
+        "elektron auksion va raqamli nazorat orqali shaffoflikni mustahkamlashga;",
+        "jamoada halollik madaniyatini kuchaytirishga chaqiraman.",
+      ],
+    },
+    {
+      kind: "paragraph",
+      text: "Shunday ekan, Markaz tizimidagi har bir xodim oʻz faoliyatida korrupsiya holatlarining oldini olishga va unga chek qoʻyishga masʼul ekanligini yana bir bor taʼkidlab oʻtmoqchiman.",
+    },
+    {
+      kind: "paragraph",
+      text: "Markaz tizimida mehnat qilayotgan barcha xodimlarni korrupsiya holatlarining har qanday koʻrinishlariga nisbatan murosasiz munosabatda boʻlishga, oʻz xizmat vazifalarini halol va xolis bajarishga chaqirib qolaman.",
+    },
+  ],
+  signature: { closing: "Hurmat bilan,", name: "I.Xalpayev" },
+};
