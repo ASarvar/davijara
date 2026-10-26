@@ -14,13 +14,17 @@ import territorialData from "@/content/territorial.json";
       reception hours, and an appeals ("Murojaat") link.
 
   Names, titles, numbers and e-mail user names are verbatim from the docx —
-  including where they read oddly (Fargʻona's entry is a DEPUTY head,
-  "boshligʻi oʻrinbosari", not the head; Toshkent viloyati's row has no
-  phone at all) and including local parts that don't match their region's
+  including where they read oddly (Toshkent viloyati's row has no phone at
+  all) and including local parts that don't match their region's
   spelling (jizzah_, not jizzax_). Spelling was normalised to the site's own
   oʻ/gʻ convention and addresses lightly tidied (shahar→shahri, kuchasi→
   koʻchasi) in both sources for the same reason — never a change of
   substance.
+
+  Changed since, at the operator's word: Andijon's head is vacant
+  (15.10.2026); Fargʻona's entry, which was the deputy head Usmanov
+  Rustamjon Mansurovich, now names the head, Yulchiyev Sardorbek
+  Turobjonovich, with his photo (26.10.2026).
 
   `appeals`: the regionals reference page links every region's "Murojaat"
   to a per-region Telegram bot, but 13 of the 14 are the literal placeholder

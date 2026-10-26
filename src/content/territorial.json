@@ -131,8 +131,8 @@
   },
   "fargona": {
     "region": "Fargʻona viloyati",
-    "fullName": "Usmanov Rustamjon Mansurovich",
-    "title": "Hududiy boshqarma boshligʻi oʻrinbosari",
+    "fullName": "Yulchiyev Sardorbek Turobjonovich",
+    "title": "Hududiy boshqarma boshligʻi",
     "address": "150100, Fargʻona shahri, A.Navoiy koʻchasi, 17-uy",
     "lat": 40.37832297936956,
     "lng": 71.78659831539474,
@@ -140,7 +140,7 @@
     "email": "fargona_markaz@davaktiv.uz",
     "receptionHours": "Dushanba-Juma",
     "appeals": null,
-    "photo": "/hududiy-boshqarmalar/fargona.png"
+    "photo": "/hududiy-boshqarmalar/fargona.jpeg"
   },
   "toshkent-viloyati": {
     "region": "Toshkent viloyati",
