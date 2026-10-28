@@ -317,11 +317,17 @@ export const legalNav: ExternalNavItem[] = [
   { label: "Sayt xaritasi", href: "/sayt-xaritasi" },
 ];
 
-/** Domains referenced above; used for JSON-LD `sameAs`. */
-export const relatedPlatforms = [
-  "https://my.gov.uz",
-  "https://davaktiv.uz",
-  "https://e-auksion.uz",
-  "https://lex.uz",
-  "https://online-ijara.uz",
-];
+/**
+ * The body the Centre sits under, for JSON-LD `parentOrganization`.
+ *
+ * The name is the one the Centre's own statute uses in its official naming
+ * ("Oʻzbekiston Respublikasi Davlat aktivlarini boshqarish agentligi
+ * huzuridagi …", src/content/about.ts); davaktiv.uz is that Agency's domain,
+ * the one every staff address on this site is at. Without this, search
+ * engines guessed the parent from third-party posts — Google's AI summary
+ * placed the Centre under a different ministry (27.10.2026).
+ */
+export const parentOrganization = {
+  name: "Oʻzbekiston Respublikasi Davlat aktivlarini boshqarish agentligi",
+  url: "https://davaktiv.uz",
+} as const;
