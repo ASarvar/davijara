@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "tts:warm": "node scripts/warm-tts.mjs",
-    "cadastre:warm": "node scripts/warm-cadastre.mjs"
+    "cadastre:warm": "node scripts/warm-cadastre.mjs",
+    "indexnow": "node scripts/indexnow.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^12.11.1",
