@@ -33,9 +33,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
+  // Counted, never typed: the description says how many offices the page lists.
+  const offices = await getTerritorialOffices();
   return {
     alternates: localeAlternates(locale, "/markaz/hududiy-boshqarmalar"),
     title: tNav(NAV_KEY),
+    description: tMeta("descriptions.territorial", { count: offices.length }),
   };
 }
 

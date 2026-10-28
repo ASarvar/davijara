@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
-import { routing } from "@/i18n/routing";
+import { publishedLocales } from "@/i18n/routing";
+import { PAGE_ROUTES, PLACEHOLDER_ONLY_NAV_KEYS } from "@/lib/data/page-routes";
+import { placeholderContent } from "@/lib/placeholder-metadata";
 import { PRIVILEGE_CATEGORIES } from "@/lib/data/privileges";
 import { getNewsSlugs } from "@/lib/data/news";
 import { getCustomPagePaths } from "@/lib/data/pages";
@@ -78,8 +80,10 @@ const staticPaths = [
 export const dynamic = "force-dynamic";
 
 /**
- * Sitemap covering all paths x all locales, with `alternates.languages` so
- * search engines can associate the three language versions of each page.
+ * Sitemap covering all paths x every PUBLISHED locale, with
+ * `alternates.languages` so search engines can associate the language
+ * versions of each page. Locales not yet open redirect to Uzbek, so listing
+ * them would hand a crawler URLs that are not pages — see `publishedLocales`.
  * The legacy site had no sitemap at all.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -99,22 +103,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   */
   const customPages = await getCustomPagePaths();
 
+  /*
+    Placeholder routes with nothing written yet are left out: they are
+    `noindex` until an editor fills them (lib/placeholder-metadata.ts), and a
+    sitemap that lists a URL the page itself refuses is a contradiction
+    search engines report as an error. Checked against the Uzbek row, which
+    every other locale falls back to.
+  */
+  const emptyPlaceholders = new Set(
+    (
+      await Promise.all(
+        PAGE_ROUTES.filter((r) => PLACEHOLDER_ONLY_NAV_KEYS.has(r.navKey)).map(
+          async (r) =>
+            (await placeholderContent(r.navKey, "uz")) ? null : `/${r.path}`,
+        ),
+      )
+    ).filter((p): p is string => p !== null),
+  );
+
   const paths = [
-    ...staticPaths,
+    ...staticPaths.filter((p) => !emptyPlaceholders.has(p)),
     ...PRIVILEGE_CATEGORIES.map((c) => `/imtiyozlar/${c.value}`),
     ...articles.map((slug) => `/yangiliklar/${slug}`),
     ...customPages.map((path) => `/${path}`),
   ];
 
   return paths.flatMap((path) =>
-    routing.locales.map((locale) => ({
+    publishedLocales.map((locale) => ({
       url: `${site.url}/${locale}${path}`,
       lastModified: new Date(),
       changeFrequency: path === "" ? ("daily" as const) : ("weekly" as const),
       priority: path === "" ? 1 : path === "/imtiyozlar" ? 0.9 : 0.7,
       alternates: {
         languages: Object.fromEntries(
-          routing.locales.map((l) => [l, `${site.url}/${l}${path}`]),
+          publishedLocales.map((l) => [l, `${site.url}/${l}${path}`]),
         ),
       },
     })),

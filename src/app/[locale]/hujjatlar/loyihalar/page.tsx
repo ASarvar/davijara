@@ -13,7 +13,7 @@ import { withBasePath } from "@/lib/base-path";
 import { getDocumentDrafts } from "@/lib/data/document-drafts";
 import { getPageByNavKey } from "@/lib/data/pages";
 import { formatDate, formatNumber } from "@/lib/format";
-import { localeAlternates } from "@/lib/seo";
+import { placeholderMetadata } from "@/lib/placeholder-metadata";
 
 /*
   The page's name lives in `messages/*.json` under `nav`, exactly once, and
@@ -36,11 +36,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "nav" });
-  return {
-    alternates: localeAlternates(locale, "/hujjatlar/loyihalar"),
-    title: t(NAV_KEY),
-  };
+  // Out of search while the editor has written nothing — see the helper.
+  return placeholderMetadata(locale, NAV_KEY);
 }
 
 /*

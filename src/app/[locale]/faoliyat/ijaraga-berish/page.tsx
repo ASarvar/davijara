@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
 import { PlaceholderPage } from "@/components/layout/placeholder-page";
-import { localeAlternates } from "@/lib/seo";
+import { placeholderMetadata } from "@/lib/placeholder-metadata";
 
 /*
   The page's name lives in `messages/*.json` under `nav`, exactly once, and
@@ -26,11 +26,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "nav" });
-  return {
-    alternates: localeAlternates(locale, "/faoliyat/ijaraga-berish"),
-    title: t(NAV_KEY),
-  };
+  // Out of search while the editor has written nothing — see the helper.
+  return placeholderMetadata(locale, NAV_KEY);
 }
 
 export default async function Page({

@@ -166,6 +166,38 @@ const RESERVED_FIRST_SEGMENTS = new Set([
   "_next",
 ]);
 
+/**
+ * The registered routes whose page is NOTHING BUT <PlaceholderPage> — no
+ * content of their own, only what an editor writes. Every other route above
+ * renders a real page and lets the editor add to it.
+ *
+ * The difference matters to search: an empty one of these is kept out of
+ * the index and the sitemap until it has content (lib/placeholder-metadata.ts,
+ * app/sitemap.ts). Regenerate with:
+ *
+ *   grep -rl "<PlaceholderPage" 'src/app/[locale]'
+ */
+export const PLACEHOLDER_ONLY_NAV_KEYS: ReadonlySet<string> = new Set([
+  "auction",
+  "leasing",
+  "faq",
+  "inventory",
+  "documentsPrograms",
+  "documentsInternal",
+  "documentsRepealed",
+  "documentsDrafts",
+  "loginFull",
+  "privacy",
+  "decreePf154",
+  "report3299",
+  "resolutionPq447",
+  "terms",
+  "services",
+  "newsStatements",
+  "newsMedia",
+  "newsUzbekistan",
+]);
+
 /** Why this path cannot be used for a NEW page, or null if it can. */
 export function reservedPathReason(path: string): string | null {
   const first = path.split("/")[0] ?? "";

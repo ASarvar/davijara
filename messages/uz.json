@@ -1,7 +1,21 @@
 {
   "meta": {
     "title": "Davijara.uz — Davlat mulkini ijaraga berish yagona portali",
-    "description": "Davlat mulki obyektlarini ijaraga olish bo'yicha yagona portal: bo'sh obyektlarni qidirish, E-auksion savdolari, ijara imtiyozlari va onlayn shartnoma rasmiylashtirish."
+    "description": "Davlat mulki obyektlarini ijaraga olish bo'yicha yagona portal: bo'sh obyektlarni qidirish, E-auksion savdolari, ijara imtiyozlari va onlayn shartnoma rasmiylashtirish.",
+    "descriptions": {
+      "documentsMain": "Davlat mulkini ijaraga berish va boshqarishga oid normativ-huquqiy hujjatlar: Fuqarolik kodeksi, «Ijara toʻgʻrisida»gi va «Davlat mulkini boshqarish toʻgʻrisida»gi qonunlar, Prezident va Vazirlar Mahkamasi hujjatlari, Davlat aktivlarini boshqarish agentligi hujjatlari.",
+      "sitemap": "Davijara.uz portalining barcha boʻlim va sahifalari roʻyxati: Markaz, faoliyat, hujjatlar, ochiq maʼlumotlar va boshqa boʻlimlar bir sahifada.",
+      "minRates": "Davlat mulkidan foydalanganlik uchun ijara toʻlovining eng kam stavkalari — Qoraqalpogʻiston Respublikasi, viloyatlar va Toshkent shahri boʻyicha yuklab olinadigan hujjatlar.",
+      "activity": "Markaz faoliyati: ijaraga beriladigan va ijaraga berilgan davlat mulki obyektlari, ijara shartnomalari, xususiylashtirishga taklif etilayotgan obyektlar, ijara imtiyozlari va koʻp beriladigan savollar.",
+      "vacancies": "Davlat mulki obyektlaridan samarali foydalanish markazidagi boʻsh ish oʻrinlari: davlat fuqarolik xizmati lavozimlariga tanlov tartibi va tanlovda beriladigan savollar haqida maʼlumot.",
+      "territorial": "Markazning {count} ta hududiy boshqarmasi — Qoraqalpogʻiston Respublikasi, viloyatlar va Toshkent shahri: rahbarlar, telefon raqamlari, elektron pochta, qabul kunlari va manzillar.",
+      "anticorruption": "Markazda korrupsiyaga qarshi kurashish: direktorning murojaati, normativ-huquqiy baza, odob-axloq qoidalari, chora-tadbirlar dasturi, ichki nazorat (komplaens) tizimi va korrupsiya haqida xabar berish kanallari.",
+      "apparatus": "Davlat mulki obyektlaridan samarali foydalanish markazi markaziy apparatining boʻlimlari va ularning rahbarlari: lavozimlar, telefon raqamlari va elektron pochta.",
+      "reception": "Davlat mulki obyektlaridan samarali foydalanish markazi rahbariyati: direktor va uning oʻrinbosarlari, telefon raqamlari va fuqarolarni qabul qilish kunlari.",
+      "openData": "Markazning ochiq maʼlumotlari: xarajatlar smetasining ijrosi, byudjet jarayonining ochiqligi boʻyicha maʼlumotlar va hisobotlar — har chorakda yangilanadi.",
+      "appeals": "Markazga kelib tushgan murojaatlar statistikasi: tashkilot pochtasi, rahbarga murojaat, ishonch telefoni, call markaz va Xalq qabulxonasi orqali kelgan, koʻrib chiqilayotgan va yopilgan murojaatlar.",
+      "privilegeCategory": "«{category}» yoʻnalishidagi ijara imtiyozlari: davlat mulkini ijaraga olishda imtiyoz kimga, qancha muddatga va qaysi huquqiy asosda berilishi."
+    }
   },
   "common": {
     "skipToContent": "Asosiy mazmunga o'tish",
@@ -561,13 +575,6 @@
     "colArea": "Ijara maydoni",
     "address": "Manzil",
     "noCadastre": "Kadastr raqami koʻrsatilmagan",
-    
-    
-    
-    
-    
-    
-    
     "found": "Topildi: {objects} ta obyekt, {contracts} ta shartnoma.",
     "empty": "Tanlangan shartlar boʻyicha shartnoma topilmadi.",
     "unavailable": "Shartnomalar reyestri hozir javob bermayapti. Birozdan keyin qayta urinib koʻring.",

@@ -24,6 +24,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, kategoriya } = await params;
   const t = await getTranslations({ locale, namespace: "privileges" });
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
 
   const category = PRIVILEGE_CATEGORIES.find((c) => c.value === kategoriya);
   if (!category) return { title: t("pageTitle") };
@@ -31,7 +32,10 @@ export async function generateMetadata({
   return {
     alternates: localeAlternates(locale, `/imtiyozlar/${kategoriya}`),
     title: `${category.label} — ${t("title")}`,
-    description: t("pageDescription"),
+    // Its own line per category — the four used to share the index page's.
+    description: tMeta("descriptions.privilegeCategory", {
+      category: category.label,
+    }),
   };
 }
 

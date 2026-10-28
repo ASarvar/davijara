@@ -35,9 +35,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
   return {
     alternates: localeAlternates(locale, "/markaz/rahbariyat"),
     title: tNav(NAV_KEY),
+    description: tMeta("descriptions.reception"),
   };
 }
 
