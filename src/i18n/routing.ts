@@ -3,6 +3,28 @@ import { defineRouting } from "next-intl/routing";
 export const locales = ["uz", "ru", "en"] as const;
 export type Locale = (typeof locales)[number];
 
+/**
+ * The locales a reader can reach RIGHT NOW — the rest redirect to Uzbek.
+ *
+ * ru and en exist as routes and their UI strings are ~98% done, but the
+ * pages' own text is still Uzbek until the translators' workbook comes back
+ * (tarjima/, 22.10.2026). Search engines indexed them anyway, and Google put
+ * /ru — Russian chrome over Uzbek text — first for "davijara", above the
+ * Uzbek home page (operator, 27.10.2026: "hozircha uz sahifaga
+ * yoʻnaltirilsin").
+ *
+ * So until a locale is listed here: src/proxy.ts sends every /ru/… and
+ * /en/… URL to the same page under /uz with a TEMPORARY redirect (307 — a
+ * 301 is cached by browsers for good, and would keep readers away from /ru
+ * after it opens); hreflang and the sitemap name only these locales; the
+ * language switcher hides the others. Opening Russian is adding "ru" here.
+ */
+export const publishedLocales: readonly Locale[] = ["uz"];
+
+export function isPublishedLocale(value: string): value is Locale {
+  return (publishedLocales as readonly string[]).includes(value);
+}
+
 /** Labels for the language switcher, matching the legacy O'z / Ru / En chips. */
 export const localeLabels: Record<Locale, string> = {
   uz: "O'z",

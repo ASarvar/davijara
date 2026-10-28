@@ -1,5 +1,6 @@
+import { NextResponse, type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
-import { routing } from "@/i18n/routing";
+import { isPublishedLocale, locales, routing } from "@/i18n/routing";
 
 /*
   Locale negotiation and redirects.
@@ -9,7 +10,24 @@ import { routing } from "@/i18n/routing";
   next-intl still exports its factory under `next-intl/middleware`; that is
   just the package's export name and is unrelated to the file convention.
 */
-export default createMiddleware(routing);
+const intl = createMiddleware(routing);
+
+export default function proxy(request: NextRequest) {
+  /*
+    A locale that exists but is not open yet goes to the same page in Uzbek,
+    query string and all — see `publishedLocales` for why, and why 307.
+  */
+  const [, first, ...rest] = request.nextUrl.pathname.split("/");
+  if (
+    (locales as readonly string[]).includes(first) &&
+    !isPublishedLocale(first)
+  ) {
+    const url = request.nextUrl.clone();
+    url.pathname = ["", routing.defaultLocale, ...rest].join("/");
+    return NextResponse.redirect(url, 307);
+  }
+  return intl(request);
+}
 
 export const config = {
   matcher: [

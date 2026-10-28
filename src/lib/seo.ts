@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { routing } from "@/i18n/routing";
+import { publishedLocales, routing } from "@/i18n/routing";
 
 /**
  * `canonical` + `hreflang` for ONE page, in every locale.
@@ -18,9 +18,9 @@ import { routing } from "@/i18n/routing";
  * Query strings are deliberately left off: a filtered catalogue
  * (`?hudud=…`) is a view of the page, not a page of its own.
  *
- * All three languages are listed for every page because every page renders
- * in all three — the database-backed ones (news, editor pages) fall back to
- * Uzbek per field rather than 404. `x-default` is Uzbek, the site's default.
+ * Only the PUBLISHED languages are listed (`publishedLocales`): the others
+ * redirect to Uzbek for now, and an hreflang pointing at a redirect tells a
+ * search engine a Russian page exists that does not. `x-default` is Uzbek.
  */
 export function localeAlternates(
   locale: string,
@@ -29,7 +29,7 @@ export function localeAlternates(
   return {
     canonical: `/${locale}${path}`,
     languages: {
-      ...Object.fromEntries(routing.locales.map((l) => [l, `/${l}${path}`])),
+      ...Object.fromEntries(publishedLocales.map((l) => [l, `/${l}${path}`])),
       "x-default": `/${routing.defaultLocale}${path}`,
     },
   };

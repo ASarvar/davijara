@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { locales, localeLabels, localeNames } from "@/i18n/routing";
+import { localeLabels, localeNames, publishedLocales } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 /**
@@ -13,11 +13,17 @@ import { cn } from "@/lib/utils";
  * else. These are real links now: `usePathname` from next-intl returns the
  * locale-agnostic path, so switching language keeps the user on the page they
  * were reading instead of dumping them at the homepage.
+ *
+ * Only PUBLISHED locales are offered (`publishedLocales`): a chip for one
+ * that redirects back to Uzbek would be a control that does nothing. With
+ * only one open there is nothing to switch to, and the group is not drawn.
  */
 export function LangSwitcher({ className }: { className?: string }) {
   const pathname = usePathname();
   const active = useLocale();
   const t = useTranslations("topbar");
+
+  if (publishedLocales.length < 2) return null;
 
   return (
     <div
@@ -25,7 +31,7 @@ export function LangSwitcher({ className }: { className?: string }) {
       aria-label={t("languageLabel")}
       className={cn("flex items-center gap-1.5", className)}
     >
-      {locales.map((locale) => {
+      {publishedLocales.map((locale) => {
         const isActive = locale === active;
         return (
           <Link
