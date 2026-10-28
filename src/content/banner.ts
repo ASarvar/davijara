@@ -31,14 +31,21 @@ export const homeBanner: {
   href?: string;
 } = {
   /*
-    1280 × 176 (7,27:1) — 21 October, Oʻzbek tili bayrami (operator,
-    21.10.2026). A NEW NAME for each artwork rather than overwriting the old
-    file, so no browser or proxy that cached the previous one can go on
-    showing it under an unchanged URL.
+    1280 × 176 (7,27:1) — the privileges banner (operator, 28.10.2026),
+    linking to /imtiyozlar. A NEW NAME for each artwork rather than
+    overwriting the old file, so no browser or proxy that cached the previous
+    one can go on showing it under an unchanged URL.
   */
-  desktop: "/banner-ozbek-tili.jpg",
+  desktop: "/banner-imtiyozlar.jpg",
   mobile: null,
-  alt: "Shahar manzarasi fonida yozuv: «21-oktabr — Oʻzbek tili bayrami muborak boʻlsin!»",
+  /*
+    The slogan verbatim. As the image is now the link's only content, this is
+    also the link's accessible name — and it already says where it goes.
+  */
+  alt: "Davlat mulki ijarasi boʻyicha barcha imtiyozlar haqida batafsil",
+  // Locale-relative: the banner renders through @/i18n/navigation's Link,
+  // which prefixes the reader's locale (/uz/imtiyozlar).
+  href: "/imtiyozlar",
 };
 
 /**
