@@ -90,13 +90,27 @@ export async function OrganizationJsonLd() {
     <>
       <script
         type="application/ld+json"
-        // Content is objects we construct from our own data, not user input.
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organization) }}
+        dangerouslySetInnerHTML={{ __html: scriptSafeJson(organization) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(website) }}
+        dangerouslySetInnerHTML={{ __html: scriptSafeJson(website) }}
       />
     </>
   );
+}
+
+/**
+ * JSON that cannot end the <script> element it is written into.
+ *
+ * NOT optional: the official names come from the "Markaz haqida" document,
+ * which is editable in the panel, and JSON.stringify leaves `<` alone — so a
+ * name containing `</script><script>…` would close this element and run on
+ * every public page, past a CSP that allows inline scripts. That would turn
+ * a content edit into script on every citizen's browser, breaking the
+ * panel's plain-text rule (davijara-admin, rule 7). `<` is the same
+ * character to a JSON parser and is never markup to the HTML one.
+ */
+function scriptSafeJson(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
 }
