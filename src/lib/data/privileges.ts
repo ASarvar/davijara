@@ -94,10 +94,12 @@ export async function getPrivilegesByCategory(
   category: PrivilegeCategory | "barchasi",
   locale?: string,
 ): Promise<Privilege[]> {
-  const all = await getPrivileges(locale);
-  return category === "barchasi"
-    ? all
-    : all.filter((p) => p.category === category);
+  // Filtered first, so only the privileges shown are translated.
+  const all = await getPrivileges();
+  return localizeContent(
+    category === "barchasi" ? all : all.filter((p) => p.category === category),
+    locale,
+  );
 }
 
 /**

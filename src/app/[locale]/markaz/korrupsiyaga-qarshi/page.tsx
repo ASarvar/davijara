@@ -112,10 +112,7 @@ export default async function AnticorruptionPage({
                 still wraps on its own, so a phone gets the source's breaks
                 plus whatever its width needs, never a line cut mid-phrase.
               */}
-              {/* `filter`: a translation may re-cut the source's line breaks
-                  into fewer lines (Russian moves «Обращение» to the front)
-                  and leave the last one empty. */}
-              {directorAppeal.titleLines.filter(Boolean).map((line) => (
+              {directorAppeal.titleLines.map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>

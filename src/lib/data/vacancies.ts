@@ -77,20 +77,18 @@ export async function getOpenVacancies(
     rows
       .map((row) => ({
         id: row.id,
-        title: row.title,
-        unit: row.unit,
+        ...localizeContent(
+          {
+            title: row.title,
+            unit: row.unit,
+            blocks: parseBlocks(row.blocks),
+          },
+          locale,
+        ),
         deadline: row.deadline,
         testDate: row.test_date,
         email: row.email,
-        blocks: parseBlocks(row.blocks),
         expired: row.deadline !== null && row.deadline < today,
-      }))
-      .map((v) => ({
-        ...v,
-        ...localizeContent(
-          { title: v.title, unit: v.unit, blocks: v.blocks },
-          locale,
-        ),
       }))
       /*
         Still-running competitions ahead of ones whose deadline has passed

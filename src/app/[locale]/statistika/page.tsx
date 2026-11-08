@@ -5,7 +5,12 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import type { Locale } from "@/i18n/routing";
 import { getRegions } from "@/lib/data/catalog";
 import { getStatistics, STATS_YEAR } from "@/lib/data/statistics";
-import { formatArea, formatNumber, formatSom } from "@/lib/format";
+import {
+  formatArea,
+  formatNumber,
+  formatSom,
+  somMagnitudes,
+} from "@/lib/format";
 import { ChartFigure } from "@/components/charts/chart-figure";
 import { MonthlyChart, OutcomeDonut } from "@/components/charts/charts";
 import {
@@ -33,21 +38,6 @@ export async function generateMetadata({
     description: t("metaDescription"),
   };
 }
-
-const MONTHS = [
-  "Yanvar",
-  "Fevral",
-  "Mart",
-  "Aprel",
-  "May",
-  "Iyun",
-  "Iyul",
-  "Avgust",
-  "Sentyabr",
-  "Oktyabr",
-  "Noyabr",
-  "Dekabr",
-];
 
 /** `×5,9` — the same shape the sold-lot card prints. */
 const rise = (lot: { soldPrice: number; startPrice: number }) =>
@@ -89,6 +79,10 @@ export default async function StatisticsPage({
   const sp = await searchParams;
   const t = await getTranslations("stats");
   const tCommon = await getTranslations("common");
+  // The calendar's month names (auctionDay), so the two cannot disagree.
+  const months = (await getTranslations("auctionDay")).raw(
+    "months",
+  ) as string[];
 
   const raw = Array.isArray(sp.hudud) ? sp.hudud[0] : sp.hudud;
   const regions = await getRegions(locale);
@@ -245,13 +239,13 @@ export default async function StatisticsPage({
           ]}
           columns={[t("month"), t("soldLots"), t("avgPrice")]}
           rows={stats.months.map((m) => [
-            MONTHS[m.month - 1],
+            months[m.month - 1],
             formatNumber(m.sold),
             formatSom(m.avg, locale),
           ])}
         >
           <MonthlyChart
-            labels={stats.months.map((m) => MONTHS[m.month - 1])}
+            labels={stats.months.map((m) => months[m.month - 1])}
             counts={stats.months.map((m) => m.sold)}
             averages={stats.months.map((m) => m.avg)}
             countLabel={t("soldLots")}
@@ -260,7 +254,11 @@ export default async function StatisticsPage({
                function, so the tooltip is told the unit rather than given
                `formatSom`. Millions, because every monthly average is in
                single-digit millions. */
-            formatAverage={{ unit: "mln", divisor: 1_000_000, decimals: 1 }}
+            formatAverage={{
+              unit: somMagnitudes(locale).million,
+              divisor: 1_000_000,
+              decimals: 1,
+            }}
           />
         </ChartFigure>
       </Section>

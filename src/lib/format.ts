@@ -39,7 +39,7 @@ export function formatFixed(value: number, maxFractionDigits: number): string {
  * formatted here at the edge.
  */
 export function formatSom(value: number, locale?: string): string {
-  const unit = locale === "ru" ? MAGNITUDES_RU : MAGNITUDES_UZ;
+  const unit = somMagnitudes(locale);
   if (value >= 1_000_000_000_000) {
     return `${formatDecimal(value / 1_000_000_000_000)}${NBSP}${unit.trillion}`;
   }
@@ -60,6 +60,11 @@ export function formatSom(value: number, locale?: string): string {
 */
 const MAGNITUDES_UZ = { trillion: "trln", billion: "mlrd", million: "mln" };
 const MAGNITUDES_RU = { trillion: "трлн", billion: "млрд", million: "млн" };
+
+/** The magnitude words formatSom uses, for a caller that scales by hand. */
+export function somMagnitudes(locale?: string) {
+  return locale === "ru" ? MAGNITUDES_RU : MAGNITUDES_UZ;
+}
 
 function formatDecimal(n: number): string {
   return formatFixed(n, 1);

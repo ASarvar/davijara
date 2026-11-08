@@ -1,5 +1,7 @@
 "use client";
 
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { localeLabels, localeNames, publishedLocales } from "@/i18n/routing";
@@ -17,13 +19,44 @@ import { cn } from "@/lib/utils";
  * Only PUBLISHED locales are offered (`publishedLocales`): a chip for one
  * that redirects back to Uzbek would be a control that does nothing. With
  * only one open there is nothing to switch to, and the group is not drawn.
+ *
+ * The QUERY travels too: a reader on /uz/obyektlar?hudud=… who switches to
+ * Russian expects the same filtered list, not the whole catalogue. Reading
+ * it takes `useSearchParams`, which on a prerendered page must sit under
+ * Suspense (see yandex-metrica-hit.tsx). The fallback is the same chips
+ * without the query, so the static HTML is what it always was and the
+ * filters are added once the page hydrates.
  */
 export function LangSwitcher({ className }: { className?: string }) {
+  if (publishedLocales.length < 2) return null;
+
+  return (
+    <Suspense fallback={<LocaleLinks className={className} />}>
+      <LocaleLinksWithQuery className={className} />
+    </Suspense>
+  );
+}
+
+function LocaleLinksWithQuery({ className }: { className?: string }) {
+  const searchParams = useSearchParams();
+  const query: Record<string, string | string[]> = {};
+  for (const key of new Set(searchParams.keys())) {
+    const values = searchParams.getAll(key);
+    query[key] = values.length > 1 ? values : values[0]!;
+  }
+  return <LocaleLinks className={className} query={query} />;
+}
+
+function LocaleLinks({
+  className,
+  query,
+}: {
+  className?: string;
+  query?: Record<string, string | string[]>;
+}) {
   const pathname = usePathname();
   const active = useLocale();
   const t = useTranslations("topbar");
-
-  if (publishedLocales.length < 2) return null;
 
   return (
     <div
@@ -36,7 +69,7 @@ export function LangSwitcher({ className }: { className?: string }) {
         return (
           <Link
             key={locale}
-            href={pathname}
+            href={query ? { pathname, query } : pathname}
             locale={locale}
             hrefLang={locale}
             aria-current={isActive ? "true" : undefined}

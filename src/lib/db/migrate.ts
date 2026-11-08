@@ -1260,100 +1260,88 @@ function seedTranslations(db: Database): void {
   );
   const LOCALES = ["ru", "en"] as const;
 
-  const news = db
-    .prepare(
-      `SELECT n.id, n.slug, t.title, t.excerpt, t.blocks
-         FROM news n
-         JOIN news_translations t ON t.news_id = n.id AND t.locale = 'uz'`,
-    )
-    .all() as Array<{
-    id: number;
-    slug: string;
-    title: string;
-    excerpt: string;
-    blocks: string;
-  }>;
-  const hasNews = db.prepare(
-    "SELECT 1 FROM news_translations WHERE news_id = ? AND locale = ?",
-  );
-  const addNews = db.prepare(
-    `INSERT INTO news_translations (news_id, locale, title, excerpt, blocks)
-     VALUES (?, ?, ?, ?, ?)`,
-  );
-  for (const row of news) {
-    for (const locale of LOCALES) {
-      if (hasNews.get(row.id, locale)) continue;
-      const blocks = storedBlocks(row.blocks);
-      if (!blocks) continue;
-      const tr = localizeFully(
-        { title: row.title, excerpt: row.excerpt, blocks },
-        locale,
-      );
-      if (!tr) continue;
-      addNews.run(
-        row.id,
-        locale,
-        tr.title,
-        tr.excerpt,
-        JSON.stringify(tr.blocks),
-      );
-      log.run(
-        now,
-        "news",
-        String(row.id),
-        `Tarjima qoʻshildi (${locale}): ${row.title}`,
-        null,
-        JSON.stringify({ id: row.id, slug: row.slug, locale, ...tr }),
-      );
-    }
-  }
+  /*
+    News and pages are the same shape (a parent row, a translations table
+    with title + one text column + blocks), so one loop handles both. The
+    identifiers below are these literals only, never input.
+  */
+  const RECORDS = [
+    {
+      entity: "news",
+      parent: "news",
+      table: "news_translations",
+      fk: "news_id",
+      ref: "slug",
+      text: "excerpt",
+    },
+    {
+      entity: "page",
+      parent: "pages",
+      table: "page_translations",
+      fk: "page_id",
+      ref: "path",
+      text: "description",
+    },
+  ] as const;
 
-  const pages = db
-    .prepare(
-      `SELECT p.id, p.path, t.title, t.description, t.blocks
-         FROM pages p
-         JOIN page_translations t ON t.page_id = p.id AND t.locale = 'uz'`,
-    )
-    .all() as Array<{
-    id: number;
-    path: string;
-    title: string;
-    description: string;
-    blocks: string;
-  }>;
-  const hasPage = db.prepare(
-    "SELECT 1 FROM page_translations WHERE page_id = ? AND locale = ?",
-  );
-  const addPage = db.prepare(
-    `INSERT INTO page_translations (page_id, locale, title, description, blocks)
-     VALUES (?, ?, ?, ?, ?)`,
-  );
-  for (const row of pages) {
-    for (const locale of LOCALES) {
-      if (hasPage.get(row.id, locale)) continue;
-      const blocks = storedBlocks(row.blocks);
-      if (!blocks) continue;
-      const tr = localizeFully(
-        { title: row.title, description: row.description, blocks },
-        locale,
-      );
-      // A page with nothing in it has nothing to translate.
-      if (!tr || (!tr.title.trim() && tr.blocks.length === 0)) continue;
-      addPage.run(
-        row.id,
-        locale,
-        tr.title,
-        tr.description,
-        JSON.stringify(tr.blocks),
-      );
-      log.run(
-        now,
-        "page",
-        String(row.id),
-        `Tarjima qoʻshildi (${locale}): ${row.title || row.path}`,
-        null,
-        JSON.stringify({ id: row.id, path: row.path, locale, ...tr }),
-      );
+  for (const spec of RECORDS) {
+    const rows = db
+      .prepare(
+        `SELECT p.id, p.${spec.ref} AS ref, t.title, t.${spec.text} AS text, t.blocks
+           FROM ${spec.parent} p
+           JOIN ${spec.table} t ON t.${spec.fk} = p.id AND t.locale = 'uz'`,
+      )
+      .all() as Array<{
+      id: number;
+      ref: string;
+      title: string;
+      text: string;
+      blocks: string;
+    }>;
+    const has = db.prepare(
+      `SELECT 1 FROM ${spec.table} WHERE ${spec.fk} = ? AND locale = ?`,
+    );
+    const add = db.prepare(
+      `INSERT INTO ${spec.table} (${spec.fk}, locale, title, ${spec.text}, blocks)
+       VALUES (?, ?, ?, ?, ?)`,
+    );
+    for (const row of rows) {
+      for (const locale of LOCALES) {
+        if (has.get(row.id, locale)) continue;
+        const blocks = storedBlocks(row.blocks);
+        if (!blocks) continue;
+        const tr = localizeFully(
+          { title: row.title, text: row.text, blocks },
+          locale,
+        );
+        if (!tr) continue;
+        // A record with nothing in it has nothing to translate.
+        if (!tr.title.trim() && tr.blocks.length === 0) continue;
+        /*
+          The Uzbek blocks passed the schema; their translation need not.
+          Russian runs longer, and a heading, alt text or caption that
+          crosses its limit (300; a table header or cite, 200) would store a
+          row parseBlocks rejects, which /ru renders as an EMPTY article,
+          never Uzbek, and nothing here would ever replace it.
+        */
+        if (!blocksSchema.safeParse(tr.blocks).success) continue;
+        add.run(row.id, locale, tr.title, tr.text, JSON.stringify(tr.blocks));
+        log.run(
+          now,
+          spec.entity,
+          String(row.id),
+          `Tarjima qoʻshildi (${locale}): ${row.title || row.ref}`,
+          null,
+          JSON.stringify({
+            id: row.id,
+            [spec.ref]: row.ref,
+            locale,
+            title: tr.title,
+            [spec.text]: tr.text,
+            blocks: tr.blocks,
+          }),
+        );
+      }
     }
   }
 

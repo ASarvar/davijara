@@ -36,8 +36,26 @@ import ru from "@/content/translations/ru.json";
   covered all of it, the file can go.
 */
 
-const DICTIONARIES: Partial<Record<string, Readonly<Record<string, string>>>> =
-  { ru: { ...ruInterim, ...ru }, en };
+type Dictionary = Readonly<Record<string, string>>;
+
+/*
+  Null-prototype objects, so a lookup can only ever find an entry: on a
+  plain object, `dict["constructor"]` is Object itself, and a paragraph
+  that happened to read "constructor" would be "translated" into a
+  function. Later sources win, so ru.json outranks ru.interim.json.
+*/
+function dictionary(...sources: Dictionary[]): Dictionary {
+  return Object.freeze(Object.assign(Object.create(null), ...sources));
+}
+
+const DICTIONARIES: Partial<Record<string, Dictionary>> = Object.assign(
+  Object.create(null),
+  { ru: dictionary(ruInterim, ru), en: dictionary(en) },
+);
+
+function lookup(dict: Dictionary, text: string): string | undefined {
+  return dict[text] ?? dict[text.trim()];
+}
 
 /*
   Fields that are never prose: links, identifiers, enum values the code
@@ -96,7 +114,7 @@ const SKIP_KEYS = new Set([
 /** One string in the reader's language, or the Uzbek it was given. */
 export function translateText(text: string, locale?: string): string {
   const dict = locale ? DICTIONARIES[locale] : undefined;
-  return dict?.[text] ?? dict?.[text.trim()] ?? text;
+  return (dict && lookup(dict, text)) ?? text;
 }
 
 /**
@@ -143,13 +161,9 @@ function isProse(text: string): boolean {
   return /\p{L}/u.test(s) && !NOT_PROSE.test(s) && !BRANDS.has(s);
 }
 
-function walk(
-  value: unknown,
-  dict: Readonly<Record<string, string>>,
-  missing?: string[],
-): unknown {
+function walk(value: unknown, dict: Dictionary, missing?: string[]): unknown {
   if (typeof value === "string") {
-    const hit = dict[value] ?? dict[value.trim()];
+    const hit = lookup(dict, value);
     if (hit === undefined && missing && isProse(value)) missing.push(value);
     return hit ?? value;
   }
