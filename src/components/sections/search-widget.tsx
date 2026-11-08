@@ -149,7 +149,7 @@ export async function SearchWidget({
   const td = await getTranslations("auctionDay");
   const tp = await getTranslations("privatization");
   const locale = await getLocale();
-  const regions = await getRegionOptions();
+  const regions = await getRegionOptions(locale);
 
   /** Reads a param back, falling back to the "all" sentinel. */
   const current = (key: string) => {

@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { getSteps } from "@/lib/data/catalog";
 import { Icon } from "@/components/icon";
@@ -20,15 +20,13 @@ import { Section, SectionHeader } from "@/components/layout/section";
  * so the sequence survives with no CSS, no JavaScript, and a screen reader.
  */
 export async function HowItWorks() {
+  const locale = await getLocale();
   const t = await getTranslations("steps");
-  const steps = await getSteps();
+  const steps = await getSteps(locale);
 
   return (
     <Section tone="light">
-      <SectionHeader
-        title={t("title")}
-        description={t("description")}
-      />
+      <SectionHeader title={t("title")} description={t("description")} />
 
       <ol className="relative grid gap-y-10 lg:grid-cols-4 lg:gap-x-8">
         {/*

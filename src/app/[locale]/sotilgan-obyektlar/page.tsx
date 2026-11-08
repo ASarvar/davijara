@@ -75,7 +75,10 @@ export default async function SoldObjectsPage({
   ]);
 
   const query = parseSoldQuery(sp);
-  const [lots, regions] = await Promise.all([getSoldLots(query), getRegions()]);
+  const [lots, regions] = await Promise.all([
+    getSoldLots(query),
+    getRegions(locale),
+  ]);
 
   const regionName = (slug: string) =>
     regions.find((r) => r.slug === slug)?.name ?? slug;

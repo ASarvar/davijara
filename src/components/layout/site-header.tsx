@@ -10,6 +10,7 @@ import { MobileNav } from "./mobile-nav";
 import { getNavigation } from "@/lib/data/navigation";
 import { AccessibilityDialog } from "./accessibility-dialog";
 import { SocialLinks } from "./social-links";
+import { LangSwitcher } from "./lang-switcher";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
@@ -50,6 +51,7 @@ export async function SiteHeader() {
   const tTopbar = await getTranslations("topbar");
   const tCommon = await getTranslations("common");
   const tContact = await getTranslations("contact");
+  const tMeta = await getTranslations("meta");
 
   /*
     The menu is assembled HERE, on the server, and handed to the two client
@@ -77,7 +79,7 @@ export async function SiteHeader() {
             className="flex shrink-0 items-center"
             aria-label={site.name}
           >
-            <Logo variant="header" priority />
+            <Logo variant="header" priority alt={tMeta("title")} />
           </Link>
 
           {/* Not a decorative chip — this deploy is a real test rollout of a
@@ -146,9 +148,12 @@ export async function SiteHeader() {
           */}
           <div className="text-muted-foreground hidden flex-col items-end gap-2 text-sm xl:flex">
             <div className="flex items-center gap-4">
-              {/* Theme first, then the accessibility dialog: this one is a
-                  single-tap switch, the other opens a panel, and the lighter
-                  control reads better closest to the content it changes. */}
+              {/* Language first: it changes the whole page, not how it is
+                  shown. Then theme, then the accessibility dialog: this one
+                  is a single-tap switch, the other opens a panel, and the
+                  lighter control reads better closest to the content it
+                  changes. */}
+              <LangSwitcher />
               <ThemeToggle />
               <AccessibilityDialog />
             </div>
@@ -181,6 +186,7 @@ export async function SiteHeader() {
             it.
           */}
           <div className="flex shrink-0 items-center gap-3 xl:hidden">
+            <LangSwitcher />
             <ThemeToggle />
             <AccessibilityDialog />
             <MobileNav items={navItems} />

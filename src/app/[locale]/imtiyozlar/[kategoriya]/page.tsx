@@ -5,6 +5,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing, type Locale } from "@/i18n/routing";
 import {
   PRIVILEGE_CATEGORIES,
+  getPrivilegeCategories,
   isPrivilegeCategory,
 } from "@/lib/data/privileges";
 import { PrivilegesView } from "@/components/sections/privileges-view";
@@ -26,7 +27,9 @@ export async function generateMetadata({
   const t = await getTranslations({ locale, namespace: "privileges" });
   const tMeta = await getTranslations({ locale, namespace: "meta" });
 
-  const category = PRIVILEGE_CATEGORIES.find((c) => c.value === kategoriya);
+  const category = (await getPrivilegeCategories(locale)).find(
+    (c) => c.value === kategoriya,
+  );
   if (!category) return { title: t("pageTitle") };
 
   return {

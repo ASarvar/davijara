@@ -1,4 +1,5 @@
 import territorialData from "@/content/territorial.json";
+import { localizeContent, translateText } from "@/lib/i18n/content";
 
 /*
   Hududiy boshqarmalar — the 14 territorial administrations' current heads.
@@ -98,13 +99,20 @@ export const REGION_ORDER = [
   "toshkent-shahar",
 ];
 
-export async function getTerritorialOffices(): Promise<TerritorialOffice[]> {
-  return REGION_ORDER.filter((id) => DATA[id]?.fullName?.trim()).map(
+export async function getTerritorialOffices(
+  locale?: string,
+): Promise<TerritorialOffice[]> {
+  const offices = REGION_ORDER.filter((id) => DATA[id]?.fullName?.trim()).map(
     (regionId) => ({ regionId, ...DATA[regionId]! }),
   );
+  return localizeContent(offices, locale);
 }
 
 /** A region's display name, e.g. for content that lists regions but isn't about the office itself. */
-export function regionName(regionId: string): string | undefined {
-  return DATA[regionId]?.region;
+export function regionName(
+  regionId: string,
+  locale?: string,
+): string | undefined {
+  const name = DATA[regionId]?.region;
+  return name && translateText(name, locale);
 }

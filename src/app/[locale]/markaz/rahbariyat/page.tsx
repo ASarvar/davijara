@@ -54,7 +54,7 @@ export default async function LeadershipPage({
   const [tNav, tCommon, members] = await Promise.all([
     getTranslations("nav"),
     getTranslations("common"),
-    getLeadership(),
+    getLeadership(locale),
   ]);
 
   return (

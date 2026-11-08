@@ -1,5 +1,7 @@
 import { orgDirectUnits, orgBranches } from "@/content/structure";
 import workersData from "@/content/workers.json";
+import { localizeContent } from "@/lib/i18n/content";
+
 import { LEADERSHIP_EMAIL } from "./leadership";
 
 /*
@@ -74,19 +76,23 @@ const DATA = workersData as Record<string, WorkerEntry>;
  * source reference had no card for) is left out entirely rather than shown
  * half-empty — the same rule leadership.ts follows.
  */
-export async function getWorkers(): Promise<Worker[]> {
-  return WORKER_ROLES.filter((role) =>
-    DATA[role.unitId]?.fullName?.trim(),
-  ).map((role) => {
-    const entry = DATA[role.unitId]!;
-    return {
-      ...role,
-      fullName: entry.fullName,
-      position: entry.position ?? "",
-      phone: entry.phone ?? null,
-      photo: entry.photo ?? null,
-    };
-  });
+export async function getWorkers(locale?: string): Promise<Worker[]> {
+  return localizeContent(workers(), locale);
+}
+
+function workers(): Worker[] {
+  return WORKER_ROLES.filter((role) => DATA[role.unitId]?.fullName?.trim()).map(
+    (role) => {
+      const entry = DATA[role.unitId]!;
+      return {
+        ...role,
+        fullName: entry.fullName,
+        position: entry.position ?? "",
+        phone: entry.phone ?? null,
+        photo: entry.photo ?? null,
+      };
+    },
+  );
 }
 
 /** Same shared reception mailbox as the leadership page — the operator's choice. */

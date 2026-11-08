@@ -1,5 +1,6 @@
 import { orgHead, orgBranches } from "@/content/structure";
 import workersData from "@/content/workers.json";
+import { localizeContent } from "@/lib/i18n/content";
 
 /*
   Rahbariyat — the public read side.
@@ -64,7 +65,13 @@ const DATA = workersData as Record<string, WorkerEntry>;
  * menu or an unwritten page follows elsewhere on this site: normal and
  * temporary, not something to surface to a citizen as broken.
  */
-export async function getLeadership(): Promise<LeadershipMember[]> {
+export async function getLeadership(
+  locale?: string,
+): Promise<LeadershipMember[]> {
+  return localizeContent(leadership(), locale);
+}
+
+function leadership(): LeadershipMember[] {
   return LEADERSHIP_ROLES.filter((role) =>
     DATA[role.roleId]?.fullName?.trim(),
   ).map((role) => {

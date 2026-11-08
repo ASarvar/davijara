@@ -1,4 +1,5 @@
 import openDataJson from "@/content/open-data.json";
+import { localizeContent } from "@/lib/i18n/content";
 
 /*
   Ochiq maʼlumotlar — the Centre's quarterly budget-transparency reports.
@@ -112,6 +113,7 @@ export async function getLatestPeriod(): Promise<PeriodOption | null> {
 export async function getOpenDataForPeriod(
   year: number,
   quarter: number,
+  locale?: string,
 ): Promise<OpenDataPeriodEntry[]> {
   const entries: OpenDataPeriodEntry[] = [];
   for (const categoryId of CATEGORY_ORDER) {
@@ -123,5 +125,5 @@ export async function getOpenDataForPeriod(
       entries.push({ categoryId, heading: entry!.heading, files: match.files });
     }
   }
-  return entries;
+  return localizeContent(entries, locale);
 }

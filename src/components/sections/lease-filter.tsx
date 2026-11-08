@@ -33,7 +33,7 @@ export async function LeaseFilter({ query }: { query: LeaseQuery }) {
   const locale = await getLocale();
 
   const [regions, districtsByRegion] = await Promise.all([
-    getRegionOptions(),
+    getRegionOptions(locale),
     getLeaseDistrictsByRegion(),
   ]);
 

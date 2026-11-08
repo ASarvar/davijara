@@ -74,7 +74,7 @@ export default async function MinRatesPage({
     getTranslations("nav"),
     getTranslations("common"),
     getTranslations("minRates"),
-    getMinRates(),
+    getMinRates(locale),
   ]);
 
   return (

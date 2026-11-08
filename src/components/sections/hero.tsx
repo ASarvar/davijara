@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { getHeroStats, getRegions } from "@/lib/data/catalog";
 import { parseListingQuery } from "@/lib/data/listings";
@@ -37,11 +37,12 @@ export async function Hero({
   searchParams?: Record<string, string | string[] | undefined>;
   children?: React.ReactNode;
 } = {}) {
+  const locale = await getLocale();
   const t = await getTranslations("hero");
   const { region, district } = parseListingQuery(searchParams);
   const [{ stats, year, contractsWidened, asOf }, regions] = await Promise.all([
-    getHeroStats(region, district),
-    region ? getRegions() : Promise.resolve([]),
+    getHeroStats(region, district, locale),
+    region ? getRegions(locale) : Promise.resolve([]),
   ]);
   const regionName = region
     ? (regions.find((r) => r.slug === region)?.name ?? null)
@@ -169,7 +170,7 @@ export async function Hero({
               control, not a data change.
             */}
               <p className="text-muted-foreground text-sm font-medium tabular-nums">
-                {year}-yil
+                {t("yearLabel", { year })}
               </p>
             </div>
 

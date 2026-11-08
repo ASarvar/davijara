@@ -23,7 +23,7 @@ export async function NewsAndDocs() {
   const locale = await getLocale();
   const [news, documents] = await Promise.all([
     getNews(3, locale),
-    getDocuments(4),
+    getDocuments(4, locale),
   ]);
 
   return (

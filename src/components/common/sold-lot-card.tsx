@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { LotImage } from "@/components/common/lot-image";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { formatArea, formatDate, formatNumber } from "@/lib/format";
@@ -43,6 +45,7 @@ export function SoldLotCard({
   /** Track sizing from the carousel — see recently-sold.tsx. */
   className?: string;
 }) {
+  const t = useTranslations("common");
   /*
     Guarded rather than assumed: `startPrice` is 0 when upstream omits it, and
     a division would print "Infinity×". Without a start price there is no rise
@@ -168,7 +171,7 @@ export function SoldLotCard({
             <p className="text-muted-foreground flex items-baseline justify-between gap-3 text-xs">
               <span>{labels.start}</span>
               <span className="tabular-nums line-through">
-                {`${formatNumber(lot.startPrice)} so'm`}
+                {t("priceSom", { amount: formatNumber(lot.startPrice) })}
               </span>
             </p>
             <p className="mt-1 flex items-baseline justify-between gap-3">
@@ -176,7 +179,7 @@ export function SoldLotCard({
                 {labels.sold}
               </span>
               <span className="font-heading text-heading text-lg font-semibold tabular-nums">
-                {`${formatNumber(lot.soldPrice)} so'm`}
+                {t("priceSom", { amount: formatNumber(lot.soldPrice) })}
               </span>
             </p>
           </div>

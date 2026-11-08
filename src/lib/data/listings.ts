@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { TASHKENT_OFFSET_MS, tashkentToday } from "@/lib/format";
 import { regions } from "@/content/regions";
+import { translateText } from "@/lib/i18n/content";
 import { featuredListings } from "@/content/homepage";
 import { mockListings } from "@/content/listings-mock";
 import {
@@ -1947,7 +1948,10 @@ export async function getDistricts(regionSlug: string): Promise<string[]> {
  * wall of individual cards. Regions with no matching lot are dropped, so the
  * list always reflects the active filters.
  */
-export function summariseByRegion(listings: Listing[]): RegionSummary[] {
+export function summariseByRegion(
+  listings: Listing[],
+  locale?: string,
+): RegionSummary[] {
   const byRegion = new Map<string, Listing[]>();
   for (const l of listings) {
     const arr = byRegion.get(l.region);
@@ -1985,7 +1989,7 @@ export function summariseByRegion(listings: Listing[]): RegionSummary[] {
 
     summaries.push({
       slug: region.slug,
-      name: region.name,
+      name: translateText(region.name, locale),
       lat: region.lat,
       lng: region.lng,
       count: lots.length,

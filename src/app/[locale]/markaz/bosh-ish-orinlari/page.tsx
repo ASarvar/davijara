@@ -49,8 +49,8 @@ export default async function VacanciesPage({
 
   const [tNav, info, vacancies] = await Promise.all([
     getTranslations("nav"),
-    getVacancyInfo(),
-    getOpenVacancies(),
+    getVacancyInfo(locale),
+    getOpenVacancies(locale),
   ]);
 
   return (

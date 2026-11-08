@@ -41,7 +41,8 @@
     "readAloudError": "Ovoz xizmati hozircha javob bermayapti",
     "readAloudSelection": "Belgilanganni o'qish",
     "readAloudResume": "Davom ettirish",
-    "readAloudLoading": "Ovoz tayyorlanmoqda"
+    "readAloudLoading": "Ovoz tayyorlanmoqda",
+    "priceSom": "{amount} so'm"
   },
   "topbar": {
     "accessibility": "Maxsus imkoniyatlar",
@@ -136,7 +137,8 @@
       "second": "shaffof",
       "third": "onlayn"
     },
-    "statsTitle": "Davlat mulki obyektlari maʼlumotlari"
+    "statsTitle": "Davlat mulki obyektlari maʼlumotlari",
+    "yearLabel": "{year}-yil"
   },
   "search": {
     "saleBands": {

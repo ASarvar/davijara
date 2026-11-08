@@ -187,15 +187,10 @@ export default async function LocaleLayout({
       lot-card             -> listings   (rendered inside objects-explorer)
       rent-calculator      -> calculator
 
-    `lang-switcher` also reads `topbar` and is still built, but the header
-    stopped rendering it while the site ships Uzbek-only — the namespace stays
-    for the accessibility dialog either way, so re-adding the switcher needs
-    no change here.
+      lang-switcher        -> topbar
 
     Everything else (hero, listings, privileges, footer …) is server-rendered.
-    Scoping this keeps the payload flat as the catalog grows — which matters
-    here, because ru.json and en.json are still mostly untranslated and will
-    triple in size.
+    Scoping this keeps the payload flat as the catalog grows.
   */
   const messages = await getMessages();
   const clientMessages = {

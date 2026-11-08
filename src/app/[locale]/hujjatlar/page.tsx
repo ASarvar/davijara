@@ -51,7 +51,7 @@ export default async function DocumentsPage({
     getTranslations("nav"),
     getTranslations("common"),
     getTranslations("documents"),
-    getLegalDocuments(),
+    getLegalDocuments(locale),
   ]);
 
   return (

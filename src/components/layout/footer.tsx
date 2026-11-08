@@ -1,22 +1,19 @@
 // `Phone` is not imported: the hotline link below is commented out, and a
 // dead import is a lint error. Restore it together with that block.
 import { ExternalLink } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
-import {
-  contacts,
-  externalLinks,
-  footerNav,
-  legalNav,
-  site,
-} from "@/content/site";
+import { getSiteContent } from "@/lib/data/site";
 import { Container } from "./section";
 import { Logo } from "./logo";
 
 export async function Footer() {
+  const { contacts, externalLinks, footerNav, legalNav, site } =
+    await getSiteContent(await getLocale());
   const t = await getTranslations("footer");
   const tn = await getTranslations("nav");
+  const tMeta = await getTranslations("meta");
   const year = new Date().getFullYear();
 
   return (
@@ -60,7 +57,7 @@ export async function Footer() {
               mark up top — so the header's saving would be undone further
               down the page.
             */}
-            <Logo variant="footer" />
+            <Logo variant="footer" alt={tMeta("title")} />
             <p className="text-muted-foreground mt-6 text-sm">
               {t("operator")}
             </p>

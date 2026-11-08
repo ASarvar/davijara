@@ -88,13 +88,14 @@ export default async function StatisticsPage({
 
   const sp = await searchParams;
   const t = await getTranslations("stats");
+  const tCommon = await getTranslations("common");
 
   const raw = Array.isArray(sp.hudud) ? sp.hudud[0] : sp.hudud;
-  const regions = await getRegions();
+  const regions = await getRegions(locale);
   // Resolved against the table, so `?hudud=nonsense` shows the republic
   // rather than an empty page.
   const region = regions.find((r) => r.slug === raw);
-  const stats = await getStatistics(region?.slug);
+  const stats = await getStatistics(region?.slug, locale);
 
   if (!stats) {
     return (
@@ -155,9 +156,13 @@ export default async function StatisticsPage({
       label: t("soldLots"),
       icon: "Building2",
     },
-    { value: formatSom(stats.total), label: t("totalValue"), icon: "Wallet" },
     {
-      value: formatSom(stats.avgPrice),
+      value: formatSom(stats.total, locale),
+      label: t("totalValue"),
+      icon: "Wallet",
+    },
+    {
+      value: formatSom(stats.avgPrice, locale),
       label: t("avgPrice"),
       icon: "Tag",
     },
@@ -242,7 +247,7 @@ export default async function StatisticsPage({
           rows={stats.months.map((m) => [
             MONTHS[m.month - 1],
             formatNumber(m.sold),
-            formatSom(m.avg),
+            formatSom(m.avg, locale),
           ])}
         >
           <MonthlyChart
@@ -369,7 +374,9 @@ export default async function StatisticsPage({
               formatNumber(r.sold),
               r.perM2 === null
                 ? "—"
-                : `${formatNumber(Math.round(r.perM2))} so'm`,
+                : tCommon("priceSom", {
+                    amount: formatNumber(Math.round(r.perM2)),
+                  }),
             ])}
           >
             <RegionScatter
@@ -379,9 +386,10 @@ export default async function StatisticsPage({
                 sold: r.sold,
                 perM2: Math.round(r.perM2 ?? 0),
                 total: r.total,
-                tooltip: `${formatNumber(r.sold)} ${t("lots")} · ${formatNumber(
-                  Math.round(r.perM2 ?? 0),
-                )} so'm/m² · ${formatSom(r.total)}`,
+                tooltip: `${formatNumber(r.sold)} ${t("lots")} · ${tCommon(
+                  "priceSom",
+                  { amount: formatNumber(Math.round(r.perM2 ?? 0)) },
+                )}/m² · ${formatSom(r.total, locale)}`,
               }))}
             />
           </ChartFigure>
@@ -488,7 +496,7 @@ export default async function StatisticsPage({
           <RecordColumn
             title={t("topByPrice")}
             lots={stats.topByPrice}
-            figure={(l) => formatSom(l.soldPrice)}
+            figure={(l) => formatSom(l.soldPrice, locale)}
             sub={(l) => `${rise(l)} · ${formatArea(l.area)}`}
             regionName={(slug) =>
               regions.find((r) => r.slug === slug)?.name ?? slug
@@ -499,7 +507,7 @@ export default async function StatisticsPage({
             lots={stats.topByRise}
             figure={rise}
             sub={(l) =>
-              `${formatSom(l.startPrice)} → ${formatSom(l.soldPrice)}`
+              `${formatSom(l.startPrice, locale)} → ${formatSom(l.soldPrice, locale)}`
             }
             regionName={(slug) =>
               regions.find((r) => r.slug === slug)?.name ?? slug

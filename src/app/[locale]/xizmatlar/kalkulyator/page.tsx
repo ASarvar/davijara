@@ -6,6 +6,7 @@ import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
 import { IconTile } from "@/components/common/icon-tile";
 import { RentCalculator } from "@/components/sections/rent-calculator";
+import { getCalculatorOptions } from "@/lib/data/calculator";
 import { localeAlternates } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -41,6 +42,7 @@ export default async function CalculatorPage({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const t = await getTranslations("calculator");
+  const calculator = await getCalculatorOptions(locale);
 
   return (
     <Section tone="deep">
@@ -72,7 +74,7 @@ export default async function CalculatorPage({
           </ul>
         </div>
 
-        <RentCalculator />
+        <RentCalculator {...calculator} />
       </div>
     </Section>
   );

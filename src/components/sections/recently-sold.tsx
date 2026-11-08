@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { getRegions } from "@/lib/data/catalog";
 import { getRecentlySold } from "@/lib/data/listings";
@@ -38,10 +38,11 @@ import { Section, SectionHeader } from "@/components/layout/section";
  *   figures rather than an inference about how the auction ran.
  */
 export async function RecentlySold() {
+  const locale = await getLocale();
   const t = await getTranslations("sold");
   const [result, regions] = await Promise.all([
     getRecentlySold(12),
-    getRegions(),
+    getRegions(locale),
   ]);
 
   // No sales in the last six weeks, or the service is unreachable. A heading

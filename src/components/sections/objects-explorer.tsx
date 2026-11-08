@@ -96,6 +96,7 @@ function RegionRow({
   market: ListingsMarket;
 }) {
   const t = useTranslations("objects");
+  const locale = useLocale();
   const sale = market === "xususiylashtirish";
 
   return (
@@ -156,7 +157,7 @@ function RegionRow({
               {sale ? t("averageStartPrice") : t("averagePrice")}
             </dt>
             <dd className="text-accent-foreground mt-0.5 text-sm font-semibold">
-              {formatSom(summary.avgPrice)}
+              {formatSom(summary.avgPrice, locale)}
             </dd>
           </div>
         </dl>

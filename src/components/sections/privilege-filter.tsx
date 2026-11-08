@@ -1,8 +1,8 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import {
-  PRIVILEGE_CATEGORIES,
+  getPrivilegeCategories,
   getPrivilegeCounts,
 } from "@/lib/data/privileges";
 import type { PrivilegeCategory } from "@/types/content";
@@ -25,11 +25,14 @@ export async function PrivilegeFilter({
 }) {
   const t = await getTranslations("privileges");
   const tc = await getTranslations("common");
-  const counts = await getPrivilegeCounts();
+  const [counts, categories] = await Promise.all([
+    getPrivilegeCounts(),
+    getPrivilegeCategories(await getLocale()),
+  ]);
 
   const chips = [
     { value: "barchasi" as const, label: tc("all") },
-    ...PRIVILEGE_CATEGORIES,
+    ...categories,
   ];
 
   return (

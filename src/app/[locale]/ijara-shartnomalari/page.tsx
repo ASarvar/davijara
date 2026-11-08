@@ -78,7 +78,7 @@ export default async function LeaseContractsPage({
   const [t, result, regions] = await Promise.all([
     getTranslations("leaseContracts"),
     getLeasedObjects(query),
-    getRegions(),
+    getRegions(locale),
   ]);
 
   const regionName = (slug: string) =>

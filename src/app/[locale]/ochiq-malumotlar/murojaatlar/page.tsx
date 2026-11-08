@@ -44,7 +44,7 @@ export default async function AppealsPage({
   const [tNav, t, sources] = await Promise.all([
     getTranslations("nav"),
     getTranslations("appeals"),
-    getAppealSources(),
+    getAppealSources(locale),
   ]);
 
   return (

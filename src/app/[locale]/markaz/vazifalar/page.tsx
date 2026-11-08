@@ -53,7 +53,7 @@ export default async function DutiesPage({
     getTranslations("duties"),
     getTranslations("nav"),
   ]);
-  const { order, duties, functions } = await getDuties();
+  const { order, duties, functions } = await getDuties(locale);
 
   return (
     <Section tone="deep">

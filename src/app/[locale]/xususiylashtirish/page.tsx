@@ -75,7 +75,7 @@ export default async function PrivatizationPage({
     parseListingQuery(sp),
   );
   const listings = sortListings(offered, parseSort(sp));
-  const summaries = summariseByRegion(listings);
+  const summaries = summariseByRegion(listings, locale);
 
   // Same helper as the catalogue's pager, so the two cannot drift apart.
   const filterParams = buildFilterQuery(sp);

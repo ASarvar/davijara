@@ -44,7 +44,7 @@ export async function SoldFilter({
 
   const query = parseSoldQuery(values);
   const [regions, districtsByRegion, days] = await Promise.all([
-    getRegionOptions(),
+    getRegionOptions(locale),
     getSoldDistrictsByRegion(),
     // Scoped to the place, not to the dates — see getSoldDays.
     getSoldDays({ region: query.region, district: query.district }),

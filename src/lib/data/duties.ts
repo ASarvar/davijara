@@ -9,6 +9,8 @@ import {
   functionsHeading,
   functionsIntro,
 } from "@/content/duties";
+import { localizeContent } from "@/lib/i18n/content";
+
 import { getDutiesDocument } from "./documents";
 
 /*
@@ -18,7 +20,11 @@ import { getDutiesDocument } from "./documents";
   below is what /markaz/vazifalar renders if the database row is missing or
   fails validation. See the fuller note there.
 */
-export async function getDuties() {
+export async function getDuties(locale?: string) {
+  return localizeContent(dutiesDocument(), locale);
+}
+
+function dutiesDocument() {
   const stored = getDutiesDocument();
   if (stored) return stored;
 

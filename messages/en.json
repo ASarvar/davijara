@@ -1,5 +1,9 @@
 {
-  "_note": "PARTIAL BY DESIGN, ~98% covered. UI chrome — navigation, buttons, labels, chart notes — is translated. Every omitted key falls back to messages/uz.json via the deep-merge in src/i18n/request.ts. STILL UZBEK ON PURPOSE, do not fill these in without a verified source: the seven keys that lead with the operator's registered name (footer.operator and the about/duties/structure/news/sold/contact metaDescriptions) need the organisation's OFFICIAL name in this language, not a rendering invented here; minRates.pageLede is the title of a Vazirlar Mahkamasi decision and needs its official wording. Statutory content (the rent privileges, the Markaz documents) is not in this file at all — it lives in the database and is deliberately untranslated.",
+  "_note": "Filled from the translators' workbook (returned 08.11.2026) — the interface only: the page and legal sheets came back without English, so /en stays redirected to /uz (src/i18n/routing.ts publishedLocales). Missing keys fall back to messages/uz.json via the deep-merge in src/i18n/request.ts.",
+  "meta": {
+    "title": "Davijara.uz — the single portal for leasing state property",
+    "description": "The single portal for leasing state-owned property: search vacant objects, E-auksion auctions, lease privileges and online contract registration."
+  },
   "common": {
     "skipToContent": "Skip to main content",
     "menu": "Menu",
@@ -24,7 +28,8 @@
     "readAloudError": "The speech service is not responding right now",
     "readAloudSelection": "Read the selection",
     "readAloudResume": "Resume",
-    "readAloudLoading": "Preparing audio"
+    "readAloudLoading": "Preparing audio",
+    "priceSom": "{amount} soʻm"
   },
   "topbar": {
     "accessibility": "Accessibility options",
@@ -119,7 +124,8 @@
       "second": "transparent",
       "third": "online"
     },
-    "statsTitle": "State property data"
+    "statsTitle": "State property data",
+    "yearLabel": "{year}"
   },
   "search": {
     "saleBands": {
@@ -169,25 +175,34 @@
       "mamuriy": "Administrative building"
     }
   },
-  "partners": {
-    "heading": "Partner organisations and platforms"
+  "map": {
+    "saleTitle": "Property offered for privatization, on the map",
+    "eyebrow": "Map",
+    "title": "Objects offered for lease, on the map"
   },
-  "footer": {
-    "hotline": "Hotline",
-    "contact": "Contact",
-    "rights": "All rights reserved",
-    "corporate": "Corporate information",
-    "trafficOnline": "Online",
-    "trafficActions": "Actions",
-    "trafficVisits": "Visits",
-    "trafficAvgTime": "Average time on site",
-    "trafficSecondsShort": "s",
-    "trafficMinutesShort": "min"
+  "steps": {
+    "eyebrow": "Process",
+    "title": "How is state property leased?",
+    "description": "Lease state property in four simple steps",
+    "action": "Full guide"
   },
-  "notFound": {
-    "title": "Page not found",
-    "description": "The page you are looking for does not exist or has been moved.",
-    "action": "Return to homepage"
+  "listings": {
+    "badgeSale": "Privatization",
+    "eyebrow": "Current offers",
+    "title": "Newly listed objects",
+    "action": "All objects",
+    "perYear": "soʻm / per year",
+    "badgeAuction": "At auction",
+    "badgeNew": "New lot",
+    "empty": "No objects match the selected criteria.",
+    "startPrice": "Starting price",
+    "badgeMock": "Sample",
+    "auctionCountdown": "Auction starts in",
+    "auctionDay": "Auction day",
+    "areaValue": "Area: {area}",
+    "badgeLive": "LIVE",
+    "auctionLive": "Bidding now",
+    "auctionLiveAction": "Join the auction"
   },
   "liveAuctions": {
     "title": "Live auctions",
@@ -236,163 +251,11 @@
     "filterLabel": "Filter by time until auction",
     "empty": "No objects have an auction opening in the selected window. Try another one."
   },
-  "sold": {
-    "eyebrow": "RESULTS",
-    "title": "Leased on the last auction day",
-    "description": "Objects leased at the {date} auction, with the opening and final price side by side.",
-    "action": "All results",
-    "startPrice": "Opening price",
-    "soldPrice": "Final price",
-    "noRise": "At the opening price",
-    "prev": "Previous",
-    "next": "Next",
-    "pageTitle": "Leased objects",
-    "pageLede": "Objects leased at auction this year, with opening and final prices",
-    "pageEmpty": "No leased objects match the selected filters.",
-    "pagination": "Pages",
-    "filterLabel": "Filter leased objects",
-    "dateFrom": "From",
-    "dateTo": "To"
-  },
-  "meta": {
-    "title": "Davijara.uz — the single portal for leasing state property",
-    "description": "The single portal for leasing state-owned property: search vacant objects, E-auksion auctions, lease privileges and online contract registration."
-  },
-  "map": {
-    "saleTitle": "Property offered for privatization, on the map",
-    "eyebrow": "Map",
-    "title": "Objects offered for lease, on the map"
-  },
-  "steps": {
-    "eyebrow": "Process",
-    "title": "How is state property leased?",
-    "description": "Lease state property in four simple steps",
-    "action": "Full guide"
-  },
-  "listings": {
-    "badgeSale": "Privatization",
-    "eyebrow": "Current offers",
-    "title": "Newly listed objects",
-    "action": "All objects",
-    "perYear": "soʻm / per year",
-    "badgeAuction": "At auction",
-    "badgeNew": "New lot",
-    "empty": "No objects match the selected criteria.",
-    "startPrice": "Starting price",
-    "badgeMock": "Sample",
-    "auctionCountdown": "Auction starts in",
-    "auctionDay": "Auction day",
-    "areaValue": "Area: {area}",
-    "badgeLive": "LIVE",
-    "auctionLive": "Bidding now",
-    "auctionLiveAction": "Join the auction"
-  },
   "services": {
     "eyebrow": "Online services",
     "title": "Interactive services",
     "description": "Handle everything online — without leaving home.",
     "action": "All services"
-  },
-  "documents": {
-    "eyebrow": "Legislation",
-    "title": "Regulatory documents",
-    "action": "All",
-    "pageLede": "List of regulatory and legal documents for the sector",
-    "empty": "The list of documents has not been published yet."
-  },
-  "faq": {
-    "title": "Frequently asked questions",
-    "eyebrow": "Questions and answers"
-  },
-  "documentDrafts": {
-    "fileMeta": "PDF · {size} KB"
-  },
-  "siteMap": {
-    "general": "General",
-    "lede": "{sections} sections, {pages} pages"
-  },
-  "minRates": {
-    "empty": "Documents by region have not been published yet."
-  },
-  "appeals": {
-    "empty": "Appeal statistics have not been published yet.",
-    "source": "Appeal source",
-    "total": "All",
-    "inProgress": "In progress",
-    "closed": "Closed appeals"
-  },
-  "openData": {
-    "pageLede": "Open data published under budget-transparency legislation — updated every quarter.",
-    "period": "Period",
-    "empty": "No open data has been published yet.",
-    "emptyPeriod": "No documents found for this period.",
-    "file": "File {n}"
-  },
-  "objects": {
-    "marketLabel": "Type of offer",
-    "marketLease": "Lease",
-    "marketSale": "Privatization",
-    "averageStartPrice": "Average starting price",
-    "mapStartPrice": "Starting price",
-    "metaDescription": "Search vacant state property by region, type, area and price — on the map and by region.",
-    "count": "Objects",
-    "totalArea": "Total area",
-    "averagePrice": "Average price",
-    "mapTab": "Map",
-    "listTab": "List",
-    "mapLoading": "Loading map…",
-    "pagination": "Pages",
-    "prevPage": "Previous page",
-    "nextPage": "Next page",
-    "regionsTab": "Regions",
-    "title": "Lease objects",
-    "emptyFiltered": "No objects match the selected criteria. Try widening the filter.",
-    "empty": "No objects match the selected criteria.",
-    "pageLede": "Every vacant state property object, on the map and by region",
-    "pageLedeFiltered": "Results for the selected criteria",
-    "mostly": "Mostly: {type}",
-    "inDistricts": "{count, plural, one {In {n} district or city} other {In {n} districts and cities}}",
-    "countValue": "{count}",
-    "resultCount": "Found: <b>{count}</b> objects",
-    "types": {
-      "noturar": "Non-residential",
-      "turar": "Residential",
-      "ishlab-chiqarish": "Industrial",
-      "mamuriy": "Administrative"
-    },
-    "mapMock": "Sample record",
-    "mapDetails": "View on E-auksion",
-    "mapLot": "Lot no.",
-    "mapZoomHint": "Ctrl + scroll to zoom",
-    "auctionCountdown": "Auction starts in",
-    "auctionStarted": "Auction has started",
-    "mapFullscreenEnter": "Open full screen",
-    "mapFullscreenExit": "Exit full screen",
-    "mockNotice": "The objects shown are still <b>samples</b> — they were created to demonstrate how the system works and are not real state property. For official information please refer to <link>e-auksion.uz</link>.",
-    "showAll": "{count, plural, one {{n} more object} other {{n} more objects}} — view all",
-    "mapLiveView": "Watch the live auction",
-    "liveTab": "Live auctions"
-  },
-  "calculator": {
-    "title": "Rent calculator",
-    "metaDescription": "Estimate the annual rent from an object's area, type and location.",
-    "lead": "Estimate the annual rent",
-    "pageLead": "Know the price of an object in advance",
-    "area": "Area (m²)",
-    "objectType": "Object type",
-    "result": "Estimated annual rent",
-    "regionFactor": "Regional coefficient",
-    "typeFactor": "By object type",
-    "pageLede": "The calculator estimates the annual payment from the minimum lease rates in force and the regional coefficients. The final price is set by the outcome of the auction.",
-    "regionFactorText": "The price varies by region and city.",
-    "typeFactorText": "Separate tariffs for offices, warehouses, retail and administrative buildings.",
-    "yearly": "Updated every year",
-    "yearlyText": "Minimum rates are set by a resolution of the Cabinet of Ministers.",
-    "region": "Region",
-    "rateSuffix": "{rate} soʻm/m²/year",
-    "resultValue": "{amount} soʻm",
-    "formula": "{area} m² × {rate} soʻm × {coef} (regional coefficient)",
-    "disclaimer": "The result is an estimate, not an official calculation. The final rent is determined by the auction. Minimum rates are updated every year by a resolution of the Cabinet of Ministers."
   },
   "privileges": {
     "eyebrow": "State support",
@@ -436,6 +299,33 @@
       "portal": "Portal"
     }
   },
+  "documents": {
+    "eyebrow": "Legislation",
+    "title": "Regulatory documents",
+    "action": "All",
+    "pageLede": "List of regulatory and legal documents for the sector",
+    "empty": "The list of documents has not been published yet."
+  },
+  "partners": {
+    "heading": "Partner organisations and platforms"
+  },
+  "footer": {
+    "hotline": "Hotline",
+    "contact": "Contact",
+    "rights": "All rights reserved",
+    "corporate": "Corporate information",
+    "trafficOnline": "Online",
+    "trafficActions": "Actions",
+    "trafficVisits": "Visits",
+    "trafficAvgTime": "Average time on site",
+    "trafficSecondsShort": "s",
+    "trafficMinutesShort": "min"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for does not exist or has been moved.",
+    "action": "Return to homepage"
+  },
   "placeholder": {
     "title": "Section in progress",
     "description": "Work on this section is under way and it will launch shortly.",
@@ -450,13 +340,23 @@
     "auction": "Integration with the electronic auction platform is under way.",
     "login": "Integration with the authorisation system (OneID) is under way."
   },
-  "contact": {
-    "title": "Contact",
-    "address": "Address",
-    "phone": "Phone",
-    "email": "Email",
-    "hours": "Working hours",
-    "mapPending": "The map is being prepared — it will be added once the exact location is confirmed."
+  "sold": {
+    "eyebrow": "RESULTS",
+    "title": "Leased on the last auction day",
+    "description": "Objects leased at the {date} auction, with the opening and final price side by side.",
+    "action": "All results",
+    "startPrice": "Opening price",
+    "soldPrice": "Final price",
+    "noRise": "At the opening price",
+    "prev": "Previous",
+    "next": "Next",
+    "pageTitle": "Leased objects",
+    "pageLede": "Objects leased at auction this year, with opening and final prices",
+    "pageEmpty": "No leased objects match the selected filters.",
+    "pagination": "Pages",
+    "filterLabel": "Filter leased objects",
+    "dateFrom": "From",
+    "dateTo": "To"
   },
   "stats": {
     "title": "Statistics",
@@ -520,6 +420,108 @@
     "avgRiseNote": "The mean of the final price as a ratio of the starting price.",
     "metaDescription": "Auction statistics for leasing state property — by region, by month, and price trends."
   },
+  "contact": {
+    "title": "Contact",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "hours": "Working hours",
+    "mapPending": "The map is being prepared — it will be added once the exact location is confirmed."
+  },
+  "objects": {
+    "marketLabel": "Type of offer",
+    "marketLease": "Lease",
+    "marketSale": "Privatization",
+    "averageStartPrice": "Average starting price",
+    "mapStartPrice": "Starting price",
+    "metaDescription": "Search vacant state property by region, type, area and price — on the map and by region.",
+    "count": "Objects",
+    "totalArea": "Total area",
+    "averagePrice": "Average price",
+    "mapTab": "Map",
+    "listTab": "List",
+    "mapLoading": "Loading map…",
+    "pagination": "Pages",
+    "prevPage": "Previous page",
+    "nextPage": "Next page",
+    "regionsTab": "Regions",
+    "title": "Lease objects",
+    "emptyFiltered": "No objects match the selected criteria. Try widening the filter.",
+    "empty": "No objects match the selected criteria.",
+    "pageLede": "Every vacant state property object, on the map and by region",
+    "mostly": "Mostly: {type}",
+    "inDistricts": "{count, plural, one {In {n} district or city} other {In {n} districts and cities}}",
+    "countValue": "{count}",
+    "resultCount": "Found: <b>{count}</b> objects",
+    "types": {
+      "noturar": "Non-residential",
+      "turar": "Residential",
+      "ishlab-chiqarish": "Industrial",
+      "mamuriy": "Administrative"
+    },
+    "mapMock": "Sample record",
+    "mapDetails": "View on E-auksion",
+    "mapLot": "Lot no.",
+    "mapZoomHint": "Ctrl + scroll to zoom",
+    "auctionCountdown": "Auction starts in",
+    "auctionStarted": "Auction has started",
+    "mapFullscreenEnter": "Open full screen",
+    "mapFullscreenExit": "Exit full screen",
+    "mockNotice": "The objects shown are still <b>samples</b> — they were created to demonstrate how the system works and are not real state property. For official information please refer to <link>e-auksion.uz</link>.",
+    "pageLedeFiltered": "Results for the selected criteria",
+    "showAll": "{count, plural, one {{n} more object} other {{n} more objects}} — view all",
+    "mapLiveView": "Watch the live auction",
+    "liveTab": "Live auctions"
+  },
+  "calculator": {
+    "title": "Rent calculator",
+    "metaDescription": "Estimate the annual rent from an object's area, type and location.",
+    "lead": "Estimate the annual rent",
+    "pageLead": "Know the price of an object in advance",
+    "area": "Area (m²)",
+    "objectType": "Object type",
+    "result": "Estimated annual rent",
+    "regionFactor": "Regional coefficient",
+    "typeFactor": "By object type",
+    "pageLede": "The calculator estimates the annual payment from the minimum lease rates in force and the regional coefficients. The final price is set by the outcome of the auction.",
+    "regionFactorText": "The price varies by region and city.",
+    "typeFactorText": "Separate tariffs for offices, warehouses, retail and administrative buildings.",
+    "yearly": "Updated every year",
+    "yearlyText": "Minimum rates are set by a resolution of the Cabinet of Ministers.",
+    "region": "Region",
+    "rateSuffix": "{rate} soʻm/m²/year",
+    "resultValue": "{amount} soʻm",
+    "formula": "{area} m² × {rate} soʻm × {coef} (regional coefficient)",
+    "disclaimer": "The result is an estimate, not an official calculation. The final rent is determined by the auction. Minimum rates are updated every year by a resolution of the Cabinet of Ministers."
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "eyebrow": "Questions and answers"
+  },
+  "documentDrafts": {
+    "fileMeta": "PDF · {size} KB"
+  },
+  "siteMap": {
+    "general": "General",
+    "lede": "{sections} sections, {pages} pages"
+  },
+  "minRates": {
+    "empty": "Documents by region have not been published yet."
+  },
+  "appeals": {
+    "empty": "Appeal statistics have not been published yet.",
+    "source": "Appeal source",
+    "total": "All",
+    "inProgress": "In progress",
+    "closed": "Closed appeals"
+  },
+  "openData": {
+    "pageLede": "Open data published under budget-transparency legislation — updated every quarter.",
+    "period": "Period",
+    "empty": "No open data has been published yet.",
+    "emptyPeriod": "No documents found for this period.",
+    "file": "File {n}"
+  },
   "territorial": {
     "count": "{count, plural, one {{n} territorial department} other {{n} territorial departments}}"
   },
@@ -554,13 +556,6 @@
     "colArea": "Leased area",
     "address": "Address",
     "noCadastre": "Cadastre number not given",
-    
-    
-    
-    
-    
-    
-    
     "found": "Found: {objects} objects, {contracts} contracts.",
     "empty": "No contracts match the selected filters.",
     "unavailable": "The contracts register is not responding right now. Please try again later.",

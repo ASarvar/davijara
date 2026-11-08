@@ -94,6 +94,7 @@ const VARIANTS = {
 export function Logo({
   className,
   variant = "footer",
+  alt = `${site.name} — ${site.tagline}`,
   /**
    * Set for the header logo, which is above the fold on every page. Leave off
    * elsewhere (the footer) so it loads lazily and stays off the critical path.
@@ -103,6 +104,12 @@ export function Logo({
   className?: string;
   variant?: keyof typeof VARIANTS;
   priority?: boolean;
+  /**
+   * The accessible name — the site's name and tagline. Pages pass
+   * `meta.title`, which is that same line in the reader's language; the
+   * Uzbek default serves the admin panel.
+   */
+  alt?: string;
 }) {
   const { media, className: sizeClass } = VARIANTS[variant];
 
@@ -112,7 +119,6 @@ export function Logo({
     Under the /site mount an unprefixed "/logo-…svg" would resolve against
     the domain root, which is a different project entirely.
   */
-  const alt = `${site.name} — ${site.tagline}`;
   const imgProps = {
     alt,
     width: 57,

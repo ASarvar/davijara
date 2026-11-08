@@ -54,6 +54,7 @@ export function LotCard({
   className?: string;
 }) {
   const t = useTranslations("listings");
+  const tCommon = useTranslations("common");
   /*
     The room, when there is one to point at. `liveAuctionUrl` exists for any
     lot with a number, so the fallback is for the rare lot that has neither
@@ -244,7 +245,9 @@ export function LotCard({
                   {t("startPrice")}
                 </span>
                 <span className="font-heading text-accent-foreground block text-xl font-semibold">
-                  {`${formatNumber(listing.pricePerYear)} so'm`}
+                  {tCommon("priceSom", {
+                    amount: formatNumber(listing.pricePerYear),
+                  })}
                 </span>
               </span>
             ) : (

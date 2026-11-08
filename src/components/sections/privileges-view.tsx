@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { getPrivilegesByCategory } from "@/lib/data/privileges";
@@ -22,8 +22,9 @@ export async function PrivilegesView({
 }: {
   active: PrivilegeCategory | "barchasi";
 }) {
+  const locale = await getLocale();
   const t = await getTranslations("privileges");
-  const items = await getPrivilegesByCategory(active);
+  const items = await getPrivilegesByCategory(active, locale);
 
   return (
     <>

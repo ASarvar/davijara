@@ -12,6 +12,7 @@ import {
 } from "@/content/homepage";
 import { faq, partners } from "@/content/faq";
 import { formatNumber } from "@/lib/format";
+import { localizeContent } from "@/lib/i18n/content";
 import {
   getListings as getLiveListings,
   getSoldCount,
@@ -50,8 +51,8 @@ export interface ListingFilter {
   maxPrice?: number;
 }
 
-export async function getRegions(): Promise<Region[]> {
-  return regions;
+export async function getRegions(locale?: string): Promise<Region[]> {
+  return localizeContent(regions, locale);
 }
 
 export async function getRegion(slug: string): Promise<Region | undefined> {
@@ -78,16 +79,19 @@ export async function getFeaturedListings(limit = 3): Promise<Listing[]> {
   return featuredListings.slice(0, limit);
 }
 
-export async function getDocuments(limit?: number): Promise<DocItem[]> {
-  return limit ? documents.slice(0, limit) : documents;
+export async function getDocuments(
+  limit?: number,
+  locale?: string,
+): Promise<DocItem[]> {
+  return localizeContent(limit ? documents.slice(0, limit) : documents, locale);
 }
 
 export async function getServices(): Promise<Service[]> {
   return services;
 }
 
-export async function getSteps(): Promise<Step[]> {
-  return steps;
+export async function getSteps(locale?: string): Promise<Step[]> {
+  return localizeContent(steps, locale);
 }
 
 /*
@@ -259,6 +263,14 @@ function latestFigure<T>(
 export async function getHeroStats(
   regionSlug?: string,
   districtName?: string,
+  locale?: string,
+): Promise<HeroStatsResult> {
+  return localizeContent(await heroStatsFor(regionSlug, districtName), locale);
+}
+
+async function heroStatsFor(
+  regionSlug?: string,
+  districtName?: string,
 ): Promise<HeroStatsResult> {
   const [objectsStat, contractsStat, areaStat, soldStat, saleStat] = heroStats;
   const year = currentYear();
@@ -426,12 +438,15 @@ export async function getImpactStats(): Promise<Stat[]> {
   return impactStats;
 }
 
-export async function getPrivilegeCategoryCards() {
-  return privilegeCategories;
+export async function getPrivilegeCategoryCards(locale?: string) {
+  return localizeContent(privilegeCategories, locale);
 }
 
-export async function getFaq(limit?: number): Promise<FaqItem[]> {
-  return limit ? faq.slice(0, limit) : faq;
+export async function getFaq(
+  limit?: number,
+  locale?: string,
+): Promise<FaqItem[]> {
+  return localizeContent(limit ? faq.slice(0, limit) : faq, locale);
 }
 
 export async function getPartners() {
@@ -439,9 +454,9 @@ export async function getPartners() {
 }
 
 /** Region options for the search widget's <select>. */
-export async function getRegionOptions(): Promise<
-  Array<{ value: string; label: string }>
-> {
-  const all = await getRegions();
+export async function getRegionOptions(
+  locale?: string,
+): Promise<Array<{ value: string; label: string }>> {
+  const all = await getRegions(locale);
   return all.map((r) => ({ value: r.slug, label: r.name }));
 }

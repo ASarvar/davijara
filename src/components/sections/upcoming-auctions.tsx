@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { getRegions } from "@/lib/data/catalog";
@@ -66,6 +66,7 @@ export async function UpcomingAuctions({
 }: {
   searchParams: Record<string, string | string[] | undefined>;
 }) {
+  const locale = await getLocale();
   const t = await getTranslations("auctions");
   const tw = await getTranslations("auctionWindow");
   const activeWindow = activeAuctionWindow(searchParams);
@@ -83,7 +84,7 @@ export async function UpcomingAuctions({
   const sales = getPrivatizationListings().then((r) => r.listings);
   const [{ listings }, regions, counts] = await Promise.all([
     getUpcomingAuctions(12, activeWindow, sales),
-    getRegions(),
+    getRegions(locale),
     getUpcomingAuctionCounts(sales),
   ]);
 

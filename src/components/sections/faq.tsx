@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { getFaq } from "@/lib/data/catalog";
 import { SurfaceCard } from "@/components/common/surface-card";
@@ -18,7 +18,8 @@ import { Section, SectionHeader } from "@/components/layout/section";
  * `.open` class on a plain div with no ARIA and no keyboard support.
  */
 export async function Faq() {
-  const items = await getFaq();
+  const locale = await getLocale();
+  const items = await getFaq(undefined, locale);
   const t = await getTranslations("faq");
 
   return (

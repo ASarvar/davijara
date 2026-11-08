@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getDb } from "@/lib/db";
+import { localizeContent } from "@/lib/i18n/content";
 import type { Privilege, PrivilegeCategory } from "@/types/content";
 
 /*
@@ -27,9 +28,12 @@ import type { Privilege, PrivilegeCategory } from "@/types/content";
   │ exactly that, so no component needed touching for this either.           │
   └──────────────────────────────────────────────────────────────────────────┘
 
-  NOT TRANSLATED, in any locale. See the note on the table in migrate.ts:
-  a machine-translated `legalBasis` is a citation to a document that does not
-  exist under that name.
+  TRANSLATED ON READ, not in the table: there is no translations table for
+  privileges. /ru shows the translators' Russian from the workbook through
+  lib/i18n/content.ts, keyed by the Uzbek text, so a privilege an editor
+  rewrites shows in Uzbek until it is translated again. The operator chose
+  on 08.11.2026 to publish that Russian as it came back, legalBasis
+  included and with no disclaimer; see the note in lib/i18n/content.ts.
 */
 
 type Row = {
@@ -66,11 +70,16 @@ export const PRIVILEGE_CATEGORIES: Array<{
   { value: "boshqa", label: "Sport, hunarmandchilik va hudud" },
 ];
 
+/** The categories, labelled in the reader's language. */
+export async function getPrivilegeCategories(locale?: string) {
+  return localizeContent(PRIVILEGE_CATEGORIES, locale);
+}
+
 export function isPrivilegeCategory(v: string): v is PrivilegeCategory {
   return PRIVILEGE_CATEGORIES.some((c) => c.value === v);
 }
 
-export async function getPrivileges(): Promise<Privilege[]> {
+export async function getPrivileges(locale?: string): Promise<Privilege[]> {
   const rows = getDb()
     .prepare(
       `SELECT category, tag, title, description, subject, duration, legal_basis
@@ -78,13 +87,14 @@ export async function getPrivileges(): Promise<Privilege[]> {
         ORDER BY position, id`,
     )
     .all() as Row[];
-  return rows.map(toPrivilege);
+  return localizeContent(rows.map(toPrivilege), locale);
 }
 
 export async function getPrivilegesByCategory(
   category: PrivilegeCategory | "barchasi",
+  locale?: string,
 ): Promise<Privilege[]> {
-  const all = await getPrivileges();
+  const all = await getPrivileges(locale);
   return category === "barchasi"
     ? all
     : all.filter((p) => p.category === category);

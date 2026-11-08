@@ -59,7 +59,7 @@ export default async function CurrentAuctionsPage({
   const [t, listings, regions] = await Promise.all([
     getTranslations("currentAuctions"),
     getLiveAuctionListings(),
-    getRegions(),
+    getRegions(locale),
   ]);
 
   const regionName = (slug: string) =>

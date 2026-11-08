@@ -4,6 +4,7 @@ import { stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import { documentDrafts, type DocumentDraft } from "@/content/document-drafts";
+import { localizeContent } from "@/lib/i18n/content";
 
 export type DocumentDraftItem = DocumentDraft & {
   /**
@@ -15,9 +16,11 @@ export type DocumentDraftItem = DocumentDraft & {
 };
 
 /** Newest first. */
-export async function getDocumentDrafts(): Promise<DocumentDraftItem[]> {
+export async function getDocumentDrafts(
+  locale?: string,
+): Promise<DocumentDraftItem[]> {
   const items = await Promise.all(
-    documentDrafts.map(async (doc) => {
+    localizeContent(documentDrafts, locale).map(async (doc) => {
       try {
         const { size } = await stat(join(process.cwd(), "public", doc.file));
         return { ...doc, sizeBytes: size };

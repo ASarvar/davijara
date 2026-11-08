@@ -6,6 +6,7 @@ import {
   orgHead,
   orgOrder,
 } from "@/content/structure";
+import { localizeContent } from "@/lib/i18n/content";
 import type { OrgBranch, OrgUnit } from "@/types/content";
 
 /*
@@ -23,11 +24,14 @@ export interface OrgStructure {
   direct: OrgUnit[];
 }
 
-export async function getOrgStructure(): Promise<OrgStructure> {
-  return {
-    order: orgOrder,
-    head: orgHead,
-    branches: orgBranches,
-    direct: orgDirectUnits,
-  };
+export async function getOrgStructure(locale?: string): Promise<OrgStructure> {
+  return localizeContent(
+    {
+      order: orgOrder,
+      head: orgHead,
+      branches: orgBranches,
+      direct: orgDirectUnits,
+    },
+    locale,
+  );
 }

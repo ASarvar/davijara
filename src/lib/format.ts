@@ -38,18 +38,28 @@ export function formatFixed(value: number, maxFractionDigits: number): string {
  * them unsortable and unfilterable. Values are numbers in the data now and
  * formatted here at the edge.
  */
-export function formatSom(value: number): string {
+export function formatSom(value: number, locale?: string): string {
+  const unit = locale === "ru" ? MAGNITUDES_RU : MAGNITUDES_UZ;
   if (value >= 1_000_000_000_000) {
-    return `${formatDecimal(value / 1_000_000_000_000)}${NBSP}trln`;
+    return `${formatDecimal(value / 1_000_000_000_000)}${NBSP}${unit.trillion}`;
   }
   if (value >= 1_000_000_000) {
-    return `${formatDecimal(value / 1_000_000_000)}${NBSP}mlrd`;
+    return `${formatDecimal(value / 1_000_000_000)}${NBSP}${unit.billion}`;
   }
   if (value >= 1_000_000) {
-    return `${formatDecimal(value / 1_000_000)}${NBSP}mln`;
+    return `${formatDecimal(value / 1_000_000)}${NBSP}${unit.million}`;
   }
   return formatNumber(value);
 }
+
+/*
+  The magnitude words, by the reader's language. A table here rather than
+  messages/: formatSom is called from client and server code alike and
+  stays a plain function, deterministic on both sides, like the rest of this
+  file. Only Uzbek and Russian: English is not published (i18n/routing.ts).
+*/
+const MAGNITUDES_UZ = { trillion: "trln", billion: "mlrd", million: "mln" };
+const MAGNITUDES_RU = { trillion: "трлн", billion: "млрд", million: "млн" };
 
 function formatDecimal(n: number): string {
   return formatFixed(n, 1);

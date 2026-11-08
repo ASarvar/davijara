@@ -35,7 +35,7 @@ export async function generateMetadata({
   const tNav = await getTranslations({ locale, namespace: "nav" });
   const tMeta = await getTranslations({ locale, namespace: "meta" });
   // Counted, never typed: the description says how many offices the page lists.
-  const offices = await getTerritorialOffices();
+  const offices = await getTerritorialOffices(locale);
   return {
     alternates: localeAlternates(locale, "/markaz/hududiy-boshqarmalar"),
     title: tNav(NAV_KEY),
@@ -55,7 +55,7 @@ export default async function TerritorialPage({
     getTranslations("nav"),
     getTranslations("common"),
     getTranslations("territorial"),
-    getTerritorialOffices(),
+    getTerritorialOffices(locale),
   ]);
 
   return (

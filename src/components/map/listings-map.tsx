@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { useTranslations } from "next-intl";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { Maximize2, Minimize2 } from "lucide-react";
 import L from "leaflet";
@@ -712,6 +713,7 @@ export function ListingsMap({
     startPrice?: string;
   };
 }) {
+  const tCommon = useTranslations("common");
   // Shared with the explorer's live tab and the menu — see the hook.
   const { lots: liveLots } = useLiveAuctions();
   const started = useStartedAuctions(listings);
@@ -881,7 +883,9 @@ export function ListingsMap({
                         </span>
                       ) : null}
                       <span className="block text-sm font-semibold text-[#7d6229]">
-                        {`${formatNumber(listing.pricePerYear)} so'm`}
+                        {tCommon("priceSom", {
+                          amount: formatNumber(listing.pricePerYear),
+                        })}
                       </span>
                     </span>
                   ) : null}

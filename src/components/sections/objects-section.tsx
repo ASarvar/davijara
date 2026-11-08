@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import {
   getListings,
@@ -57,7 +57,7 @@ export async function ObjectsSection({
     sale ? privatization.listings : lease.listings,
     parseSort(searchParams),
   );
-  const summaries = summariseByRegion(listings);
+  const summaries = summariseByRegion(listings, await getLocale());
 
   /*
     Both links out of this section carry the active filters. Following either

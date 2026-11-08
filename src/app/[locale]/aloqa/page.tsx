@@ -3,7 +3,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
-import { contacts, site } from "@/content/site";
+import { getSiteContent } from "@/lib/data/site";
 import { IconTile } from "@/components/common/icon-tile";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { SocialLinks } from "@/components/layout/social-links";
@@ -34,6 +34,7 @@ export default async function Page({
   setRequestLocale(locale as Locale);
   const t = await getTranslations("contact");
 
+  const { contacts, site } = await getSiteContent(locale);
   const { address, hours } = contacts;
 
   return (

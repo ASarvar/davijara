@@ -54,7 +54,7 @@ export default async function AboutPage({
     getTranslations("nav"),
   ]);
   const { establishmentOrder, establishment, officialNaming } =
-    await getAbout();
+    await getAbout(locale);
 
   return (
     <Section tone="deep">

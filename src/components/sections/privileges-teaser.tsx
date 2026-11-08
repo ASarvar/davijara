@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import { getPrivilegeCategoryCards } from "@/lib/data/catalog";
@@ -9,9 +9,10 @@ import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 
 export async function PrivilegesTeaser() {
+  const locale = await getLocale();
   const t = await getTranslations("privileges");
   const [cards, counts] = await Promise.all([
-    getPrivilegeCategoryCards(),
+    getPrivilegeCategoryCards(locale),
     getPrivilegeCounts(),
   ]);
 

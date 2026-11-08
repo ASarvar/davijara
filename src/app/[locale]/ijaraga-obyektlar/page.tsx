@@ -56,7 +56,7 @@ export default async function ObjectsPage({
   // Saralash orders the list and the pager; the map and region totals do not
   // care about order.
   const listings = sortListings(result.listings, parseSort(sp));
-  const summaries = summariseByRegion(listings);
+  const summaries = summariseByRegion(listings, locale);
 
   /*
     Active filters, serialised for the pager. Passed as a STRING rather than a

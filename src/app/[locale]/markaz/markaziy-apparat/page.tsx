@@ -51,7 +51,7 @@ export default async function WorkersPage({
   const [tNav, tCommon, workers] = await Promise.all([
     getTranslations("nav"),
     getTranslations("common"),
-    getWorkers(),
+    getWorkers(locale),
   ]);
 
   return (

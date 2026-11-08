@@ -1,6 +1,7 @@
 import "server-only";
 
 import { regions } from "@/content/regions";
+import { translateText } from "@/lib/i18n/content";
 import { TASHKENT_OFFSET_MS } from "@/lib/format";
 import { fetchSoldYearForRegions } from "@/lib/data/listings";
 import type { SoldLot } from "@/types/content";
@@ -258,6 +259,7 @@ function band(
  */
 export async function getStatistics(
   regionSlug?: string,
+  locale?: string,
 ): Promise<Statistics | null> {
   if (!process.env.LISTINGS_API_URL) return null;
 
@@ -344,7 +346,7 @@ export async function getStatistics(
       );
       return {
         slug: r.slug,
-        name: r.name,
+        name: translateText(r.name, locale),
         sold: lots.length,
         total: lots.reduce((a, l) => a + l.soldPrice, 0),
         /*

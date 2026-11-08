@@ -1,12 +1,13 @@
 import { vacancyInfo, type VacancyInfo } from "@/content/vacancies";
 import { getDb } from "@/lib/db";
 import { tashkentToday } from "@/lib/format";
+import { localizeContent } from "@/lib/i18n/content";
 import { parseBlocks, type Block } from "@/types/blocks";
 
 export type { VacancyInfo, VacancyTableRow } from "@/content/vacancies";
 
-export async function getVacancyInfo(): Promise<VacancyInfo> {
-  return vacancyInfo;
+export async function getVacancyInfo(locale?: string): Promise<VacancyInfo> {
+  return localizeContent(vacancyInfo, locale);
 }
 
 /** One open announcement, as the public page renders it. */
@@ -47,7 +48,15 @@ type Row = {
  * evidence for it. The page renders nothing in that case rather than
  * something untrue.
  */
-export async function getOpenVacancies(): Promise<Vacancy[] | null> {
+/*
+  `locale`: the announcements are panel content with no translations table,
+  so /ru reads them through the same dictionary as src/content (see
+  lib/i18n/content.ts). An announcement written after the dictionary was
+  shows in Uzbek.
+*/
+export async function getOpenVacancies(
+  locale?: string,
+): Promise<Vacancy[] | null> {
   let rows: Row[];
   try {
     rows = getDb()
@@ -75,6 +84,13 @@ export async function getOpenVacancies(): Promise<Vacancy[] | null> {
         email: row.email,
         blocks: parseBlocks(row.blocks),
         expired: row.deadline !== null && row.deadline < today,
+      }))
+      .map((v) => ({
+        ...v,
+        ...localizeContent(
+          { title: v.title, unit: v.unit, blocks: v.blocks },
+          locale,
+        ),
       }))
       /*
         Still-running competitions ahead of ones whose deadline has passed

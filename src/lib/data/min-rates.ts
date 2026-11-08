@@ -33,10 +33,10 @@ export type MinRateRegion = {
 
 const DATA = minRatesData as Record<string, string>;
 
-export async function getMinRates(): Promise<MinRateRegion[]> {
+export async function getMinRates(locale?: string): Promise<MinRateRegion[]> {
   return REGION_ORDER.filter((id) => DATA[id]).map((regionId) => ({
     regionId,
-    region: regionName(regionId) ?? regionId,
+    region: regionName(regionId, locale) ?? regionId,
     pdf: DATA[regionId]!,
   }));
 }

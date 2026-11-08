@@ -6,20 +6,24 @@ export type Locale = (typeof locales)[number];
 /**
  * The locales a reader can reach RIGHT NOW — the rest redirect to Uzbek.
  *
- * ru and en exist as routes and their UI strings are ~98% done, but the
- * pages' own text is still Uzbek until the translators' workbook comes back
- * (tarjima/, 22.10.2026). Search engines indexed them anyway, and Google put
- * /ru — Russian chrome over Uzbek text — first for "davijara", above the
- * Uzbek home page (operator, 27.10.2026: "hozircha uz sahifaga
- * yoʻnaltirilsin").
+ * ru and en exist as routes, but until 08.11.2026 the pages' own text was
+ * Uzbek in both. Search engines indexed them anyway, and Google put /ru,
+ * Russian chrome over Uzbek text, first for "davijara", above the Uzbek home
+ * page (operator, 27.10.2026: "hozircha uz sahifaga yoʻnaltirilsin").
  *
- * So until a locale is listed here: src/proxy.ts sends every /ru/… and
+ * RUSSIAN IS OPEN since the translators' workbook came back (08.11.2026)
+ * with the interface, the pages and the legal texts all in Russian.
+ * ENGLISH IS NOT: that workbook brought English for the interface only, so
+ * /en would be English menus over Uzbek pages, which is the same mistake
+ * again. It opens when the page text comes back in English.
+ *
+ * Until a locale is listed here: src/proxy.ts sends every /ru/… and
  * /en/… URL to the same page under /uz with a TEMPORARY redirect (307 — a
  * 301 is cached by browsers for good, and would keep readers away from /ru
  * after it opens); hreflang and the sitemap name only these locales; the
  * language switcher hides the others. Opening Russian is adding "ru" here.
  */
-export const publishedLocales: readonly Locale[] = ["uz"];
+export const publishedLocales: readonly Locale[] = ["uz", "ru"];
 
 export function isPublishedLocale(value: string): value is Locale {
   return (publishedLocales as readonly string[]).includes(value);

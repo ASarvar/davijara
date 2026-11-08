@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { getRegions } from "@/lib/data/catalog";
 import { getLiveAuctionListings } from "@/lib/data/live-auctions";
@@ -46,10 +46,11 @@ import { Section, SectionHeader } from "@/components/layout/section";
  * follows the same number (lib/live-auctions-limit.ts).
  */
 export async function LiveAuctions() {
+  const locale = await getLocale();
   const [t, listings, regions] = await Promise.all([
     getTranslations("liveAuctions"),
     getLiveAuctionListings(),
-    getRegions(),
+    getRegions(locale),
   ]);
 
   if (listings.length === 0) return null;

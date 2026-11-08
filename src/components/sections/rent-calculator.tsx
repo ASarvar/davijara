@@ -7,8 +7,8 @@ import { useTranslations } from "next-intl";
 import {
   calculateAnnualRent,
   calculatorBounds,
-  objectRates,
-  regionCoefficients,
+  type ObjectRate,
+  type RegionCoefficient,
 } from "@/content/calculator";
 import { SelectField } from "@/components/common/select-field";
 import { SurfaceCard } from "@/components/common/surface-card";
@@ -25,7 +25,14 @@ import { formatNumber } from "@/lib/format";
  * set annually by decree and the final figure is determined at auction, so
  * presenting this as a firm price on a state portal would be misleading.
  */
-export function RentCalculator() {
+export function RentCalculator({
+  objectRates,
+  regionCoefficients,
+}: {
+  /** Labelled in the reader's language — see lib/data/calculator.ts. */
+  objectRates: ObjectRate[];
+  regionCoefficients: RegionCoefficient[];
+}) {
   const t = useTranslations("calculator");
   const [area, setArea] = useState<number>(calculatorBounds.defaultArea);
   const [typeValue, setTypeValue] = useState(objectRates[0].value);

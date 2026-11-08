@@ -12,11 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  closingStatement,
-  directorAppeal,
-  sections,
-} from "@/content/anticorruption";
+import { getAnticorruption } from "@/lib/data/anticorruption";
 import { localeAlternates } from "@/lib/seo";
 
 /*
@@ -61,6 +57,8 @@ export default async function AnticorruptionPage({
   setRequestLocale(locale as Locale);
 
   const tNav = await getTranslations("nav");
+  const { sections, directorAppeal, closingStatement } =
+    await getAnticorruption(locale);
 
   return (
     <Section tone="deep">
@@ -114,7 +112,10 @@ export default async function AnticorruptionPage({
                 still wraps on its own, so a phone gets the source's breaks
                 plus whatever its width needs, never a line cut mid-phrase.
               */}
-              {directorAppeal.titleLines.map((line) => (
+              {/* `filter`: a translation may re-cut the source's line breaks
+                  into fewer lines (Russian moves «Обращение» to the front)
+                  and leave the last one empty. */}
+              {directorAppeal.titleLines.filter(Boolean).map((line) => (
                 <span key={line} className="block">
                   {line}
                 </span>

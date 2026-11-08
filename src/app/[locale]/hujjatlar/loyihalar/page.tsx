@@ -59,7 +59,7 @@ export default async function Page({
   setRequestLocale(locale as Locale);
 
   const [docs, intro] = await Promise.all([
-    getDocumentDrafts(),
+    getDocumentDrafts(locale),
     getPageByNavKey(NAV_KEY, locale),
   ]);
   const blocks = intro?.blocks ?? [];

@@ -109,7 +109,7 @@ export default async function OpenDataPage({
   const requested = periods.find((p) => p.value === sp.davr);
   const selected = requested ?? defaultPeriod;
   const entries = selected
-    ? await getOpenDataForPeriod(selected.year, selected.quarter)
+    ? await getOpenDataForPeriod(selected.year, selected.quarter, locale)
     : [];
 
   return (
