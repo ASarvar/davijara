@@ -1210,150 +1210,31 @@ const migrations: Migration[] = [
       after-snapshot, the way every panel write does.
     */
     seed(db) {
-      const now = new Date().toISOString();
-      const log = db.prepare(
-        `INSERT INTO audit_log
-           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
-         VALUES (?, NULL, 'migratsiya', 'update', ?, ?, ?, ?, ?)`,
-      );
-      const LOCALES = ["ru", "en"] as const;
-
-      const news = db
-        .prepare(
-          `SELECT n.id, n.slug, t.title, t.excerpt, t.blocks
-             FROM news n
-             JOIN news_translations t ON t.news_id = n.id AND t.locale = 'uz'`,
-        )
-        .all() as Array<{
-        id: number;
-        slug: string;
-        title: string;
-        excerpt: string;
-        blocks: string;
-      }>;
-      const hasNews = db.prepare(
-        "SELECT 1 FROM news_translations WHERE news_id = ? AND locale = ?",
-      );
-      const addNews = db.prepare(
-        `INSERT INTO news_translations (news_id, locale, title, excerpt, blocks)
-         VALUES (?, ?, ?, ?, ?)`,
-      );
-      for (const row of news) {
-        for (const locale of LOCALES) {
-          if (hasNews.get(row.id, locale)) continue;
-          const blocks = storedBlocks(row.blocks);
-          if (!blocks) continue;
-          const tr = localizeFully(
-            { title: row.title, excerpt: row.excerpt, blocks },
-            locale,
-          );
-          if (!tr) continue;
-          addNews.run(
-            row.id,
-            locale,
-            tr.title,
-            tr.excerpt,
-            JSON.stringify(tr.blocks),
-          );
-          log.run(
-            now,
-            "news",
-            String(row.id),
-            `Tarjima qoʻshildi (${locale}): ${row.title}`,
-            null,
-            JSON.stringify({ id: row.id, slug: row.slug, locale, ...tr }),
-          );
-        }
-      }
-
-      const pages = db
-        .prepare(
-          `SELECT p.id, p.path, t.title, t.description, t.blocks
-             FROM pages p
-             JOIN page_translations t ON t.page_id = p.id AND t.locale = 'uz'`,
-        )
-        .all() as Array<{
-        id: number;
-        path: string;
-        title: string;
-        description: string;
-        blocks: string;
-      }>;
-      const hasPage = db.prepare(
-        "SELECT 1 FROM page_translations WHERE page_id = ? AND locale = ?",
-      );
-      const addPage = db.prepare(
-        `INSERT INTO page_translations (page_id, locale, title, description, blocks)
-         VALUES (?, ?, ?, ?, ?)`,
-      );
-      for (const row of pages) {
-        for (const locale of LOCALES) {
-          if (hasPage.get(row.id, locale)) continue;
-          const blocks = storedBlocks(row.blocks);
-          if (!blocks) continue;
-          const tr = localizeFully(
-            { title: row.title, description: row.description, blocks },
-            locale,
-          );
-          // A page with nothing in it has nothing to translate.
-          if (!tr || (!tr.title.trim() && tr.blocks.length === 0)) continue;
-          addPage.run(
-            row.id,
-            locale,
-            tr.title,
-            tr.description,
-            JSON.stringify(tr.blocks),
-          );
-          log.run(
-            now,
-            "page",
-            String(row.id),
-            `Tarjima qoʻshildi (${locale}): ${row.title || row.path}`,
-            null,
-            JSON.stringify({ id: row.id, path: row.path, locale, ...tr }),
-          );
-        }
-      }
-
-      const menu = db
-        .prepare("SELECT key, label_uz, label_ru, label_en FROM menu_sections")
-        .all() as Array<{
-        key: string;
-        label_uz: string;
-        label_ru: string | null;
-        label_en: string | null;
-      }>;
-      const setLabel = {
-        ru: db.prepare("UPDATE menu_sections SET label_ru = ? WHERE key = ?"),
-        en: db.prepare("UPDATE menu_sections SET label_en = ? WHERE key = ?"),
-      };
-      for (const row of menu) {
-        for (const locale of LOCALES) {
-          const current = locale === "ru" ? row.label_ru : row.label_en;
-          if (current?.trim()) continue;
-          const label = translateText(row.label_uz, locale);
-          if (label === row.label_uz) continue;
-          setLabel[locale].run(label, row.key);
-          log.run(
-            now,
-            "menu",
-            row.key,
-            `Menyu nomi tarjimasi (${locale}): ${row.label_uz} → ${label}`,
-            JSON.stringify(row),
-            JSON.stringify({
-              ...row,
-              [locale === "ru" ? "label_ru" : "label_en"]: label,
-            }),
-          );
-        }
-      }
+      seedTranslations(db);
+    },
+  },
+  {
+    version: 21,
+    name: "ru: 22.10 dan keyingi matnlar (vaqtinchalik tarjima), 08.11.2026",
+    up: `SELECT 1;`,
+    /*
+      Migration 20 again, unchanged, for what it could not translate the
+      first time it ran in production: the VM 563 item, whose excerpt an
+      editor had re-dated in the panel ("2023-yil 14-dekabrdagi") so it
+      matched nothing in the dictionary and, all or nothing, got no ru row.
+      The dictionary now holds that wording (ru.interim.json). Safe to run
+      twice by construction: it never overwrites a row or a label, so
+      everything migration 20 wrote is left as it is.
+    */
+    seed(db) {
+      seedTranslations(db);
     },
   },
 ];
 
 /*
-  A stored row's blocks, or undefined if they do not parse — migration 20
-  skips such a row rather than throwing, because a throw here stops the
+  A stored row's blocks, or undefined if they do not parse — migrations
+  20 and 21 skip such a row rather than throwing, because a throw here stops the
   migration and with it every page of the site.
 */
 function storedBlocks(json: string) {
@@ -1362,6 +1243,151 @@ function storedBlocks(json: string) {
     return parsed.success ? parsed.data : undefined;
   } catch {
     return undefined;
+  }
+}
+
+/*
+  Migrations 20 and 21: ru/en rows for the panel's news, pages and menu
+  labels from the translators' dictionary. The rules are in migration 20's
+  note.
+*/
+function seedTranslations(db: Database): void {
+  const now = new Date().toISOString();
+  const log = db.prepare(
+    `INSERT INTO audit_log
+       (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+     VALUES (?, NULL, 'migratsiya', 'update', ?, ?, ?, ?, ?)`,
+  );
+  const LOCALES = ["ru", "en"] as const;
+
+  const news = db
+    .prepare(
+      `SELECT n.id, n.slug, t.title, t.excerpt, t.blocks
+         FROM news n
+         JOIN news_translations t ON t.news_id = n.id AND t.locale = 'uz'`,
+    )
+    .all() as Array<{
+    id: number;
+    slug: string;
+    title: string;
+    excerpt: string;
+    blocks: string;
+  }>;
+  const hasNews = db.prepare(
+    "SELECT 1 FROM news_translations WHERE news_id = ? AND locale = ?",
+  );
+  const addNews = db.prepare(
+    `INSERT INTO news_translations (news_id, locale, title, excerpt, blocks)
+     VALUES (?, ?, ?, ?, ?)`,
+  );
+  for (const row of news) {
+    for (const locale of LOCALES) {
+      if (hasNews.get(row.id, locale)) continue;
+      const blocks = storedBlocks(row.blocks);
+      if (!blocks) continue;
+      const tr = localizeFully(
+        { title: row.title, excerpt: row.excerpt, blocks },
+        locale,
+      );
+      if (!tr) continue;
+      addNews.run(
+        row.id,
+        locale,
+        tr.title,
+        tr.excerpt,
+        JSON.stringify(tr.blocks),
+      );
+      log.run(
+        now,
+        "news",
+        String(row.id),
+        `Tarjima qoʻshildi (${locale}): ${row.title}`,
+        null,
+        JSON.stringify({ id: row.id, slug: row.slug, locale, ...tr }),
+      );
+    }
+  }
+
+  const pages = db
+    .prepare(
+      `SELECT p.id, p.path, t.title, t.description, t.blocks
+         FROM pages p
+         JOIN page_translations t ON t.page_id = p.id AND t.locale = 'uz'`,
+    )
+    .all() as Array<{
+    id: number;
+    path: string;
+    title: string;
+    description: string;
+    blocks: string;
+  }>;
+  const hasPage = db.prepare(
+    "SELECT 1 FROM page_translations WHERE page_id = ? AND locale = ?",
+  );
+  const addPage = db.prepare(
+    `INSERT INTO page_translations (page_id, locale, title, description, blocks)
+     VALUES (?, ?, ?, ?, ?)`,
+  );
+  for (const row of pages) {
+    for (const locale of LOCALES) {
+      if (hasPage.get(row.id, locale)) continue;
+      const blocks = storedBlocks(row.blocks);
+      if (!blocks) continue;
+      const tr = localizeFully(
+        { title: row.title, description: row.description, blocks },
+        locale,
+      );
+      // A page with nothing in it has nothing to translate.
+      if (!tr || (!tr.title.trim() && tr.blocks.length === 0)) continue;
+      addPage.run(
+        row.id,
+        locale,
+        tr.title,
+        tr.description,
+        JSON.stringify(tr.blocks),
+      );
+      log.run(
+        now,
+        "page",
+        String(row.id),
+        `Tarjima qoʻshildi (${locale}): ${row.title || row.path}`,
+        null,
+        JSON.stringify({ id: row.id, path: row.path, locale, ...tr }),
+      );
+    }
+  }
+
+  const menu = db
+    .prepare("SELECT key, label_uz, label_ru, label_en FROM menu_sections")
+    .all() as Array<{
+    key: string;
+    label_uz: string;
+    label_ru: string | null;
+    label_en: string | null;
+  }>;
+  const setLabel = {
+    ru: db.prepare("UPDATE menu_sections SET label_ru = ? WHERE key = ?"),
+    en: db.prepare("UPDATE menu_sections SET label_en = ? WHERE key = ?"),
+  };
+  for (const row of menu) {
+    for (const locale of LOCALES) {
+      const current = locale === "ru" ? row.label_ru : row.label_en;
+      if (current?.trim()) continue;
+      const label = translateText(row.label_uz, locale);
+      if (label === row.label_uz) continue;
+      setLabel[locale].run(label, row.key);
+      log.run(
+        now,
+        "menu",
+        row.key,
+        `Menyu nomi tarjimasi (${locale}): ${row.label_uz} → ${label}`,
+        JSON.stringify(row),
+        JSON.stringify({
+          ...row,
+          [locale === "ru" ? "label_ru" : "label_en"]: label,
+        }),
+      );
+    }
   }
 }
 
