@@ -33,16 +33,22 @@ jobs:
         run: npm run build
 
       - name: Verify statutory content is intact
-        # The 24 privilege records are the highest-value data in the repo and
+        # The privilege records are the highest-value data in the repo and
         # every field is legally binding. Fail the build if any record goes
         # missing or a citation is emptied.
+        #
+        # EXPECTED is the operator's list (66d9d7c, 22.09.2026): 29 records.
+        # Change it only together with a reviewed change to that list.
+        # A citation that itself contains double quotes ('… (9-band "v" …)')
+        # is written in single quotes, so both quote styles are matched.
         run: |
           node -e "
+            const EXPECTED = 29;
             const src = require('fs').readFileSync('src/content/privileges.ts','utf8');
             const ids = [...src.matchAll(/^\s{4}id: (\d+),/gm)].length;
-            const cites = [...src.matchAll(/legalBasis: \"(.+?)\",/g)].map(m => m[1]);
-            if (ids !== 24) { console.error('Expected 24 privileges, found ' + ids); process.exit(1); }
-            if (cites.length !== 24) { console.error('Expected 24 citations, found ' + cites.length); process.exit(1); }
+            const cites = [...src.matchAll(/legalBasis: ([\"'])(.+?)\1,/g)].map(m => m[2]);
+            if (ids !== EXPECTED) { console.error('Expected ' + EXPECTED + ' privileges, found ' + ids); process.exit(1); }
+            if (cites.length !== EXPECTED) { console.error('Expected ' + EXPECTED + ' citations, found ' + cites.length); process.exit(1); }
             if (cites.some(c => !c.trim())) { console.error('Empty legalBasis found'); process.exit(1); }
-            console.log('OK: 24 privileges, 24 non-empty citations');
+            console.log('OK: ' + EXPECTED + ' privileges, ' + EXPECTED + ' non-empty citations');
           "
