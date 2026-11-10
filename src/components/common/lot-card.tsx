@@ -9,6 +9,7 @@ import {
   formatDateTime,
   formatNumber,
 } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { Listing } from "@/types/content";
 
 /*
@@ -236,7 +237,16 @@ export function LotCard({
             ["7 600 000","so'm"], rendered "7 600 000so'm"). Building the
             string in JS sidesteps JSX's whitespace rules entirely.
           */}
-          <div className="border-border mt-auto flex items-end justify-between gap-3 border-t pt-4">
+          {/*
+            `flex-wrap` + a price that never wraps (operator, 10.11.2026). A
+            sale's price runs to eleven digits — "15 486 000 000 so'm" — and
+            squeezed beside the countdown it broke onto two lines, which put
+            that card's whole footer out of line with its neighbours. Now the
+            number steps down one size when it is long, and if it still does
+            not fit, the countdown moves under it (`ml-auto` keeps it on the
+            right) instead of the number breaking.
+          */}
+          <div className="border-border mt-auto flex flex-wrap items-end justify-between gap-x-3 gap-y-2 border-t pt-4">
             {/* No "0 so'm": a lot sent without a price states none. The
                 empty span keeps the date on the right edge. */}
             {listing.pricePerYear > 0 ? (
@@ -244,7 +254,15 @@ export function LotCard({
                 <span className="text-muted-foreground block text-xs">
                   {t("startPrice")}
                 </span>
-                <span className="font-heading text-accent-foreground block text-xl font-semibold">
+                <span
+                  className={cn(
+                    "font-heading text-accent-foreground block font-semibold whitespace-nowrap tabular-nums",
+                    // A billion or more: longer than "999 999 999".
+                    formatNumber(listing.pricePerYear).length > 11
+                      ? "text-lg"
+                      : "text-xl",
+                  )}
+                >
                   {tCommon("priceSom", {
                     amount: formatNumber(listing.pricePerYear),
                   })}
@@ -262,7 +280,7 @@ export function LotCard({
                 what a reader needs. What the room does not publish is when
                 it closes, so nothing here pretends to know.
               */
-              <span className="shrink-0 text-right">
+              <span className="ml-auto shrink-0 text-right">
                 <span className="text-muted-foreground block text-xs">
                   {t("auctionLive")}
                 </span>
@@ -271,7 +289,7 @@ export function LotCard({
                 </span>
               </span>
             ) : listing.auctionDate ? (
-              <span className="shrink-0 text-right">
+              <span className="ml-auto shrink-0 text-right">
                 {/*
                   "Savdo boshlanishiga", never "ariza berishga qolgan vaqt".
                   `auction_date` is when the auction OPENS; applications close

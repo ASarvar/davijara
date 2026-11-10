@@ -440,6 +440,7 @@
     "metaDescription": "Davlat mulki obyektlarini ijaraga berish boʻyicha savdo statistikasi — hududlar, oylar, narx dinamikasi."
   },
   "contact": {
+    "social": "Ijtimoiy tarmoqlar",
     "title": "Aloqa",
     "metaDescription": "Davlat mulki obyektlaridan foydalanish markazi — manzil, telefon va elektron pochta.",
     "address": "Manzil",
@@ -583,5 +584,14 @@
     "partial": "{count} ta hudud boʻyicha reyestr javob bermadi — ular roʻyxatda yoʻq.",
     "pagination": "Sahifalar",
     "reset": "Tozalash"
+  },
+  "videos": {
+    "watchOnYoutube": "YouTube'da ochish",
+    "prev": "Oldingi",
+    "next": "Keyingi",
+    "title": "Video sharhlar",
+    "description": "Markazning YouTube kanalidagi videolar",
+    "channel": "YouTube kanaliga oʻtish",
+    "opensOnYoutube": "YouTube'da yangi oynada ochiladi"
   }
 }

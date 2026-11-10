@@ -10,6 +10,7 @@ import { HowItWorks } from "@/components/sections/how-it-works";
 import { LiveAuctions } from "@/components/sections/live-auctions";
 import { UpcomingAuctions } from "@/components/sections/upcoming-auctions";
 import { RecentlySold } from "@/components/sections/recently-sold";
+import { VideoShorts } from "@/components/sections/video-shorts";
 import { PrivilegesTeaser } from "@/components/sections/privileges-teaser";
 import { NewsAndDocs } from "@/components/sections/news-and-docs";
 import { Faq } from "@/components/sections/faq";
@@ -51,9 +52,12 @@ export default async function HomePage({
       HowItWorks       light  (mist)
       UpcomingAuctions deep
       RecentlySold     light  (mist)
-      PrivilegesTeaser deep
-      NewsAndDocs      light  (mist)
-      Faq              deep
+      VideoShorts      deep   — added 10.11.2026; every section after it
+                              flipped, which is why the three below take
+                              `tone` as a prop and are given it here
+      PrivilegesTeaser light  (mist)
+      NewsAndDocs      deep
+      Faq              light  (mist)
       (footer)         floor  — always the closing surface, either theme
 
     Each section sets its own tone via `<Section tone=…>`; `data-tone`
@@ -71,8 +75,10 @@ export default async function HomePage({
     out of the sequence: `data-tone="floor"` is navy on the dark theme, like
     `deep`, but the darker mist step on the light one, where `deep` would have
     put it on the near-white ground and made it indistinguishable from the
-    section above. On the dark theme it does sit navy-on-navy under the FAQ,
-    with the gold hairline carrying the boundary. See globals.css.
+    section above. Until 10.11.2026 `floor` was in fact the same mist as
+    `light`; it is its own darker step now (mist-edge), so it stays separate
+    under the FAQ, which became `light` when "Video sharhlar" was added.
+    See globals.css.
 
     THREE SECTIONS ARE BUILT BUT NOT ON THIS PAGE: `services` (light),
     `impact` (deep) and `partners` (deep) all exist under components/sections
@@ -103,9 +109,10 @@ export default async function HomePage({
       <HowItWorks />
       <UpcomingAuctions searchParams={sp} />
       <RecentlySold />
-      <PrivilegesTeaser />
-      <NewsAndDocs />
-      <Faq />
+      <VideoShorts tone="deep" />
+      <PrivilegesTeaser tone="light" />
+      <NewsAndDocs tone="deep" />
+      <Faq tone="light" />
     </>
   );
 }

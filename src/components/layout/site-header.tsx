@@ -16,10 +16,8 @@ import { ThemeToggle } from "./theme-toggle";
 /**
  * Site header — a tall brand band above a centred navigation bar.
  *
- *     ┌─ LOGO ──────────────── a11y · theme ─┐  brand band, --band
- *     │                  phone · email       │
- *     │                  telegram ig fb      │
- *     ├──────────────────────────────────────┤
+ *     ┌─ LOGO ─── theme · a11y · phone · tg ig fb · UZ RU ─┐  brand band
+ *     ├────────────────────────────────────────────────────┤
  *     └──── Markaz · Faoliyat · Hujjatlar ───┘  nav bar, --band, STICKY
  *
  * THE TWO BANDS: brand band on `--band`, nav bar on `--background`. The
@@ -48,9 +46,7 @@ import { ThemeToggle } from "./theme-toggle";
  * every route renders.
  */
 export async function SiteHeader() {
-  const tTopbar = await getTranslations("topbar");
   const tCommon = await getTranslations("common");
-  const tContact = await getTranslations("contact");
   const tMeta = await getTranslations("meta");
 
   /*
@@ -68,11 +64,10 @@ export async function SiteHeader() {
     <header data-tone="deep" className="sticky top-0 z-40">
       {/* ── Brand band ─────────────────────────────────────────────────── */}
       <div className="bg-band">
-        {/* The band's height is set by the three-row contact stack, not by
-            this padding, so the padding is only what keeps that stack off the
-            band's edges. It went py-6 → py-1 while the header was being cut
-            down, which left the rows touching the boundary; py-2/3 is the
-            breathing room put back. */}
+        {/* The band's height is set by the logo, not by this padding; the
+            controls beside it are one row now (10.11.2026), shorter than the
+            logo. The padding is only what keeps the logo off the band's
+            edges. */}
         <Container className="relative flex items-center justify-between gap-4 py-2 xl:py-3">
           <Link
             href="/"
@@ -130,65 +125,55 @@ export async function SiteHeader() {
           </div> */}
 
           {/*
-            THE CONTACT STACK, right-aligned, three rows.
+            ONE ROW beside the logo, in the operator's order (10.11.2026):
 
-              1  theme + accessibility controls
-              2  phone and email, side by side
-              3  the social marks
+              theme · accessibility · phone · social marks · language
 
-            Phone and email share row 2 because they answer one question —
-            "how do I reach the Centre" — and stacking them made the band a
-            row taller to say it twice.
+            It was a three-row stack (controls / "Telefon" + number / social
+            marks) until then. The "Telefon" caption is gone at the
+            operator's request: the handset icon already says what the number
+            is, and its `tel:` link is what a phone acts on.
 
-            `text-sm` (15px on this project's scale) rather than the 12.5px it
-            ran at. That figure came from the old single-line utility strip,
-            where every pixel of height was spent on the sticky header; in a
-            column with room around it, 12.5px was simply small — and it is
-            the phone number a citizen is squinting at.
+            `text-sm` (15px on this project's scale): it is the phone number a
+            citizen is squinting at.
           */}
-          <div className="text-muted-foreground hidden flex-col items-end gap-2 text-sm xl:flex">
-            <div className="flex items-center gap-4">
-              {/* Language first: it changes the whole page, not how it is
-                  shown. Then theme, then the accessibility dialog: this one
-                  is a single-tap switch, the other opens a panel, and the
-                  lighter control reads better closest to the content it
-                  changes. */}
-              <LangSwitcher />
-              <ThemeToggle />
-              <AccessibilityDialog />
-            </div>
-            {/*
-              PHONE ONLY. The email was removed from this band — it lives on
-              /aloqa now, alongside the address, the hours and the map, which
-              is where a reader looking for a way to write to the Centre goes.
-
-              Deleted rather than commented out, which is this project's own
-              rule: a commented-out block is invisible to the type checker and
-              leaves its import tripping the linter (see the note on the three
-              unused sections in CLAUDE.md). Re-adding it is four lines and a
-              `Mail` import.
-            */}
-            {tContact("phone")}
+          <div className="text-muted-foreground hidden items-center gap-5 text-sm xl:flex">
+            <ThemeToggle />
+            <AccessibilityDialog />
             <a
               href={contacts.phoneHref}
-              className="hover:text-accent-foreground flex items-center gap-1.5 transition-colors"
+              className="hover:text-accent-foreground flex items-center gap-1.5 whitespace-nowrap transition-colors"
             >
               <Phone aria-hidden="true" className="size-3.5 shrink-0" />
               {contacts.phone}
             </a>
             <SocialLinks className="flex items-center gap-3" />
+            <LangSwitcher />
           </div>
 
           {/*
-            Below `xl` the same controls collapse onto the logo's own row and
-            the sheet trigger joins them — the brand band IS the whole header
-            at that width, so everything the reader can act on has to be in
-            it.
+            Below `xl` the same order, with the sheet trigger at the end — the
+            brand band IS the whole header at that width.
+
+            NO SOCIAL MARKS on this row (operator, 10.11.2026): they live at
+            the foot of the menu sheet (mobile-nav.tsx) instead, and in the
+            footer.
+
+            The phone is the handset icon alone below `md`. The number stays
+            in the link as screen-reader text, so it is still what is
+            announced, and the `tel:` link is what a phone acts on anyway.
           */}
-          <div className="flex shrink-0 items-center gap-3 xl:hidden">
-            <LangSwitcher />
+          <div className="text-muted-foreground flex shrink-0 items-center gap-2.5 sm:gap-3 xl:hidden">
             <ThemeToggle />
             <AccessibilityDialog />
+            <a
+              href={contacts.phoneHref}
+              className="hover:text-accent-foreground flex items-center gap-1.5 text-sm whitespace-nowrap transition-colors"
+            >
+              <Phone aria-hidden="true" className="size-4 shrink-0" />
+              <span className="sr-only md:not-sr-only">{contacts.phone}</span>
+            </a>
+            <LangSwitcher />
             <MobileNav items={navItems} />
           </div>
         </Container>

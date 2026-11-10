@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Lenis from "lenis";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -73,8 +73,57 @@ declare global {
   }
 }
 
+/*
+  Set by the browser's back/forward (popstate), consumed by the next route
+  change: a history step is the one navigation that must NOT be sent to the
+  top, because the reader expects to land where they were.
+*/
+let fromHistory = false;
+
 export function MotionProvider() {
   const pathname = usePathname();
+  const firstRoute = useRef(true);
+
+  useEffect(() => {
+    const onPop = () => {
+      fromHistory = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  /*
+    NEW PAGE, TOP OF PAGE (operator, 10.11.2026: from the bottom of the home
+    page, "Statistika" in the menu opened /statistika at its bottom).
+
+    Next normally scrolls a changed route to the top on its own, and in
+    testing it did (10.11.2026: header menu and mobile sheet, scripted and
+    wheel scrolling, dev and live — all landed at 0). The report was not
+    reproduced, so the cause is NOT known; the suspect is the Lenis smooth
+    scroll below, which keeps its own idea of the scroll position. This
+    makes the reset explicit instead of relying on Next alone: React runs
+    every cleanup before any setup, and this effect is declared before the
+    one that builds the new Lenis, so the old instance is already gone when
+    the window is put at the top and the new one starts from there.
+
+    Only when the PATH changed: every `scroll={false}` navigation on the
+    site (market switch, map/list view, the statistics scope) changes the
+    query alone, so it never reaches here. Not on the first render (a reload
+    restores its own position), not after back/forward, and not when the
+    URL names an anchor, which is a request for somewhere else.
+  */
+  useEffect(() => {
+    if (firstRoute.current) {
+      firstRoute.current = false;
+      return;
+    }
+    if (fromHistory) {
+      fromHistory = false;
+      return;
+    }
+    if (window.location.hash) return;
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     // Honour the OS setting. The arming script already skipped hiding
@@ -152,7 +201,9 @@ export function MotionProvider() {
               ease: EASE,
               // `amount` spreads the whole batch across a fixed total, so a
               // row of three and a list of twenty both finish promptly.
-              stagger: { amount: Math.min(batch.length * STAGGER, STAGGER_CAP) },
+              stagger: {
+                amount: Math.min(batch.length * STAGGER, STAGGER_CAP),
+              },
               // `fromTo` applies the start state inline immediately, so the
               // elements are still hidden the moment the CSS rule stops
               // applying — no flash between the two.
@@ -211,7 +262,9 @@ export function MotionProvider() {
        a row of photographs arriving. */
     const setupClips = (scope: ParentNode) => {
       const els = [
-        ...scope.querySelectorAll<HTMLElement>("[data-clip]:not([data-revealed])"),
+        ...scope.querySelectorAll<HTMLElement>(
+          "[data-clip]:not([data-revealed])",
+        ),
       ];
       if (els.length === 0) return;
 
@@ -273,25 +326,23 @@ export function MotionProvider() {
        it tracks the scroll. `scrub` is correct here and wrong for everything
        above. */
     const setupParallax = (scope: ParentNode) => {
-      scope
-        .querySelectorAll<HTMLElement>("[data-parallax]")
-        .forEach((el) => {
-          const depth = Number(el.getAttribute("data-parallax")) || 0.12;
-          gsap.fromTo(
-            el,
-            { yPercent: -depth * 50 },
-            {
-              yPercent: depth * 50,
-              ease: "none",
-              scrollTrigger: {
-                trigger: el.parentElement ?? el,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: true,
-              },
+      scope.querySelectorAll<HTMLElement>("[data-parallax]").forEach((el) => {
+        const depth = Number(el.getAttribute("data-parallax")) || 0.12;
+        gsap.fromTo(
+          el,
+          { yPercent: -depth * 50 },
+          {
+            yPercent: depth * 50,
+            ease: "none",
+            scrollTrigger: {
+              trigger: el.parentElement ?? el,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
             },
-          );
-        });
+          },
+        );
+      });
     };
 
     const SELECTOR =

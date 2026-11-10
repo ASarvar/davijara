@@ -89,6 +89,16 @@ const VARIANTS = {
     media: 640,
     className: "h-11 w-[36px] sm:w-[200px]",
   },
+  /*
+    The mobile menu sheet's title. Mark only at every width: the sheet is
+    300px wide whatever the window, so the wordmark never fits beside the
+    title. `media` is a width no screen reaches, which keeps the <source>
+    from ever matching. 57:69 → 24px tall → 20px.
+  */
+  sheet: {
+    media: 100_000,
+    className: "h-6 w-[20px]",
+  },
 } as const;
 
 export function Logo({

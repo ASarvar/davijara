@@ -6,6 +6,7 @@ import {
   footerNav,
   legalNav,
   site,
+  socialLinks,
 } from "@/content/site";
 import { localizeContent } from "@/lib/i18n/content";
 
@@ -22,7 +23,7 @@ import { localizeContent } from "@/lib/i18n/content";
 */
 export async function getSiteContent(locale?: string) {
   return localizeContent(
-    { site, contacts, externalLinks, footerNav, legalNav },
+    { site, contacts, externalLinks, footerNav, legalNav, socialLinks },
     locale,
   );
 }

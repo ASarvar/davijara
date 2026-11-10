@@ -83,6 +83,8 @@ something genuinely needs the browser:
 | `yandex-metrica-hit` | fires `ym('hit')` on App Router navigation; only mounts when `YANDEX_METRICA_ID` is set |
 | `accessibility-controls` | reads/writes `data-contrast` + `data-text-size` on `<html>` |
 | `accessibility-dialog` | Dialog open/close state for the topbar trigger |
+| `scroll-row` | arrow buttons for a still sideways row whose scrollbar is hidden |
+| `video-shorts-row` | the homepage Shorts row and the dialog player it opens on a click |
 
 Scroll reveals are **not** a reason to add `"use client"` — they are pure CSS.
 

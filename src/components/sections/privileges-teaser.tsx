@@ -8,7 +8,12 @@ import { IconTile } from "@/components/common/icon-tile";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 
-export async function PrivilegesTeaser() {
+/** `tone`: set by the homepage, whose rhythm decides it — see app/[locale]/page.tsx. */
+export async function PrivilegesTeaser({
+  tone = "deep",
+}: {
+  tone?: "deep" | "light";
+} = {}) {
   const locale = await getLocale();
   const t = await getTranslations("privileges");
   const [cards, counts] = await Promise.all([
@@ -17,7 +22,7 @@ export async function PrivilegesTeaser() {
   ]);
 
   return (
-    <Section tone="deep">
+    <Section tone={tone}>
       <SectionHeader
         title={t("title")}
         description={t("description")}

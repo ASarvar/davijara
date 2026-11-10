@@ -27,31 +27,56 @@ import { cn } from "@/lib/utils";
  * without the query, so the static HTML is what it always was and the
  * filters are added once the page hydrates.
  */
-export function LangSwitcher({ className }: { className?: string }) {
+type Variant = "chips" | "segmented";
+
+/*
+  `chips` — the header's compact "Oʻz Ru" pair.
+  `segmented` — the same short labels with no frame of their own, for
+  the menu sheet. Its segments come from `publishedLocales`, so opening
+  English adds "En" with no change here. Short labels on purpose (operator,
+  10.11.2026): spelled out, "Oʻzbekcha" outweighed the menu items above it.
+*/
+export function LangSwitcher({
+  className,
+  variant = "chips",
+}: {
+  className?: string;
+  variant?: Variant;
+}) {
   if (publishedLocales.length < 2) return null;
 
   return (
-    <Suspense fallback={<LocaleLinks className={className} />}>
-      <LocaleLinksWithQuery className={className} />
+    <Suspense
+      fallback={<LocaleLinks className={className} variant={variant} />}
+    >
+      <LocaleLinksWithQuery className={className} variant={variant} />
     </Suspense>
   );
 }
 
-function LocaleLinksWithQuery({ className }: { className?: string }) {
+function LocaleLinksWithQuery({
+  className,
+  variant,
+}: {
+  className?: string;
+  variant: Variant;
+}) {
   const searchParams = useSearchParams();
   const query: Record<string, string | string[]> = {};
   for (const key of new Set(searchParams.keys())) {
     const values = searchParams.getAll(key);
     query[key] = values.length > 1 ? values : values[0]!;
   }
-  return <LocaleLinks className={className} query={query} />;
+  return <LocaleLinks className={className} variant={variant} query={query} />;
 }
 
 function LocaleLinks({
   className,
+  variant,
   query,
 }: {
   className?: string;
+  variant: Variant;
   query?: Record<string, string | string[]>;
 }) {
   const pathname = usePathname();
@@ -62,7 +87,12 @@ function LocaleLinks({
     <div
       role="group"
       aria-label={t("languageLabel")}
-      className={cn("flex items-center gap-1.5", className)}
+      className={cn(
+        variant === "segmented"
+          ? "inline-flex gap-1"
+          : "flex items-center gap-1.5",
+        className,
+      )}
     >
       {publishedLocales.map((locale) => {
         const isActive = locale === active;
@@ -74,17 +104,28 @@ function LocaleLinks({
             hrefLang={locale}
             aria-current={isActive ? "true" : undefined}
             title={localeNames[locale]}
-            className={cn(
-              "rounded px-2 py-0.5 text-xs leading-5 transition-colors",
-              // Semantic border tokens, not raw gold: these keep their gold
-              // tint in the brand palette but become solid white / yellow in
-              // high-contrast mode, where a 20%-alpha gold chip outline is
-              // invisible on black.
-              "border-hairline border",
-              isActive
-                ? "bg-accent text-accent-foreground border-outline font-semibold"
-                : "text-muted-foreground hover:text-accent-foreground hover:border-outline",
-            )}
+            className={
+              variant === "segmented"
+                ? cn(
+                    // A filled segment plus weight for the active one, so
+                    // the state survives greyscale and high contrast.
+                    "rounded-sm border border-transparent px-2.5 py-1 text-xs leading-5 transition-colors",
+                    isActive
+                      ? "bg-accent text-accent-foreground border-outline font-semibold"
+                      : "text-muted-foreground hover:text-accent-foreground",
+                  )
+                : cn(
+                    "rounded-sm px-2 py-0.5 text-xs leading-5 transition-colors",
+                    // Semantic border tokens, not raw gold: these keep their
+                    // gold tint in the brand palette but become solid white /
+                    // yellow in high-contrast mode, where a 20%-alpha gold
+                    // chip outline is invisible on black.
+                    "border-hairline border",
+                    isActive
+                      ? "bg-accent text-accent-foreground border-outline font-semibold"
+                      : "text-muted-foreground hover:text-accent-foreground hover:border-outline",
+                  )
+            }
           >
             {localeLabels[locale]}
             <span className="sr-only"> — {localeNames[locale]}</span>

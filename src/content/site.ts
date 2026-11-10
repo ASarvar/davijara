@@ -27,7 +27,10 @@ export const site = {
 
 export const contacts = {
   phone: "(71) 259-22-70",
-  phoneHref: "tel:1082",
+  // The number above, dialable. Was "tel:1082" from 25.08.2026, left behind
+  // when the displayed number changed on 26.08 — every tap on (71) 259-22-70
+  // in the header and on /aloqa called the hotline instead (fixed 10.11.2026).
+  phoneHref: "tel:+998712592270",
   corporatePhone: "1082",
   corporatePhoneHref: "1082",
   hotline: "1082",
@@ -149,6 +152,12 @@ export const socialLinks: Array<{
     platform: "facebook",
     href: "https://www.facebook.com/davijarauz/",
     label: "Facebook",
+  },
+  // Supplied by the operator, 10.11.2026 (content/videos.ts).
+  {
+    platform: "youtube",
+    href: "https://www.youtube.com/@davijara_uz",
+    label: "YouTube",
   },
 ];
 /**

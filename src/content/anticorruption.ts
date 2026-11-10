@@ -41,6 +41,12 @@
 */
 
 export type AnticorruptionSection = {
+  /**
+   * A stable handle for a section another page reads, so it is found by
+   * this rather than by its position or its (translated) heading. Only the
+   * reporting channels have one: /aloqa shows them (operator, 10.11.2026).
+   */
+  id?: string;
   heading: string;
   /** Paragraphs before the list — or the section's entire content, if it has no list. */
   paragraphs: string[];
@@ -136,6 +142,7 @@ export const sections: AnticorruptionSection[] = [
     ],
   },
   {
+    id: "reporting-channels",
     heading: "Korrupsiya haqida xabar berish aloqa kanallari",
     paragraphs: [
       "Jismoniy va yuridik shaxslar Markaz faoliyatida korrupsiya, manfaatlar toʻqnashuvi, mansab vakolatini suiisteʼmol qilish yoki boshqa korrupsiyaviy holatlar toʻgʻrisida quyidagi aloqa kanallari orqali xabar berishlari mumkin:",

@@ -62,16 +62,42 @@ function FacebookIcon() {
   );
 }
 
+/* Exported: the homepage's video section puts it on its channel button. */
+export function YoutubeIcon() {
+  return (
+    <svg {...SIZE}>
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
+  );
+}
+
 const ICONS = {
   telegram: TelegramIcon,
   instagram: InstagramIcon,
   facebook: FacebookIcon,
+  youtube: YoutubeIcon,
 } as const;
 
 /** Platform keys this component can draw. */
 export type SocialPlatform = keyof typeof ICONS;
 
-export function SocialLinks({ className }: { className?: string }) {
+/*
+  `inline` — bare marks in a row (header, contact page).
+  `tiles` — each mark on its own small round tile (32px) with a border, for
+  the menu sheet; a row of tiles wraps cleanly as networks are added to
+  `socialLinks`.
+  `buttons` — mark AND name on a bordered button, for /aloqa, where bare
+  marks under the cards did not read as something to press (operator,
+  10.11.2026). The name is the platform's own (`label`), so it is visible
+  text rather than screen-reader-only.
+*/
+export function SocialLinks({
+  className,
+  variant = "inline",
+}: {
+  className?: string;
+  variant?: "inline" | "tiles" | "buttons";
+}) {
   if (socialLinks.length === 0) return null;
 
   return (
@@ -102,14 +128,28 @@ export function SocialLinks({ className }: { className?: string }) {
                 Group-scoped so the icon can animate independently of the
                 link's own hover state — see the icon's classes below.
               */
-              className="group text-muted-foreground hover:text-accent-foreground focus-visible:ring-ring flex items-center rounded transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+              className={
+                variant === "buttons"
+                  ? "group border-hairline bg-background text-foreground hover:border-outline hover:text-accent-foreground focus-visible:ring-ring flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+                  : variant === "tiles"
+                    ? "group border-hairline bg-card text-muted-foreground hover:text-accent-foreground hover:border-outline focus-visible:ring-ring flex size-8 items-center justify-center rounded-full border transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+                    : "group text-muted-foreground hover:text-accent-foreground focus-visible:ring-ring flex items-center rounded transition-colors duration-200 focus-visible:ring-2 focus-visible:outline-none"
+              }
             >
-              <span className="inline-flex transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-110">
+              <span
+                className={
+                  variant === "buttons"
+                    ? "text-accent-foreground inline-flex transition-transform duration-200 ease-out group-hover:scale-110"
+                    : "inline-flex transition-transform duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-110"
+                }
+              >
                 <Icon />
               </span>
               {/* The mark is decorative; this is the link's accessible name.
                   An unlabelled icon link announces only its URL. */}
-              <span className="sr-only">{label}</span>
+              <span className={variant === "buttons" ? undefined : "sr-only"}>
+                {label}
+              </span>
             </a>
           </li>
         );

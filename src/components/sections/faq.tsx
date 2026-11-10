@@ -17,13 +17,18 @@ import { Section, SectionHeader } from "@/components/layout/section";
  * the HTML and indexable even while collapsed. The legacy version toggled a
  * `.open` class on a plain div with no ARIA and no keyboard support.
  */
-export async function Faq() {
+/** `tone`: set by the homepage, whose rhythm decides it — see app/[locale]/page.tsx. */
+export async function Faq({
+  tone = "deep",
+}: {
+  tone?: "deep" | "light";
+} = {}) {
   const locale = await getLocale();
   const items = await getFaq(undefined, locale);
   const t = await getTranslations("faq");
 
   return (
-    <Section tone="deep">
+    <Section tone={tone}>
       <SectionHeader title={t("title")} />
 
       <Accordion

@@ -271,23 +271,18 @@ export default async function LocaleLayout({
           */}
           <TrafficBeacon />
           <SkipLink />
+          <SiteHeader />
           {/*
-            ABOVE the header, at the operator's request — so the national
-            banner is the first thing on the page rather than a strip under
-            the chrome.
+            UNDER the header, at the operator's request (10.11.2026); it sat
+            above it until then. Menu first, then the banner, so the page
+            opens on the site's own chrome.
 
             It renders itself only on the homepage (see home-banner.tsx). It
-            has to be here rather than in `page.tsx` because nothing a page
-            renders can appear above the layout's own header, and it must come
-            before <SiteHeader> in the DOM for the same reason a screen reader
-            and a print render read it first.
-
-            The sticky header is unaffected: the banner scrolls away and the
-            header pins once it reaches the top, which is what `position:
-            sticky` does with a preceding sibling.
+            stays here rather than moving into `page.tsx` so its place on the
+            page does not depend on which route renders it, and so a later
+            request to move it back above the header is a swap of two lines.
           */}
           <HomeBanner />
-          <SiteHeader />
           {/*
             Skip-link target. Wrapped in <ViewTransition> so route navigations
             cross-fade instead of snapping; the chrome around it stays put,

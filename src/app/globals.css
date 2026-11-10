@@ -728,6 +728,32 @@
 }
 
 /*
+  THE FOOTER'S OWN STEP, below both section tones (10.11.2026).
+
+  The block above gave `floor` the same mist as `light`, although every note
+  about it (here, footer.tsx, the homepage rhythm) said "the darker mist
+  step". So whenever a page's last section was `light`, the footer had the
+  same background and the two ran together; adding "Video sharhlar" to the
+  homepage made its last section `light` and showed it.
+
+  mist-edge (#dce2ec) is darker than `light` (#eef1f8) and than `deep`
+  (#f7f9fc), so the footer is now separate from whichever comes above it, on
+  every page, whatever the zebra's parity. Only the backgrounds move; the
+  inks are the block above's. Measured on #dce2ec: cobalt headings 8.3:1,
+  navy-mid small print 12.5:1. The surfaces that used mist-edge go one step
+  further down so they stay visible against it.
+
+  Declared BEFORE the high-contrast block on purpose: same specificity, so
+  high contrast, coming later, still turns the footer black.
+*/
+:root[data-theme="light"] [data-tone="floor"] {
+  --background: var(--color-mist-edge);
+  --secondary: var(--color-mist-deep);
+  --muted: var(--color-mist-deep);
+  --band: var(--color-mist-deep);
+}
+
+/*
   ── Maxsus imkoniyatlar — accessibility mode ──────────────────────────────
 
   Uzbek government portals conventionally offer a mode for visually impaired

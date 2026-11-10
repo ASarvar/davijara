@@ -9,7 +9,12 @@ import { IconTile } from "@/components/common/icon-tile";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { Section, SectionHeader } from "@/components/layout/section";
 
-export async function NewsAndDocs() {
+/** `tone`: set by the homepage, whose rhythm decides it — see app/[locale]/page.tsx. */
+export async function NewsAndDocs({
+  tone = "light",
+}: {
+  tone?: "deep" | "light";
+} = {}) {
   const [tn, td] = await Promise.all([
     getTranslations("news"),
     getTranslations("documents"),
@@ -27,7 +32,7 @@ export async function NewsAndDocs() {
   ]);
 
   return (
-    <Section tone="light">
+    <Section tone={tone}>
       <div className="grid gap-12 lg:grid-cols-[1.3fr_1fr]">
         {/* News */}
         <div>

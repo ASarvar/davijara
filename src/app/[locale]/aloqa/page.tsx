@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import {
+  Clock,
+  Globe,
+  Mail,
+  MapPin,
+  Phone,
+  Send,
+  Share2,
+  ShieldAlert,
+} from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/i18n/routing";
+import { getReportingChannels } from "@/lib/data/anticorruption";
 import { getSiteContent } from "@/lib/data/site";
+import { ActionLink } from "@/components/common/action-link";
 import { IconTile } from "@/components/common/icon-tile";
 import { SurfaceCard } from "@/components/common/surface-card";
 import { SocialLinks } from "@/components/layout/social-links";
@@ -33,8 +44,12 @@ export default async function Page({
   const { locale } = await params;
   setRequestLocale(locale as Locale);
   const t = await getTranslations("contact");
+  const tNav = await getTranslations("nav");
 
-  const { contacts, site } = await getSiteContent(locale);
+  const [{ contacts, site, socialLinks }, reporting] = await Promise.all([
+    getSiteContent(locale),
+    getReportingChannels(locale),
+  ]);
   const { address, hours } = contacts;
 
   return (
@@ -61,7 +76,7 @@ export default async function Page({
             convention, not a meaning we want.
           */}
           <address className="grid gap-4 not-italic">
-            <SurfaceCard padding="md" radius="lg" className="flex gap-4">
+            <SurfaceCard padding="md" radius="md" className="flex gap-4">
               <IconTile size="sm">
                 <MapPin aria-hidden="true" className="size-4" />
               </IconTile>
@@ -75,7 +90,7 @@ export default async function Page({
               </div>
             </SurfaceCard>
 
-            <SurfaceCard padding="md" radius="lg" className="flex gap-4">
+            <SurfaceCard padding="md" radius="md" className="flex gap-4">
               <IconTile size="sm">
                 <Phone aria-hidden="true" className="size-4" />
               </IconTile>
@@ -99,7 +114,7 @@ export default async function Page({
               </div>
             </SurfaceCard>
 
-            <SurfaceCard padding="md" radius="lg" className="flex gap-4">
+            <SurfaceCard padding="md" radius="md" className="flex gap-4">
               <IconTile size="sm">
                 <Mail aria-hidden="true" className="size-4" />
               </IconTile>
@@ -122,7 +137,7 @@ export default async function Page({
             </SurfaceCard>
           </address>
 
-          <SurfaceCard padding="md" radius="lg" className="flex gap-4">
+          <SurfaceCard padding="md" radius="md" className="flex gap-4">
             <IconTile size="sm">
               <Clock aria-hidden="true" className="size-4" />
             </IconTile>
@@ -138,8 +153,27 @@ export default async function Page({
             </div>
           </SurfaceCard>
 
-          {/* Renders nothing while content/site.ts has no account URLs. */}
-          <SocialLinks className="flex items-center gap-4 px-1" />
+          {/*
+            A card like the others, with the networks as labelled buttons:
+            bare marks under the cards went unnoticed (operator,
+            10.11.2026). Not drawn while content/site.ts lists no accounts.
+          */}
+          {socialLinks.length > 0 ? (
+            <SurfaceCard padding="md" radius="md" className="flex gap-4">
+              <IconTile size="sm">
+                <Share2 aria-hidden="true" className="size-4" />
+              </IconTile>
+              <div className="min-w-0">
+                <h2 className="font-heading text-sm font-semibold">
+                  {t("social")}
+                </h2>
+                <SocialLinks
+                  variant="buttons"
+                  className="mt-3 flex flex-wrap gap-2"
+                />
+              </div>
+            </SurfaceCard>
+          ) : null}
         </div>
 
         {/*
@@ -166,7 +200,7 @@ export default async function Page({
             `isolation: isolate` resolves Leaflet's 200-1000 WITHIN the map, so
             the map as a whole sits at this div's own level in the page.
           */
-          <div className="border-hairline isolate h-[26rem] overflow-hidden rounded-xl border lg:h-[34rem]">
+          <div className="border-hairline isolate h-[26rem] overflow-hidden rounded-lg border lg:h-[34rem]">
             {/* A client wrapper, because `dynamic(..., { ssr: false })` cannot
                 be called from a Server Component — see office-map-panel.tsx. */}
             <OfficeMapPanel
@@ -178,7 +212,7 @@ export default async function Page({
         ) : (
           <SurfaceCard
             padding="lg"
-            radius="lg"
+            radius="md"
             className="flex h-[16rem] flex-col items-center justify-center text-center lg:h-[34rem]"
           >
             <IconTile size="lg" className="mb-4">
@@ -191,6 +225,92 @@ export default async function Page({
           </SurfaceCard>
         )}
       </div>
+
+      {/*
+        REPORTING CORRUPTION, operator 10.11.2026. The same section the
+        anticorruption page shows (lib/data/anticorruption.ts reads both from
+        one place), so the two pages cannot list different channels.
+
+        Its own band below the office's details rather than more cards in
+        the left column: these are a different office's lines — the
+        compliance desk, not the switchboard — and mixing them into one
+        stack would invite a citizen to report to the wrong one.
+      */}
+      {reporting ? (
+        <section
+          aria-labelledby="reporting-channels"
+          className="border-hairline mt-12 border-t pt-10"
+        >
+          <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+            <div className="flex items-start gap-4">
+              <IconTile size="md">
+                <ShieldAlert aria-hidden="true" className="size-5" />
+              </IconTile>
+              <div className="min-w-0">
+                <h2
+                  id="reporting-channels"
+                  className="font-heading text-xl font-semibold text-balance sm:text-2xl"
+                >
+                  {reporting.heading}
+                </h2>
+                {reporting.paragraphs.map((p) => (
+                  <p
+                    key={p}
+                    className="text-muted-foreground mt-2 max-w-3xl text-sm text-pretty"
+                  >
+                    {p}
+                  </p>
+                ))}
+              </div>
+            </div>
+            <ActionLink href="/markaz/korrupsiyaga-qarshi" className="shrink-0">
+              {tNav("anticorruption")}
+            </ActionLink>
+          </div>
+
+          <ul className="mt-6 grid gap-4 md:grid-cols-2">
+            {reporting.channels.map(({ text, channel }) => {
+              const Glyph = channel
+                ? { phone: Phone, email: Mail, web: Globe, telegram: Send }[
+                    channel.kind
+                  ]
+                : ShieldAlert;
+              return (
+                <li key={text} className="flex">
+                  <SurfaceCard
+                    padding="md"
+                    radius="md"
+                    className="flex w-full gap-4"
+                  >
+                    <IconTile size="sm">
+                      <Glyph aria-hidden="true" className="size-4" />
+                    </IconTile>
+                    {channel ? (
+                      <div className="min-w-0">
+                        <p className="text-muted-foreground text-sm first-letter:uppercase">
+                          {channel.label}
+                        </p>
+                        <a
+                          href={channel.href}
+                          {...(channel.kind === "telegram" ||
+                          channel.kind === "web"
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                          className="text-accent-foreground mt-1 block font-semibold break-all tabular-nums transition-opacity hover:opacity-80"
+                        >
+                          {channel.value}
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-pretty">{text}</p>
+                    )}
+                  </SurfaceCard>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
     </Section>
   );
 }

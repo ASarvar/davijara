@@ -87,7 +87,12 @@ const csp = [
     opaque content hashes, so they can only ever arrive as data, never be
     constructed from a lot number.
   */
-  `img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz${ym}`,
+  /*
+    `i.ytimg.com`: the covers of the homepage's YouTube Shorts (10.11.2026).
+    The player itself is a frame, allowed in frame-src below; no script-src
+    is opened for YouTube. See components/sections/video-shorts-row.tsx.
+  */
+  `img-src 'self' data: blob: https://tile.openstreetmap.org https://media.e-auksion.uz https://i.ytimg.com${ym}`,
   "font-src 'self' data:",
   /*
     `media-src` was absent and therefore inherited `default-src 'self'`, which
@@ -106,7 +111,12 @@ const csp = [
     same value the fallback already gave. `frame-ancestors 'none'` below is a
     different question — who may embed US — and is untouched.
   */
-  `frame-src 'self'${ym}`,
+  /*
+    `www.youtube-nocookie.com`: the homepage's Shorts play in a dialog
+    (operator, 10.11.2026). The privacy-enhanced player host, and only that
+    one: the frame is created on a click, never on page load.
+  */
+  `frame-src 'self' https://www.youtube-nocookie.com${ym}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

@@ -421,6 +421,7 @@
     "metaDescription": "Auction statistics for leasing state property — by region, by month, and price trends."
   },
   "contact": {
+    "social": "Social media",
     "title": "Contact",
     "address": "Address",
     "phone": "Phone",
@@ -562,5 +563,14 @@
     "partial": "The register did not answer for {count} regions — they are not in the list.",
     "pagination": "Pages",
     "reset": "Clear"
+  },
+  "videos": {
+    "watchOnYoutube": "Open on YouTube",
+    "prev": "Previous",
+    "next": "Next",
+    "title": "Video reviews",
+    "description": "Videos from the Centre's YouTube channel",
+    "channel": "Go to the YouTube channel",
+    "opensOnYoutube": "opens on YouTube in a new window"
   }
 }

@@ -6,12 +6,13 @@ import { withBasePath } from "@/lib/base-path";
 import { Container } from "@/components/layout/section";
 
 /**
- * The banner strip ABOVE the header, on the homepage only.
+ * The banner strip directly UNDER the header, on the homepage only. It sat
+ * above the header until the operator moved it below the menu (10.11.2026).
  *
  * ── WHY THIS IS A CLIENT COMPONENT ────────────────────────────────────────
  *
- * It has to sit above `<SiteHeader>`, which lives in the locale layout — so
- * the banner has to live there too. But the layout wraps every route, and the
+ * It is rendered next to `<SiteHeader>`, which lives in the locale layout — so
+ * the banner lives there too. But the layout wraps every route, and the
  * banner belongs to the homepage alone: a decorative strip repeated above
  * every document list and search result costs ~200px of reading room on
  * thirty pages to say something the reader already saw on the way in.
@@ -111,7 +112,9 @@ export function HomeBanner() {
       own surface. The strip's only edges are the image's own rounded corners.
     */
     <section data-tone="deep" className="bg-background">
-      <Container className="">
+      {/* `pt-4`: under the menu bar now, and flush against its border the
+          strip read as part of the chrome. */}
+      <Container className="pt-4">
         {/*
           The radius lives on this wrapper with `overflow-hidden`, not on the
           <img>. A rounded <img> is clipped by the browser at paint time and
