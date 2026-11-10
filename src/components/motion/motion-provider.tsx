@@ -96,15 +96,18 @@ export function MotionProvider() {
     NEW PAGE, TOP OF PAGE (operator, 10.11.2026: from the bottom of the home
     page, "Statistika" in the menu opened /statistika at its bottom).
 
-    Next normally scrolls a changed route to the top on its own, and in
-    testing it did (10.11.2026: header menu and mobile sheet, scripted and
-    wheel scrolling, dev and live — all landed at 0). The report was not
-    reproduced, so the cause is NOT known; the suspect is the Lenis smooth
-    scroll below, which keeps its own idea of the scroll position. This
-    makes the reset explicit instead of relying on Next alone: React runs
-    every cleanup before any setup, and this effect is declared before the
-    one that builds the new Lenis, so the old instance is already gone when
-    the window is put at the top and the new one starts from there.
+    The cause: `html { scroll-behavior: smooth }` in globals.css makes every
+    programmatic scroll an ANIMATION unless it says otherwise — Next's own
+    route-change scroll included, since Next 16 no longer overrides it
+    (fixed with `data-scroll-behavior` on <html>, see the locale layout).
+    The new page's ScrollTrigger.refresh() re-pins the scroll position it
+    finds, which stops that animation in flight, so the reader stayed at
+    the bottom. Hence `behavior: "instant"` here: the reset is one jump,
+    with nothing left running for a refresh to interrupt.
+
+    React runs every cleanup before any setup, and this effect is declared
+    before the one that builds the new Lenis, so the old instance is already
+    gone when the window is put at the top and the new one starts from there.
 
     Only when the PATH changed: every `scroll={false}` navigation on the
     site (market switch, map/list view, the statistics scope) changes the
@@ -122,7 +125,7 @@ export function MotionProvider() {
       return;
     }
     if (window.location.hash) return;
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [pathname]);
 
   useEffect(() => {

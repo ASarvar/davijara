@@ -235,9 +235,20 @@ export default async function LocaleLayout({
       adds: a reader with no stored preference would otherwise get one frame
       of the navy palette on every single page load.
     */
+    /*
+      `data-scroll-behavior="smooth"` tells Next to switch the page's
+      `scroll-behavior: smooth` (globals.css, for in-page anchors) off while
+      it moves the window on a route change. Next 16 stopped doing that by
+      default, so going to a new page became a smooth ANIMATION from wherever
+      the old page was — and ScrollTrigger's refresh on the new page stops an
+      animation in flight, leaving a reader who clicked "Statistika" at the
+      foot of the home page at the foot of /statistika (operator, 10.11.2026).
+      See node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md.
+    */
     <html
       lang={locale}
       data-theme="light"
+      data-scroll-behavior="smooth"
       className={fontVariables}
       suppressHydrationWarning
     >
