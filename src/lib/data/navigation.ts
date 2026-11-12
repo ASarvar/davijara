@@ -174,7 +174,20 @@ export async function getNavigation(locale?: string): Promise<NavItem[]> {
     const builtin = mainNavByKey.get(section.key);
     const attached = byParent.get(section.key) ?? [];
     const children = [...(builtin?.children ?? []), ...attached];
-    if (!children.length) continue;
+    /*
+      A built-in row with nothing under it is a plain link to its own page
+      ("Yangiliklar" since 12.11.2026) — the same shape as Aloqa.
+    */
+    if (!children.length) {
+      if (builtin) {
+        managed.push({
+          key: section.key,
+          href: builtin.href,
+          label: sectionLabel(section, resolved),
+        });
+      }
+      continue;
+    }
 
     managed.push({
       key: section.key,

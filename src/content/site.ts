@@ -264,15 +264,16 @@ export const mainNav: NavItem[] = [
       { key: "appeals", href: "/ochiq-malumotlar/murojaatlar" },
     ],
   },
-  {
-    key: "news",
-    href: "/yangiliklar",
-    children: [
-      { key: "newsCentre", href: "/yangiliklar" },
-      { key: "newsUzbekistan", href: "/yangiliklar/ozbekiston" },
-      { key: "newsStatements", href: "/yangiliklar/bayonotlar" },
-    ],
-  },
+  /*
+    A PLAIN LINK, no dropdown (operator, 12.11.2026: "Yangiliklarning o'zi
+    qolsin"). It used to open on Markaz yangiliklari / Oʻzbekiston
+    yangiliklari / Rahbariyat bayonotlari; the last two are still routes an
+    editor can fill in (and are in the sitemap), they are just not in the
+    header. It stays a `menu_sections` row, so it can still be renamed or
+    moved from /admin/menyu — and a page an editor places under it brings
+    the dropdown back, holding only that page (lib/data/navigation.ts).
+  */
+  { key: "news", href: "/yangiliklar" },
   { key: "contact", href: "/aloqa" },
 ];
 

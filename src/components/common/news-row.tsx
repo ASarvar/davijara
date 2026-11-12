@@ -17,9 +17,11 @@ import type { NewsItem } from "@/types/content";
   this was extracted — which is the same story `SurfaceCard` and `IconTile`
   record, so it is not a story worth repeating.
 
-  A FIXED SQUARE, not an aspect ratio. These stack in a column, and a
-  thumbnail whose height follows its own image turns the column's left edge
-  into a staircase.
+  A FIXED 16:9 BOX — the same width on every row, so a column of them keeps
+  a straight left edge, and the same shape as the article page's own cover
+  (`aspect-[16/9]` there). It was a square until 12.11.2026, which showed
+  a sliver from the middle of every 16:9 cover — the memorandum photo of two
+  people signing came out as one man's shoulder (operator's screenshot).
 */
 export async function NewsRow({
   item,
@@ -62,8 +64,8 @@ export async function NewsRow({
     >
       <span
         className={cn(
-          "bg-secondary relative shrink-0 overflow-hidden rounded-md",
-          md ? "size-20 sm:size-24" : "size-16",
+          "bg-secondary relative aspect-video shrink-0 self-start overflow-hidden rounded-md",
+          md ? "w-28 sm:w-40" : "w-24",
         )}
       >
         {item.image ? (
