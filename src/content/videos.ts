@@ -5,14 +5,13 @@
   THE CHANNEL: https://www.youtube.com/@davijara_uz, supplied by the
   operator; the id below was read off that page's canonical link.
 
-  WHY A LIST OF IDS, NOT "THE LATEST": YouTube's public RSS feeds, the
-  key-free way to ask for a channel's newest uploads, answered 404 for every
-  channel on 10.11.2026 — YouTube's own included — so a section built on
-  them would have shipped empty. The automatic route that does work is the
-  YouTube Data API, which needs a key the operator would have to create. Until
-  then, this is the list: the eleven Shorts the channel's /shorts page showed
-  on 10.11.2026, newest first. To add one, put its id (the part after
-  /shorts/) at the top.
+  NOT THE SOURCE ANY MORE. The row comes from the channel's RSS feed, and
+  when that fails, from the last row the site rendered successfully, kept in
+  the database (lib/data/videos.ts, since 12.11.2026). This list is read in
+  one case only: a server that has never once reached YouTube — a fresh
+  database — where there is no last good row yet. It holds the Shorts the
+  channel's /shorts page showed on 12.11.2026, newest first; a new upload
+  does not need adding here.
 
   Only ids. Titles and covers are read from YouTube itself
   (lib/data/videos.ts), so nothing here can drift from what the channel says.
@@ -23,6 +22,7 @@ export const youtubeChannel = {
 } as const;
 
 export const featuredShorts: readonly string[] = [
+  "V0udnNCQB1A",
   "9jz1xYyxSGU",
   "VvMGiH-AbIE",
   "MfNi83JIdqA",
