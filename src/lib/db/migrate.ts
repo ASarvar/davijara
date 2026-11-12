@@ -9,7 +9,7 @@ import type { Database } from "better-sqlite3";
   inlining the records: a seed that quotes its source module is checkable
   against it, and a seed that re-types 5 records is not.
 */
-import { news as legacyNews, newsSeedV19 } from "@/content/news";
+import { news as legacyNews, newsSeedV19, newsSeedV22 } from "@/content/news";
 import { privileges as legacyPrivileges } from "@/content/privileges";
 import * as legacyAbout from "@/content/about";
 import * as legacyDuties from "@/content/duties";
@@ -1228,6 +1228,60 @@ const migrations: Migration[] = [
     */
     seed(db) {
       seedTranslations(db);
+    },
+  },
+  {
+    version: 22,
+    name: "news: rieltorlar gildiyasi bilan memorandum, 12.11.2026",
+    up: `SELECT 1;`,
+    /*
+      Migration 19's recipe (content/news.ts has the source note): a
+      published row, its translations, and an audit entry with the full
+      after-snapshot. This time the operator supplied the Russian text too,
+      so the ru row is written here directly rather than through the
+      dictionary of migrations 20-21.
+
+      SKIPPED if the slug is already taken (an editor may have entered it by
+      hand first). Both texts are checked against the panel's own block
+      schema before anything is written, so a malformed seed fails here, not
+      as an empty article.
+    */
+    seed(db) {
+      const item = newsSeedV22;
+      const taken = db
+        .prepare("SELECT 1 FROM news WHERE slug = ?")
+        .get(item.slug);
+      if (taken) return;
+
+      const texts = (["uz", "ru"] as const).map((locale) => ({
+        locale,
+        ...item[locale],
+        json: JSON.stringify(blocksSchema.parse(item[locale].blocks)),
+      }));
+      const now = new Date().toISOString();
+      const { lastInsertRowid } = db
+        .prepare(
+          `INSERT INTO news (slug, category, status, published_at, image, created_at, updated_at)
+           VALUES (?, ?, 'published', ?, ?, ?, ?)`,
+        )
+        .run(item.slug, item.category, item.publishedAt, item.image, now, now);
+      const id = Number(lastInsertRowid);
+      const insert = db.prepare(
+        `INSERT INTO news_translations (news_id, locale, title, excerpt, blocks)
+         VALUES (?, ?, ?, ?, ?)`,
+      );
+      for (const t of texts)
+        insert.run(id, t.locale, t.title, t.excerpt, t.json);
+      db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, 'migratsiya', 'create', 'news', ?, ?, NULL, ?)`,
+      ).run(
+        now,
+        String(id),
+        `Yangilik yaratildi: ${item.uz.title}`,
+        JSON.stringify({ id, ...item, status: "published" }),
+      );
     },
   },
 ];

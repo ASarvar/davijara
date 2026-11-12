@@ -180,3 +180,100 @@ export const newsSeedV19: {
     },
   ],
 };
+
+/*
+  ┌──────────────────────────────────────────────────────────────────────────┐
+  │ Rieltorlar gildiyasi bilan memorandum — added by migration 22.           │
+  │                                                                          │
+  │ SOURCE: the operator's Uzbek and Russian texts and the two square post   │
+  │ images (one per language), supplied in chat on 12.11.2026.               │
+  │                                                                          │
+  │ The EXCERPT is each image's own caption, word for word: it is the one    │
+  │ sentence in the material that names both parties, and the article page  │
+  │ prints the excerpt as its lead. The body is the supplied text below its  │
+  │ title, verbatim; the only change is the Uzbek apostrophe — ‘ written as  │
+  │ ʻ (oʻ, gʻ), the letter this site uses everywhere — and a missing space   │
+  │ after one Russian list dash.                                             │
+  │                                                                          │
+  │ The COVER is the photo half of the Uzbek image, 1280×720 from y = 40:   │
+  │ the caption band (which repeats the excerpt in one language) is cut off, │
+  │ so one picture serves /uz and /ru alike at the site's 16:9.              │
+  │                                                                          │
+  │ publishedAt is the day it was handed over, not a signing date — none     │
+  │ was given. Category "tadbirlar" is this file's choice; an editor can     │
+  │ change either in the panel.                                              │
+  └──────────────────────────────────────────────────────────────────────────┘
+*/
+type NewsText = { title: string; excerpt: string; blocks: Block[] };
+
+export const newsSeedV22: {
+  slug: string;
+  publishedAt: string;
+  category: NewsCategory;
+  image: string;
+  uz: NewsText;
+  ru: NewsText;
+} = {
+  slug: "rieltorlar-gildiyasi-hamkorlik-memorandumi",
+  publishedAt: "2026-11-12",
+  category: "tadbirlar",
+  image: "/yangiliklar/rieltorlar-gildiyasi-memorandum.jpg",
+  uz: {
+    title:
+      "Davlat mulki obyektlaridan samarali foydalanish sohasida hamkorlik memorandumi imzolandi",
+    excerpt:
+      "Oʻzbekiston Respublikasi Davlat aktivlarini boshqarish agentligi huzuridagi Davlat mulki obyektlaridan samarali foydalanish markazi hamda Oʻzbekiston rieltorlari gildiyasi oʻrtasida hamkorlik memorandumi imzolandi.",
+    blocks: [
+      {
+        type: "paragraph",
+        text: "Maqsad — davlat mulkidan foydalanish samaradorligini oshirish, rieltorlarning kasbiy bilimlarini oshirish hamda fuqarolar va tadbirkorlarning xabardorligini oshirish.",
+      },
+      { type: "paragraph", text: "Hamkorlikning asosiy yoʻnalishlari:" },
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          "Seminarlar, treninglar va amaliy mashgʻulotlar oʻtkazish;",
+          "Davlat mulkini ijaraga olish, sotib olish va elektron savdolarda ishtirok etish boʻyicha materiallar tayyorlash;",
+          "Obyektlar haqida rasmiy axborot almashish;",
+          "Ijara imtiyozlari va shartlarini tushuntirish;",
+          "Rieltorlar malakasini oshirish va uslubiy yordam koʻrsatish;",
+          "Davlat mulki obyektlari bilan tanishish uchun tashriflar tashkil etish va amaliy masalalarni birgalikda muhokama qilish.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Ushbu hamkorlik keng jamoatchilikning davlat mulki obyektlarini ijaraga olish va sotib olish imkoniyatlari haqidagi xabardorligini oshirishga, shuningdek, rieltorlarning ushbu sohadagi kasbiy faoliyatini rivojlantirishga xizmat qiladi.",
+      },
+    ],
+  },
+  ru: {
+    title:
+      "Подписан меморандум о сотрудничестве в сфере эффективного использования объектов государственного имущества",
+    excerpt:
+      "Между Центром по эффективному использованию объектов государственного имущества при Агентстве по управлению государственными активами Республики Узбекистан и Гильдией риелторов Узбекистана подписан меморандум о сотрудничестве.",
+    blocks: [
+      {
+        type: "paragraph",
+        text: "Цель — повышение эффективности использования государственного имущества, профессиональных знаний риелторов и информированности граждан и предпринимателей.",
+      },
+      { type: "paragraph", text: "Основные направления сотрудничества:" },
+      {
+        type: "list",
+        ordered: false,
+        items: [
+          "Проведение семинаров, тренингов и практических занятий;",
+          "Подготовка материалов об аренде, приобретении госимущества и участии в электронных торгах;",
+          "Обмен официальной информацией об объектах;",
+          "Разъяснение льгот и условий аренды;",
+          "Повышение квалификации риелторов и методическая поддержка.",
+          "Также предусмотрены посещения объектов и совместное обсуждение практических вопросов.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Данное сотрудничество будет способствовать повышению информированности широкой общественности о возможностях аренды и приобретения объектов государственного имущества, а также развитию профессиональной деятельности риелторов в этой сфере.",
+      },
+    ],
+  },
+};
