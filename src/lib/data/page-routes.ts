@@ -180,7 +180,6 @@ const RESERVED_FIRST_SEGMENTS = new Set([
 export const PLACEHOLDER_ONLY_NAV_KEYS: ReadonlySet<string> = new Set([
   "auction",
   "leasing",
-  "faq",
   "inventory",
   "documentsPrograms",
   "documentsInternal",

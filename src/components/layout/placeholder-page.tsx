@@ -19,6 +19,7 @@ import { Section } from "./section";
 export async function PlaceholderPage({
   navKey,
   descriptionKey,
+  children,
 }: {
   /**
    * Key in the `nav` namespace — the page's title comes from the SAME string
@@ -38,6 +39,12 @@ export async function PlaceholderPage({
    * when the section has nothing more particular to say.
    */
   descriptionKey?: string;
+  /**
+   * Fixed content of the route's own, rendered after the editor's text — or
+   * after the "being prepared" panel while there is none. /shartlar puts its
+   * section on translations here (operator, 16.11.2026).
+   */
+  children?: React.ReactNode;
 }) {
   const t = await getTranslations("placeholder");
   const tNav = await getTranslations("nav");
@@ -75,6 +82,7 @@ export async function PlaceholderPage({
             {tNav(navKey)}
           </h1>
           <BlockContent blocks={page.blocks} className="mt-2" />
+          {children ? <div className="mt-10">{children}</div> : null}
         </div>
       </Section>
     );
@@ -96,6 +104,11 @@ export async function PlaceholderPage({
           <Link href="/">{t("action")}</Link>
         </Button>
       </div>
+      {children ? (
+        <div className="border-hairline mx-auto mt-10 max-w-3xl border-t pt-10">
+          {children}
+        </div>
+      ) : null}
     </Section>
   );
 }

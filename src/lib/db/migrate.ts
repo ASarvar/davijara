@@ -1284,6 +1284,22 @@ const migrations: Migration[] = [
       );
     },
   },
+  {
+    version: 23,
+    name: "en: tarjimonlarning inglizcha fayli, 16.11.2026",
+    up: `SELECT 1;`,
+    /*
+      Migration 20 again, for English this time: the translators' English
+      workbook came back on 16.11.2026 with all three sheets filled, and
+      src/content/translations/en.json now holds it. Same rules — matched by
+      the Uzbek text as it stands in this database, all or nothing per
+      record, and it NEVER OVERWRITES a row or a label an editor wrote. The
+      Russian rows are therefore left exactly as they are.
+    */
+    seed(db) {
+      seedTranslations(db);
+    },
+  },
 ];
 
 /*

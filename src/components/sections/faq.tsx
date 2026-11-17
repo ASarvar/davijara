@@ -9,6 +9,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Section, SectionHeader } from "@/components/layout/section";
+import type { FaqItem } from "@/types/content";
 
 /**
  * Frequently asked questions.
@@ -31,29 +32,41 @@ export async function Faq({
     <Section tone={tone}>
       <SectionHeader title={t("title")} />
 
-      <Accordion
-        type="single"
-        collapsible
-        className="mx-auto max-w-3xl space-y-3"
-      >
-        {items.map((item, i) => (
-          <SurfaceCard
-            key={item.question}
-            padding="inline"
-            interactive
-            data-reveal="left"
-          >
-            <AccordionItem value={String(i)} className="border-0">
-              <AccordionTrigger className="text-left text-base font-medium hover:no-underline">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground text-sm text-pretty">
-                {item.answer}
-              </AccordionContent>
-            </AccordionItem>
-          </SurfaceCard>
-        ))}
-      </Accordion>
+      <FaqAccordion items={items} />
     </Section>
+  );
+}
+
+/**
+ * The questions themselves — shared by the homepage section above and the
+ * full page at /faoliyat/savollar (operator, 16.11.2026: that page was empty
+ * while the homepage had the answers). One list, one markup, so the two can
+ * never say different things.
+ */
+export function FaqAccordion({ items }: { items: FaqItem[] }) {
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      className="mx-auto max-w-3xl space-y-3"
+    >
+      {items.map((item, i) => (
+        <SurfaceCard
+          key={item.question}
+          padding="inline"
+          interactive
+          data-reveal="left"
+        >
+          <AccordionItem value={String(i)} className="border-0">
+            <AccordionTrigger className="text-left text-base font-medium hover:no-underline">
+              {item.question}
+            </AccordionTrigger>
+            <AccordionContent className="text-muted-foreground text-sm text-pretty">
+              {item.answer}
+            </AccordionContent>
+          </AccordionItem>
+        </SurfaceCard>
+      ))}
+    </Accordion>
   );
 }

@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ExternalLink } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { TranslationNotice } from "@/components/common/translation-notice";
 import type { Locale } from "@/i18n/routing";
 import { Section } from "@/components/layout/section";
 import { IconTile } from "@/components/common/icon-tile";
@@ -68,6 +69,7 @@ export default async function DocumentsPage({
         <p className="text-muted-foreground mt-3 text-center text-sm text-pretty">
           {t("pageLede")}
         </p>
+        <TranslationNotice className="mx-auto mt-6 max-w-3xl" />
 
         {documents.length === 0 ? (
           <p className="border-hairline text-muted-foreground mt-8 rounded-lg border border-dashed px-4 py-6 text-center text-sm text-pretty">

@@ -4,6 +4,7 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { getPrivilegesByCategory } from "@/lib/data/privileges";
 import type { PrivilegeCategory } from "@/types/content";
 import { Section } from "@/components/layout/section";
+import { TranslationNotice } from "@/components/common/translation-notice";
 import { PrivilegeFilter } from "./privilege-filter";
 import { PrivilegeList } from "./privilege-list";
 
@@ -44,6 +45,7 @@ export async function PrivilegesView({
         >
           {t("pageDescription")}
         </p>
+        <TranslationNotice className="mt-6 max-w-3xl" />
       </Section>
 
       <Section tone="deep" className="pt-0">
