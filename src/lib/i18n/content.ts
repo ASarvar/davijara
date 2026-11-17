@@ -1,6 +1,7 @@
 import "server-only";
 
 import en from "@/content/translations/en.json";
+import enInterim from "@/content/translations/en.interim.json";
 import ruInterim from "@/content/translations/ru.interim.json";
 import ru from "@/content/translations/ru.json";
 
@@ -34,6 +35,12 @@ import ru from "@/content/translations/ru.json";
   hand-written, so edit it directly, and it ranks BELOW ru.json: a string the
   translators deliver later replaces it with no change here. When they have
   covered all of it, the file can go.
+
+  en.interim.json is the same thing for English (17.11.2026, operator chose
+  this over waiting when /en opened): the 66 strings above plus the
+  memorandum news item of 12.11.2026, which the Russian got from the
+  operator directly. Generated once from ru.interim.json's keys; edit it by
+  hand now, and it too ranks below the translators' en.json.
 */
 
 type Dictionary = Readonly<Record<string, string>>;
@@ -50,7 +57,7 @@ function dictionary(...sources: Dictionary[]): Dictionary {
 
 const DICTIONARIES: Partial<Record<string, Dictionary>> = Object.assign(
   Object.create(null),
-  { ru: dictionary(ruInterim, ru), en: dictionary(en) },
+  { ru: dictionary(ruInterim, ru), en: dictionary(enInterim, en) },
 );
 
 function lookup(dict: Dictionary, text: string): string | undefined {

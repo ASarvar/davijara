@@ -29,6 +29,15 @@ import type { Block } from "@/types/blocks";
       lib/map-tiles.ts; lot photos are proxied through /api/lot-image, so
       the browser does not contact e-auksion for them;
     · winners' and bidders' personal data never reach a page (davijara-data).
+    · added 17.11.2026, when the operator published both pages: the
+      homepage's YouTube Shorts — covers fetched by the browser from
+      i.ytimg.com on load, the player (youtube-nocookie.com) only after a
+      click — components/sections/video-shorts-row.tsx, CSP in
+      next.config.ts. Migration 24 writes it into the stored page in all
+      three languages; YOUTUBE_PARAGRAPH is that text. It is deliberately
+      NOT added to the blocks below: migrations 20/23 match a page's ru/en
+      by its Uzbek text, all or nothing, and a sentence the workbook never
+      saw would cost a fresh database the whole translated page.
   Change what the site does and this text must change with it.
 
   WHAT IS DELIBERATELY NOT WRITTEN, because it is the operator's to decide
@@ -57,6 +66,17 @@ const CHANGES = (what: string): Block => ({
   type: "paragraph",
   text: `Markaz ${what} oʻzgartirish kiritishi mumkin. Amaldagi tahriri doimo shu sahifada eʼlon qilinadi.`,
 });
+
+/*
+  The YouTube paragraph, in the three languages migration 24 writes it in.
+  Claude's text, all three (17.11.2026) — the translators have not seen it.
+  It sits after the OpenStreetMap paragraph under "Uchinchi tomon xizmatlari".
+*/
+export const YOUTUBE_PARAGRAPH = {
+  uz: "Bosh sahifadagi videolar YouTube xizmatida joylashgan: sahifa ochilganda ularning muqova rasmlari brauzeringiz tomonidan YouTube (Google) serverlaridan yuklanadi. Video pleyer faqat videoni bosganingizda youtube-nocookie.com manzilidan ochiladi, shundan soʻng koʻrish maʼlumotlari Google kompaniyasining maxfiylik siyosatiga muvofiq qayta ishlanadi.",
+  ru: "Видео на главной странице размещены на YouTube: при открытии страницы ваш браузер загружает их обложки с серверов YouTube (Google). Видеоплеер открывается с адреса youtube-nocookie.com только после того, как вы нажмёте на видео; после этого данные о просмотре обрабатываются в соответствии с политикой конфиденциальности компании Google.",
+  en: "The videos on the homepage are hosted on YouTube: when the page opens, your browser loads their cover images from YouTube (Google) servers. The video player opens from youtube-nocookie.com only when you click a video; from then on, viewing data is processed in accordance with Google's privacy policy.",
+} as const;
 
 export const legalDrafts: LegalDraft[] = [
   {

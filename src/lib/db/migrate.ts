@@ -21,7 +21,7 @@ import {
   type VacancySeed,
 } from "@/content/vacancy-announcements";
 // Migration 17 only — draft texts for the two footer legal pages.
-import { legalDrafts } from "@/content/legal-drafts";
+import { legalDrafts, YOUTUBE_PARAGRAPH } from "@/content/legal-drafts";
 import { tashkentToday } from "@/lib/format";
 // Migration 20 only — the translators' dictionary.
 import { localizeFully, translateText } from "@/lib/i18n/content";
@@ -1295,6 +1295,107 @@ const migrations: Migration[] = [
       the Uzbek text as it stands in this database, all or nothing per
       record, and it NEVER OVERWRITES a row or a label an editor wrote. The
       Russian rows are therefore left exactly as they are.
+    */
+    seed(db) {
+      seedTranslations(db);
+    },
+  },
+  {
+    version: 24,
+    name: "maxfiylik va shartlar e'lon qilindi, 17.11.2026",
+    up: `SELECT 1;`,
+    /*
+      The operator published Maxfiylik siyosati and Foydalanish shartlari
+      for everyone (17.11.2026: "hammaga och") — the migration-17 drafts,
+      with the ru/en rows migrations 20/23 gave them.
+
+      First the privacy policy gets the YouTube paragraph it was missing
+      (content/legal-drafts.ts, YOUTUBE_PARAGRAPH): the homepage Shorts
+      arrived after the draft was written, and a published policy must say
+      what the site does. Inserted after the OpenStreetMap paragraph, per
+      locale row; a row that already mentions YouTube, or has no
+      OpenStreetMap paragraph to anchor on (an editor rewrote it), is left
+      for the editor rather than guessed at.
+
+      Then each page that is still a draft is set to published; one that is
+      already published is left alone. Every write gets an audit entry with
+      before/after, like a panel save.
+    */
+    seed(db) {
+      const now = new Date().toISOString();
+      const log = db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, 'migratsiya', ?, 'page', ?, ?, ?, ?)`,
+      );
+      const page = db.prepare("SELECT id, status FROM pages WHERE path = ?");
+
+      const privacy = page.get("maxfiylik") as
+        | { id: number; status: string }
+        | undefined;
+      if (privacy) {
+        const rows = db
+          .prepare(
+            "SELECT locale, blocks FROM page_translations WHERE page_id = ?",
+          )
+          .all(privacy.id) as Array<{ locale: "uz" | "ru" | "en"; blocks: string }>;
+        const update = db.prepare(
+          "UPDATE page_translations SET blocks = ? WHERE page_id = ? AND locale = ?",
+        );
+        for (const row of rows) {
+          const blocks = storedBlocks(row.blocks);
+          const text = YOUTUBE_PARAGRAPH[row.locale];
+          if (!blocks || !text) continue;
+          if (row.blocks.includes("YouTube")) continue;
+          const at = blocks.findIndex(
+            (b) => b.type === "paragraph" && b.text.includes("OpenStreetMap"),
+          );
+          if (at < 0) continue;
+          const after = [
+            ...blocks.slice(0, at + 1),
+            { type: "paragraph" as const, text },
+            ...blocks.slice(at + 1),
+          ];
+          const json = JSON.stringify(blocksSchema.parse(after));
+          update.run(json, privacy.id, row.locale);
+          log.run(
+            now,
+            "update",
+            String(privacy.id),
+            `Sahifa tahrirlandi (${row.locale}): /maxfiylik — YouTube bandi`,
+            JSON.stringify({ locale: row.locale, blocks }),
+            JSON.stringify({ locale: row.locale, blocks: after }),
+          );
+        }
+      }
+
+      for (const path of ["maxfiylik", "shartlar"]) {
+        const row = page.get(path) as { id: number; status: string } | undefined;
+        if (!row || row.status !== "draft") continue;
+        db.prepare(
+          "UPDATE pages SET status = 'published', updated_at = ? WHERE id = ?",
+        ).run(now, row.id);
+        log.run(
+          now,
+          "publish",
+          String(row.id),
+          `Sahifa eʼlon qilindi: /${path}`,
+          JSON.stringify({ id: row.id, path, status: "draft" }),
+          JSON.stringify({ id: row.id, path, status: "published" }),
+        );
+      }
+    },
+  },
+  {
+    version: 25,
+    name: "en: vaqtinchalik inglizcha tarjima, 17.11.2026",
+    up: `SELECT 1;`,
+    /*
+      Migration 23 again, now that src/content/translations/en.interim.json
+      (Claude's English, the operator's choice when /en opened) is part of
+      the English dictionary: it gives the VM 563 and memorandum news items
+      their en rows. Same rules — all or nothing per record, never
+      overwrites.
     */
     seed(db) {
       seedTranslations(db);

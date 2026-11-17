@@ -17,13 +17,18 @@ export type Locale = (typeof locales)[number];
  * /en would be English menus over Uzbek pages, which is the same mistake
  * again. It opens when the page text comes back in English.
  *
+ * ENGLISH OPENED 17.11.2026: the translators' English workbook (16.11.2026)
+ * covered the pages and legal texts, and the operator chose to open /en
+ * with Claude's interim English for what came after it
+ * (content/translations/en.interim.json, meta.descriptions in en.json).
+ *
  * Until a locale is listed here: src/proxy.ts sends every /ru/… and
  * /en/… URL to the same page under /uz with a TEMPORARY redirect (307 — a
  * 301 is cached by browsers for good, and would keep readers away from /ru
  * after it opens); hreflang and the sitemap name only these locales; the
  * language switcher hides the others. Opening Russian is adding "ru" here.
  */
-export const publishedLocales: readonly Locale[] = ["uz", "ru"];
+export const publishedLocales: readonly Locale[] = ["uz", "ru", "en"];
 
 export function isPublishedLocale(value: string): value is Locale {
   return (publishedLocales as readonly string[]).includes(value);

@@ -31,21 +31,17 @@ export const homeBanner: {
   href?: string;
 } = {
   /*
-    1280 × 176 (7,27:1) — the privileges banner (operator, 28.10.2026),
-    linking to /imtiyozlar. A NEW NAME for each artwork rather than
-    overwriting the old file, so no browser or proxy that cached the previous
-    one can go on showing it under an unchanged URL.
+    1440 × 199 (7,24:1) — the State Flag Day greeting, 18 November (operator,
+    17.11.2026), replacing the privileges banner (`/banner-imtiyozlar.jpg`,
+    1280 × 176, linked to /imtiyozlar — kept in public/ to put back). A NEW
+    NAME for each artwork rather than overwriting the old file, so no browser
+    or proxy that cached the previous one can go on showing it under an
+    unchanged URL. No `href`: a greeting has nowhere to send the reader.
   */
-  desktop: "/banner-imtiyozlar.jpg",
+  desktop: "/banner-bayroq-kuni.jpg",
   mobile: null,
-  /*
-    The slogan verbatim. As the image is now the link's only content, this is
-    also the link's accessible name — and it already says where it goes.
-  */
-  alt: "Davlat mulki ijarasi boʻyicha barcha imtiyozlar haqida batafsil",
-  // Locale-relative: the banner renders through @/i18n/navigation's Link,
-  // which prefixes the reader's locale (/uz/imtiyozlar).
-  href: "/imtiyozlar",
+  // The artwork's four lines verbatim, apostrophes normalised to ʻ.
+  alt: "18-noyabr - Oʻzbekiston Respublikasi Davlat bayrogʻi qabul qilingan kun! Davlat bayrogʻimiz - xalqimizning milliy gʻururi, mustaqilligi va birdamligi ramzidir. Ushbu qutlugʻ sana munosabati bilan barcha yurtdoshlarimizni samimiy tabriklaymiz! Oʻzbekiston Respublikasi Davlat bayrogʻi qabul qilingan kun muborak boʻlsin!",
 };
 
 /**
@@ -56,4 +52,4 @@ export const homeBanner: {
  * jumps down by the banner's height the moment it decodes. Update both
  * numbers together whenever the artwork is replaced.
  */
-export const BANNER_SIZE = { width: 1280, height: 176 } as const;
+export const BANNER_SIZE = { width: 1440, height: 199 } as const;

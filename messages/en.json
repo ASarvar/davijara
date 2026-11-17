@@ -1,8 +1,23 @@
 {
-  "_note": "Filled from the translators' English workbook (returned 16.11.2026, all three sheets), imported by row ID with tarjima/skriptlar/import_xlsx.py. Any key still missing falls back to messages/uz.json via the deep-merge in src/i18n/request.ts.",
+  "_note": "Filled from the translators' English workbook (returned 16.11.2026, all three sheets), imported by row ID with tarjima/skriptlar/import_xlsx.py. Any key still missing falls back to messages/uz.json via the deep-merge in src/i18n/request.ts. meta.descriptions is NOT the translators' text: added to uz.json after the workbook was built, translated by Claude on 17.11.2026 when /en opened, pending their review.",
   "meta": {
     "title": "Davijara.uz — the Unified Portal for Renting State-Owned Property",
-    "description": "The unified portal for renting state-owned properties: search for available properties, E-auksion auctions, rental benefits and online rental agreement registration."
+    "description": "The unified portal for renting state-owned properties: search for available properties, E-auksion auctions, rental benefits and online rental agreement registration.",
+    "descriptions": {
+      "faq": "Answers to frequently asked questions about renting state property, taking part in auctions, lease terms and payments.",
+      "documentsMain": "Regulatory legal acts on leasing and managing state property: the Civil Code, the laws «On Lease» and «On the Management of State Property», acts of the President and the Cabinet of Ministers, and documents of the State Assets Management Agency.",
+      "sitemap": "A list of every section and page of the Davijara.uz portal: the Center, activities, documents, open data and other sections on one page.",
+      "minRates": "Minimum rates of rent for the use of state property — downloadable documents for the Republic of Karakalpakstan, the regions and the city of Tashkent.",
+      "activity": "The Center's activities: state properties offered for rent and already rented out, lease agreements, properties offered for privatisation, rental benefits and frequently asked questions.",
+      "vacancies": "Vacancies at the Center for the efficient use of state facilities: the competition procedure for civil service positions and the questions asked at the competition.",
+      "territorial": "The Center's {count, plural, one {# regional department} other {# regional departments}} — the Republic of Karakalpakstan, the regions and the city of Tashkent: heads, phone numbers, email, reception days and addresses.",
+      "anticorruption": "Combating corruption at the Center: the director's address, the regulatory framework, the code of conduct, the programme of measures, the internal control (compliance) system and channels for reporting corruption.",
+      "apparatus": "Divisions of the central office of the Center for the efficient use of state facilities and their heads: positions, phone numbers and email.",
+      "reception": "Leadership of the Center for the efficient use of state facilities: the director and deputies, phone numbers and days for receiving citizens.",
+      "openData": "The Center's open data: information and reports on the execution of the expenditure estimate and on the openness of the budget process — updated quarterly.",
+      "appeals": "Statistics of appeals to the Center — received by the organisation's mail, addressed to the head, through the hotline, the call centre and the People's Reception Office: under review and closed.",
+      "privilegeCategory": "Rental benefits in the «{category}» area: who receives a benefit when renting state property, for how long and on what legal basis."
+    }
   },
   "common": {
     "skipToContent": "Skip to main content",
