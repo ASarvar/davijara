@@ -1,7 +1,9 @@
 "use client";
 
+import { useLocale } from "next-intl";
+
 import { Link, usePathname } from "@/i18n/navigation";
-import { BANNER_SIZE, homeBanner } from "@/content/banner";
+import { BANNER_SIZE, homeBannerFor } from "@/content/banner";
 import { withBasePath } from "@/lib/base-path";
 import { Container } from "@/components/layout/section";
 
@@ -54,7 +56,8 @@ import { Container } from "@/components/layout/section";
  */
 export function HomeBanner() {
   const pathname = usePathname();
-  const { desktop, mobile, alt, href } = homeBanner;
+  // A locale may have its own artwork (content/banner.ts).
+  const { desktop, mobile, alt, href } = homeBannerFor(useLocale());
 
   // Homepage only. `usePathname` here is locale-stripped, so "/" covers
   // /uz, /ru and /en alike.

@@ -1401,6 +1401,53 @@ const migrations: Migration[] = [
       seedTranslations(db);
     },
   },
+  {
+    version: 26,
+    name: "news: rasmsiz to'rt yangilikka rasm, 19.11.2026",
+    up: `SELECT 1;`,
+    /*
+      The four news items migrated from content/news.ts had no cover (item 2
+      of "Предложения по сайту 3"); the operator supplied one each on
+      19.11.2026, 1774 × 887, cropped to the site's 1280 × 720 from the
+      centre and kept in public/yangiliklar/ like the two before them.
+
+      Only a row whose image is still empty is touched: a cover an editor
+      has since uploaded in the panel wins. Each change is audited.
+    */
+    seed(db) {
+      const now = new Date().toISOString();
+      const covers = [
+        "ijara-imtiyozlari-bolimi",
+        "joriy-yilda-ijaraga-berilgan-obyektlar",
+        "namangan-36600-kv-m-obyekt",
+        "portal-sinov-rejimida",
+      ];
+      const find = db.prepare("SELECT id, image FROM news WHERE slug = ?");
+      const set = db.prepare(
+        "UPDATE news SET image = ?, updated_at = ? WHERE id = ?",
+      );
+      const log = db.prepare(
+        `INSERT INTO audit_log
+           (at, user_id, username, action, entity, entity_id, summary, before_json, after_json)
+         VALUES (?, NULL, 'migratsiya', 'update', 'news', ?, ?, ?, ?)`,
+      );
+      for (const slug of covers) {
+        const row = find.get(slug) as
+          | { id: number; image: string | null }
+          | undefined;
+        if (!row || row.image) continue;
+        const image = `/yangiliklar/${slug}.jpg`;
+        set.run(image, now, row.id);
+        log.run(
+          now,
+          String(row.id),
+          `Yangilik rasmi qoʻshildi: ${slug}`,
+          JSON.stringify({ id: row.id, slug, image: row.image }),
+          JSON.stringify({ id: row.id, slug, image }),
+        );
+      }
+    },
+  },
 ];
 
 /*

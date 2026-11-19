@@ -21,7 +21,7 @@
  * nothing else, and on a government portal a message only sighted visitors
  * receive is not published.
  */
-export const homeBanner: {
+export type HomeBannerArt = {
   desktop: string | null;
   /** Optional narrow crop. Falls back to `desktop` when absent — see above. */
   mobile?: string | null;
@@ -29,23 +29,54 @@ export const homeBanner: {
   alt: string;
   /** Optional destination if the banner is also a link. */
   href?: string;
-} = {
-  /*
-    1440 × 199 (7,24:1) — the State Flag Day greeting, 18 November (operator,
-    17.11.2026), replacing the privileges banner (`/banner-imtiyozlar.jpg`,
-    1280 × 176, linked to /imtiyozlar — kept in public/ to put back). A NEW
-    NAME for each artwork rather than overwriting the old file, so no browser
-    or proxy that cached the previous one can go on showing it under an
-    unchanged URL. No `href`: a greeting has nowhere to send the reader.
-  */
-  desktop: "/banner-bayroq-kuni.jpg",
-  mobile: null,
-  // The artwork's four lines verbatim, apostrophes normalised to ʻ.
-  alt: "18-noyabr - Oʻzbekiston Respublikasi Davlat bayrogʻi qabul qilingan kun! Davlat bayrogʻimiz - xalqimizning milliy gʻururi, mustaqilligi va birdamligi ramzidir. Ushbu qutlugʻ sana munosabati bilan barcha yurtdoshlarimizni samimiy tabriklaymiz! Oʻzbekiston Respublikasi Davlat bayrogʻi qabul qilingan kun muborak boʻlsin!",
 };
 
+/** The default banner — every locale without its own entry below. */
+export const homeBanner: HomeBannerArt = {
+  /*
+    1440 × 199 — the privileges banner, Uzbek (operator, 19.11.2026, after
+    the State Flag Day greeting of 18 November, `/banner-bayroq-kuni.jpg`,
+    had run its day). Shown on /uz and /en — the operator gave no English
+    artwork and asked for the Uzbek one there. A NEW NAME for each artwork
+    rather than overwriting the old file (the 1280 × 176 original is
+    `/banner-imtiyozlar.jpg`), so no browser or proxy that cached the
+    previous one can go on showing it under an unchanged URL.
+  */
+  desktop: "/banner-imtiyozlar-uz.jpg",
+  mobile: null,
+  /*
+    The slogan verbatim. As the image is the link's only content, this is
+    also the link's accessible name — and it already says where it goes.
+  */
+  alt: "Davlat mulki ijarasi boʻyicha barcha imtiyozlar haqida batafsil",
+  // Locale-relative: rendered through @/i18n/navigation's Link.
+  href: "/imtiyozlar",
+};
+
+/*
+  PER-LOCALE ARTWORK (operator, 19.11.2026: "rus tilidagisiga shuni qo'y").
+  A banner carries its slogan in the picture, so a locale may have its own
+  file; a locale with no entry here shows `homeBanner`. The Russian one is
+  the privileges banner in Russian, 1440 × 199, linking to /imtiyozlar.
+*/
+const bannerByLocale: Partial<Record<string, HomeBannerArt>> = {
+  ru: {
+    desktop: "/banner-imtiyozlar-ru.jpg",
+    mobile: null,
+    // The slogan verbatim; as the link's only content it is also its name.
+    alt: "Льготы по аренде государственного имущества — узнать подробнее",
+    href: "/imtiyozlar",
+  },
+};
+
+export function homeBannerFor(locale: string): HomeBannerArt {
+  return bannerByLocale[locale] ?? homeBanner;
+}
+
 /**
- * The intrinsic size of `desktop`, in pixels.
+ * The intrinsic size of `desktop`, in pixels — EVERY banner's, so all of
+ * them must be the same size (1440 × 199 today), or this becomes a
+ * per-banner field.
  *
  * Given rather than measured because the strip is a plain `<img>`: without a
  * width and height the browser reserves no box for it, and the whole page
