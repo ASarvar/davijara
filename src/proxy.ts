@@ -14,6 +14,35 @@ const intl = createMiddleware(routing);
 
 export default function proxy(request: NextRequest) {
   /*
+    THE FRONT DOOR IS A PERMANENT REDIRECT (308), not next-intl's 307.
+
+    `localeDetection: false` (routing.ts) makes "/" -> "/uz" unconditional, so
+    nothing a browser could cache is ever wrong. And it matters for search:
+    every external link to the portal — Instagram, YouTube, the e-auksion
+    posts, news items — points at the bare https://davijara.uz/. A temporary
+    redirect tells Google and Yandex to keep "/" as the address and treat
+    /uz as a stand-in, so the home page's ranking signals stayed on a URL
+    with no content of its own; in November 2026 "davijara" returned
+    /uz/markaz/rahbariyat first and no home page at all. 308 hands them to
+    /uz, which is also what the page's own canonical says.
+
+    IF localeDetection IS EVER TURNED BACK ON, this must go back to 307:
+    browsers keep a 308 forever, and a reader sent to /uz once would never
+    be negotiated to /ru again.
+  */
+  /*
+    Next relativizes a same-origin Location on the way out (production sends
+    `location: /uz`), so the inner hop's plain http never reaches the client.
+    A hand-written relative Location is NOT an option: the proxy adapter
+    parses it as a URL and the request 500s.
+  */
+  if (request.nextUrl.pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = `/${routing.defaultLocale}`;
+    return NextResponse.redirect(url, 308);
+  }
+
+  /*
     A locale that exists but is not open yet goes to the same page in Uzbek,
     query string and all — see `publishedLocales` for why, and why 307.
   */
